@@ -2,6 +2,7 @@ import { and, desc, eq } from "drizzle-orm";
 
 import type { DbClient } from "./client";
 import { actions, auditLog, documents, employees } from "./schema";
+import { generateEmployeeDocument } from "../document/generator";
 
 export type ActorRole = "admin" | "hr" | "employee" | "unknown";
 
@@ -175,15 +176,20 @@ export async function createTriggeredActionRecords(
   const documentId = crypto.randomUUID();
   const auditId = crypto.randomUUID();
   const normalizedAction = actionName.trim();
-  const documentName = `${employee.employeeCode}-${normalizedAction}-${now.slice(0, 10)}.txt`;
+  const generatedDocument = generateEmployeeDocument({
+    employee,
+    action: normalizedAction,
+    generatedAt: now,
+    documentId,
+  });
 
   await db.batch([
     db.insert(documents).values({
       id: documentId,
       employeeId,
       action: normalizedAction,
-      documentName,
-      storageUrl: "",
+      documentName: generatedDocument.documentName,
+      storageUrl: generatedDocument.storageUrl,
       createdAt: now,
     }),
     db.insert(auditLog).values({
