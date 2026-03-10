@@ -10,8 +10,10 @@ import {
   getDocuments,
   listActionConfigs,
   type RequestContext,
+  updateAuditLogNotified,
   upsertActionConfig,
 } from "../db/queries";
+import { dispatchNotification } from "../notifications/dispatchNotification";
 import { resolveEmployeeLifecycleAction } from "../services/actionResolver";
 
 export interface GraphQLContext extends RequestContext {
@@ -168,6 +170,19 @@ const resolvers = {
         args.employeeId,
         args.action,
       );
+
+      const notificationResult = await dispatchNotification({
+        db: context.db,
+        employee: result.employee,
+        document: result.document,
+        action: args.action,
+        apiKey: context.env.RESEND_API_KEY,
+      });
+
+      if (notificationResult.notified) {
+        await updateAuditLogNotified(context.db, result.auditEntry.id, true);
+        result.auditEntry.recipientsNotified = true;
+      }
 
       return {
         employee: result.employee,

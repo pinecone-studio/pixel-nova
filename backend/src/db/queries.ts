@@ -185,6 +185,17 @@ export async function upsertActionConfig(
   return normalizeActionConfig(row);
 }
 
+export async function updateAuditLogNotified(
+  db: DbClient,
+  auditId: string,
+  notified: boolean,
+) {
+  await db
+    .update(auditLog)
+    .set({ recipientsNotified: notified })
+    .where(eq(auditLog.id, auditId));
+}
+
 export async function createTriggeredActionRecords(
   db: DbClient,
   employeeId: string,
