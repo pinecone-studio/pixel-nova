@@ -22,7 +22,7 @@ export const DEFAULT_LIFECYCLE_ACTION_CONFIGS: LifecycleActionConfig[] = [
   {
     name: "promote_employee",
     phase: "working",
-    triggerFields: ["level", "numberOfVacationDays", "isSalaryCompany"],
+    triggerFields: ["level"],
   },
   {
     name: "change_position",
@@ -36,7 +36,27 @@ export const DEFAULT_LIFECYCLE_ACTION_CONFIGS: LifecycleActionConfig[] = [
   },
 ];
 
-type ValueRecord = Record<string, unknown>;
+export const EMPLOYEE_CHANGE_FIELDS = [
+  "employeeCode",
+  "firstName",
+  "lastName",
+  "department",
+  "branch",
+  "level",
+  "hireDate",
+  "terminationDate",
+  "status",
+] as const;
+
+export type EmployeeChangeField = (typeof EMPLOYEE_CHANGE_FIELDS)[number];
+export type ValueRecord = Record<string, unknown> &
+  Partial<Record<EmployeeChangeField, unknown>>;
+
+export interface EmployeeChangeSet {
+  changedFields: EmployeeChangeField[];
+  oldValues: ValueRecord;
+  newValues: ValueRecord;
+}
 
 export interface ResolveEmployeeActionInput {
   employeeId: string;
@@ -55,6 +75,28 @@ const ACTION_PRIORITY: LifecycleAction[] = [
   "promote_employee",
   "change_position",
 ];
+
+export function buildEmployeeChangeSet(
+  previousValues: ValueRecord | null,
+  nextValues: ValueRecord,
+): EmployeeChangeSet {
+  const changedFields: EmployeeChangeField[] = [];
+
+  for (const field of EMPLOYEE_CHANGE_FIELDS) {
+    const previousValue = previousValues?.[field] ?? null;
+    const nextValue = nextValues[field] ?? null;
+
+    if (!Object.is(previousValue, nextValue)) {
+      changedFields.push(field);
+    }
+  }
+
+  return {
+    changedFields,
+    oldValues: previousValues ?? {},
+    newValues: nextValues,
+  };
+}
 
 function normalizeFieldName(field: string) {
   return field.trim();
@@ -91,6 +133,11 @@ function hasTriggerFieldOverlap(triggerFields: string[], changedFields: Set<stri
 
 function getValue(source: ValueRecord, field: string) {
   return source[field];
+}
+
+function getCurrentValue(input: ResolveEmployeeActionInput, field: string) {
+  const nextValue = getValue(input.newValues, field);
+  return nextValue === undefined ? getValue(input.oldValues, field) : nextValue;
 }
 
 function hasValue(value: unknown) {
@@ -144,34 +191,25 @@ function resolvesOffboarding(input: ResolveEmployeeActionInput, changedFields: S
 }
 
 function resolvesAddEmployee(input: ResolveEmployeeActionInput, changedFields: Set<string>) {
-  if (!hasChanged(changedFields, "status")) {
-    return false;
-  }
-
   const oldStatus = normalizeStatus(getValue(input.oldValues, "status"));
-  const newStatus = normalizeStatus(getValue(input.newValues, "status"));
-  if (newStatus !== "ACTIVE" || oldStatus === "ACTIVE") {
+  const newStatus = normalizeStatus(getCurrentValue(input, "status"));
+  if (newStatus !== "ACTIVE") {
     return false;
   }
 
+  const becameActive =
+    hasChanged(changedFields, "status") && newStatus === "ACTIVE" && oldStatus !== "ACTIVE";
   const oldHireDate = getValue(input.oldValues, "hireDate");
-  const newHireDate = getValue(input.newValues, "hireDate");
+  const newHireDate = getCurrentValue(input, "hireDate");
+  const firstHireSignal =
+    hasChanged(changedFields, "hireDate") &&
+    !hasValue(oldHireDate) &&
+    hasValue(newHireDate);
 
-  if (hasChanged(changedFields, "hireDate")) {
-    return !hasValue(oldHireDate) && hasValue(newHireDate);
-  }
-
-  return !hasValue(oldHireDate);
+  return becameActive || firstHireSignal;
 }
 
 function resolvesPromotion(input: ResolveEmployeeActionInput, changedFields: Set<string>) {
-  if (
-    hasChanged(changedFields, "numberOfVacationDays") ||
-    hasChanged(changedFields, "isSalaryCompany")
-  ) {
-    return true;
-  }
-
   if (!hasChanged(changedFields, "level")) {
     return false;
   }
