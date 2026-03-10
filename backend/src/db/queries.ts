@@ -3,10 +3,7 @@ import { and, desc, eq } from "drizzle-orm";
 import type { DbClient } from "./client";
 import { actions, auditLog, documents, employees } from "./schema";
 import { generateEmployeeDocument } from "../document/generator";
-import {
-  DEFAULT_LIFECYCLE_ACTION_CONFIGS,
-  type LifecycleActionConfig,
-} from "../services/actionResolver";
+import type { LifecycleActionConfig } from "../services/actionResolver";
 
 export type ActorRole = "admin" | "hr" | "employee" | "unknown";
 
@@ -75,6 +72,56 @@ export async function insertEmployee(
   return getEmployeeById(db, employee.id);
 }
 
+export async function updateEmployee(
+  db: DbClient,
+  employeeId: string,
+  employee: Omit<typeof employees.$inferInsert, "id">,
+) {
+  await db
+    .update(employees)
+    .set(employee)
+    .where(eq(employees.id, employeeId));
+
+  return getEmployeeById(db, employeeId);
+}
+
+export async function upsertEmployeeRecord(
+  db: DbClient,
+  employee: typeof employees.$inferInsert,
+) {
+  const previousEmployee = await getEmployeeById(db, employee.id);
+  const terminationDate =
+    employee.terminationDate === undefined
+      ? previousEmployee?.terminationDate ?? null
+      : employee.terminationDate ?? null;
+
+  const nextEmployee = previousEmployee
+    ? await updateEmployee(db, employee.id, {
+        employeeCode: employee.employeeCode,
+        firstName: employee.firstName,
+        lastName: employee.lastName,
+        department: employee.department,
+        branch: employee.branch,
+        level: employee.level,
+        hireDate: employee.hireDate,
+        terminationDate,
+        status: employee.status,
+      })
+    : await insertEmployee(db, {
+        ...employee,
+        terminationDate,
+      });
+
+  if (!nextEmployee) {
+    throw new Error(`Failed to upsert employee ${employee.id}`);
+  }
+
+  return {
+    previousEmployee,
+    employee: nextEmployee,
+  };
+}
+
 export async function getDocuments(
   db: DbClient,
   employeeId?: string | null,
@@ -132,22 +179,6 @@ export async function insertAuditLog(
 export async function listActionConfigs(db: DbClient) {
   const rows = await db.select().from(actions).orderBy(actions.name);
   return rows.map(normalizeActionConfig);
-}
-
-export async function ensureDefaultActionConfigs(db: DbClient) {
-  for (const input of DEFAULT_LIFECYCLE_ACTION_CONFIGS) {
-    await db
-      .insert(actions)
-      .values({
-        id: crypto.randomUUID(),
-        name: input.name,
-        phase: input.phase,
-        triggerFields: JSON.stringify(input.triggerFields),
-      })
-      .onConflictDoNothing({
-        target: actions.name,
-      });
-  }
 }
 
 export async function upsertActionConfig(

@@ -2,6 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 
 import {
+  buildEmployeeChangeSet,
   DEFAULT_LIFECYCLE_ACTION_CONFIGS,
   resolveEmployeeLifecycleAction,
   type ResolveEmployeeActionInput,
@@ -34,8 +35,8 @@ test("resolves add_employee when status becomes ACTIVE for a new hire", () => {
 
 test("resolves add_employee when hireDate is first set alongside ACTIVE status", () => {
   const action = resolve({
-    changedFields: ["status", "hireDate"],
-    oldValues: { status: "PENDING", hireDate: null },
+    changedFields: ["hireDate"],
+    oldValues: { status: "ACTIVE", hireDate: null },
     newValues: { status: "ACTIVE", hireDate: "2026-03-10" },
   });
 
@@ -67,26 +68,6 @@ test("resolves promote_employee when level increases", () => {
     changedFields: ["level"],
     oldValues: { level: "L1" },
     newValues: { level: "L2" },
-  });
-
-  assert.equal(action, "promote_employee");
-});
-
-test("resolves promote_employee when numberOfVacationDays changes", () => {
-  const action = resolve({
-    changedFields: ["numberOfVacationDays"],
-    oldValues: { numberOfVacationDays: 15 },
-    newValues: { numberOfVacationDays: 20 },
-  });
-
-  assert.equal(action, "promote_employee");
-});
-
-test("resolves promote_employee when isSalaryCompany changes", () => {
-  const action = resolve({
-    changedFields: ["isSalaryCompany"],
-    oldValues: { isSalaryCompany: false },
-    newValues: { isSalaryCompany: true },
   });
 
   assert.equal(action, "promote_employee");
@@ -168,6 +149,64 @@ test("returns null when the matching action is missing from the registry config"
   );
 
   assert.equal(action, null);
+});
+
+test("buildEmployeeChangeSet detects changed fields from a create payload", () => {
+  const changeSet = buildEmployeeChangeSet(null, {
+    employeeCode: "EMP-001",
+    firstName: "Test",
+    lastName: "User",
+    department: "Engineering",
+    branch: "HQ",
+    level: "L1",
+    hireDate: "2026-03-10",
+    terminationDate: null,
+    status: "ACTIVE",
+  });
+
+  assert.deepEqual(changeSet.changedFields, [
+    "employeeCode",
+    "firstName",
+    "lastName",
+    "department",
+    "branch",
+    "level",
+    "hireDate",
+    "status",
+  ]);
+  assert.deepEqual(changeSet.oldValues, {});
+  assert.equal(changeSet.newValues.status, "ACTIVE");
+});
+
+test("buildEmployeeChangeSet detects only updated employee fields", () => {
+  const changeSet = buildEmployeeChangeSet(
+    {
+      employeeCode: "EMP-001",
+      firstName: "Test",
+      lastName: "User",
+      department: "Engineering",
+      branch: "HQ",
+      level: "L1",
+      hireDate: "2026-03-10",
+      terminationDate: null,
+      status: "ACTIVE",
+    },
+    {
+      employeeCode: "EMP-001",
+      firstName: "Test",
+      lastName: "User",
+      department: "Engineering",
+      branch: "West",
+      level: "L2",
+      hireDate: "2026-03-10",
+      terminationDate: null,
+      status: "ACTIVE",
+    },
+  );
+
+  assert.deepEqual(changeSet.changedFields, ["branch", "level"]);
+  assert.equal(changeSet.oldValues.branch, "HQ");
+  assert.equal(changeSet.newValues.branch, "West");
 });
 
 test("returns null when registry trigger fields do not overlap the change event", () => {

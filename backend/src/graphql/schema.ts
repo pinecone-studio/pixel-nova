@@ -4,17 +4,20 @@ import { createSchema } from "graphql-yoga";
 import type { DbClient } from "../db/client";
 import {
   createTriggeredActionRecords,
-  ensureDefaultActionConfigs,
   getEmployeeById,
   getAuditLogs,
   getDocuments,
   listActionConfigs,
   type RequestContext,
   updateAuditLogNotified,
+  upsertEmployeeRecord,
   upsertActionConfig,
 } from "../db/queries";
 import { dispatchNotification } from "../notifications/dispatchNotification";
-import { resolveEmployeeLifecycleAction } from "../services/actionResolver";
+import {
+  buildEmployeeChangeSet,
+  resolveEmployeeLifecycleAction,
+} from "../services/actionResolver";
 
 export interface GraphQLContext extends RequestContext {
   env: CloudflareBindings;
@@ -74,8 +77,27 @@ const typeDefs = /* GraphQL */ `
     auditLog: AuditLog!
   }
 
+  type UpsertEmployeeResult {
+    employee: Employee!
+    resolvedAction: String
+    triggeredActionResult: TriggerActionResult
+  }
+
   type ResolvedEmployeeAction {
     action: String!
+  }
+
+  input UpsertEmployeeInput {
+    id: ID!
+    employeeCode: String!
+    firstName: String!
+    lastName: String!
+    department: String!
+    branch: String!
+    level: String!
+    hireDate: String!
+    terminationDate: String
+    status: String!
   }
 
   input UpdateActionRegistryInput {
@@ -99,6 +121,7 @@ const typeDefs = /* GraphQL */ `
 
   type Mutation {
     triggerAction(employeeId: ID!, action: String!): TriggerActionResult!
+    upsertEmployee(input: UpsertEmployeeInput!): UpsertEmployeeResult!
     resolveEmployeeAction(input: ResolveEmployeeActionInput!): ResolvedEmployeeAction
     updateRegistry(input: UpdateActionRegistryInput!): ActionConfig!
   }
@@ -143,6 +166,39 @@ const jsonScalar = new GraphQLScalarType({
   parseLiteral: (valueNode) => parseJsonLiteral(valueNode),
 });
 
+async function executeTriggeredAction(
+  context: GraphQLContext,
+  employeeId: string,
+  action: string,
+) {
+  const resendApiKey =
+    (context.env as CloudflareBindings & { RESEND_API_KEY?: string }).RESEND_API_KEY ?? "";
+  const result = await createTriggeredActionRecords(
+    context.db,
+    employeeId,
+    action,
+  );
+
+  const notificationResult = await dispatchNotification({
+    db: context.db,
+    employee: result.employee,
+    document: result.document,
+    action,
+    apiKey: resendApiKey,
+  });
+
+  if (notificationResult.notified) {
+    await updateAuditLogNotified(context.db, result.auditEntry.id, true);
+    result.auditEntry.recipientsNotified = true;
+  }
+
+  return {
+    employee: result.employee,
+    document: result.document,
+    auditLog: result.auditEntry,
+  };
+}
+
 const resolvers = {
   JSON: jsonScalar,
   Query: {
@@ -164,30 +220,84 @@ const resolvers = {
       _: unknown,
       args: { employeeId: string; action: string },
       context: GraphQLContext,
+    ) => executeTriggeredAction(context, args.employeeId, args.action),
+    upsertEmployee: async (
+      _: unknown,
+      args: {
+        input: {
+          id: string;
+          employeeCode: string;
+          firstName: string;
+          lastName: string;
+          department: string;
+          branch: string;
+          level: string;
+          hireDate: string;
+          terminationDate?: string | null;
+          status: string;
+        };
+      },
+      context: GraphQLContext,
     ) => {
-      const result = await createTriggeredActionRecords(
-        context.db,
-        args.employeeId,
-        args.action,
-      );
-
-      const notificationResult = await dispatchNotification({
-        db: context.db,
-        employee: result.employee,
-        document: result.document,
-        action: args.action,
-        apiKey: context.env.RESEND_API_KEY,
+      const persisted = await upsertEmployeeRecord(context.db, {
+        id: args.input.id,
+        employeeCode: args.input.employeeCode,
+        firstName: args.input.firstName,
+        lastName: args.input.lastName,
+        department: args.input.department,
+        branch: args.input.branch,
+        level: args.input.level,
+        hireDate: args.input.hireDate,
+        terminationDate: args.input.terminationDate,
+        status: args.input.status,
       });
 
-      if (notificationResult.notified) {
-        await updateAuditLogNotified(context.db, result.auditEntry.id, true);
-        result.auditEntry.recipientsNotified = true;
-      }
+      const changeSet = buildEmployeeChangeSet(
+        persisted.previousEmployee
+          ? {
+              employeeCode: persisted.previousEmployee.employeeCode,
+              firstName: persisted.previousEmployee.firstName,
+              lastName: persisted.previousEmployee.lastName,
+              department: persisted.previousEmployee.department,
+              branch: persisted.previousEmployee.branch,
+              level: persisted.previousEmployee.level,
+              hireDate: persisted.previousEmployee.hireDate,
+              terminationDate: persisted.previousEmployee.terminationDate,
+              status: persisted.previousEmployee.status,
+            }
+          : null,
+        {
+          employeeCode: persisted.employee.employeeCode,
+          firstName: persisted.employee.firstName,
+          lastName: persisted.employee.lastName,
+          department: persisted.employee.department,
+          branch: persisted.employee.branch,
+          level: persisted.employee.level,
+          hireDate: persisted.employee.hireDate,
+          terminationDate: persisted.employee.terminationDate,
+          status: persisted.employee.status,
+        },
+      );
+
+      const actionConfigs = await listActionConfigs(context.db);
+      const resolvedAction = resolveEmployeeLifecycleAction(
+        {
+          employeeId: persisted.employee.id,
+          changedFields: changeSet.changedFields,
+          oldValues: changeSet.oldValues,
+          newValues: changeSet.newValues,
+        },
+        { actionConfigs },
+      );
+
+      const triggeredActionResult = resolvedAction
+        ? await executeTriggeredAction(context, persisted.employee.id, resolvedAction)
+        : null;
 
       return {
-        employee: result.employee,
-        document: result.document,
-        auditLog: result.auditEntry,
+        employee: persisted.employee,
+        resolvedAction,
+        triggeredActionResult,
       };
     },
     resolveEmployeeAction: async (
@@ -208,7 +318,6 @@ const resolvers = {
         throw new Error(`Employee not found for id ${args.input.employeeId}`);
       }
 
-      await ensureDefaultActionConfigs(context.db);
       const actionConfigs = await listActionConfigs(context.db);
       const action = resolveEmployeeLifecycleAction(args.input, { actionConfigs });
 
