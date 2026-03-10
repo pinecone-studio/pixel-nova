@@ -3,7 +3,10 @@ import { and, desc, eq } from "drizzle-orm";
 import type { DbClient } from "./client";
 import { actions, auditLog, documents, employees } from "./schema";
 import { generateEmployeeDocument } from "../document/generator";
-import type { LifecycleActionConfig } from "../services/actionResolver";
+import {
+  DEFAULT_LIFECYCLE_ACTION_CONFIGS,
+  type LifecycleActionConfig,
+} from "../services/actionResolver";
 
 export type ActorRole = "admin" | "hr" | "employee" | "unknown";
 
@@ -100,12 +103,23 @@ export async function upsertEmployeeRecord(
         employeeCode: employee.employeeCode,
         firstName: employee.firstName,
         lastName: employee.lastName,
+        firstNameEng: employee.firstNameEng ?? previousEmployee.firstNameEng,
+        lastNameEng: employee.lastNameEng ?? previousEmployee.lastNameEng,
+        entraId: employee.entraId ?? previousEmployee.entraId,
+        email: employee.email ?? previousEmployee.email,
+        imageUrl: employee.imageUrl ?? previousEmployee.imageUrl,
+        github: employee.github ?? previousEmployee.github,
         department: employee.department,
         branch: employee.branch,
         level: employee.level,
         hireDate: employee.hireDate,
         terminationDate,
         status: employee.status,
+        numberOfVacationDays: employee.numberOfVacationDays ?? previousEmployee.numberOfVacationDays,
+        isSalaryCompany: employee.isSalaryCompany ?? previousEmployee.isSalaryCompany,
+        isKpi: employee.isKpi ?? previousEmployee.isKpi,
+        birthDayAndMonth: employee.birthDayAndMonth ?? previousEmployee.birthDayAndMonth,
+        birthdayPoster: employee.birthdayPoster ?? previousEmployee.birthdayPoster,
       })
     : await insertEmployee(db, {
         ...employee,
@@ -181,6 +195,22 @@ export async function listActionConfigs(db: DbClient) {
   return rows.map(normalizeActionConfig);
 }
 
+export async function ensureDefaultActionConfigs(db: DbClient) {
+  for (const config of DEFAULT_LIFECYCLE_ACTION_CONFIGS) {
+    await db
+      .insert(actions)
+      .values({
+        id: crypto.randomUUID(),
+        name: config.name,
+        phase: config.phase,
+        triggerFields: JSON.stringify(config.triggerFields),
+      })
+      .onConflictDoNothing({
+        target: actions.name,
+      });
+  }
+}
+
 export async function upsertActionConfig(
   db: DbClient,
   input: ActionRegistryInput,
@@ -239,25 +269,40 @@ export async function createTriggeredActionRecords(
   }
 
   const now = new Date().toISOString();
-  const documentId = crypto.randomUUID();
   const auditId = crypto.randomUUID();
   const normalizedAction = actionName.trim();
-  const generatedDocument = generateEmployeeDocument({
-    employee,
-    action: normalizedAction,
-    generatedAt: now,
-    documentId,
-  });
 
-  await db.batch([
-    db.insert(documents).values({
-      id: documentId,
-      employeeId,
-      action: normalizedAction,
-      documentName: generatedDocument.documentName,
-      storageUrl: generatedDocument.storageUrl,
-      createdAt: now,
-    }),
+  // action-registry.json-оос тухайн action-ийн document list-ийг авна
+  const actionRegistry = await import("../config/action-registry.json");
+  const actionConfig = (actionRegistry.actions as Record<string, { documents?: Array<{ id: string; template: string; order: number }> }>)[normalizedAction];
+  const docTemplates = actionConfig?.documents ?? [{ id: "default", template: "default.html", order: 1 }];
+
+  // Template тус бүрд document үүсгэнэ
+  const documentInserts = docTemplates
+    .sort((a, b) => a.order - b.order)
+    .map((tmpl) => {
+      const documentId = crypto.randomUUID();
+      const orderPrefix = String(tmpl.order).padStart(2, "0");
+      const generated = generateEmployeeDocument({
+        employee,
+        action: normalizedAction,
+        generatedAt: now,
+        documentId,
+      });
+
+      return {
+        id: documentId,
+        employeeId,
+        action: normalizedAction,
+        documentName: `${orderPrefix}_${tmpl.id}.pdf`,
+        storageUrl: generated.storageUrl,
+        createdAt: now,
+      };
+    });
+
+  // Бүх document + audit log-ийг batch insert хийнэ
+  const batchOps = [
+    ...documentInserts.map((doc) => db.insert(documents).values(doc)),
     db.insert(auditLog).values({
       id: auditId,
       employeeId,
@@ -266,22 +311,26 @@ export async function createTriggeredActionRecords(
       recipientsNotified: false,
       timestamp: now,
     }),
-  ]);
+  ];
 
-  const [document] = await db
+  await db.batch(batchOps as [typeof batchOps[0], ...typeof batchOps]);
+
+  // Үүссэн document-уудыг query хийнэ
+  const createdDocuments = await db
     .select()
     .from(documents)
-    .where(and(eq(documents.id, documentId), eq(documents.employeeId, employeeId)))
-    .limit(1);
+    .where(and(eq(documents.employeeId, employeeId), eq(documents.action, normalizedAction)))
+    .orderBy(documents.documentName);
+
   const [auditEntry] = await db
     .select()
     .from(auditLog)
     .where(and(eq(auditLog.id, auditId), eq(auditLog.employeeId, employeeId)))
     .limit(1);
 
-  if (!document || !auditEntry) {
+  if (createdDocuments.length === 0 || !auditEntry) {
     throw new Error("Failed to create trigger action records");
   }
 
-  return { employee, document, auditEntry };
+  return { employee, documents: createdDocuments, auditEntry };
 }

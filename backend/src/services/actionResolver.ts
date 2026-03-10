@@ -22,7 +22,7 @@ export const DEFAULT_LIFECYCLE_ACTION_CONFIGS: LifecycleActionConfig[] = [
   {
     name: "promote_employee",
     phase: "working",
-    triggerFields: ["level"],
+    triggerFields: ["level", "numberOfVacationDays", "isSalaryCompany"],
   },
   {
     name: "change_position",
@@ -40,12 +40,19 @@ export const EMPLOYEE_CHANGE_FIELDS = [
   "employeeCode",
   "firstName",
   "lastName",
+  "firstNameEng",
+  "lastNameEng",
+  "email",
   "department",
   "branch",
   "level",
   "hireDate",
   "terminationDate",
   "status",
+  "numberOfVacationDays",
+  "isSalaryCompany",
+  "isKpi",
+  "birthDayAndMonth",
 ] as const;
 
 export type EmployeeChangeField = (typeof EMPLOYEE_CHANGE_FIELDS)[number];
@@ -210,18 +217,27 @@ function resolvesAddEmployee(input: ResolveEmployeeActionInput, changedFields: S
 }
 
 function resolvesPromotion(input: ResolveEmployeeActionInput, changedFields: Set<string>) {
-  if (!hasChanged(changedFields, "level")) {
-    return false;
+  // level дээшилсэн бол promotion
+  if (hasChanged(changedFields, "level")) {
+    const oldLevel = parseLevelValue(getValue(input.oldValues, "level"));
+    const newLevel = parseLevelValue(getValue(input.newValues, "level"));
+
+    if (oldLevel !== null && newLevel !== null && newLevel > oldLevel) {
+      return true;
+    }
   }
 
-  const oldLevel = parseLevelValue(getValue(input.oldValues, "level"));
-  const newLevel = parseLevelValue(getValue(input.newValues, "level"));
-
-  if (oldLevel === null || newLevel === null) {
-    return false;
+  // numberOfVacationDays өөрчлөгдсөн бол promotion (benefit change)
+  if (hasChanged(changedFields, "numberOfVacationDays")) {
+    return true;
   }
 
-  return newLevel > oldLevel;
+  // isSalaryCompany өөрчлөгдсөн бол promotion
+  if (hasChanged(changedFields, "isSalaryCompany")) {
+    return true;
+  }
+
+  return false;
 }
 
 function resolvesPositionChange(
