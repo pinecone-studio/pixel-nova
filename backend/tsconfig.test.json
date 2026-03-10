@@ -1,0 +1,13 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "outDir": ".test-dist",
+    "noEmit": false
+  },
+  "include": [
+    "src/services/actionResolver.ts",
+    "src/services/actionResolver.test.ts"
+  ]
+}

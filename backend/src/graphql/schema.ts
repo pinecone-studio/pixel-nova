@@ -1,14 +1,18 @@
+import { GraphQLScalarType, Kind, type ValueNode } from "graphql";
 import { createSchema } from "graphql-yoga";
 
 import type { DbClient } from "../db/client";
 import {
   createTriggeredActionRecords,
+  ensureDefaultActionConfigs,
+  getEmployeeById,
   getAuditLogs,
   getDocuments,
   listActionConfigs,
   type RequestContext,
   upsertActionConfig,
 } from "../db/queries";
+import { resolveEmployeeLifecycleAction } from "../services/actionResolver";
 
 export interface GraphQLContext extends RequestContext {
   env: CloudflareBindings;
@@ -16,6 +20,8 @@ export interface GraphQLContext extends RequestContext {
 }
 
 const typeDefs = /* GraphQL */ `
+  scalar JSON
+
   type Employee {
     id: ID!
     employeeCode: String!
@@ -66,10 +72,21 @@ const typeDefs = /* GraphQL */ `
     auditLog: AuditLog!
   }
 
+  type ResolvedEmployeeAction {
+    action: String!
+  }
+
   input UpdateActionRegistryInput {
     name: String!
     phase: String!
     triggerFields: [String!]!
+  }
+
+  input ResolveEmployeeActionInput {
+    employeeId: ID!
+    changedFields: [String!]!
+    oldValues: JSON!
+    newValues: JSON!
   }
 
   type Query {
@@ -80,11 +97,52 @@ const typeDefs = /* GraphQL */ `
 
   type Mutation {
     triggerAction(employeeId: ID!, action: String!): TriggerActionResult!
+    resolveEmployeeAction(input: ResolveEmployeeActionInput!): ResolvedEmployeeAction
     updateRegistry(input: UpdateActionRegistryInput!): ActionConfig!
   }
 `;
 
+type JsonValue =
+  | string
+  | number
+  | boolean
+  | null
+  | JsonValue[]
+  | { [key: string]: JsonValue };
+
+function parseJsonLiteral(valueNode: ValueNode): JsonValue {
+  switch (valueNode.kind) {
+    case Kind.STRING:
+    case Kind.BOOLEAN:
+      return valueNode.value;
+    case Kind.INT:
+    case Kind.FLOAT:
+      return Number(valueNode.value);
+    case Kind.NULL:
+      return null;
+    case Kind.OBJECT:
+      return Object.fromEntries(
+        valueNode.fields.map((field) => [
+          field.name.value,
+          parseJsonLiteral(field.value),
+        ]),
+      );
+    case Kind.LIST:
+      return valueNode.values.map((item) => parseJsonLiteral(item));
+    default:
+      return null;
+  }
+}
+
+const jsonScalar = new GraphQLScalarType({
+  name: "JSON",
+  serialize: (value) => value,
+  parseValue: (value) => value,
+  parseLiteral: (valueNode) => parseJsonLiteral(valueNode),
+});
+
 const resolvers = {
+  JSON: jsonScalar,
   Query: {
     documents: async (
       _: unknown,
@@ -116,6 +174,30 @@ const resolvers = {
         document: result.document,
         auditLog: result.auditEntry,
       };
+    },
+    resolveEmployeeAction: async (
+      _: unknown,
+      args: {
+        input: {
+          employeeId: string;
+          changedFields: string[];
+          oldValues: Record<string, unknown>;
+          newValues: Record<string, unknown>;
+        };
+      },
+      context: GraphQLContext,
+    ) => {
+      const employee = await getEmployeeById(context.db, args.input.employeeId);
+
+      if (!employee) {
+        throw new Error(`Employee not found for id ${args.input.employeeId}`);
+      }
+
+      await ensureDefaultActionConfigs(context.db);
+      const actionConfigs = await listActionConfigs(context.db);
+      const action = resolveEmployeeLifecycleAction(args.input, { actionConfigs });
+
+      return action ? { action } : null;
     },
     updateRegistry: async (
       _: unknown,
