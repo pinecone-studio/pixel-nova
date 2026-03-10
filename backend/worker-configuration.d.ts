@@ -8,6 +8,7 @@ declare namespace Cloudflare {
 	interface Env {
 		DB: D1Database;
 		ASSETS: Fetcher;
+		RESEND_API_KEY: string;
 	}
 }
 interface CloudflareBindings extends Cloudflare.Env {}
