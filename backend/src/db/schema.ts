@@ -10,6 +10,12 @@ export const employees = sqliteTable(
     department: text("department").notNull(),
     branch: text("branch").notNull(),
     level: text("level").notNull(),
+    numberOfVacationDays: integer("number_of_vacation_days")
+      .notNull()
+      .default(0),
+    isSalaryCompany: integer("is_salary_company", { mode: "boolean" })
+      .notNull()
+      .default(false),
     hireDate: text("hire_date").notNull(),
     terminationDate: text("termination_date"),
     status: text("status").notNull(),

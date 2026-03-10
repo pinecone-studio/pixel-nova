@@ -4,6 +4,7 @@
 	"scripts": {
 		"dev": "wrangler dev",
 		"check": "tsc --noEmit",
+		"test": "tsc -p tsconfig.test.json && node --test .test-dist/services/actionResolver.test.js",
 		"db:generate": "drizzle-kit generate",
 		"db:export": "drizzle-kit export",
 		"deploy": "wrangler deploy --minify",

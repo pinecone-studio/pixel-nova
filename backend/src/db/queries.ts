@@ -3,6 +3,10 @@ import { and, desc, eq } from "drizzle-orm";
 import type { DbClient } from "./client";
 import { actions, auditLog, documents, employees } from "./schema";
 import { generateEmployeeDocument } from "../document/generator";
+import {
+  DEFAULT_LIFECYCLE_ACTION_CONFIGS,
+  type LifecycleActionConfig,
+} from "../services/actionResolver";
 
 export type ActorRole = "admin" | "hr" | "employee" | "unknown";
 
@@ -21,6 +25,10 @@ export interface ActionRegistryInput {
   triggerFields: string[];
 }
 
+export interface NormalizedActionConfig
+  extends Omit<typeof actions.$inferSelect, "triggerFields" | "name">,
+    LifecycleActionConfig {}
+
 function toJsonArray(input: string): string[] {
   try {
     const parsed = JSON.parse(input);
@@ -36,7 +44,7 @@ export function normalizeActionConfig(row: typeof actions.$inferSelect) {
   return {
     ...row,
     triggerFields: toJsonArray(row.triggerFields),
-  };
+  } as NormalizedActionConfig;
 }
 
 export async function getEmployeeById(db: DbClient, employeeId: string) {
@@ -124,6 +132,22 @@ export async function insertAuditLog(
 export async function listActionConfigs(db: DbClient) {
   const rows = await db.select().from(actions).orderBy(actions.name);
   return rows.map(normalizeActionConfig);
+}
+
+export async function ensureDefaultActionConfigs(db: DbClient) {
+  for (const input of DEFAULT_LIFECYCLE_ACTION_CONFIGS) {
+    await db
+      .insert(actions)
+      .values({
+        id: crypto.randomUUID(),
+        name: input.name,
+        phase: input.phase,
+        triggerFields: JSON.stringify(input.triggerFields),
+      })
+      .onConflictDoNothing({
+        target: actions.name,
+      });
+  }
 }
 
 export async function upsertActionConfig(
