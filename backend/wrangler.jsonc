@@ -20,10 +20,19 @@
       "migrations_dir": "drizzle",
     },
   ],
+  "r2_buckets": [
+    {
+      "binding": "DOCUMENT_BUCKET",
+      "bucket_name": "epas-documents"
+    }
+  ],
   "observability": {
     "enabled": true,
   },
   "compatibility_flags": ["nodejs_compat"],
+  "rules": [
+    { "type": "Text", "globs": ["**/*.html"], "fallthrough": true }
+  ],
   /**
    * Smart Placement
    * https://developers.cloudflare.com/workers/configuration/smart-placement/#smart-placement
