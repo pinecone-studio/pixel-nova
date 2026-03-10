@@ -1,0 +1,292 @@
+<!doctype html>
+<html lang="mn">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Цалин нэмэгдүүлэх тушаал</title>
+    <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      body {
+        background: #d0d0d0;
+        font-family: "Times New Roman", Times, serif;
+        font-size: 12pt;
+        color: #000;
+        padding: 30px 16px;
+      }
+      .page {
+        width: 21cm;
+        min-height: 29.7cm;
+        background: #fff;
+        margin: 0 auto 28px auto;
+        padding: 1.8cm 2cm 2cm 2.5cm;
+        box-shadow: 0 3px 18px rgba(0, 0, 0, 0.2);
+        position: relative;
+      }
+      .org-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 16px;
+        font-size: 11pt;
+        line-height: 1.7;
+      }
+      .org-left {
+        width: 55%;
+      }
+      .org-right {
+        width: 42%;
+        text-align: right;
+      }
+      .org-name {
+        font-weight: bold;
+        font-size: 12pt;
+        text-transform: uppercase;
+      }
+      .order-meta {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        border-top: 2px solid #000;
+        border-bottom: 1px solid #000;
+        padding: 5px 0;
+        margin: 14px 0 18px;
+        font-size: 11.5pt;
+        font-weight: bold;
+      }
+      .doc-subject {
+        text-align: center;
+        font-size: 13pt;
+        font-weight: bold;
+        text-transform: uppercase;
+        margin-bottom: 20px;
+        letter-spacing: 1px;
+      }
+      .info-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 11.5pt;
+        margin: 14px 0 18px;
+      }
+      .info-table td {
+        padding: 6px 10px;
+        border: 1px solid #000;
+        line-height: 1.75;
+        vertical-align: middle;
+      }
+      .info-table td.lbl {
+        width: 40%;
+        font-weight: bold;
+        background: #f5f5f5;
+      }
+      p {
+        text-align: justify;
+        line-height: 1.9;
+        margin-bottom: 9px;
+        font-size: 11.5pt;
+      }
+      .indent {
+        text-indent: 1.2cm;
+      }
+      .ind1 {
+        margin-left: 1.2cm;
+      }
+      .d {
+        display: inline-block;
+        vertical-align: bottom;
+        overflow: hidden;
+        white-space: nowrap;
+        letter-spacing: 1.5px;
+        font-size: 11pt;
+      }
+      .dxs {
+        width: 32px;
+      }
+      .dsm {
+        width: 80px;
+      }
+      .dmd {
+        width: 140px;
+      }
+      .dlg {
+        width: 200px;
+      }
+      .dxl {
+        width: 270px;
+      }
+      .sig-section {
+        margin-top: 30px;
+      }
+      .sig-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0 40px;
+        font-size: 11.5pt;
+      }
+      .sig-line {
+        border-bottom: 1px solid #000;
+        width: 200px;
+        margin: 48px 0 6px;
+      }
+      .sig-hint {
+        font-size: 10pt;
+        font-style: italic;
+      }
+      @media print {
+        body {
+          background: none;
+          padding: 0;
+        }
+        .page {
+          box-shadow: none;
+          margin: 0;
+          page-break-after: always;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="page">
+      <div class="org-header">
+        <div class="org-left">
+          <div class="org-name">
+            "<span class="d dlg">........................</span>" ХХК
+          </div>
+          <div>УБД: <span class="d dmd">.................</span></div>
+          <div>
+            Хаяг: <span class="d dxl">.................................</span>
+          </div>
+        </div>
+        <div class="org-right">
+          <div>Улаанбаатар хот</div>
+          <div>
+            20<span class="d dxs">......</span> оны
+            <span class="d dxs">......</span> сарын
+            <span class="d dxs">......</span>-ны өдөр
+          </div>
+        </div>
+      </div>
+
+      <div class="order-meta">
+        <span>ТУШААЛ</span>
+        <span>№ <span class="d dsm">.............</span></span>
+        <span>Улаанбаатар</span>
+      </div>
+
+      <div class="doc-subject">Цалин нэмэгдүүлэх тухай</div>
+
+      <table class="info-table">
+        <tr>
+          <td class="lbl">Ажилтны овог, нэр:</td>
+          <td><span class="d dxl">.................................</span></td>
+        </tr>
+        <tr>
+          <td class="lbl">Ажиллаж буй нэгж / хэлтэс:</td>
+          <td><span class="d dxl">.................................</span></td>
+        </tr>
+        <tr>
+          <td class="lbl">Албан тушаал:</td>
+          <td><span class="d dxl">.................................</span></td>
+        </tr>
+        <tr>
+          <td class="lbl">Ажилд орсон огноо:</td>
+          <td>
+            20<span class="d dxs">......</span> оны
+            <span class="d dxs">......</span> сарын
+            <span class="d dxs">......</span>-ны өдөр
+          </td>
+        </tr>
+        <tr>
+          <td class="lbl">Өмнөх цалингийн хэмжээ:</td>
+          <td>
+            <span class="d dxl">.................................</span> ₮
+          </td>
+        </tr>
+        <tr>
+          <td class="lbl">Шинэ цалингийн хэмжээ:</td>
+          <td>
+            <span class="d dxl">.................................</span> ₮
+          </td>
+        </tr>
+        <tr>
+          <td class="lbl">Хүчин төгөлдөр болох огноо:</td>
+          <td>
+            20<span class="d dxs">......</span> оны
+            <span class="d dxs">......</span> сарын
+            <span class="d dxs">......</span>-ны өдөр
+          </td>
+        </tr>
+      </table>
+
+      <p class="indent">
+        Монгол Улсын Хөдөлмөрийн тухай хуулийн холбогдох заалт, компанийн цалин
+        хөлсний журам, ажилтны ажлын үр дүнгийн үнэлгээ, нэгжийн удирдлагын
+        саналыг үндэслэн дараах шийдвэрийг гаргав.
+      </p>
+
+      <p class="ind1">
+        <b>1.</b>
+        <span class="d dxl">.................................</span> овогтой
+        <span class="d dlg">........................</span>-ийн цалинг 20<span
+          class="d dxs"
+          >......</span
+        >
+        оны <span class="d dxs">......</span> дугаар сарын
+        <span class="d dxs">......</span>-ний өдрөөс эхлэн
+        <span class="d dxl">.................................</span> төгрөг
+        болгон нэмэгдүүлсүгэй.
+      </p>
+
+      <p class="ind1"><b>2.</b> Цалин нэмэгдүүлсэн үндэслэл:</p>
+      <p style="margin-left: 2.4cm">
+        а. Ажлын үр дүн, гүйцэтгэлийн үнэлгээ:
+        <span class="d dxl">.................................</span>
+      </p>
+      <p style="margin-left: 2.4cm">
+        б. Мэргэжлийн ур чадварын өсөлт:
+        <span class="d dxl">.................................</span>
+      </p>
+      <p style="margin-left: 2.4cm">
+        в. Бусад: <span class="d dxl">.................................</span>
+      </p>
+
+      <p class="ind1">
+        <b>3.</b> Шинэ цалинг тооцон олгохыг Санхүүгийн алба
+        <span class="d dlg">........................</span>-д үүрэг болгосугай.
+      </p>
+      <p class="ind1">
+        <b>4.</b> Энэхүү тушаалын хэрэгжилтэд хяналт тавьж ажиллахыг Хүний
+        нөөцийн алба <span class="d dlg">........................</span>-д
+        даалгасугай.
+      </p>
+
+      <div class="sig-section">
+        <div class="sig-grid">
+          <div>
+            <p style="font-weight: bold">Гүйцэтгэх захирал:</p>
+            <div class="sig-line"></div>
+            <p class="sig-hint">(гарын үсэг, тамга)</p>
+            <div style="margin-top: 10px; line-height: 2">
+              <div>
+                Нэр: <span class="d dlg">........................</span>
+              </div>
+            </div>
+          </div>
+          <div>
+            <p style="font-weight: bold">Танилцсан ажилтан:</p>
+            <div class="sig-line"></div>
+            <p class="sig-hint">(гарын үсэг)</p>
+            <div style="margin-top: 10px; line-height: 2">
+              <div>
+                Нэр: <span class="d dlg">........................</span>
+              </div>
+              <div>Огноо: <span class="d dmd">.................</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

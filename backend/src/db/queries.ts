@@ -3,6 +3,7 @@ import { and, desc, eq } from "drizzle-orm";
 import type { DbClient } from "./client";
 import { actions, auditLog, documents, employees } from "./schema";
 import { generateEmployeeDocument } from "../document/generator";
+import { uploadEmployeeDocumentToR2 } from "../storage/r2";
 import {
   DEFAULT_LIFECYCLE_ACTION_CONFIGS,
   type LifecycleActionConfig,
@@ -261,6 +262,7 @@ export async function createTriggeredActionRecords(
   db: DbClient,
   employeeId: string,
   actionName: string,
+  bucket?: R2Bucket,
 ) {
   const employee = await getEmployeeById(db, employeeId);
 
@@ -278,27 +280,62 @@ export async function createTriggeredActionRecords(
   const docTemplates = actionConfig?.documents ?? [{ id: "default", template: "default.html", order: 1 }];
 
   // Template тус бүрд document үүсгэнэ
-  const documentInserts = docTemplates
-    .sort((a, b) => a.order - b.order)
-    .map((tmpl) => {
-      const documentId = crypto.randomUUID();
-      const orderPrefix = String(tmpl.order).padStart(2, "0");
-      const generated = generateEmployeeDocument({
-        employee,
-        action: normalizedAction,
-        generatedAt: now,
-        documentId,
-      });
+  const documentInserts: Array<{
+    id: string;
+    employeeId: string;
+    action: string;
+    documentName: string;
+    storageUrl: string;
+    createdAt: string;
+  }> = [];
 
-      return {
-        id: documentId,
-        employeeId,
-        action: normalizedAction,
-        documentName: `${orderPrefix}_${tmpl.id}.pdf`,
-        storageUrl: generated.storageUrl,
-        createdAt: now,
-      };
+  for (const tmpl of docTemplates.sort((a, b) => a.order - b.order)) {
+    const documentId = crypto.randomUUID();
+    const orderPrefix = String(tmpl.order).padStart(2, "0");
+    const generated = generateEmployeeDocument({
+      employee,
+      action: normalizedAction,
+      generatedAt: now,
+      documentId,
+      templateFile: tmpl.template,
     });
+
+    let storageUrl = generated.storageUrl;
+
+    // R2 bucket байвал upload хийнэ
+    if (bucket) {
+      try {
+        const r2Key = await uploadEmployeeDocumentToR2({
+          bucket,
+          employeeId,
+          documentId,
+          documentName: `${orderPrefix}_${tmpl.id}.html`,
+          content: generated.content,
+          contentType: generated.contentType,
+          createdAt: now,
+        });
+        storageUrl = `r2://${r2Key}`;
+      } catch (err) {
+        console.error(`R2 upload failed for ${tmpl.id}:`, err);
+        // Fallback: data URL хэвээр хадгалагдана
+        if (!storageUrl) {
+          storageUrl = `data:${generated.contentType};charset=utf-8,${encodeURIComponent(generated.content)}`;
+        }
+      }
+    } else if (!storageUrl) {
+      // R2 байхгүй бол data URL-д хадгална
+      storageUrl = `data:${generated.contentType};charset=utf-8,${encodeURIComponent(generated.content)}`;
+    }
+
+    documentInserts.push({
+      id: documentId,
+      employeeId,
+      action: normalizedAction,
+      documentName: `${orderPrefix}_${tmpl.id}.html`,
+      storageUrl,
+      createdAt: now,
+    });
+  }
 
   // Бүх document + audit log-ийг batch insert хийнэ
   const batchOps = [
