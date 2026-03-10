@@ -1,0 +1,44 @@
+{
+  "actions": {
+    "add_employee": {
+      "phase": "onboarding",
+      "triggerFields": ["status", "hireDate"],
+      "triggerCondition": "status === ACTIVE && isNewRecord",
+      "recipients": ["hr_team", "department_chief", "branch_manager"],
+      "documents": [
+        { "id": "employment_contract", "template": "employment_contract.html", "order": 1 },
+        { "id": "probation_order", "template": "probation_order.html", "order": 2 },
+        { "id": "job_description", "template": "job_description.html", "order": 3 },
+        { "id": "nda", "template": "nda.html", "order": 4 }
+      ]
+    },
+    "promote_employee": {
+      "phase": "working",
+      "triggerFields": ["level", "numberOfVacationDays", "isSalaryCompany"],
+      "recipients": ["hr_team", "department_chief"],
+      "documents": [
+        { "id": "salary_increase_order", "template": "salary_increase_order.html", "order": 1 }
+      ]
+    },
+    "change_position": {
+      "phase": "working",
+      "triggerFields": ["department", "branch", "level"],
+      "recipients": ["hr_team", "department_chief", "branch_manager"],
+      "documents": [
+        { "id": "job_description", "template": "job_description.html", "order": 1 },
+        { "id": "position_update_order", "template": "position_update_order.html", "order": 2 },
+        { "id": "contract_addendum", "template": "contract_addendum.html", "order": 3 }
+      ]
+    },
+    "offboard_employee": {
+      "phase": "offboarding",
+      "triggerFields": ["terminationDate", "status"],
+      "triggerCondition": "status === TERMINATED || status === INACTIVE",
+      "recipients": ["hr_team", "department_chief", "ceo"],
+      "documents": [
+        { "id": "termination_order", "template": "termination_order.html", "order": 1 },
+        { "id": "handover_sheet", "template": "handover_sheet.html", "order": 2 }
+      ]
+    }
+  }
+}
