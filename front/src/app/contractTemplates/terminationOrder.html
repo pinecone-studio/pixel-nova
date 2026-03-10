@@ -2,156 +2,695 @@
 <html lang="mn">
   <head>
     <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Ажлаас чөлөөлөх тушаал</title>
-
     <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
       body {
-        font-family: "Times New Roman", serif;
-        background: #ccc;
+        background: #d0d0d0;
+        font-family: "Times New Roman", Times, serif;
+        font-size: 12pt;
+        color: #000;
+        padding: 30px 16px;
       }
 
       .page {
-        width: 794px;
-        min-height: 1123px;
-        background: white;
-        margin: 40px auto;
-        padding: 80px;
-        page-break-after: always;
+        width: 21cm;
+        min-height: 29.7cm;
+        background: #fff;
+        margin: 0 auto 28px auto;
+        padding: 1.8cm 2cm 2cm 2.5cm;
+        box-shadow: 0 3px 18px rgba(0, 0, 0, 0.2);
+        position: relative;
       }
 
-      .header {
+      /* ── Хуудасны дугаар ── */
+      .page-num {
         text-align: center;
-        font-size: 18px;
-        line-height: 1.6;
+        font-size: 11pt;
+        margin-bottom: 16px;
       }
 
-      .title {
-        text-align: center;
-        font-size: 26px;
-        font-weight: bold;
-        margin: 40px 0;
-      }
-
-      .meta {
+      /* ── Байгууллагын толгой ── */
+      .org-header {
         display: flex;
         justify-content: space-between;
-        margin-bottom: 40px;
-        font-size: 18px;
+        align-items: flex-start;
+        margin-bottom: 16px;
+        font-size: 11pt;
+        line-height: 1.7;
+      }
+      .org-left {
+        width: 55%;
+      }
+      .org-right {
+        width: 42%;
+        text-align: right;
+      }
+      .org-name {
+        font-weight: bold;
+        font-size: 12pt;
+        text-transform: uppercase;
       }
 
-      .content {
-        font-size: 18px;
-        line-height: 1.8;
+      /* ── Тушаал дугаар / огноо мөр ── */
+      .order-meta {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        border-top: 2px solid #000;
+        border-bottom: 1px solid #000;
+        padding: 5px 0;
+        margin: 14px 0 18px;
+        font-size: 11.5pt;
+        font-weight: bold;
+      }
+
+      /* ── Гарчиг ── */
+      .doc-title {
+        text-align: center;
+        font-size: 13pt;
+        font-weight: bold;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-bottom: 6px;
+      }
+      .doc-subject {
+        text-align: center;
+        font-size: 12pt;
+        font-weight: bold;
+        margin-bottom: 20px;
+      }
+
+      /* ── Бүлгийн гарчиг ── */
+      .sec-title {
+        text-align: center;
+        font-size: 12pt;
+        font-weight: bold;
+        text-transform: uppercase;
+        margin: 22px 0 12px;
+        letter-spacing: 0.5px;
+      }
+
+      /* ── Параграф ── */
+      p {
         text-align: justify;
+        line-height: 1.9;
+        margin-bottom: 9px;
+        font-size: 11.5pt;
+      }
+      .indent {
+        text-indent: 1.2cm;
+      }
+      .ind1 {
+        margin-left: 1.2cm;
+      }
+      .ind2 {
+        margin-left: 2.4cm;
       }
 
-      .bold {
+      /* ── Мэдээллийн хүснэгт ── */
+      .info-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 11.5pt;
+        margin: 14px 0 18px;
+      }
+      .info-table td {
+        padding: 6px 10px;
+        border: 1px solid #000;
+        line-height: 1.75;
+        vertical-align: middle;
+      }
+      .info-table td.lbl {
+        width: 40%;
         font-weight: bold;
+        background: #f5f5f5;
       }
 
-      .sign {
-        margin-top: 80px;
-        display: flex;
-        justify-content: space-between;
+      /* ── Цэгтэй бөглөх мөр ── */
+      .d {
+        display: inline-block;
+        vertical-align: bottom;
+        overflow: hidden;
+        white-space: nowrap;
+        letter-spacing: 1.5px;
+        font-size: 11pt;
+      }
+      .dxs {
+        width: 32px;
+      }
+      .dsm {
+        width: 80px;
+      }
+      .dmd {
+        width: 140px;
+      }
+      .dlg {
+        width: 200px;
+      }
+      .dxl {
+        width: 270px;
       }
 
-      .footer {
-        margin-top: 60px;
-        font-size: 18px;
+      /* ── Checkbox ── */
+      .cb {
+        display: inline-block;
+        width: 12px;
+        height: 12px;
+        border: 1px solid #000;
+        vertical-align: middle;
+        margin-right: 3px;
+      }
+
+      /* ── Гарын үсэг ── */
+      .sig-section {
+        margin-top: 30px;
+      }
+      .sig-title {
+        text-align: center;
+        font-weight: bold;
+        font-size: 13pt;
+        margin-bottom: 26px;
+        letter-spacing: 1px;
+      }
+      .sig-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0 40px;
+        font-size: 11.5pt;
+      }
+      .sig-line {
+        border-bottom: 1px solid #000;
+        width: 200px;
+        margin: 48px 0 6px;
+      }
+      .sig-hint {
+        font-size: 10pt;
+        font-style: italic;
+      }
+      .sig-info {
+        line-height: 2.1;
+        margin-top: 10px;
+      }
+
+      /* ── Тойрох хуудасны хүснэгт ── */
+      .handover-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 11pt;
+        margin: 12px 0 16px;
+      }
+      .handover-table th {
+        border: 1px solid #000;
+        padding: 6px 8px;
+        background: #f0f0f0;
+        font-weight: bold;
+        text-align: center;
+        font-size: 11pt;
+      }
+      .handover-table td {
+        border: 1px solid #000;
+        padding: 7px 8px;
+        vertical-align: top;
+        line-height: 1.7;
+        font-size: 11pt;
+        min-height: 28px;
+      }
+      .handover-table td.num {
+        text-align: center;
+        width: 6%;
+      }
+
+      @media print {
+        body {
+          background: none;
+          padding: 0;
+        }
+        .page {
+          box-shadow: none;
+          margin: 0;
+          page-break-after: always;
+          width: 21cm;
+          min-height: 29.7cm;
+          padding: 1.8cm 2cm 2cm 2.5cm;
+        }
       }
     </style>
   </head>
-
   <body>
-    <!-- PAGE 1 -->
-
+    <!-- ══════════════════════ ХУУДАС 1 — ТУШААЛ ══════════════════════ -->
     <div class="page">
-      <div class="header">
-        КОМПАНИЙН НЭР<br />
-        ХАЯГ, УТАС
-      </div>
+      <div class="page-num">1</div>
 
-      <div class="meta">
-        <div>Дугаар: ______</div>
-        <div>Огноо: 20__ оны __ сарын __</div>
-      </div>
-
-      <div class="title">АЖЛААС ЧӨЛӨӨЛӨХ ТУШААЛ</div>
-
-      <div class="content">
-        Монгол Улсын Хөдөлмөрийн тухай хууль болон байгууллагын дотоод журмыг
-        үндэслэн дараах тушаалыг гаргав.
-
-        <br /><br />
-
-        <span class="bold">Нэг.</span> __________________ овогтой
-        ____________________-ийг өөрийн хүсэлтээр / эсхүл
-        _______________________ шалтгаанаар
-
-        <span class="bold">20__ оны __ сарын __-ний өдрөөс эхлэн</span>
-
-        ________________________________ албан тушаалаас
-        <span class="bold">чөлөөлсүгэй.</span>
-
-        <br /><br />
-
-        <span class="bold">Хоёр.</span> Санхүү, нягтлан бодох хэлтэст ажилтантай
-        холбогдох цалин, нөхөн олговор, бусад тооцоог холбогдох журмын дагуу
-        хийж дуусгахыг даалгасугай.
-
-        <br /><br />
-
-        <span class="bold">Гурав.</span> Хүний нөөцийн хэлтэст ажилтны
-        хөдөлмөрийн дэвтэр болон холбогдох баримт бичигт тэмдэглэл хийхийг үүрэг
-        болгосугай.
-      </div>
-
-      <div class="sign">
-        <div>
-          ЗАХИРАЛ<br /><br />
-          ____________________
+      <!-- Байгууллагын толгой -->
+      <div class="org-header">
+        <div class="org-left">
+          <div class="org-name">
+            "<span class="d dlg">........................</span>" ХХК
+          </div>
+          <div>
+            Улсын бүртгэлийн дугаар:
+            <span class="d dmd">.................</span>
+          </div>
+          <div>
+            Хаяг: <span class="d dxl">.................................</span>
+          </div>
         </div>
+        <div class="org-right">
+          <div>Улаанбаатар хот</div>
+          <div>
+            20<span class="d dxs">......</span> оны
+            <span class="d dxs">......</span> сарын
+            <span class="d dxs">......</span>-ны өдөр
+          </div>
+        </div>
+      </div>
 
-        <div>
-          Гарын үсэг<br /><br />
-          ____________________
+      <!-- Дугаар / огноо мөр -->
+      <div class="order-meta">
+        <span>ТУШААЛ</span>
+        <span>№ <span class="d dsm">.............</span></span>
+        <span>Улаанбаатар</span>
+      </div>
+
+      <!-- Тушаалын сэдэв -->
+      <div class="doc-subject">Ажлаас чөлөөлөх тухай</div>
+
+      <!-- Ажилтны мэдээлэл хүснэгт -->
+      <table class="info-table">
+        <tr>
+          <td class="lbl">Ажилтны овог, нэр:</td>
+          <td><span class="d dxl">.................................</span></td>
+        </tr>
+        <tr>
+          <td class="lbl">Регистрийн дугаар:</td>
+          <td><span class="d dmd">.................</span></td>
+        </tr>
+        <tr>
+          <td class="lbl">Ажилласан нэгж / хэлтэс:</td>
+          <td><span class="d dxl">.................................</span></td>
+        </tr>
+        <tr>
+          <td class="lbl">Албан тушаал:</td>
+          <td><span class="d dxl">.................................</span></td>
+        </tr>
+        <tr>
+          <td class="lbl">Ажилд орсон огноо:</td>
+          <td>
+            20<span class="d dxs">......</span> оны
+            <span class="d dxs">......</span> сарын
+            <span class="d dxs">......</span>-ны өдөр
+          </td>
+        </tr>
+        <tr>
+          <td class="lbl">Ажлаас чөлөөлөх огноо:</td>
+          <td>
+            20<span class="d dxs">......</span> оны
+            <span class="d dxs">......</span> сарын
+            <span class="d dxs">......</span>-ны өдөр
+          </td>
+        </tr>
+        <tr>
+          <td class="lbl">Хөдөлмөрийн гэрээний дугаар:</td>
+          <td>№ <span class="d dmd">.................</span></td>
+        </tr>
+      </table>
+
+      <!-- Үндэслэл -->
+      <p class="indent">
+        Монгол Улсын Хөдөлмөрийн тухай хуулийн
+        <span class="d dmd">.................</span> дүгээр зүйлийн
+        <span class="d dsm">.............</span> дэх хэсэгт заасан үндэслэл
+        болон <span class="d dxl">.................................</span>-ны
+        өргөдөл, хүний нөөцийн албаны саналыг үндэслэн,
+      </p>
+
+      <!-- Ажлаас чөлөөлөх үндэслэл сонголт -->
+      <div class="sec-title">Чөлөөлөх үндэслэл</div>
+
+      <p class="ind1">
+        <span class="cb"></span> Ажилтны өөрийн хүсэлтээр (Хөдөлмөрийн тухай
+        хуулийн 39 дүгээр зүйл)
+      </p>
+      <p class="ind1">
+        <span class="cb"></span> Ажил олгогчийн санаачилгаар — ноцтой зөрчил
+        (40.1.4)
+      </p>
+      <p class="ind1">
+        <span class="cb"></span> Ажил олгогчийн санаачилгаар — бусад үндэслэл
+        (40.1)
+      </p>
+      <p class="ind1">
+        <span class="cb"></span> Гэрээний хугацаа дууссан (37.1.1)
+      </p>
+      <p class="ind1">
+        <span class="cb"></span> Талуудын харилцан тохиролцол (37.1.7)
+      </p>
+      <p class="ind1">
+        <span class="cb"></span> Бусад:
+        <span class="d dxl">.................................</span>
+      </p>
+
+      <div class="sec-title">Тушаах нь:</div>
+
+      <p class="ind1">
+        <b>1.</b>
+        <span class="d dxl">.................................</span> овогтой
+        <span class="d dlg">........................</span>-г
+        <span class="d dlg">........................</span> албан тушаалаас
+        20<span class="d dxs">......</span> оны
+        <span class="d dxs">......</span> дугаар сарын
+        <span class="d dxs">......</span>-ний өдрөөс эхлэн Монгол Улсын
+        Хөдөлмөрийн тухай хуулийн
+        <span class="d dmd">.................</span> дүгээр зүйлийн
+        <span class="d dsm">.............</span> дэх хэсгийн үндэслэлээр ажлаас
+        чөлөөлсүгэй.
+      </p>
+
+      <p class="ind1">
+        <b>2.</b> Ажилтны эцсийн тооцоог хийж, ээлжийн амралтын нөхөн олговор,
+        бусад зохих төлбөрийг хуулийн хугацаанд олгохыг Санхүүгийн алба
+        <span class="d dlg">........................</span>-д даалгасугай.
+      </p>
+
+      <p class="ind1">
+        <b>3.</b> Ажилтанд хүлээлгэсэн эд хөрөнгө, баримт бичиг, цахим
+        хэрэгслийг тойрох хуудасны дагуу бүрэн хүлээлгэн авахыг
+        <span class="d dlg">........................</span> /Хүний нөөцийн
+        алба/-д даалгасугай.
+      </p>
+
+      <p class="ind1">
+        <b>4.</b> Ажилтны хөдөлмөрийн дэвтэр, нийгмийн даатгалын бичиг баримтыг
+        хуулийн дагуу бүрдүүлж ажилтанд хүргүүлэхийг Хүний нөөцийн алба
+        <span class="d dlg">........................</span>-д үүрэг болгосугай.
+      </p>
+
+      <p class="ind1">
+        <b>5.</b> Энэхүү тушаалын хэрэгжилтэд хяналт тавьж ажиллахыг
+        <span class="d dlg">........................</span>-д үүрэг болгосугай.
+      </p>
+
+      <!-- Гарын үсэг -->
+      <div class="sig-section">
+        <div class="sig-grid">
+          <div>
+            <p style="font-weight: bold">Гүйцэтгэх захирал:</p>
+            <div class="sig-line"></div>
+            <p class="sig-hint">(гарын үсэг, тамга)</p>
+            <div class="sig-info">
+              <div>
+                Нэр: <span class="d dlg">........................</span>
+              </div>
+            </div>
+          </div>
+          <div>
+            <p style="font-weight: bold">Танилцсан ажилтан:</p>
+            <div class="sig-line"></div>
+            <p class="sig-hint">(гарын үсэг)</p>
+            <div class="sig-info">
+              <div>
+                Нэр: <span class="d dlg">........................</span>
+              </div>
+              <div>Огноо: <span class="d dmd">.................</span></div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
 
-    <!-- PAGE 2 -->
-
+    <!-- ══════════════════════ ХУУДАС 2 — ТОЙРОХ ХУУДАС ══════════════════════ -->
     <div class="page">
-      <div class="title">ТАНИЛЦСАН ТУХАЙ</div>
+      <div class="page-num">2</div>
 
-      <div class="content">
-        Дээрх тушаалтай танилцсан:
-
-        <br /><br />
-
-        Овог нэр: _______________________________
-
-        <br /><br />
-
-        Албан тушаал: ___________________________
-
-        <br /><br />
-
-        Гарын үсэг: _____________________________
-
-        <br /><br />
-
-        Огноо: ______ оны ______ сарын ______ өдөр
-
-        <br /><br /><br />
+      <!-- Толгой -->
+      <div class="org-header">
+        <div class="org-left">
+          <div class="org-name">
+            "<span class="d dlg">........................</span>" ХХК
+          </div>
+        </div>
+        <div class="org-right" style="font-size: 11pt; line-height: 1.7">
+          <div>Тушаал №: <span class="d dsm">.............</span></div>
+          <div>
+            Огноо: 20<span class="d dxs">......</span>/<span class="d dxs"
+              >......</span
+            >/<span class="d dxs">......</span>
+          </div>
+        </div>
       </div>
 
-      <div class="footer">
-        Хавсралт:<br />
+      <div class="doc-title">Тойрох хуудас</div>
+      <div class="doc-subject">Ажлаас чөлөөлөгдөх үеийн тооцоо</div>
 
-        1. Ажил хүлээлцэх акт<br />
-        2. Тойрох хуудас<br />
-        3. Хөдөлмөрийн дэвтрийн тэмдэглэл
+      <!-- Ажилтны мэдээлэл -->
+      <table class="info-table">
+        <tr>
+          <td class="lbl">Ажилтны нэр:</td>
+          <td><span class="d dxl">.................................</span></td>
+        </tr>
+        <tr>
+          <td class="lbl">Албан тушаал:</td>
+          <td><span class="d dxl">.................................</span></td>
+        </tr>
+        <tr>
+          <td class="lbl">Нэгж / Хэлтэс:</td>
+          <td><span class="d dxl">.................................</span></td>
+        </tr>
+        <tr>
+          <td class="lbl">Ажлаас чөлөөлөгдөх огноо:</td>
+          <td>
+            20<span class="d dxs">......</span> оны
+            <span class="d dxs">......</span> сарын
+            <span class="d dxs">......</span>-ны өдөр
+          </td>
+        </tr>
+      </table>
+
+      <!-- Тойрох хүснэгт -->
+      <table class="handover-table">
+        <tr>
+          <th class="num">№</th>
+          <th style="width: 30%">Нэгж / Хариуцагч</th>
+          <th style="width: 30%">Тооцоолох зүйл</th>
+          <th style="width: 18%">Хүлээн авсан огноо</th>
+          <th style="width: 16%">Гарын үсэг</th>
+        </tr>
+        <tr>
+          <td class="num">1</td>
+          <td>Хүний нөөцийн алба</td>
+          <td>Хөдөлмөрийн дэвтэр, баримт бичиг</td>
+          <td><span class="d" style="width: 90%">.............</span></td>
+          <td><span class="d" style="width: 90%">.............</span></td>
+        </tr>
+        <tr>
+          <td class="num">2</td>
+          <td>Санхүүгийн алба</td>
+          <td>Цалин, нөхөн олговор, зээл тооцоо</td>
+          <td><span class="d" style="width: 90%">.............</span></td>
+          <td><span class="d" style="width: 90%">.............</span></td>
+        </tr>
+        <tr>
+          <td class="num">3</td>
+          <td>Мэдээллийн технологи</td>
+          <td>Компьютер, техник хэрэгсэл, нэвтрэх эрх</td>
+          <td><span class="d" style="width: 90%">.............</span></td>
+          <td><span class="d" style="width: 90%">.............</span></td>
+        </tr>
+        <tr>
+          <td class="num">4</td>
+          <td>Нэгжийн удирдлага</td>
+          <td>Ажлын гаргалт, баримт бичиг</td>
+          <td><span class="d" style="width: 90%">.............</span></td>
+          <td><span class="d" style="width: 90%">.............</span></td>
+        </tr>
+        <tr>
+          <td class="num">5</td>
+          <td>Захиргаа</td>
+          <td>Нэвтрэх карт, тоног төхөөрөмж</td>
+          <td><span class="d" style="width: 90%">.............</span></td>
+          <td><span class="d" style="width: 90%">.............</span></td>
+        </tr>
+        <tr>
+          <td class="num">6</td>
+          <td>Агуулахын ажилтан</td>
+          <td>Эд хөрөнгө, ажлын хувцас</td>
+          <td><span class="d" style="width: 90%">.............</span></td>
+          <td><span class="d" style="width: 90%">.............</span></td>
+        </tr>
+        <tr>
+          <td class="num">7</td>
+          <td>Аюулгүй байдлын алба</td>
+          <td>Нэвтрэх үнэмлэх, тусгай зөвшөөрөл</td>
+          <td><span class="d" style="width: 90%">.............</span></td>
+          <td><span class="d" style="width: 90%">.............</span></td>
+        </tr>
+        <tr>
+          <td class="num">8</td>
+          <td>
+            <span class="d" style="width: 95%"
+              >.................................</span
+            >
+          </td>
+          <td>
+            <span class="d" style="width: 95%"
+              >.................................</span
+            >
+          </td>
+          <td><span class="d" style="width: 90%">.............</span></td>
+          <td><span class="d" style="width: 90%">.............</span></td>
+        </tr>
+        <tr>
+          <td class="num">9</td>
+          <td>
+            <span class="d" style="width: 95%"
+              >.................................</span
+            >
+          </td>
+          <td>
+            <span class="d" style="width: 95%"
+              >.................................</span
+            >
+          </td>
+          <td><span class="d" style="width: 90%">.............</span></td>
+          <td><span class="d" style="width: 90%">.............</span></td>
+        </tr>
+        <tr>
+          <td class="num">10</td>
+          <td>
+            <span class="d" style="width: 95%"
+              >.................................</span
+            >
+          </td>
+          <td>
+            <span class="d" style="width: 95%"
+              >.................................</span
+            >
+          </td>
+          <td><span class="d" style="width: 90%">.............</span></td>
+          <td><span class="d" style="width: 90%">.............</span></td>
+        </tr>
+      </table>
+
+      <!-- Санхүүгийн тооцоо -->
+      <div class="sec-title">Санхүүгийн эцсийн тооцоо</div>
+
+      <table class="handover-table">
+        <tr>
+          <th class="num">№</th>
+          <th style="width: 50%">Тооцооны зүйл</th>
+          <th style="width: 22%">Дүн (₮)</th>
+          <th style="width: 22%">Тэмдэглэл</th>
+        </tr>
+        <tr>
+          <td class="num">1</td>
+          <td>Үлдэгдэл цалин</td>
+          <td><span class="d" style="width: 95%">.................</span></td>
+          <td><span class="d" style="width: 95%">.................</span></td>
+        </tr>
+        <tr>
+          <td class="num">2</td>
+          <td>Ээлжийн амралтын нөхөн олговор</td>
+          <td><span class="d" style="width: 95%">.................</span></td>
+          <td><span class="d" style="width: 95%">.................</span></td>
+        </tr>
+        <tr>
+          <td class="num">3</td>
+          <td>Тэтгэмж / Нөхөн төлбөр</td>
+          <td><span class="d" style="width: 95%">.................</span></td>
+          <td><span class="d" style="width: 95%">.................</span></td>
+        </tr>
+        <tr>
+          <td class="num">4</td>
+          <td>Суутгал (зээл, төлбөр гэх мэт)</td>
+          <td>- <span class="d" style="width: 85%">.................</span></td>
+          <td><span class="d" style="width: 95%">.................</span></td>
+        </tr>
+        <tr>
+          <td class="num">5</td>
+          <td>Бусад</td>
+          <td><span class="d" style="width: 95%">.................</span></td>
+          <td><span class="d" style="width: 95%">.................</span></td>
+        </tr>
+        <tr>
+          <td
+            colspan="2"
+            style="font-weight: bold; text-align: right; padding-right: 12px"
+          >
+            Нийт олгох дүн:
+          </td>
+          <td style="font-weight: bold">
+            <span class="d" style="width: 95%">.................</span>
+          </td>
+          <td></td>
+        </tr>
+      </table>
+
+      <!-- Тойрох хуудасны гарын үсэг -->
+      <div style="margin-top: 24px">
+        <table
+          style="width: 100%; border-collapse: collapse; font-size: 11.5pt"
+        >
+          <tr>
+            <td style="width: 33%; vertical-align: top; padding-right: 14px">
+              <p style="font-weight: bold; margin-bottom: 44px">
+                Тойрох хуудас бүрдүүлсэн:
+              </p>
+              <div
+                style="
+                  border-bottom: 1px solid #000;
+                  width: 180px;
+                  margin-bottom: 6px;
+                "
+              ></div>
+              <p style="font-size: 10pt; font-style: italic">(гарын үсэг)</p>
+              <p style="margin-top: 8px; line-height: 2">
+                Нэр: <span class="d dlg">........................</span><br />
+                Огноо: <span class="d dmd">.................</span>
+              </p>
+            </td>
+            <td style="width: 33%; vertical-align: top; padding: 0 14px">
+              <p style="font-weight: bold; margin-bottom: 44px">
+                Хүний нөөц хянасан:
+              </p>
+              <div
+                style="
+                  border-bottom: 1px solid #000;
+                  width: 180px;
+                  margin-bottom: 6px;
+                "
+              ></div>
+              <p style="font-size: 10pt; font-style: italic">(гарын үсэг)</p>
+              <p style="margin-top: 8px; line-height: 2">
+                Нэр: <span class="d dlg">........................</span><br />
+                Огноо: <span class="d dmd">.................</span>
+              </p>
+            </td>
+            <td style="width: 33%; vertical-align: top; padding-left: 14px">
+              <p style="font-weight: bold; margin-bottom: 44px">
+                Ажилтан хүлээн авсан:
+              </p>
+              <div
+                style="
+                  border-bottom: 1px solid #000;
+                  width: 180px;
+                  margin-bottom: 6px;
+                "
+              ></div>
+              <p style="font-size: 10pt; font-style: italic">(гарын үсэг)</p>
+              <p style="margin-top: 8px; line-height: 2">
+                Нэр: <span class="d dlg">........................</span><br />
+                Огноо: <span class="d dmd">.................</span>
+              </p>
+            </td>
+          </tr>
+        </table>
       </div>
     </div>
   </body>
