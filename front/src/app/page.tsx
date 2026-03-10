@@ -1,65 +1,76 @@
-import Image from "next/image";
+import { DocumentIcon, DownIcon } from "./components/icons";
+import { Navbar } from "./components/navbarSection";
+import {
+  BiBuilding,
+  BiFile,
+  BiTime,
+  BiCheckCircle,
+  BiLoader,
+} from "react-icons/bi";
+
+const stats = [
+  { value: 4, label: "Нийт баримт" },
+  { value: 2, label: "Хүлээгдэж буй" },
+  { value: 1, label: "Батлагдсан" },
+  { value: 1, label: "Шийдвэрлэгдсэн" },
+];
 
 export default function Home() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <div className="min-h-screen bg-[#0A0A0F]">
+      <Navbar />
+
+      <div className="max-w-6xl mx-auto px-6 py-8 flex flex-col gap-6">
+        {/* Hero / Welcome Card */}
+        <div className="w-full rounded-2xl border border-[#00CC99]/30  p-8">
+          <div className="flex flex-col gap-3">
+            <p className="text-[#00CC99] text-sm font-medium tracking-widest uppercase">
+              Сайн байна уу
+            </p>
+            <p className="text-white text-4xl font-bold tracking-tight">
+              Sunduibazrr.B
+            </p>
+            <p className="text-[#4A4A6A] text-sm leading-relaxed max-w-lg">
+              Таны хөдөлмөрийн баримт бичгүүд болон ажлын түүхийг энд харах
+              боломжтой. Бүх баримтууд аюулгүй хадгалагдсан.
+            </p>
+            <div className="flex gap-2 mt-1 flex-wrap">
+              <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#00CC99]/15 text-[#00CC99] text-xs font-semibold border border-[#00CC99]/20">
+                <BiBuilding className="w-3.5 h-3.5" />
+                Engineering
+              </span>
+              <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#1A1A2E] text-[#8888AA] text-xs font-medium border border-[#2A2A40]">
+                Senior Engineer
+              </span>
+              <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#1A1A2E] text-[#8888AA] text-xs font-medium border border-[#2A2A40]">
+                EMP-0042
+              </span>
+            </div>
+          </div>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+
+        {/* Stats Grid */}
+        <div className="grid grid-cols-4 gap-4">
+          {stats.map(({ value, label }) => (
+            <div
+              key={label}
+              className="rounded-xl border border-[#1E1E32] bg-[#0D0D18] p-5 hover:border-[#00CC99]/30 hover:bg-[#0D1A16] transition-all duration-200 group"
+            >
+              <div className="flex items-start justify-between">
+                <div className="flex flex-col gap-1">
+                  <p className="text-3xl font-bold text-white group-hover:text-[#00CC99] transition-colors duration-200">
+                    {value}
+                  </p>
+                  <p className="text-[#4A4A6A] text-xs">{label}</p>
+                </div>
+                <div className="rounded-lg w-9 h-9 border border-[#00CC99]/30 bg-[#00CC99]/5 flex items-center justify-center shadow-sm shadow-[#00CC99]/10 group-hover:border-[#00CC99]/60 transition-all duration-200">
+                  <DocumentIcon />
+                </div>
+              </div>
+            </div>
+          ))}
         </div>
-      </main>
+      </div>
     </div>
   );
 }
