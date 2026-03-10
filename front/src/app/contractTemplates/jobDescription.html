@@ -1,0 +1,1118 @@
+<!doctype html>
+<html lang="mn">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Ажлын байрны тодорхойлолт</title>
+    <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        background: #d0d0d0;
+        font-family: "Times New Roman", Times, serif;
+        font-size: 12pt;
+        color: #000;
+        padding: 30px 16px;
+      }
+
+      .page {
+        width: 21cm;
+        min-height: 29.7cm;
+        background: #fff;
+        margin: 0 auto 28px auto;
+        padding: 2cm 2cm 2cm 2.5cm;
+        box-shadow: 0 3px 18px rgba(0, 0, 0, 0.2);
+        position: relative;
+      }
+
+      .page-num {
+        text-align: center;
+        font-size: 11pt;
+        margin-bottom: 14px;
+      }
+
+      .org-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 6px;
+        font-size: 11pt;
+      }
+      .org-left {
+        width: 60%;
+        line-height: 1.7;
+      }
+      .org-right {
+        width: 38%;
+        text-align: right;
+        line-height: 1.7;
+        font-size: 11pt;
+      }
+      .org-name {
+        font-weight: bold;
+        font-size: 11.5pt;
+        text-transform: uppercase;
+      }
+
+      .approved-box {
+        text-align: right;
+        margin-bottom: 18px;
+        font-size: 11pt;
+        line-height: 1.9;
+      }
+      .approved-box .label {
+        font-weight: bold;
+      }
+
+      /* ── Гарчиг ── */
+      .doc-title {
+        text-align: center;
+        font-size: 14pt;
+        font-weight: bold;
+        text-transform: uppercase;
+        letter-spacing: 1.5px;
+        margin: 14px 0 6px;
+      }
+      .doc-subtitle {
+        text-align: center;
+        font-size: 12pt;
+        font-weight: bold;
+        margin-bottom: 18px;
+      }
+
+      .meta-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 11.5pt;
+        margin-bottom: 18px;
+      }
+      .meta-table td {
+        padding: 5px 8px;
+        border: 1px solid #000;
+        vertical-align: top;
+        line-height: 1.7;
+      }
+      .meta-table td.label-cell {
+        width: 38%;
+        font-weight: bold;
+        background: #f5f5f5;
+      }
+
+      .sec-title {
+        font-size: 12pt;
+        font-weight: bold;
+        text-align: center;
+        text-transform: uppercase;
+        margin: 20px 0 10px;
+        letter-spacing: 0.5px;
+      }
+
+      .sub-title {
+        font-size: 11.5pt;
+        font-weight: bold;
+        margin: 14px 0 6px;
+      }
+
+      p {
+        text-align: justify;
+        line-height: 1.85;
+        margin-bottom: 7px;
+        font-size: 11.5pt;
+      }
+      .indent {
+        text-indent: 1.2cm;
+      }
+      .ind1 {
+        margin-left: 1.2cm;
+      }
+      .ind2 {
+        margin-left: 2.2cm;
+      }
+      .ind3 {
+        margin-left: 3.2cm;
+      }
+
+      .d {
+        display: inline-block;
+        vertical-align: bottom;
+        overflow: hidden;
+        white-space: nowrap;
+        letter-spacing: 1.5px;
+        font-size: 11pt;
+      }
+      .dxs {
+        width: 32px;
+      }
+      .dsm {
+        width: 80px;
+      }
+      .dmd {
+        width: 140px;
+      }
+      .dlg {
+        width: 200px;
+      }
+      .dxl {
+        width: 270px;
+      }
+      .dxx {
+        width: 100%;
+        display: block;
+        margin: 4px 0;
+      }
+
+      .std-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 11pt;
+        margin: 10px 0 14px;
+      }
+      .std-table th {
+        border: 1px solid #000;
+        padding: 6px 8px;
+        background: #f0f0f0;
+        font-weight: bold;
+        text-align: center;
+        font-size: 11pt;
+      }
+      .std-table td {
+        border: 1px solid #000;
+        padding: 6px 8px;
+        vertical-align: top;
+        line-height: 1.7;
+        font-size: 11pt;
+      }
+      .std-table td.num {
+        text-align: center;
+        width: 6%;
+      }
+      .std-table td.fill {
+        min-height: 24px;
+      }
+
+      .sig-section {
+        margin-top: 30px;
+      }
+      .sig-title {
+        text-align: center;
+        font-weight: bold;
+        font-size: 12.5pt;
+        margin-bottom: 24px;
+        letter-spacing: 1px;
+      }
+      .sig-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0 40px;
+        font-size: 11.5pt;
+      }
+      .sig-col {
+        line-height: 2;
+      }
+      .sig-col .role {
+        font-weight: bold;
+        margin-bottom: 8px;
+      }
+      .sig-line {
+        border-bottom: 1px solid #000;
+        width: 200px;
+        margin: 44px 0 6px;
+      }
+      .sig-hint {
+        font-size: 10pt;
+        font-style: italic;
+      }
+
+      @media print {
+        body {
+          background: none;
+          padding: 0;
+        }
+        .page {
+          box-shadow: none;
+          margin: 0;
+          page-break-after: always;
+          width: 21cm;
+          min-height: 29.7cm;
+          padding: 2cm 2cm 2cm 2.5cm;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- page 1 shu -->
+    <div class="page">
+      <div class="org-header">
+        <div class="org-left">
+          <div class="org-name">
+            <span class="d dlg">.........................</span> ХХК
+          </div>
+          <div>УБД: <span class="d dmd">...................</span></div>
+        </div>
+        <div class="approved-box">
+          <div class="label">БАТЛАВ:</div>
+          <div>Гүйцэтгэх захирал</div>
+          <div><span class="d dlg">.........................</span></div>
+          <div>
+            20<span class="d dxs">......</span> оны
+            <span class="d dxs">......</span> сарын
+            <span class="d dxs">......</span>-ны өдөр
+          </div>
+        </div>
+      </div>
+
+      <div class="doc-title">Ажлын байрны тодорхойлолт</div>
+      <div class="doc-subtitle">
+        "<span class="d dlg">.........................</span>" албан тушаал
+      </div>
+
+      <table class="meta-table">
+        <tr>
+          <td class="label-cell">Байгууллагын нэр:</td>
+          <td>
+            <span class="d dxl">...................................</span>
+          </td>
+        </tr>
+        <tr>
+          <td class="label-cell">Нэгжийн нэр / Хэлтэс:</td>
+          <td>
+            <span class="d dxl">...................................</span>
+          </td>
+        </tr>
+        <tr>
+          <td class="label-cell">Албан тушаалын нэр:</td>
+          <td>
+            <span class="d dxl">...................................</span>
+          </td>
+        </tr>
+        <tr>
+          <td class="label-cell">Тушаалын дугаар / Огноо:</td>
+          <td>
+            № <span class="d dsm">.............</span> &nbsp; / &nbsp; 20<span
+              class="d dxs"
+              >......</span
+            >
+            оны <span class="d dxs">......</span> сарын
+            <span class="d dxs">......</span>
+          </td>
+        </tr>
+        <tr>
+          <td class="label-cell">Шууд харьяалагдах удирдлага:</td>
+          <td>
+            <span class="d dxl">...................................</span>
+          </td>
+        </tr>
+        <tr>
+          <td class="label-cell">Ажлын байрны зэрэглэл / Түвшин:</td>
+          <td>
+            <span class="d dxl">...................................</span>
+          </td>
+        </tr>
+        <tr>
+          <td class="label-cell">Ажлын байрны байршил:</td>
+          <td>
+            <span class="d dxl">...................................</span>
+          </td>
+        </tr>
+        <tr>
+          <td class="label-cell">Гэрээний хугацаа:</td>
+          <td>
+            <span class="d dxl">...................................</span>
+          </td>
+        </tr>
+        <tr>
+          <td class="label-cell">Баталсан огноо:</td>
+          <td>
+            20<span class="d dxs">......</span> оны
+            <span class="d dxs">......</span> сарын
+            <span class="d dxs">......</span>-ны өдөр
+          </td>
+        </tr>
+      </table>
+
+      <div class="sec-title">1. Ажлын байрны зорилго</div>
+
+      <p class="indent">
+        Энэхүү ажлын байрны тодорхойлолт нь "<span class="d dxl"
+          >...................................</span
+        >" ХХК-ийн <span class="d dlg">.........................</span> нэгжид
+        ажиллах <span class="d dlg">.........................</span> албан
+        тушаалтны гүйцэтгэх ажил үүрэг, хүлээх хариуцлага, мэргэшлийн шаардлагыг
+        тодорхойлох зорилготой бөгөөд энэхүү баримт бичиг нь хөдөлмөрийн
+        гэрээний салшгүй хэсэг болно.
+      </p>
+
+      <p class="indent">
+        Тус албан тушаал нь байгууллагын стратегийн зорилт, үйл ажиллагааны
+        уялдааг хангаж, харьяа нэгжийн өдөр тутмын үйл ажиллагааг зохион
+        байгуулах, холбогдох удирдлагад тайлагнах үндсэн үүрэгтэй.
+      </p>
+
+      <div class="sec-title">2. Харьяалал ба удирдлагын бүтэц</div>
+
+      <p class="ind1">
+        <b>2.1.</b> Шууд харьяалагдах удирдлага:
+        <span class="d dlg">.........................</span>
+      </p>
+      <p class="ind1">
+        <b>2.2.</b> Шууд харьяалагдах ажилтан:
+        <span class="d dlg">.........................</span>
+      </p>
+      <p class="ind1">
+        <b>2.3.</b> Орлох ажилтан:
+        <span class="d dlg">.........................</span>
+      </p>
+      <p class="ind1">
+        <b>2.4.</b> Хамтран ажиллах нэгж / хэлтэс:
+        <span class="d dlg">.........................</span>
+      </p>
+      <p class="ind1">
+        <b>2.5.</b> Гадаад харилцаа (байгууллага, этгээд):
+        <span class="d dlg">.........................</span>
+      </p>
+    </div>
+
+    <!-- page 2 shu -->
+    <div class="page">
+      <div class="page-num">2</div>
+
+      <div class="sec-title">3. Үндсэн чиг үүрэг ба хариуцлага</div>
+
+      <div class="sub-title">3.1. Үндсэн ажил үүрэг</div>
+
+      <table class="std-table">
+        <tr>
+          <th class="num">№</th>
+          <th style="width: 60%">Ажил үүргийн агуулга</th>
+          <th style="width: 20%">Гүйцэтгэлийн хэмжүүр</th>
+          <th style="width: 14%">Хувь</th>
+        </tr>
+        <tr>
+          <td class="num">1</td>
+          <td class="fill">
+            <span class="d" style="width: 98%"
+              >................................................................</span
+            >
+          </td>
+          <td class="fill">
+            <span class="d" style="width: 98%">.................</span>
+          </td>
+          <td class="fill"><span class="d dxs">......</span>%</td>
+        </tr>
+        <tr>
+          <td class="num">2</td>
+          <td class="fill">
+            <span class="d" style="width: 98%"
+              >................................................................</span
+            >
+          </td>
+          <td class="fill">
+            <span class="d" style="width: 98%">.................</span>
+          </td>
+          <td class="fill"><span class="d dxs">......</span>%</td>
+        </tr>
+        <tr>
+          <td class="num">3</td>
+          <td class="fill">
+            <span class="d" style="width: 98%"
+              >................................................................</span
+            >
+          </td>
+          <td class="fill">
+            <span class="d" style="width: 98%">.................</span>
+          </td>
+          <td class="fill"><span class="d dxs">......</span>%</td>
+        </tr>
+        <tr>
+          <td class="num">4</td>
+          <td class="fill">
+            <span class="d" style="width: 98%"
+              >................................................................</span
+            >
+          </td>
+          <td class="fill">
+            <span class="d" style="width: 98%">.................</span>
+          </td>
+          <td class="fill"><span class="d dxs">......</span>%</td>
+        </tr>
+        <tr>
+          <td class="num">5</td>
+          <td class="fill">
+            <span class="d" style="width: 98%"
+              >................................................................</span
+            >
+          </td>
+          <td class="fill">
+            <span class="d" style="width: 98%">.................</span>
+          </td>
+          <td class="fill"><span class="d dxs">......</span>%</td>
+        </tr>
+        <tr>
+          <td class="num">6</td>
+          <td class="fill">
+            <span class="d" style="width: 98%"
+              >................................................................</span
+            >
+          </td>
+          <td class="fill">
+            <span class="d" style="width: 98%">.................</span>
+          </td>
+          <td class="fill"><span class="d dxs">......</span>%</td>
+        </tr>
+        <tr>
+          <td class="num">7</td>
+          <td class="fill">
+            <span class="d" style="width: 98%"
+              >................................................................</span
+            >
+          </td>
+          <td class="fill">
+            <span class="d" style="width: 98%">.................</span>
+          </td>
+          <td class="fill"><span class="d dxs">......</span>%</td>
+        </tr>
+        <tr>
+          <td class="num">8</td>
+          <td class="fill">
+            <span class="d" style="width: 98%"
+              >................................................................</span
+            >
+          </td>
+          <td class="fill">
+            <span class="d" style="width: 98%">.................</span>
+          </td>
+          <td class="fill"><span class="d dxs">......</span>%</td>
+        </tr>
+        <tr>
+          <td
+            colspan="3"
+            style="text-align: right; font-weight: bold; padding-right: 10px"
+          >
+            Нийт:
+          </td>
+          <td style="text-align: center; font-weight: bold">100%</td>
+        </tr>
+      </table>
+
+      <div class="sub-title">3.2. Нэмэлт үүрэг, даалгавар</div>
+
+      <p class="ind1">
+        3.2.1. Шууд болон шууд бус удирдлагаас өгсөн бусад үүрэг, даалгаврыг
+        гүйцэтгэх.
+      </p>
+      <p class="ind1">
+        3.2.2. Байгууллагын стратегийн зорилтыг хэрэгжүүлэхэд идэвхтэй оролцох.
+      </p>
+      <p class="ind1">
+        3.2.3. Хамтран ажиллах нэгж, хэлтэстэй уялдаа холбоотой ажиллах,
+        мэдээлэл солилцох.
+      </p>
+      <p class="ind1">
+        3.2.4. Шаардлагатай үед орлох ажилтны үүргийг гүйцэтгэх.
+      </p>
+      <p class="ind1">
+        3.2.5.
+        <span class="d" style="width: 85%; display: inline-block"
+          >................................................................</span
+        >
+      </p>
+
+      <div class="sec-title">4. Эрх мэдэл ба шийдвэр гаргах хүрээ</div>
+
+      <p class="ind1">
+        4.1. Өөрийн хариуцсан ажлын хүрээнд шийдвэр гаргах, холбогдох удирдлагад
+        санал тавих эрхтэй.
+      </p>
+      <p class="ind1">
+        4.2. Байгууллагын нэрийн өмнөөс гадны этгээдтэй харилцах:
+        <span class="d dsm">.............</span>
+      </p>
+      <p class="ind1">
+        4.3. Гэрээ, хэлцэл байгуулах эрх:
+        <span class="d dsm">.............</span> (Тийм / Үгүй)
+      </p>
+      <p class="ind1">
+        4.4. Санхүүгийн шийдвэр гаргах дээд хэмжээ:
+        <span class="d dlg">.........................</span> төгрөг
+      </p>
+      <p class="ind1">
+        4.5. Ажилтанд хариуцлага тооцох эрх:
+        <span class="d dsm">.............</span> (Тийм / Үгүй)
+      </p>
+    </div>
+
+    <!-- page 3 shu -->
+    <div class="page">
+      <div class="page-num">3</div>
+
+      <div class="sec-title">5. Мэргэшлийн шаардлага</div>
+
+      <div class="sub-title">5.1. Боловсрол</div>
+
+      <table class="std-table">
+        <tr>
+          <th style="width: 35%">Үзүүлэлт</th>
+          <th>Шаардлага</th>
+          <th style="width: 20%">Тэмдэглэл</th>
+        </tr>
+        <tr>
+          <td>Боловсролын зэрэг</td>
+          <td><span class="d dlg">.........................</span></td>
+          <td>Заавал / Давуу тал</td>
+        </tr>
+        <tr>
+          <td>Мэргэжлийн чиглэл</td>
+          <td><span class="d dlg">.........................</span></td>
+          <td>Заавал / Давуу тал</td>
+        </tr>
+        <tr>
+          <td>Нэмэлт сургалт / Гэрчилгээ</td>
+          <td><span class="d dlg">.........................</span></td>
+          <td>Заавал / Давуу тал</td>
+        </tr>
+        <tr>
+          <td>Мэргэжлийн зэрэг</td>
+          <td><span class="d dlg">.........................</span></td>
+          <td>Заавал / Давуу тал</td>
+        </tr>
+      </table>
+
+      <div class="sub-title">5.2. Туршлага</div>
+
+      <table class="std-table">
+        <tr>
+          <th style="width: 35%">Үзүүлэлт</th>
+          <th>Шаардлага</th>
+        </tr>
+        <tr>
+          <td>Нийт ажлын туршлага</td>
+          <td><span class="d dmd">...................</span> жилээс доошгүй</td>
+        </tr>
+        <tr>
+          <td>Холбогдох чиглэлийн туршлага</td>
+          <td><span class="d dmd">...................</span> жилээс доошгүй</td>
+        </tr>
+        <tr>
+          <td>Удирдах ажлын туршлага</td>
+          <td><span class="d dmd">...................</span> жилээс доошгүй</td>
+        </tr>
+        <tr>
+          <td>Салбарын туршлага</td>
+          <td><span class="d dlg">.........................</span></td>
+        </tr>
+      </table>
+
+      <div class="sub-title">5.3. Мэдлэг, ур чадвар</div>
+
+      <table class="std-table">
+        <tr>
+          <th class="num">№</th>
+          <th style="width: 55%">Мэдлэг / Ур чадвар</th>
+          <th style="width: 20%">Түвшин</th>
+          <th style="width: 15%">Заавал / Давуу</th>
+        </tr>
+        <tr>
+          <td class="num">1</td>
+          <td>
+            <span class="d" style="width: 98%"
+              >...................................</span
+            >
+          </td>
+          <td><span class="d" style="width: 98%">.............</span></td>
+          <td><span class="d" style="width: 98%">.............</span></td>
+        </tr>
+        <tr>
+          <td class="num">2</td>
+          <td>
+            <span class="d" style="width: 98%"
+              >...................................</span
+            >
+          </td>
+          <td><span class="d" style="width: 98%">.............</span></td>
+          <td><span class="d" style="width: 98%">.............</span></td>
+        </tr>
+        <tr>
+          <td class="num">3</td>
+          <td>
+            <span class="d" style="width: 98%"
+              >...................................</span
+            >
+          </td>
+          <td><span class="d" style="width: 98%">.............</span></td>
+          <td><span class="d" style="width: 98%">.............</span></td>
+        </tr>
+        <tr>
+          <td class="num">4</td>
+          <td>
+            <span class="d" style="width: 98%"
+              >...................................</span
+            >
+          </td>
+          <td><span class="d" style="width: 98%">.............</span></td>
+          <td><span class="d" style="width: 98%">.............</span></td>
+        </tr>
+        <tr>
+          <td class="num">5</td>
+          <td>
+            <span class="d" style="width: 98%"
+              >...................................</span
+            >
+          </td>
+          <td><span class="d" style="width: 98%">.............</span></td>
+          <td><span class="d" style="width: 98%">.............</span></td>
+        </tr>
+        <tr>
+          <td class="num">6</td>
+          <td>
+            <span class="d" style="width: 98%"
+              >...................................</span
+            >
+          </td>
+          <td><span class="d" style="width: 98%">.............</span></td>
+          <td><span class="d" style="width: 98%">.............</span></td>
+        </tr>
+      </table>
+
+      <div class="sub-title">5.4. Хэлний мэдлэг</div>
+
+      <table class="std-table">
+        <tr>
+          <th style="width: 30%">Хэл</th>
+          <th style="width: 20%">Унших</th>
+          <th style="width: 20%">Бичих</th>
+          <th style="width: 20%">Ярих</th>
+          <th style="width: 10%">Шаардлага</th>
+        </tr>
+        <tr>
+          <td>Монгол хэл</td>
+          <td style="text-align: center">✓</td>
+          <td style="text-align: center">✓</td>
+          <td style="text-align: center">✓</td>
+          <td style="text-align: center">Заавал</td>
+        </tr>
+        <tr>
+          <td>Англи хэл</td>
+          <td><span class="d dsm">.............</span></td>
+          <td><span class="d dsm">.............</span></td>
+          <td><span class="d dsm">.............</span></td>
+          <td><span class="d dsm">.............</span></td>
+        </tr>
+        <tr>
+          <td><span class="d dsm">.............</span></td>
+          <td><span class="d dsm">.............</span></td>
+          <td><span class="d dsm">.............</span></td>
+          <td><span class="d dsm">.............</span></td>
+          <td><span class="d dsm">.............</span></td>
+        </tr>
+      </table>
+    </div>
+
+    <!-- page 4 shu -->
+    <div class="page">
+      <div class="page-num">4</div>
+
+      <div class="sec-title">6. Хувийн шинж чанар, зан төлөв</div>
+
+      <table class="std-table">
+        <tr>
+          <th class="num">№</th>
+          <th style="width: 50%">Шинж чанар</th>
+          <th>Тайлбар / Жишээ</th>
+        </tr>
+        <tr>
+          <td class="num">1</td>
+          <td>Манлайлах чадвар</td>
+          <td>
+            <span class="d" style="width: 98%"
+              >...................................</span
+            >
+          </td>
+        </tr>
+        <tr>
+          <td class="num">2</td>
+          <td>Харилцааны чадвар</td>
+          <td>
+            <span class="d" style="width: 98%"
+              >...................................</span
+            >
+          </td>
+        </tr>
+        <tr>
+          <td class="num">3</td>
+          <td>Багаар ажиллах чадвар</td>
+          <td>
+            <span class="d" style="width: 98%"
+              >...................................</span
+            >
+          </td>
+        </tr>
+        <tr>
+          <td class="num">4</td>
+          <td>Асуудал шийдвэрлэх чадвар</td>
+          <td>
+            <span class="d" style="width: 98%"
+              >...................................</span
+            >
+          </td>
+        </tr>
+        <tr>
+          <td class="num">5</td>
+          <td>Цаг хугацааг зохицуулах чадвар</td>
+          <td>
+            <span class="d" style="width: 98%"
+              >...................................</span
+            >
+          </td>
+        </tr>
+        <tr>
+          <td class="num">6</td>
+          <td>Шинийг санаачлах чадвар</td>
+          <td>
+            <span class="d" style="width: 98%"
+              >...................................</span
+            >
+          </td>
+        </tr>
+        <tr>
+          <td class="num">7</td>
+          <td>Дасан зохицох чадвар</td>
+          <td>
+            <span class="d" style="width: 98%"
+              >...................................</span
+            >
+          </td>
+        </tr>
+        <tr>
+          <td class="num">8</td>
+          <td>Хариуцлагатай байдал</td>
+          <td>
+            <span class="d" style="width: 98%"
+              >...................................</span
+            >
+          </td>
+        </tr>
+        <tr>
+          <td class="num">9</td>
+          <td>
+            <span class="d" style="width: 98%"
+              >...................................</span
+            >
+          </td>
+          <td>
+            <span class="d" style="width: 98%"
+              >...................................</span
+            >
+          </td>
+        </tr>
+        <tr>
+          <td class="num">10</td>
+          <td>
+            <span class="d" style="width: 98%"
+              >...................................</span
+            >
+          </td>
+          <td>
+            <span class="d" style="width: 98%"
+              >...................................</span
+            >
+          </td>
+        </tr>
+      </table>
+
+      <div class="sec-title">7. Ажлын нөхцөл ба цагийн хуваарь</div>
+
+      <p class="ind1">
+        <b>7.1.</b> Ажлын цагийн горим: &nbsp;&nbsp;<span
+          style="border: 1px solid #000; padding: 1px 8px; font-size: 10.5pt"
+          >Хэвийн</span
+        >
+        &nbsp;&nbsp;<span
+          style="border: 1px solid #000; padding: 1px 8px; font-size: 10.5pt"
+          >Ээлжийн</span
+        >
+        &nbsp;&nbsp;<span
+          style="border: 1px solid #000; padding: 1px 8px; font-size: 10.5pt"
+          >Уян хатан</span
+        >
+      </p>
+      <p class="ind1">
+        <b>7.2.</b> Ажлын өдрүүд:
+        <span class="d dlg">.........................</span>
+      </p>
+      <p class="ind1">
+        <b>7.3.</b> Ажлын цаг: <span class="d dsm">.............</span> цагаас
+        <span class="d dsm">.............</span> цаг хүртэл
+      </p>
+      <p class="ind1">
+        <b>7.4.</b> Үдийн завсарлага:
+        <span class="d dsm">.............</span> цагаас
+        <span class="d dsm">.............</span> цаг хүртэл
+      </p>
+      <p class="ind1">
+        <b>7.5.</b> Нэг долоо хоногийн ажлын цаг:
+        <span class="d dsm">.............</span> цаг
+      </p>
+      <p class="ind1">
+        <b>7.6.</b> Томилолтоор явах шаардлага: &nbsp;<span
+          style="border: 1px solid #000; padding: 1px 6px; font-size: 10.5pt"
+          >Тийм</span
+        >
+        &nbsp;<span
+          style="border: 1px solid #000; padding: 1px 6px; font-size: 10.5pt"
+          >Үгүй</span
+        >
+        &nbsp; Хэр: <span class="d dsm">.............</span>
+      </p>
+      <p class="ind1">
+        <b>7.7.</b> Ажлын байрны онцгой нөхцөл:
+        <span class="d dlg">.........................</span>
+      </p>
+      <p class="ind1">
+        <b>7.8.</b> Тусгай хувцас, хамгаалалтын хэрэгсэл: &nbsp;<span
+          style="border: 1px solid #000; padding: 1px 6px; font-size: 10.5pt"
+          >Тийм</span
+        >
+        &nbsp;<span
+          style="border: 1px solid #000; padding: 1px 6px; font-size: 10.5pt"
+          >Үгүй</span
+        >
+      </p>
+
+      <div class="sec-title">8. Гүйцэтгэлийн үнэлгээний үзүүлэлт</div>
+
+      <table class="std-table">
+        <tr>
+          <th class="num">№</th>
+          <th style="width: 45%">KPI үзүүлэлт</th>
+          <th style="width: 20%">Хэмжих нэгж</th>
+          <th style="width: 15%">Зорилтот утга</th>
+          <th style="width: 10%">Жин %</th>
+        </tr>
+        <tr>
+          <td class="num">1</td>
+          <td>
+            <span class="d" style="width: 98%"
+              >...................................</span
+            >
+          </td>
+          <td><span class="d" style="width: 98%">.............</span></td>
+          <td><span class="d" style="width: 98%">.............</span></td>
+          <td><span class="d dxs">......</span>%</td>
+        </tr>
+        <tr>
+          <td class="num">2</td>
+          <td>
+            <span class="d" style="width: 98%"
+              >...................................</span
+            >
+          </td>
+          <td><span class="d" style="width: 98%">.............</span></td>
+          <td><span class="d" style="width: 98%">.............</span></td>
+          <td><span class="d dxs">......</span>%</td>
+        </tr>
+        <tr>
+          <td class="num">3</td>
+          <td>
+            <span class="d" style="width: 98%"
+              >...................................</span
+            >
+          </td>
+          <td><span class="d" style="width: 98%">.............</span></td>
+          <td><span class="d" style="width: 98%">.............</span></td>
+          <td><span class="d dxs">......</span>%</td>
+        </tr>
+        <tr>
+          <td class="num">4</td>
+          <td>
+            <span class="d" style="width: 98%"
+              >...................................</span
+            >
+          </td>
+          <td><span class="d" style="width: 98%">.............</span></td>
+          <td><span class="d" style="width: 98%">.............</span></td>
+          <td><span class="d dxs">......</span>%</td>
+        </tr>
+        <tr>
+          <td class="num">5</td>
+          <td>
+            <span class="d" style="width: 98%"
+              >...................................</span
+            >
+          </td>
+          <td><span class="d" style="width: 98%">.............</span></td>
+          <td><span class="d" style="width: 98%">.............</span></td>
+          <td><span class="d dxs">......</span>%</td>
+        </tr>
+        <tr>
+          <td
+            colspan="4"
+            style="text-align: right; font-weight: bold; padding-right: 10px"
+          >
+            Нийт:
+          </td>
+          <td style="text-align: center; font-weight: bold">100%</td>
+        </tr>
+      </table>
+    </div>
+
+    <!-- page 5 shu -->
+    <div class="page">
+      <div class="page-num">5</div>
+
+      <div class="sec-title">9. Хариуцлага ба үүрэг</div>
+
+      <div class="sub-title">9.1. Байгууллагын өмнө хүлээх хариуцлага</div>
+      <p class="ind1">
+        9.1.1. Энэхүү тодорхойлолтод заасан ажил үүргийг бүрэн, чанартай, цаг
+        хугацаанд нь гүйцэтгэж, гүйцэтгэлийг удирдлагад тайлагнах.
+      </p>
+      <p class="ind1">
+        9.1.2. Байгууллагын стратеги, зорилт, үнэт зүйлийг дэмжиж, хэрэгжүүлэхэд
+        идэвхтэй оролцох.
+      </p>
+      <p class="ind1">
+        9.1.3. Байгууллагын дүрэм, журам, хөдөлмөрийн дотоод журмыг чандлан
+        сахин мөрдөх.
+      </p>
+      <p class="ind1">
+        9.1.4. Байгууллагын нэр хүнд, ашиг сонирхлыг хамгаалах, нууцыг чандлан
+        хадгалах.
+      </p>
+      <p class="ind1">
+        9.1.5. Хариуцсан эд хөрөнгө, нөөц баялгийг зүй зохистой ашиглах,
+        хадгалах.
+      </p>
+
+      <div class="sub-title">9.2. Эд хөрөнгийн хариуцлага</div>
+      <p class="ind1">9.2.1. Ажилтанд хүлээлгэн өгсөн эд хөрөнгийн жагсаалт:</p>
+
+      <table class="std-table">
+        <tr>
+          <th class="num">№</th>
+          <th style="width: 45%">Эд хөрөнгийн нэр</th>
+          <th style="width: 20%">Тоо хэмжээ</th>
+          <th>Хүлээн авсан огноо</th>
+        </tr>
+        <tr>
+          <td class="num">1</td>
+          <td>
+            <span class="d" style="width: 98%"
+              >...................................</span
+            >
+          </td>
+          <td><span class="d" style="width: 98%">.............</span></td>
+          <td><span class="d" style="width: 98%">.............</span></td>
+        </tr>
+        <tr>
+          <td class="num">2</td>
+          <td>
+            <span class="d" style="width: 98%"
+              >...................................</span
+            >
+          </td>
+          <td><span class="d" style="width: 98%">.............</span></td>
+          <td><span class="d" style="width: 98%">.............</span></td>
+        </tr>
+        <tr>
+          <td class="num">3</td>
+          <td>
+            <span class="d" style="width: 98%"
+              >...................................</span
+            >
+          </td>
+          <td><span class="d" style="width: 98%">.............</span></td>
+          <td><span class="d" style="width: 98%">.............</span></td>
+        </tr>
+        <tr>
+          <td class="num">4</td>
+          <td>
+            <span class="d" style="width: 98%"
+              >...................................</span
+            >
+          </td>
+          <td><span class="d" style="width: 98%">.............</span></td>
+          <td><span class="d" style="width: 98%">.............</span></td>
+        </tr>
+        <tr>
+          <td class="num">5</td>
+          <td>
+            <span class="d" style="width: 98%"
+              >...................................</span
+            >
+          </td>
+          <td><span class="d" style="width: 98%">.............</span></td>
+          <td><span class="d" style="width: 98%">.............</span></td>
+        </tr>
+      </table>
+
+      <div class="sec-title">10. Нэмэлт заалт</div>
+
+      <p class="indent">
+        10.1. Энэхүү ажлын байрны тодорхойлолтод тусгагдаагүй асуудлыг Монгол
+        Улсын Хөдөлмөрийн тухай хууль, байгууллагын Хөдөлмөрийн дотоод журам
+        болон холбогдох бусад хууль тогтоомжоор зохицуулна.
+      </p>
+      <p class="indent">
+        10.2. Энэхүү тодорхойлолтод талууд харилцан тохиролцсоноор нэмэлт,
+        өөрчлөлт оруулж болох бөгөөд нэмэлт, өөрчлөлтийг бичгээр үйлдэж
+        баталгаажуулна.
+      </p>
+      <p class="indent">
+        10.3. Энэхүү тодорхойлолт нь хөдөлмөрийн гэрээний салшгүй хэсэг бөгөөд
+        талууд гарын үсэг зурж баталгаажуулснаар хүчин төгөлдөр болно.
+      </p>
+      <p class="indent">
+        10.4. Тодорхойлолтыг 2 хувь үйлдэж, тус бүр нэг хувийг талууд хадгална.
+      </p>
+
+      <div class="sig-section">
+        <div class="sig-title">ТАНИЛЦСАН БА ЗӨВШӨӨРСӨН:</div>
+
+        <table
+          style="width: 100%; border-collapse: collapse; font-size: 11.5pt"
+        >
+          <tr>
+            <td style="width: 33%; vertical-align: top; padding-right: 16px">
+              <p class="sig-col role" style="font-weight: bold">
+                Батласан удирдлага:
+              </p>
+              <p><span class="d dlg">.........................</span></p>
+              <p style="font-size: 10.5pt">(Албан тушаал)</p>
+              <div class="sig-line"></div>
+              <p class="sig-hint">(гарын үсэг)</p>
+              <p style="margin-top: 8px">
+                Огноо: <span class="d dmd">...................</span>
+              </p>
+            </td>
+            <td style="width: 33%; vertical-align: top; padding: 0 16px">
+              <p class="sig-col role" style="font-weight: bold">Хүний нөөц:</p>
+              <p><span class="d dlg">.........................</span></p>
+              <p style="font-size: 10.5pt">(Мэргэжилтний нэр)</p>
+              <div class="sig-line"></div>
+              <p class="sig-hint">(гарын үсэг)</p>
+              <p style="margin-top: 8px">
+                Огноо: <span class="d dmd">...................</span>
+              </p>
+            </td>
+            <td style="width: 33%; vertical-align: top; padding-left: 16px">
+              <p class="sig-col role" style="font-weight: bold">
+                Танилцсан ажилтан:
+              </p>
+              <p><span class="d dlg">.........................</span></p>
+              <p style="font-size: 10.5pt">(Ажилтны нэр)</p>
+              <div class="sig-line"></div>
+              <p class="sig-hint">(гарын үсэг)</p>
+              <p style="margin-top: 8px">
+                Огноо: <span class="d dmd">...................</span>
+              </p>
+            </td>
+          </tr>
+        </table>
+      </div>
+    </div>
+  </body>
+</html>
