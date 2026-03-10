@@ -40,6 +40,11 @@
    * https://developers.cloudflare.com/workers/wrangler/configuration/#environment-variables
    * Note: Use secrets to store sensitive data.
    * https://developers.cloudflare.com/workers/configuration/secrets/
+   *
+   * RESEND_API_KEY — set as a secret:
+   *   wrangler secret put RESEND_API_KEY
+   * For local dev, create .dev.vars and add:
+   *   RESEND_API_KEY=re_xxxxxxxxxxxx
    */
   // "vars": {  "MY_VARIABLE": "production_value" }
   /**
