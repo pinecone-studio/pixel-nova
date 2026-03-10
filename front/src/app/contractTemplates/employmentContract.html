@@ -19,7 +19,6 @@
         padding: 30px 16px;
       }
 
-      /* A4 page: 21cm × 29.7cm */
       .page {
         width: 21cm;
         min-height: 29.7cm;
@@ -30,7 +29,6 @@
         position: relative;
       }
 
-      /* ── Title ── */
       .doc-title {
         text-align: center;
         font-size: 13pt;
@@ -40,7 +38,6 @@
         margin-bottom: 22px;
       }
 
-      /* ── Date / number row ── */
       .doc-meta {
         display: flex;
         justify-content: space-between;
@@ -51,7 +48,6 @@
         padding-bottom: 10px;
       }
 
-      /* ── Section headings ── */
       .sec-title {
         text-align: center;
         font-size: 12.5pt;
@@ -59,7 +55,6 @@
         margin: 18px 0 10px;
       }
 
-      /* ── Paragraphs ── */
       p,
       .para {
         text-align: justify;
@@ -78,76 +73,36 @@
         margin-left: 66px;
       }
 
-      /* ── Blank fill lines ── */
-      .b {
+      .d {
         display: inline-block;
-        border-bottom: 1px solid #000;
         vertical-align: bottom;
-        height: 1.1em;
-        min-width: 60px;
+        overflow: hidden;
+        white-space: nowrap;
+        letter-spacing: 1.5px;
+        font-size: 11pt;
+        color: #000;
       }
-      .bxs {
-        min-width: 30px;
+      .dxs {
+        width: 32px;
       }
-      .bsm {
-        min-width: 60px;
+      .dsm {
+        width: 68px;
       }
-      .bmd {
-        min-width: 110px;
+      .dmd {
+        width: 118px;
       }
-      .blg {
-        min-width: 170px;
+      .dlg {
+        width: 178px;
       }
-      .bxl {
-        min-width: 240px;
-      }
-      .bfull {
-        min-width: 98%;
-        display: block;
-        margin: 5px 0;
+      .dxl {
+        width: 248px;
       }
 
-      /* ── Signature table ── */
+      /* Signature */
       .sig-section {
         margin-top: 26px;
         border-top: 1px solid #000;
         padding-top: 14px;
-      }
-
-      .sig-label {
-        font-weight: bold;
-        font-size: 11.5pt;
-        margin-bottom: 10px;
-      }
-
-      .sig-grid {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 0 30px;
-        font-size: 11pt;
-      }
-
-      .sig-col p {
-        line-height: 2.1;
-        margin-bottom: 0;
-      }
-
-      .sig-stamp {
-        margin-top: 12px;
-        min-height: 70px;
-        border: 1px dashed #aaa;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: #bbb;
-        font-size: 10pt;
-        font-style: italic;
-      }
-
-      hr.thin {
-        border: none;
-        border-top: 1px solid #ccc;
-        margin: 14px 0 10px;
       }
 
       @media print {
@@ -167,30 +122,41 @@
     </style>
   </head>
   <body>
-    <!-- ═══════════════════════════ PAGE 1 ═══════════════════════════ -->
+    <!-- page 1 shu -->
     <div class="page">
       <div class="doc-title">Хөдөлмөрийн гэрээ</div>
 
       <div class="doc-meta">
         <span
-          >20<span class="b bxs"></span> оны <span class="b bxs"></span> сарын
-          <span class="b bxs"></span>-ний өдөр</span
+          >20<span class="d dxs">......</span> оны
+          <span class="d dxs">......</span> сарын
+          <span class="d dxs">......</span>-ний өдөр</span
         >
-        <span>№ <span class="b bsm"></span></span>
+        <span>№ <span class="d dsm">.............</span></span>
         <span>Улаанбаатар хот</span>
       </div>
 
       <p>
         Энэхүү Хөдөлмөрийн гэрээ (<i>цаашид</i> <b>Гэрээ</b> <i>гэх</i>)-г Нэг
-        талаас <span class="b bxl"></span> хаягт байрлах,
-        <span class="b bsm"></span> улсын бүртгэлийн дугаартай,
-        <span class="b blg"></span> /байгууллагын нэр/ түүнийг
-        <span class="b bxl"></span>
+        талаас
+        <span class="d dxl"
+          >................................................</span
+        >
+        хаягт байрлах, <span class="d dsm">.............</span> улсын бүртгэлийн
+        дугаартай,
+        <span class="d dlg">........................</span> /байгууллагын нэр/
+        түүнийг
+        <span class="d dxl"
+          >................................................</span
+        >
         үндсэн дээр төлөөлөн /төлөөлсөн хүний албан тушаал, нэр/ <i>/цаашид</i>
         <b>Ажил олгогч</b> <i>гэх/</i>, Нөгөө талаас
-        <span class="b bxl"></span> хаягт оршин суух,
-        <span class="b bsm"></span> регистрийн дугаартай
-        <span class="b bmd"></span> овогтой <span class="b blg"></span> /цаашид
+        <span class="d dxl"
+          >................................................</span
+        >
+        хаягт оршин суух, <span class="d dsm">.............</span> регистрийн
+        дугаартай <span class="d dmd">...................</span> овогтой
+        <span class="d dlg">........................</span> /цаашид
         <b>Ажилтан</b> гэх/ нар (хамтад нь <b>Талууд</b> гэх) Монгол Улсын
         Хөдөлмөрийн тухай хууль, түүнтэй нийцүүлэн гаргасан байгууллагын
         Хөдөлмөрийн дотоод журам болон хөдөлмөрийн харилцааг зохицуулсан бусад
@@ -214,10 +180,14 @@
       <div class="sec-title">2. Хөдөлмөрийн гэрээний хугацаа</div>
 
       <p>
-        2.1. Хөдөлмөрийн гэрээний эхлэх хугацаа: <span class="b blg"></span>
+        2.1. Хөдөлмөрийн гэрээний эхлэх хугацаа:
+        <span class="d dlg">........................</span>
       </p>
 
-      <p>2.2. Гэрээний хүчинтэй хугацаа: <span class="b blg"></span></p>
+      <p>
+        2.2. Гэрээний хүчинтэй хугацаа:
+        <span class="d dlg">........................</span>
+      </p>
 
       <p>
         2.3. Талууд гэрээний хугацаа дуусахаас өмнө гэрээг цуцлах талаар хэн
@@ -231,9 +201,12 @@
 
       <p>3.1. Гүйцэтгэх ажил үүрэг</p>
 
-      <p class="ind1">3.1.1. Ажлын байр: <span class="b blg"></span></p>
       <p class="ind1">
-        3.1.2. Ажилтны албан тушаал: <span class="b blg"></span>
+        3.1.1. Ажлын байр: <span class="d dlg">........................</span>
+      </p>
+      <p class="ind1">
+        3.1.2. Ажилтны албан тушаал:
+        <span class="d dlg">........................</span>
       </p>
       <p class="ind1">
         3.1.3. Ажилтны хариуцах ажил, үүрэг: Ажилтны эрхлэх ажил, албан тушаал
@@ -241,22 +214,27 @@
         шууд болон шууд бус удирдлагаас өгсөн бусад үүрэг, даалгаврыг хийж
         гүйцэтгэнэ.
       </p>
-      <p class="ind1">3.1.4. Хөдөлмөрийн нөхцөл: <span class="b blg"></span></p>
-      <p class="ind1">3.1.5. Ажлын цаг: <span class="b blg"></span></p>
+      <p class="ind1">
+        3.1.4. Хөдөлмөрийн нөхцөл:
+        <span class="d dlg">........................</span>
+      </p>
+      <p class="ind1">
+        3.1.5. Ажлын цаг: <span class="d dlg">........................</span>
+      </p>
 
       <p class="ind2">
-        I. Ажлын өдөр <span class="b bsm"></span> гарагаас
-        <span class="b bsm"></span> гараг хүртэл
-        <span class="b bsm"></span> хоног байна.
+        I. Ажлын өдөр <span class="d dsm">.............</span> гарагаас
+        <span class="d dsm">.............</span> гараг хүртэл
+        <span class="d dsm">.............</span> хоног байна.
       </p>
       <p class="ind2">
-        II. Хоногт ажлын <span class="b bxs"></span> цагаар тооцон долоо
-        хоногийн <span class="b bxs"></span> цаг ажиллана.
+        II. Хоногт ажлын <span class="d dxs">......</span> цагаар тооцон долоо
+        хоногийн <span class="d dxs">......</span> цаг ажиллана.
       </p>
       <p class="ind2">
-        III. Ажил эхлэх цаг <span class="b bsm"></span> цагт байна. Үдийн
-        завсарлага <span class="b bsm"></span> -
-        <span class="b bsm"></span> цагт байна.
+        III. Ажил эхлэх цаг <span class="d dsm">.............</span> цагт байна.
+        Үдийн завсарлага <span class="d dsm">.............</span> -
+        <span class="d dsm">.............</span> цагт байна.
       </p>
       <p class="ind2">
         IV. Ажилтны ажлын цагийн хуваарь нь удирдлагаас зөвшөөрөл авсны үндсэн
@@ -270,8 +248,12 @@
       <p>3.2. Цалин</p>
 
       <p class="ind1">
-        3.2.1. Ажилтны нэг сарын үндсэн цалин <span class="b bmd"></span> ₮ /
-        <span class="b bxl"></span> / байна.
+        3.2.1. Ажилтны нэг сарын үндсэн цалин
+        <span class="d dmd">...................</span> ₮ /
+        <span class="d dxl"
+          >................................................</span
+        >
+        / байна.
       </p>
       <p class="ind1">
         3.2.2. Ажилтны үндсэн цалингаас Нийгмийн даатгалын шимтгэл, хувь хүний
@@ -279,9 +261,10 @@
       </p>
       <p class="ind1">
         3.2.3. Ажил олгогч нь Ажилтны үндсэн цалинг сар бүрийн
-        <span class="b bxs"></span> ба <span class="b bxs"></span>-ны өдрүүдэд 2
-        (хоёр) хуваан олгоно. Хэрэв цалин олгох өдөр нь баярын болон амралтын
-        өдөр таарвал өмнөх ажлын өдөр олгоно.
+        <span class="d dxs">......</span> ба
+        <span class="d dxs">......</span>-ны өдрүүдэд 2 (хоёр) хуваан олгоно.
+        Хэрэв цалин олгох өдөр нь баярын болон амралтын өдөр таарвал өмнөх ажлын
+        өдөр олгоно.
       </p>
       <p class="ind1">
         3.2.4. Илүү цагаар ажилласан болон бүх нийтийн амралтын бусад өдрөөр
@@ -301,7 +284,7 @@
       </p>
     </div>
 
-    <!-- ═══════════════════════════ PAGE 2 ═══════════════════════════ -->
+    <!-- page 2 shu -->
     <div class="page">
       <div class="sec-title">4. Ажилтны эрх, үүрэг</div>
 
@@ -337,8 +320,8 @@
         ажиллах үүрэгтэй.
       </p>
       <p class="ind1">
-        4.2.2. <span class="b bsm"></span> хоног бүрээр ажлын төлөвлөгөө гарган
-        батлуулж, хуваарийн дагуу ажил үүргээ гүйцэтгэнэ.
+        4.2.2. <span class="d dsm">.............</span> хоног бүрээр ажлын
+        төлөвлөгөө гарган батлуулж, хуваарийн дагуу ажил үүргээ гүйцэтгэнэ.
       </p>
       <p class="ind1">
         4.2.3. Мэргэжил, ур чадвараа байнга дээшлүүлэн идэвх санаачилгатай
@@ -410,7 +393,7 @@
       </p>
     </div>
 
-    <!-- ═══════════════════════════ PAGE 3 ═══════════════════════════ -->
+    <!-- page 3 shu -->
     <div class="page">
       <div class="sec-title">6. Талуудын хариуцлага</div>
 
@@ -521,7 +504,7 @@
       </p>
     </div>
 
-    <!-- ═══════════════════════════ PAGE 4 ═══════════════════════════ -->
+    <!-- page 4 shu -->
     <div class="page">
       <div class="sec-title">9. Давагдашгүй хүчин зүйл</div>
 
@@ -571,30 +554,56 @@
       <div class="sec-title">12. Талуудын хууль ёсны хаягийн мэдээлэл</div>
 
       <p><b>Ажил олгогч:</b></p>
-      <p>Хаяг: <span class="b" style="min-width: 350px"></span></p>
+      <p>
+        Хаяг:
+        <span class="d" style="width: 350px"
+          >...........................................................................</span
+        >
+      </p>
       <p>
         Утас:
-        <span class="b" style="min-width: 200px"></span> &nbsp;&nbsp;&nbsp;
+        <span class="d" style="width: 200px"
+          >.................................</span
+        >
       </p>
       <p>
         Факс:
-        <span class="b" style="min-width: 200px"></span> &nbsp;&nbsp;&nbsp;
+        <span class="d" style="width: 200px"
+          >.................................</span
+        >
       </p>
 
       <p style="margin-top: 12px"><b>Ажилтан:</b></p>
-      <p>Хаяг: <span class="b" style="min-width: 350px"></span></p>
+      <p>
+        Хаяг:
+        <span class="d" style="width: 350px"
+          >...........................................................................</span
+        >
+      </p>
       <p>
         Утас:
-        <span class="b" style="min-width: 200px"></span> &nbsp;&nbsp;&nbsp;
+        <span class="d" style="width: 200px"
+          >.................................</span
+        >
       </p>
       <p>
         Факс:
-        <span class="b" style="min-width: 200px"></span> &nbsp;&nbsp;&nbsp;
+        <span class="d" style="width: 200px"
+          >.................................</span
+        >
       </p>
 
-      <!-- ── Signature block ── -->
+      <!-- garin usgiin heseg shu -->
       <div class="sig-section">
-        <div class="sig-label" style="text-align: center; margin-bottom: 24px">
+        <div
+          style="
+            text-align: center;
+            font-weight: bold;
+            font-size: 12pt;
+            margin-bottom: 24px;
+            letter-spacing: 1px;
+          "
+        >
           ГЭРЭЭ БАЙГУУЛСАН:
         </div>
 
@@ -627,19 +636,28 @@
               style="
                 width: 50%;
                 vertical-align: top;
-                padding: 0 0 0 30px;
+                padding: 0 0 0 90px;
                 text-align: right;
               "
             >
-              <p style="font-weight: bold; margin-bottom: 60px">АЖИЛТАН:</p>
+              <p
+                style="
+                  font-weight: bold;
+                  margin-bottom: 60px;
+                  margin-left: 135px;
+                "
+              >
+                АЖИЛТАН:
+              </p>
               <div
                 style="
                   border-bottom: 1px solid #000;
                   width: 220px;
                   margin-bottom: 8px;
+                  margin-left: auto;
                 "
               ></div>
-              <p style="margin-left: 170px">(нэр, гарын үсэг)</p>
+              <p style="margin-left: 110px">(нэр, гарын үсэг)</p>
             </td>
           </tr>
         </table>
