@@ -39,17 +39,11 @@ export async function dispatchNotification(
     return { notified: false, recipientCount: 0 };
   }
 
-  // Олон document-ийн мэдээллийг email-д нэгтгэнэ
-  const documentLines = input.documents
-    .map((doc, i) => `${i + 1}. ${doc.documentName} --> ${doc.storageUrl}`)
-    .join("\n");
-
   const template = buildEmailTemplate({
     employeeName: `${input.employee.firstName} ${input.employee.lastName}`,
     employeeCode: input.employee.employeeCode,
     action: input.action,
-    documentName: input.documents.map((d) => d.documentName).join(", "),
-    documentUrl: documentLines,
+    documents: input.documents.map((d) => ({ name: d.documentName, url: d.storageUrl })),
     generatedAt: input.documents[0]?.createdAt ?? new Date().toISOString(),
   });
 
@@ -58,6 +52,7 @@ export async function dispatchNotification(
       to: emails,
       subject: template.subject,
       text: template.text,
+      html: template.html,
       apiKey: input.apiKey,
     });
 

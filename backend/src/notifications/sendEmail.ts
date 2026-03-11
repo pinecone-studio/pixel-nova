@@ -2,6 +2,7 @@ export interface SendEmailInput {
   to: string[];
   subject: string;
   text: string;
+  html?: string;
   apiKey: string;
   fromEmail?: string;
 }
@@ -22,6 +23,7 @@ export async function sendEmail(input: SendEmailInput): Promise<void> {
       to: input.to,
       subject: input.subject,
       text: input.text,
+      ...(input.html ? { html: input.html } : {}),
     }),
   });
 
