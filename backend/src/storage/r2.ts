@@ -18,7 +18,7 @@ export interface UploadEmployeeDocumentInput {
   templateId: string;
   documentId: string;
   documentName: string;
-  content: string;
+  content: string | Uint8Array | ArrayBuffer;
   contentType: string;
   createdAt: string;
 }
@@ -31,10 +31,6 @@ function sanitizePart(value: string) {
   return value.replace(/[^a-zA-Z0-9._\u0400-\u04FF-]+/g, "-").replace(/-+/g, "-").replace(/^-|-$/g, "");
 }
 
-/**
- * TDD-д нийцсэн R2 object key бүтэц:
- * documents/{employeeCode}_{lastName}{firstName}/{phase}/{YYYY-MM-DD}_{action}/{order}_{templateId}.html
- */
 export function buildEmployeeDocumentObjectKey(input: {
   employeeCode: string;
   lastName: string;
@@ -47,7 +43,7 @@ export function buildEmployeeDocumentObjectKey(input: {
 }) {
   const employeeFolder = `${sanitizePart(input.employeeCode)}_${sanitizePart(input.lastName)}${sanitizePart(input.firstName)}`;
   const dateAction = `${toDatePrefix(input.createdAt)}_${sanitizePart(input.action)}`;
-  const fileName = `${input.order}_${sanitizePart(input.templateId)}.html`;
+  const fileName = `${input.order}_${sanitizePart(input.templateId)}.pdf`;
 
   return `documents/${employeeFolder}/${sanitizePart(input.phase)}/${dateAction}/${fileName}`;
 }

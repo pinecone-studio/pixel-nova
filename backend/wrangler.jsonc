@@ -54,12 +54,17 @@
    * Note: Use secrets to store sensitive data.
    * https://developers.cloudflare.com/workers/configuration/secrets/
    *
-   * RESEND_API_KEY â€” set as a secret:
+   * RESEND_API_KEY — set as a secret:
    *   wrangler secret put RESEND_API_KEY
+   * PDF_RENDERER_SECRET — optional shared secret for the renderer:
+   *   wrangler secret put PDF_RENDERER_SECRET
+   *
    * For local dev, create .dev.vars and add:
    *   RESEND_API_KEY=re_xxxxxxxxxxxx
+   *   PDF_RENDERER_URL=http://localhost:4001
+   *   PDF_RENDERER_SECRET=your_shared_secret
    */
-  // "vars": {  "MY_VARIABLE": "production_value" }
+  // "vars": {  "PDF_RENDERER_URL": "http://localhost:4001" }
   /**
    * Service Bindings (communicate between multiple Workers)
    * https://developers.cloudflare.com/workers/wrangler/configuration/#service-bindings

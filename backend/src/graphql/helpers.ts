@@ -13,6 +13,12 @@ export async function executeTriggeredAction(
   const resendApiKey =
     (ctx.env as CloudflareBindings & { RESEND_API_KEY?: string })
       .RESEND_API_KEY ?? "";
+  const pdfRendererUrl =
+    (ctx.env as CloudflareBindings & { PDF_RENDERER_URL?: string })
+      .PDF_RENDERER_URL ?? "";
+  const pdfRendererSecret =
+    (ctx.env as CloudflareBindings & { PDF_RENDERER_SECRET?: string })
+      .PDF_RENDERER_SECRET ?? "";
 
   const bucket = (ctx.env as CloudflareBindings & { epas_documents?: R2Bucket })
     .epas_documents;
@@ -23,6 +29,10 @@ export async function executeTriggeredAction(
     action,
     bucket,
     ctx.actor,
+    {
+      serviceUrl: pdfRendererUrl,
+      secret: pdfRendererSecret,
+    },
   );
 
   const notificationResult = await dispatchNotification({

@@ -15,7 +15,7 @@ test("builds TDD-compliant path: employeeCode_name/phase/date_action/order_templ
   });
 
   expect(key).toBe(
-    "documents/EMP-0042_Bat-ErdeneDorj/onboarding/2024-02-24_add_employee/01_employment_contract.html",
+    "documents/EMP-0042_Bat-ErdeneDorj/onboarding/2024-02-24_add_employee/01_employment_contract.pdf",
   );
 });
 
@@ -32,7 +32,7 @@ test("builds correct path for offboarding action", () => {
   });
 
   expect(key).toBe(
-    "documents/EMP-0099_BoldTsolmon/offboarding/2025-01-10_offboard_employee/02_handover_sheet.html",
+    "documents/EMP-0099_BoldTsolmon/offboarding/2025-01-10_offboard_employee/02_handover_sheet.pdf",
   );
 });
 
@@ -49,7 +49,7 @@ test("builds correct path for working phase promotion", () => {
   });
 
   expect(key).toBe(
-    "documents/EMP-0042_Bat-ErdeneDorj/working/2024-06-15_promote_employee/01_salary_increase_order.html",
+    "documents/EMP-0042_Bat-ErdeneDorj/working/2024-06-15_promote_employee/01_salary_increase_order.pdf",
   );
 });
 
@@ -68,7 +68,7 @@ test("sanitizes special characters in employee name", () => {
   expect(key.startsWith("documents/EMP-001_")).toBe(true);
   expect(key.includes("/onboarding/")).toBe(true);
   expect(key.includes("/2024-01-01_add_employee/")).toBe(true);
-  expect(key.endsWith("/01_nda.html")).toBe(true);
+  expect(key.endsWith("/01_nda.pdf")).toBe(true);
 });
 
 test("different timestamps create non-overlapping paths (non-destructive)", () => {

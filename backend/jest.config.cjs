@@ -6,6 +6,7 @@ module.exports = {
   extensionsToTreatAsEsm: [".ts"],
   moduleNameMapper: {
     "^(\\.{1,2}/.*)\\.js$": "$1",
+    "\\.html$": "<rootDir>/test/htmlTemplateMock.js",
   },
   transform: {
     "^.+\\.ts$": [
