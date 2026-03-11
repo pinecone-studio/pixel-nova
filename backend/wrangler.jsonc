@@ -22,16 +22,20 @@
   ],
   "r2_buckets": [
     {
-      "binding": "DOCUMENT_BUCKET",
-      "bucket_name": "epas-documents"
-    }
+      "bucket_name": "epas-documents",
+      "binding": "epas_documents",
+    },
   ],
   "observability": {
     "enabled": true,
   },
   "compatibility_flags": ["nodejs_compat"],
   "rules": [
-    { "type": "Text", "globs": ["**/*.html"], "fallthrough": true }
+    {
+      "type": "Text",
+      "globs": ["**/*.html"],
+      "fallthrough": true,
+    },
   ],
   /**
    * Smart Placement

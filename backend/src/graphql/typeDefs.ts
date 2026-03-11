@@ -109,10 +109,18 @@ export const typeDefs = /* GraphQL */ `
     newValues: JSON!
   }
 
+  type DocumentContent {
+    id: ID!
+    documentName: String!
+    contentType: String!
+    content: String!
+  }
+
   type Query {
     documents(employeeId: ID!): [Document!]!
     auditLogs(employeeId: ID): [AuditLog!]!
     actions: [ActionConfig!]!
+    documentContent(documentId: ID!): DocumentContent
   }
 
   type Mutation {
