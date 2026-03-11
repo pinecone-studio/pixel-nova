@@ -249,87 +249,87 @@
       <div class="org-header">
         <div class="org-left">
           <div class="org-name">
-            <span class="d dlg">.........................</span> ХХК
+            <span class="d dlg">{{company_name}}</span> ХХК
           </div>
-          <div>УБД: <span class="d dmd">...................</span></div>
+          <div>УБД: <span class="d dmd">{{company_register_no}}</span></div>
         </div>
         <div class="approved-box">
           <div class="label">БАТЛАВ:</div>
           <div>Гүйцэтгэх захирал</div>
-          <div><span class="d dlg">.........................</span></div>
+          <div><span class="d dlg">{{ceo_name}}</span></div>
           <div>
-            20<span class="d dxs">......</span> оны
-            <span class="d dxs">......</span> сарын
-            <span class="d dxs">......</span>-ны өдөр
+            20<span class="d dxs">{{approval_date_year_short}}</span> оны
+            <span class="d dxs">{{approval_date_month}}</span> сарын
+            <span class="d dxs">{{approval_date_day}}</span>-ны өдөр
           </div>
         </div>
       </div>
 
       <div class="doc-title">Ажлын байрны тодорхойлолт</div>
       <div class="doc-subtitle">
-        "<span class="d dlg">.........................</span>" албан тушаал
+        "<span class="d dlg">{{position_title}}</span>" албан тушаал
       </div>
 
       <table class="meta-table">
         <tr>
           <td class="label-cell">Байгууллагын нэр:</td>
           <td>
-            <span class="d dxl">...................................</span>
+            <span class="d dxl">{{company_name_full}}</span>
           </td>
         </tr>
         <tr>
           <td class="label-cell">Нэгжийн нэр / Хэлтэс:</td>
           <td>
-            <span class="d dxl">...................................</span>
+            <span class="d dxl">{{department_name}}</span>
           </td>
         </tr>
         <tr>
           <td class="label-cell">Албан тушаалын нэр:</td>
           <td>
-            <span class="d dxl">...................................</span>
+            <span class="d dxl">{{position_name}}</span>
           </td>
         </tr>
         <tr>
           <td class="label-cell">Тушаалын дугаар / Огноо:</td>
           <td>
-            № <span class="d dsm">.............</span> &nbsp; / &nbsp; 20<span
+            № <span class="d dsm">{{order_number}}</span> &nbsp; / &nbsp; 20<span
               class="d dxs"
-              >......</span
+              >{{order_date_year_short}}</span
             >
-            оны <span class="d dxs">......</span> сарын
-            <span class="d dxs">......</span>
+            оны <span class="d dxs">{{order_date_month}}</span> сарын
+            <span class="d dxs">{{order_date_day}}</span>
           </td>
         </tr>
         <tr>
           <td class="label-cell">Шууд харьяалагдах удирдлага:</td>
           <td>
-            <span class="d dxl">...................................</span>
+            <span class="d dxl">{{direct_manager}}</span>
           </td>
         </tr>
         <tr>
           <td class="label-cell">Ажлын байрны зэрэглэл / Түвшин:</td>
           <td>
-            <span class="d dxl">...................................</span>
+            <span class="d dxl">{{job_grade_level}}</span>
           </td>
         </tr>
         <tr>
           <td class="label-cell">Ажлын байрны байршил:</td>
           <td>
-            <span class="d dxl">...................................</span>
+            <span class="d dxl">{{job_location}}</span>
           </td>
         </tr>
         <tr>
           <td class="label-cell">Гэрээний хугацаа:</td>
           <td>
-            <span class="d dxl">...................................</span>
+            <span class="d dxl">{{contract_term}}</span>
           </td>
         </tr>
         <tr>
           <td class="label-cell">Баталсан огноо:</td>
           <td>
-            20<span class="d dxs">......</span> оны
-            <span class="d dxs">......</span> сарын
-            <span class="d dxs">......</span>-ны өдөр
+            20<span class="d dxs">{{approved_date_year_short}}</span> оны
+            <span class="d dxs">{{approved_date_month}}</span> сарын
+            <span class="d dxs">{{approved_date_day}}</span>-ны өдөр
           </td>
         </tr>
       </table>
@@ -338,9 +338,9 @@
 
       <p class="indent">
         Энэхүү ажлын байрны тодорхойлолт нь "<span class="d dxl"
-          >...................................</span
-        >" ХХК-ийн <span class="d dlg">.........................</span> нэгжид
-        ажиллах <span class="d dlg">.........................</span> албан
+          >{{company_name_purpose}}</span
+        >" ХХК-ийн <span class="d dlg">{{unit_name}}</span> нэгжид
+        ажиллах <span class="d dlg">{{position_name_purpose}}</span> албан
         тушаалтны гүйцэтгэх ажил үүрэг, хүлээх хариуцлага, мэргэшлийн шаардлагыг
         тодорхойлох зорилготой бөгөөд энэхүү баримт бичиг нь хөдөлмөрийн
         гэрээний салшгүй хэсэг болно.
@@ -356,23 +356,23 @@
 
       <p class="ind1">
         <b>2.1.</b> Шууд харьяалагдах удирдлага:
-        <span class="d dlg">.........................</span>
+        <span class="d dlg">{{report_to}}</span>
       </p>
       <p class="ind1">
         <b>2.2.</b> Шууд харьяалагдах ажилтан:
-        <span class="d dlg">.........................</span>
+        <span class="d dlg">{{direct_reports}}</span>
       </p>
       <p class="ind1">
         <b>2.3.</b> Орлох ажилтан:
-        <span class="d dlg">.........................</span>
+        <span class="d dlg">{{substitute_position}}</span>
       </p>
       <p class="ind1">
         <b>2.4.</b> Хамтран ажиллах нэгж / хэлтэс:
-        <span class="d dlg">.........................</span>
+        <span class="d dlg">{{collaborate_units}}</span>
       </p>
       <p class="ind1">
         <b>2.5.</b> Гадаад харилцаа (байгууллага, этгээд):
-        <span class="d dlg">.........................</span>
+        <span class="d dlg">{{external_relations}}</span>
       </p>
     </div>
 
@@ -395,97 +395,97 @@
           <td class="num">1</td>
           <td class="fill">
             <span class="d" style="width: 98%"
-              >................................................................</span
+              >{{duty_1_desc}}</span
             >
           </td>
           <td class="fill">
-            <span class="d" style="width: 98%">.................</span>
+            <span class="d" style="width: 98%">{{duty_1_kpi}}</span>
           </td>
-          <td class="fill"><span class="d dxs">......</span>%</td>
+          <td class="fill"><span class="d dxs">{{duty_1_weight}}</span>%</td>
         </tr>
         <tr>
           <td class="num">2</td>
           <td class="fill">
             <span class="d" style="width: 98%"
-              >................................................................</span
+              >{{duty_2_desc}}</span
             >
           </td>
           <td class="fill">
-            <span class="d" style="width: 98%">.................</span>
+            <span class="d" style="width: 98%">{{duty_2_kpi}}</span>
           </td>
-          <td class="fill"><span class="d dxs">......</span>%</td>
+          <td class="fill"><span class="d dxs">{{duty_2_weight}}</span>%</td>
         </tr>
         <tr>
           <td class="num">3</td>
           <td class="fill">
             <span class="d" style="width: 98%"
-              >................................................................</span
+              >{{duty_3_desc}}</span
             >
           </td>
           <td class="fill">
-            <span class="d" style="width: 98%">.................</span>
+            <span class="d" style="width: 98%">{{duty_3_kpi}}</span>
           </td>
-          <td class="fill"><span class="d dxs">......</span>%</td>
+          <td class="fill"><span class="d dxs">{{duty_3_weight}}</span>%</td>
         </tr>
         <tr>
           <td class="num">4</td>
           <td class="fill">
             <span class="d" style="width: 98%"
-              >................................................................</span
+              >{{duty_4_desc}}</span
             >
           </td>
           <td class="fill">
-            <span class="d" style="width: 98%">.................</span>
+            <span class="d" style="width: 98%">{{duty_4_kpi}}</span>
           </td>
-          <td class="fill"><span class="d dxs">......</span>%</td>
+          <td class="fill"><span class="d dxs">{{duty_4_weight}}</span>%</td>
         </tr>
         <tr>
           <td class="num">5</td>
           <td class="fill">
             <span class="d" style="width: 98%"
-              >................................................................</span
+              >{{duty_5_desc}}</span
             >
           </td>
           <td class="fill">
-            <span class="d" style="width: 98%">.................</span>
+            <span class="d" style="width: 98%">{{duty_5_kpi}}</span>
           </td>
-          <td class="fill"><span class="d dxs">......</span>%</td>
+          <td class="fill"><span class="d dxs">{{duty_5_weight}}</span>%</td>
         </tr>
         <tr>
           <td class="num">6</td>
           <td class="fill">
             <span class="d" style="width: 98%"
-              >................................................................</span
+              >{{duty_6_desc}}</span
             >
           </td>
           <td class="fill">
-            <span class="d" style="width: 98%">.................</span>
+            <span class="d" style="width: 98%">{{duty_6_kpi}}</span>
           </td>
-          <td class="fill"><span class="d dxs">......</span>%</td>
+          <td class="fill"><span class="d dxs">{{duty_6_weight}}</span>%</td>
         </tr>
         <tr>
           <td class="num">7</td>
           <td class="fill">
             <span class="d" style="width: 98%"
-              >................................................................</span
+              >{{duty_7_desc}}</span
             >
           </td>
           <td class="fill">
-            <span class="d" style="width: 98%">.................</span>
+            <span class="d" style="width: 98%">{{duty_7_kpi}}</span>
           </td>
-          <td class="fill"><span class="d dxs">......</span>%</td>
+          <td class="fill"><span class="d dxs">{{duty_7_weight}}</span>%</td>
         </tr>
         <tr>
           <td class="num">8</td>
           <td class="fill">
             <span class="d" style="width: 98%"
-              >................................................................</span
+              >{{duty_8_desc}}</span
             >
           </td>
           <td class="fill">
-            <span class="d" style="width: 98%">.................</span>
+            <span class="d" style="width: 98%">{{duty_8_kpi}}</span>
           </td>
-          <td class="fill"><span class="d dxs">......</span>%</td>
+          <td class="fill"><span class="d dxs">{{duty_8_weight}}</span>%</td>
         </tr>
         <tr>
           <td
@@ -516,7 +516,7 @@
       <p class="ind1">
         3.2.5.
         <span class="d" style="width: 85%; display: inline-block"
-          >................................................................</span
+          >{{additional_duty}}</span
         >
       </p>
 
@@ -528,19 +528,19 @@
       </p>
       <p class="ind1">
         4.2. Байгууллагын нэрийн өмнөөс гадны этгээдтэй харилцах:
-        <span class="d dsm">.............</span>
+        <span class="d dsm">{{external_contact_authority}}</span>
       </p>
       <p class="ind1">
         4.3. Гэрээ, хэлцэл байгуулах эрх:
-        <span class="d dsm">.............</span> (Тийм / Үгүй)
+        <span class="d dsm">{{contract_authority}}</span> (Тийм / Үгүй)
       </p>
       <p class="ind1">
         4.4. Санхүүгийн шийдвэр гаргах дээд хэмжээ:
-        <span class="d dlg">.........................</span> төгрөг
+        <span class="d dlg">{{financial_approval_limit}}</span> төгрөг
       </p>
       <p class="ind1">
         4.5. Ажилтанд хариуцлага тооцох эрх:
-        <span class="d dsm">.............</span> (Тийм / Үгүй)
+        <span class="d dsm">{{disciplinary_authority}}</span> (Тийм / Үгүй)
       </p>
     </div>
 
@@ -560,22 +560,22 @@
         </tr>
         <tr>
           <td>Боловсролын зэрэг</td>
-          <td><span class="d dlg">.........................</span></td>
+          <td><span class="d dlg">{{education_level}}</span></td>
           <td>Заавал / Давуу тал</td>
         </tr>
         <tr>
           <td>Мэргэжлийн чиглэл</td>
-          <td><span class="d dlg">.........................</span></td>
+          <td><span class="d dlg">{{major_field}}</span></td>
           <td>Заавал / Давуу тал</td>
         </tr>
         <tr>
           <td>Нэмэлт сургалт / Гэрчилгээ</td>
-          <td><span class="d dlg">.........................</span></td>
+          <td><span class="d dlg">{{additional_certificates}}</span></td>
           <td>Заавал / Давуу тал</td>
         </tr>
         <tr>
           <td>Мэргэжлийн зэрэг</td>
-          <td><span class="d dlg">.........................</span></td>
+          <td><span class="d dlg">{{professional_grade}}</span></td>
           <td>Заавал / Давуу тал</td>
         </tr>
       </table>
@@ -589,19 +589,19 @@
         </tr>
         <tr>
           <td>Нийт ажлын туршлага</td>
-          <td><span class="d dmd">...................</span> жилээс доошгүй</td>
+          <td><span class="d dmd">{{total_experience_years}}</span> жилээс доошгүй</td>
         </tr>
         <tr>
           <td>Холбогдох чиглэлийн туршлага</td>
-          <td><span class="d dmd">...................</span> жилээс доошгүй</td>
+          <td><span class="d dmd">{{related_experience_years}}</span> жилээс доошгүй</td>
         </tr>
         <tr>
           <td>Удирдах ажлын туршлага</td>
-          <td><span class="d dmd">...................</span> жилээс доошгүй</td>
+          <td><span class="d dmd">{{management_experience_years}}</span> жилээс доошгүй</td>
         </tr>
         <tr>
           <td>Салбарын туршлага</td>
-          <td><span class="d dlg">.........................</span></td>
+          <td><span class="d dlg">{{industry_experience}}</span></td>
         </tr>
       </table>
 
@@ -618,61 +618,61 @@
           <td class="num">1</td>
           <td>
             <span class="d" style="width: 98%"
-              >...................................</span
+              >{{skill_1_name}}</span
             >
           </td>
-          <td><span class="d" style="width: 98%">.............</span></td>
-          <td><span class="d" style="width: 98%">.............</span></td>
+          <td><span class="d" style="width: 98%">{{skill_1_level}}</span></td>
+          <td><span class="d" style="width: 98%">{{skill_1_requirement}}</span></td>
         </tr>
         <tr>
           <td class="num">2</td>
           <td>
             <span class="d" style="width: 98%"
-              >...................................</span
+              >{{skill_2_name}}</span
             >
           </td>
-          <td><span class="d" style="width: 98%">.............</span></td>
-          <td><span class="d" style="width: 98%">.............</span></td>
+          <td><span class="d" style="width: 98%">{{skill_2_level}}</span></td>
+          <td><span class="d" style="width: 98%">{{skill_2_requirement}}</span></td>
         </tr>
         <tr>
           <td class="num">3</td>
           <td>
             <span class="d" style="width: 98%"
-              >...................................</span
+              >{{skill_3_name}}</span
             >
           </td>
-          <td><span class="d" style="width: 98%">.............</span></td>
-          <td><span class="d" style="width: 98%">.............</span></td>
+          <td><span class="d" style="width: 98%">{{skill_3_level}}</span></td>
+          <td><span class="d" style="width: 98%">{{skill_3_requirement}}</span></td>
         </tr>
         <tr>
           <td class="num">4</td>
           <td>
             <span class="d" style="width: 98%"
-              >...................................</span
+              >{{skill_4_name}}</span
             >
           </td>
-          <td><span class="d" style="width: 98%">.............</span></td>
-          <td><span class="d" style="width: 98%">.............</span></td>
+          <td><span class="d" style="width: 98%">{{skill_4_level}}</span></td>
+          <td><span class="d" style="width: 98%">{{skill_4_requirement}}</span></td>
         </tr>
         <tr>
           <td class="num">5</td>
           <td>
             <span class="d" style="width: 98%"
-              >...................................</span
+              >{{skill_5_name}}</span
             >
           </td>
-          <td><span class="d" style="width: 98%">.............</span></td>
-          <td><span class="d" style="width: 98%">.............</span></td>
+          <td><span class="d" style="width: 98%">{{skill_5_level}}</span></td>
+          <td><span class="d" style="width: 98%">{{skill_5_requirement}}</span></td>
         </tr>
         <tr>
           <td class="num">6</td>
           <td>
             <span class="d" style="width: 98%"
-              >...................................</span
+              >{{skill_6_name}}</span
             >
           </td>
-          <td><span class="d" style="width: 98%">.............</span></td>
-          <td><span class="d" style="width: 98%">.............</span></td>
+          <td><span class="d" style="width: 98%">{{skill_6_level}}</span></td>
+          <td><span class="d" style="width: 98%">{{skill_6_requirement}}</span></td>
         </tr>
       </table>
 
@@ -695,17 +695,17 @@
         </tr>
         <tr>
           <td>Англи хэл</td>
-          <td><span class="d dsm">.............</span></td>
-          <td><span class="d dsm">.............</span></td>
-          <td><span class="d dsm">.............</span></td>
-          <td><span class="d dsm">.............</span></td>
+          <td><span class="d dsm">{{english_reading_level}}</span></td>
+          <td><span class="d dsm">{{english_writing_level}}</span></td>
+          <td><span class="d dsm">{{english_speaking_level}}</span></td>
+          <td><span class="d dsm">{{english_requirement}}</span></td>
         </tr>
         <tr>
-          <td><span class="d dsm">.............</span></td>
-          <td><span class="d dsm">.............</span></td>
-          <td><span class="d dsm">.............</span></td>
-          <td><span class="d dsm">.............</span></td>
-          <td><span class="d dsm">.............</span></td>
+          <td><span class="d dsm">{{second_language_name}}</span></td>
+          <td><span class="d dsm">{{second_language_reading_level}}</span></td>
+          <td><span class="d dsm">{{second_language_writing_level}}</span></td>
+          <td><span class="d dsm">{{second_language_speaking_level}}</span></td>
+          <td><span class="d dsm">{{second_language_requirement}}</span></td>
         </tr>
       </table>
     </div>
@@ -727,7 +727,7 @@
           <td>Манлайлах чадвар</td>
           <td>
             <span class="d" style="width: 98%"
-              >...................................</span
+              >{{trait_leadership_desc}}</span
             >
           </td>
         </tr>
@@ -736,7 +736,7 @@
           <td>Харилцааны чадвар</td>
           <td>
             <span class="d" style="width: 98%"
-              >...................................</span
+              >{{trait_communication_desc}}</span
             >
           </td>
         </tr>
@@ -745,7 +745,7 @@
           <td>Багаар ажиллах чадвар</td>
           <td>
             <span class="d" style="width: 98%"
-              >...................................</span
+              >{{trait_teamwork_desc}}</span
             >
           </td>
         </tr>
@@ -754,7 +754,7 @@
           <td>Асуудал шийдвэрлэх чадвар</td>
           <td>
             <span class="d" style="width: 98%"
-              >...................................</span
+              >{{trait_problem_solving_desc}}</span
             >
           </td>
         </tr>
@@ -763,7 +763,7 @@
           <td>Цаг хугацааг зохицуулах чадвар</td>
           <td>
             <span class="d" style="width: 98%"
-              >...................................</span
+              >{{trait_time_management_desc}}</span
             >
           </td>
         </tr>
@@ -772,7 +772,7 @@
           <td>Шинийг санаачлах чадвар</td>
           <td>
             <span class="d" style="width: 98%"
-              >...................................</span
+              >{{trait_innovation_desc}}</span
             >
           </td>
         </tr>
@@ -781,7 +781,7 @@
           <td>Дасан зохицох чадвар</td>
           <td>
             <span class="d" style="width: 98%"
-              >...................................</span
+              >{{trait_adaptability_desc}}</span
             >
           </td>
         </tr>
@@ -790,7 +790,7 @@
           <td>Хариуцлагатай байдал</td>
           <td>
             <span class="d" style="width: 98%"
-              >...................................</span
+              >{{trait_responsibility_desc}}</span
             >
           </td>
         </tr>
@@ -798,12 +798,12 @@
           <td class="num">9</td>
           <td>
             <span class="d" style="width: 98%"
-              >...................................</span
+              >{{trait_custom_1_name}}</span
             >
           </td>
           <td>
             <span class="d" style="width: 98%"
-              >...................................</span
+              >{{trait_custom_1_desc}}</span
             >
           </td>
         </tr>
@@ -811,12 +811,12 @@
           <td class="num">10</td>
           <td>
             <span class="d" style="width: 98%"
-              >...................................</span
+              >{{trait_custom_2_name}}</span
             >
           </td>
           <td>
             <span class="d" style="width: 98%"
-              >...................................</span
+              >{{trait_custom_2_desc}}</span
             >
           </td>
         </tr>
@@ -840,20 +840,20 @@
       </p>
       <p class="ind1">
         <b>7.2.</b> Ажлын өдрүүд:
-        <span class="d dlg">.........................</span>
+        <span class="d dlg">{{workdays}}</span>
       </p>
       <p class="ind1">
-        <b>7.3.</b> Ажлын цаг: <span class="d dsm">.............</span> цагаас
-        <span class="d dsm">.............</span> цаг хүртэл
+        <b>7.3.</b> Ажлын цаг: <span class="d dsm">{{work_start_time}}</span> цагаас
+        <span class="d dsm">{{work_end_time}}</span> цаг хүртэл
       </p>
       <p class="ind1">
         <b>7.4.</b> Үдийн завсарлага:
-        <span class="d dsm">.............</span> цагаас
-        <span class="d dsm">.............</span> цаг хүртэл
+        <span class="d dsm">{{break_start_time}}</span> цагаас
+        <span class="d dsm">{{break_end_time}}</span> цаг хүртэл
       </p>
       <p class="ind1">
         <b>7.5.</b> Нэг долоо хоногийн ажлын цаг:
-        <span class="d dsm">.............</span> цаг
+        <span class="d dsm">{{weekly_work_hours}}</span> цаг
       </p>
       <p class="ind1">
         <b>7.6.</b> Томилолтоор явах шаардлага: &nbsp;<span
@@ -864,11 +864,11 @@
           style="border: 1px solid #000; padding: 1px 6px; font-size: 10.5pt"
           >Үгүй</span
         >
-        &nbsp; Хэр: <span class="d dsm">.............</span>
+        &nbsp; Хэр: <span class="d dsm">{{travel_requirement_details}}</span>
       </p>
       <p class="ind1">
         <b>7.7.</b> Ажлын байрны онцгой нөхцөл:
-        <span class="d dlg">.........................</span>
+        <span class="d dlg">{{special_work_conditions}}</span>
       </p>
       <p class="ind1">
         <b>7.8.</b> Тусгай хувцас, хамгаалалтын хэрэгсэл: &nbsp;<span
@@ -895,56 +895,56 @@
           <td class="num">1</td>
           <td>
             <span class="d" style="width: 98%"
-              >...................................</span
+              >{{kpi_1_name}}</span
             >
           </td>
-          <td><span class="d" style="width: 98%">.............</span></td>
-          <td><span class="d" style="width: 98%">.............</span></td>
-          <td><span class="d dxs">......</span>%</td>
+          <td><span class="d" style="width: 98%">{{kpi_1_unit}}</span></td>
+          <td><span class="d" style="width: 98%">{{kpi_1_target}}</span></td>
+          <td><span class="d dxs">{{kpi_1_weight}}</span>%</td>
         </tr>
         <tr>
           <td class="num">2</td>
           <td>
             <span class="d" style="width: 98%"
-              >...................................</span
+              >{{kpi_2_name}}</span
             >
           </td>
-          <td><span class="d" style="width: 98%">.............</span></td>
-          <td><span class="d" style="width: 98%">.............</span></td>
-          <td><span class="d dxs">......</span>%</td>
+          <td><span class="d" style="width: 98%">{{kpi_2_unit}}</span></td>
+          <td><span class="d" style="width: 98%">{{kpi_2_target}}</span></td>
+          <td><span class="d dxs">{{kpi_2_weight}}</span>%</td>
         </tr>
         <tr>
           <td class="num">3</td>
           <td>
             <span class="d" style="width: 98%"
-              >...................................</span
+              >{{kpi_3_name}}</span
             >
           </td>
-          <td><span class="d" style="width: 98%">.............</span></td>
-          <td><span class="d" style="width: 98%">.............</span></td>
-          <td><span class="d dxs">......</span>%</td>
+          <td><span class="d" style="width: 98%">{{kpi_3_unit}}</span></td>
+          <td><span class="d" style="width: 98%">{{kpi_3_target}}</span></td>
+          <td><span class="d dxs">{{kpi_3_weight}}</span>%</td>
         </tr>
         <tr>
           <td class="num">4</td>
           <td>
             <span class="d" style="width: 98%"
-              >...................................</span
+              >{{kpi_4_name}}</span
             >
           </td>
-          <td><span class="d" style="width: 98%">.............</span></td>
-          <td><span class="d" style="width: 98%">.............</span></td>
-          <td><span class="d dxs">......</span>%</td>
+          <td><span class="d" style="width: 98%">{{kpi_4_unit}}</span></td>
+          <td><span class="d" style="width: 98%">{{kpi_4_target}}</span></td>
+          <td><span class="d dxs">{{kpi_4_weight}}</span>%</td>
         </tr>
         <tr>
           <td class="num">5</td>
           <td>
             <span class="d" style="width: 98%"
-              >...................................</span
+              >{{kpi_5_name}}</span
             >
           </td>
-          <td><span class="d" style="width: 98%">.............</span></td>
-          <td><span class="d" style="width: 98%">.............</span></td>
-          <td><span class="d dxs">......</span>%</td>
+          <td><span class="d" style="width: 98%">{{kpi_5_unit}}</span></td>
+          <td><span class="d" style="width: 98%">{{kpi_5_target}}</span></td>
+          <td><span class="d dxs">{{kpi_5_weight}}</span>%</td>
         </tr>
         <tr>
           <td
@@ -999,51 +999,51 @@
           <td class="num">1</td>
           <td>
             <span class="d" style="width: 98%"
-              >...................................</span
+              >{{asset_1_name}}</span
             >
           </td>
-          <td><span class="d" style="width: 98%">.............</span></td>
-          <td><span class="d" style="width: 98%">.............</span></td>
+          <td><span class="d" style="width: 98%">{{asset_1_qty}}</span></td>
+          <td><span class="d" style="width: 98%">{{asset_1_received_date}}</span></td>
         </tr>
         <tr>
           <td class="num">2</td>
           <td>
             <span class="d" style="width: 98%"
-              >...................................</span
+              >{{asset_2_name}}</span
             >
           </td>
-          <td><span class="d" style="width: 98%">.............</span></td>
-          <td><span class="d" style="width: 98%">.............</span></td>
+          <td><span class="d" style="width: 98%">{{asset_2_qty}}</span></td>
+          <td><span class="d" style="width: 98%">{{asset_2_received_date}}</span></td>
         </tr>
         <tr>
           <td class="num">3</td>
           <td>
             <span class="d" style="width: 98%"
-              >...................................</span
+              >{{asset_3_name}}</span
             >
           </td>
-          <td><span class="d" style="width: 98%">.............</span></td>
-          <td><span class="d" style="width: 98%">.............</span></td>
+          <td><span class="d" style="width: 98%">{{asset_3_qty}}</span></td>
+          <td><span class="d" style="width: 98%">{{asset_3_received_date}}</span></td>
         </tr>
         <tr>
           <td class="num">4</td>
           <td>
             <span class="d" style="width: 98%"
-              >...................................</span
+              >{{asset_4_name}}</span
             >
           </td>
-          <td><span class="d" style="width: 98%">.............</span></td>
-          <td><span class="d" style="width: 98%">.............</span></td>
+          <td><span class="d" style="width: 98%">{{asset_4_qty}}</span></td>
+          <td><span class="d" style="width: 98%">{{asset_4_received_date}}</span></td>
         </tr>
         <tr>
           <td class="num">5</td>
           <td>
             <span class="d" style="width: 98%"
-              >...................................</span
+              >{{asset_5_name}}</span
             >
           </td>
-          <td><span class="d" style="width: 98%">.............</span></td>
-          <td><span class="d" style="width: 98%">.............</span></td>
+          <td><span class="d" style="width: 98%">{{asset_5_qty}}</span></td>
+          <td><span class="d" style="width: 98%">{{asset_5_received_date}}</span></td>
         </tr>
       </table>
 
@@ -1077,34 +1077,34 @@
               <p class="sig-col role" style="font-weight: bold">
                 Батласан удирдлага:
               </p>
-              <p><span class="d dlg">.........................</span></p>
+              <p><span class="d dlg">{{approver_title}}</span></p>
               <p style="font-size: 10.5pt">(Албан тушаал)</p>
               <div class="sig-line"></div>
               <p class="sig-hint">(гарын үсэг)</p>
               <p style="margin-top: 8px">
-                Огноо: <span class="d dmd">...................</span>
+                Огноо: <span class="d dmd">{{approver_date}}</span>
               </p>
             </td>
             <td style="width: 33%; vertical-align: top; padding: 0 16px">
               <p class="sig-col role" style="font-weight: bold">Хүний нөөц:</p>
-              <p><span class="d dlg">.........................</span></p>
+              <p><span class="d dlg">{{hr_specialist_name}}</span></p>
               <p style="font-size: 10.5pt">(Мэргэжилтний нэр)</p>
               <div class="sig-line"></div>
               <p class="sig-hint">(гарын үсэг)</p>
               <p style="margin-top: 8px">
-                Огноо: <span class="d dmd">...................</span>
+                Огноо: <span class="d dmd">{{hr_sign_date}}</span>
               </p>
             </td>
             <td style="width: 33%; vertical-align: top; padding-left: 16px">
               <p class="sig-col role" style="font-weight: bold">
                 Танилцсан ажилтан:
               </p>
-              <p><span class="d dlg">.........................</span></p>
+              <p><span class="d dlg">{{employee_name}}</span></p>
               <p style="font-size: 10.5pt">(Ажилтны нэр)</p>
               <div class="sig-line"></div>
               <p class="sig-hint">(гарын үсэг)</p>
               <p style="margin-top: 8px">
-                Огноо: <span class="d dmd">...................</span>
+                Огноо: <span class="d dmd">{{employee_sign_date}}</span>
               </p>
             </td>
           </tr>
