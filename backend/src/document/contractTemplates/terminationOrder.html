@@ -252,22 +252,22 @@
       <div class="org-header">
         <div class="org-left">
           <div class="org-name">
-            "<span class="d dlg">........................</span>" ХХК
+            "<span class="d dlg">{{company_name}}</span>" ХХК
           </div>
           <div>
             Улсын бүртгэлийн дугаар:
-            <span class="d dmd">.................</span>
+            <span class="d dmd">{{company_register_no}}</span>
           </div>
           <div>
-            Хаяг: <span class="d dxl">.................................</span>
+            Хаяг: <span class="d dxl">{{company_address}}</span>
           </div>
         </div>
         <div class="org-right">
           <div>Улаанбаатар хот</div>
           <div>
-            20<span class="d dxs">......</span> оны
-            <span class="d dxs">......</span> сарын
-            <span class="d dxs">......</span>-ны өдөр
+            20<span class="d dxs">{{order_date_year_short}}</span> оны
+            <span class="d dxs">{{order_date_month}}</span> сарын
+            <span class="d dxs">{{order_date_day}}</span>-ны өдөр
           </div>
         </div>
       </div>
@@ -275,7 +275,7 @@
       <!-- Дугаар / огноо мөр -->
       <div class="order-meta">
         <span>ТУШААЛ</span>
-        <span>№ <span class="d dsm">.............</span></span>
+        <span>№ <span class="d dsm">{{order_number}}</span></span>
         <span>Улаанбаатар</span>
       </div>
 
@@ -286,48 +286,48 @@
       <table class="info-table">
         <tr>
           <td class="lbl">Ажилтны овог, нэр:</td>
-          <td><span class="d dxl">.................................</span></td>
+          <td><span class="d dxl">{{employee_full_name}}</span></td>
         </tr>
         <tr>
           <td class="lbl">Регистрийн дугаар:</td>
-          <td><span class="d dmd">.................</span></td>
+          <td><span class="d dmd">{{employee_register_no}}</span></td>
         </tr>
         <tr>
           <td class="lbl">Ажилласан нэгж / хэлтэс:</td>
-          <td><span class="d dxl">.................................</span></td>
+          <td><span class="d dxl">{{employee_department}}</span></td>
         </tr>
         <tr>
           <td class="lbl">Албан тушаал:</td>
-          <td><span class="d dxl">.................................</span></td>
+          <td><span class="d dxl">{{employee_position}}</span></td>
         </tr>
         <tr>
           <td class="lbl">Ажилд орсон огноо:</td>
           <td>
-            20<span class="d dxs">......</span> оны
-            <span class="d dxs">......</span> сарын
-            <span class="d dxs">......</span>-ны өдөр
+            20<span class="d dxs">{{hire_date_year_short}}</span> оны
+            <span class="d dxs">{{hire_date_month}}</span> сарын
+            <span class="d dxs">{{hire_date_day}}</span>-ны өдөр
           </td>
         </tr>
         <tr>
           <td class="lbl">Ажлаас чөлөөлөх огноо:</td>
           <td>
-            20<span class="d dxs">......</span> оны
-            <span class="d dxs">......</span> сарын
-            <span class="d dxs">......</span>-ны өдөр
+            20<span class="d dxs">{{termination_date_year_short}}</span> оны
+            <span class="d dxs">{{termination_date_month}}</span> сарын
+            <span class="d dxs">{{termination_date_day}}</span>-ны өдөр
           </td>
         </tr>
         <tr>
           <td class="lbl">Хөдөлмөрийн гэрээний дугаар:</td>
-          <td>№ <span class="d dmd">.................</span></td>
+          <td>№ <span class="d dmd">{{employment_contract_number}}</span></td>
         </tr>
       </table>
 
       <!-- Үндэслэл -->
       <p class="indent">
         Монгол Улсын Хөдөлмөрийн тухай хуулийн
-        <span class="d dmd">.................</span> дүгээр зүйлийн
-        <span class="d dsm">.............</span> дэх хэсэгт заасан үндэслэл
-        болон <span class="d dxl">.................................</span>-ны
+        <span class="d dmd">{{law_article}}</span> дүгээр зүйлийн
+        <span class="d dsm">{{law_clause}}</span> дэх хэсэгт заасан үндэслэл
+        болон <span class="d dxl">{{termination_request_date}}</span>-ны
         өргөдөл, хүний нөөцийн албаны саналыг үндэслэн,
       </p>
 
@@ -354,47 +354,47 @@
       </p>
       <p class="ind1">
         <span class="cb"></span> Бусад:
-        <span class="d dxl">.................................</span>
+        <span class="d dxl">{{other_termination_reason}}</span>
       </p>
 
       <div class="sec-title">Тушаах нь:</div>
 
       <p class="ind1">
         <b>1.</b>
-        <span class="d dxl">.................................</span> овогтой
-        <span class="d dlg">........................</span>-г
-        <span class="d dlg">........................</span> албан тушаалаас
-        20<span class="d dxs">......</span> оны
-        <span class="d dxs">......</span> дугаар сарын
-        <span class="d dxs">......</span>-ний өдрөөс эхлэн Монгол Улсын
+        <span class="d dxl">{{employee_last_name}}</span> овогтой
+        <span class="d dlg">{{employee_first_name}}</span>-г
+        <span class="d dlg">{{employee_position_clause}}</span> албан тушаалаас
+        20<span class="d dxs">{{termination_effective_year_short}}</span> оны
+        <span class="d dxs">{{termination_effective_month}}</span> дугаар сарын
+        <span class="d dxs">{{termination_effective_day}}</span>-ний өдрөөс эхлэн Монгол Улсын
         Хөдөлмөрийн тухай хуулийн
-        <span class="d dmd">.................</span> дүгээр зүйлийн
-        <span class="d dsm">.............</span> дэх хэсгийн үндэслэлээр ажлаас
+        <span class="d dmd">{{termination_law_article}}</span> дүгээр зүйлийн
+        <span class="d dsm">{{termination_law_clause}}</span> дэх хэсгийн үндэслэлээр ажлаас
         чөлөөлсүгэй.
       </p>
 
       <p class="ind1">
         <b>2.</b> Ажилтны эцсийн тооцоог хийж, ээлжийн амралтын нөхөн олговор,
         бусад зохих төлбөрийг хуулийн хугацаанд олгохыг Санхүүгийн алба
-        <span class="d dlg">........................</span>-д даалгасугай.
+        <span class="d dlg">{{finance_department_assignee}}</span>-д даалгасугай.
       </p>
 
       <p class="ind1">
         <b>3.</b> Ажилтанд хүлээлгэсэн эд хөрөнгө, баримт бичиг, цахим
         хэрэгслийг тойрох хуудасны дагуу бүрэн хүлээлгэн авахыг
-        <span class="d dlg">........................</span> /Хүний нөөцийн
+        <span class="d dlg">{{hr_department_assignee}}</span> /Хүний нөөцийн
         алба/-д даалгасугай.
       </p>
 
       <p class="ind1">
         <b>4.</b> Ажилтны хөдөлмөрийн дэвтэр, нийгмийн даатгалын бичиг баримтыг
         хуулийн дагуу бүрдүүлж ажилтанд хүргүүлэхийг Хүний нөөцийн алба
-        <span class="d dlg">........................</span>-д үүрэг болгосугай.
+        <span class="d dlg">{{hr_department_responsible}}</span>-д үүрэг болгосугай.
       </p>
 
       <p class="ind1">
         <b>5.</b> Энэхүү тушаалын хэрэгжилтэд хяналт тавьж ажиллахыг
-        <span class="d dlg">........................</span>-д үүрэг болгосугай.
+        <span class="d dlg">{{control_responsible}}</span>-д үүрэг болгосугай.
       </p>
 
       <!-- Гарын үсэг -->
@@ -406,7 +406,7 @@
             <p class="sig-hint">(гарын үсэг, тамга)</p>
             <div class="sig-info">
               <div>
-                Нэр: <span class="d dlg">........................</span>
+                Нэр: <span class="d dlg">{{ceo_name}}</span>
               </div>
             </div>
           </div>
@@ -416,9 +416,9 @@
             <p class="sig-hint">(гарын үсэг)</p>
             <div class="sig-info">
               <div>
-                Нэр: <span class="d dlg">........................</span>
+                Нэр: <span class="d dlg">{{employee_ack_name}}</span>
               </div>
-              <div>Огноо: <span class="d dmd">.................</span></div>
+              <div>Огноо: <span class="d dmd">{{employee_ack_date}}</span></div>
             </div>
           </div>
         </div>
@@ -433,15 +433,15 @@
       <div class="org-header">
         <div class="org-left">
           <div class="org-name">
-            "<span class="d dlg">........................</span>" ХХК
+            "<span class="d dlg">{{company_name_handover}}</span>" ХХК
           </div>
         </div>
         <div class="org-right" style="font-size: 11pt; line-height: 1.7">
-          <div>Тушаал №: <span class="d dsm">.............</span></div>
+          <div>Тушаал №: <span class="d dsm">{{order_number_handover}}</span></div>
           <div>
-            Огноо: 20<span class="d dxs">......</span>/<span class="d dxs"
-              >......</span
-            >/<span class="d dxs">......</span>
+            Огноо: 20<span class="d dxs">{{handover_date_year_short}}</span>/<span class="d dxs"
+              >{{handover_date_month}}</span
+            >/<span class="d dxs">{{handover_date_day}}</span>
           </div>
         </div>
       </div>
@@ -453,22 +453,22 @@
       <table class="info-table">
         <tr>
           <td class="lbl">Ажилтны нэр:</td>
-          <td><span class="d dxl">.................................</span></td>
+          <td><span class="d dxl">{{handover_employee_name}}</span></td>
         </tr>
         <tr>
           <td class="lbl">Албан тушаал:</td>
-          <td><span class="d dxl">.................................</span></td>
+          <td><span class="d dxl">{{handover_employee_position}}</span></td>
         </tr>
         <tr>
           <td class="lbl">Нэгж / Хэлтэс:</td>
-          <td><span class="d dxl">.................................</span></td>
+          <td><span class="d dxl">{{handover_employee_department}}</span></td>
         </tr>
         <tr>
           <td class="lbl">Ажлаас чөлөөлөгдөх огноо:</td>
           <td>
-            20<span class="d dxs">......</span> оны
-            <span class="d dxs">......</span> сарын
-            <span class="d dxs">......</span>-ны өдөр
+            20<span class="d dxs">{{handover_termination_year_short}}</span> оны
+            <span class="d dxs">{{handover_termination_month}}</span> сарын
+            <span class="d dxs">{{handover_termination_day}}</span>-ны өдөр
           </td>
         </tr>
       </table>
@@ -486,95 +486,95 @@
           <td class="num">1</td>
           <td>Хүний нөөцийн алба</td>
           <td>Хөдөлмөрийн дэвтэр, баримт бичиг</td>
-          <td><span class="d" style="width: 90%">.............</span></td>
-          <td><span class="d" style="width: 90%">.............</span></td>
+          <td><span class="d" style="width: 90%">{{handover_hr_receive_date}}</span></td>
+          <td><span class="d" style="width: 90%">{{handover_hr_signature}}</span></td>
         </tr>
         <tr>
           <td class="num">2</td>
           <td>Санхүүгийн алба</td>
           <td>Цалин, нөхөн олговор, зээл тооцоо</td>
-          <td><span class="d" style="width: 90%">.............</span></td>
-          <td><span class="d" style="width: 90%">.............</span></td>
+          <td><span class="d" style="width: 90%">{{handover_finance_receive_date}}</span></td>
+          <td><span class="d" style="width: 90%">{{handover_finance_signature}}</span></td>
         </tr>
         <tr>
           <td class="num">3</td>
           <td>Мэдээллийн технологи</td>
           <td>Компьютер, техник хэрэгсэл, нэвтрэх эрх</td>
-          <td><span class="d" style="width: 90%">.............</span></td>
-          <td><span class="d" style="width: 90%">.............</span></td>
+          <td><span class="d" style="width: 90%">{{handover_it_receive_date}}</span></td>
+          <td><span class="d" style="width: 90%">{{handover_it_signature}}</span></td>
         </tr>
         <tr>
           <td class="num">4</td>
           <td>Нэгжийн удирдлага</td>
           <td>Ажлын гаргалт, баримт бичиг</td>
-          <td><span class="d" style="width: 90%">.............</span></td>
-          <td><span class="d" style="width: 90%">.............</span></td>
+          <td><span class="d" style="width: 90%">{{handover_unit_receive_date}}</span></td>
+          <td><span class="d" style="width: 90%">{{handover_unit_signature}}</span></td>
         </tr>
         <tr>
           <td class="num">5</td>
           <td>Захиргаа</td>
           <td>Нэвтрэх карт, тоног төхөөрөмж</td>
-          <td><span class="d" style="width: 90%">.............</span></td>
-          <td><span class="d" style="width: 90%">.............</span></td>
+          <td><span class="d" style="width: 90%">{{handover_admin_receive_date}}</span></td>
+          <td><span class="d" style="width: 90%">{{handover_admin_signature}}</span></td>
         </tr>
         <tr>
           <td class="num">6</td>
           <td>Агуулахын ажилтан</td>
           <td>Эд хөрөнгө, ажлын хувцас</td>
-          <td><span class="d" style="width: 90%">.............</span></td>
-          <td><span class="d" style="width: 90%">.............</span></td>
+          <td><span class="d" style="width: 90%">{{handover_warehouse_receive_date}}</span></td>
+          <td><span class="d" style="width: 90%">{{handover_warehouse_signature}}</span></td>
         </tr>
         <tr>
           <td class="num">7</td>
           <td>Аюулгүй байдлын алба</td>
           <td>Нэвтрэх үнэмлэх, тусгай зөвшөөрөл</td>
-          <td><span class="d" style="width: 90%">.............</span></td>
-          <td><span class="d" style="width: 90%">.............</span></td>
+          <td><span class="d" style="width: 90%">{{handover_security_receive_date}}</span></td>
+          <td><span class="d" style="width: 90%">{{handover_security_signature}}</span></td>
         </tr>
         <tr>
           <td class="num">8</td>
           <td>
             <span class="d" style="width: 95%"
-              >.................................</span
+              >{{handover_custom_unit_1}}</span
             >
           </td>
           <td>
             <span class="d" style="width: 95%"
-              >.................................</span
+              >{{handover_custom_item_1}}</span
             >
           </td>
-          <td><span class="d" style="width: 90%">.............</span></td>
-          <td><span class="d" style="width: 90%">.............</span></td>
+          <td><span class="d" style="width: 90%">{{handover_custom_date_1}}</span></td>
+          <td><span class="d" style="width: 90%">{{handover_custom_signature_1}}</span></td>
         </tr>
         <tr>
           <td class="num">9</td>
           <td>
             <span class="d" style="width: 95%"
-              >.................................</span
+              >{{handover_custom_unit_2}}</span
             >
           </td>
           <td>
             <span class="d" style="width: 95%"
-              >.................................</span
+              >{{handover_custom_item_2}}</span
             >
           </td>
-          <td><span class="d" style="width: 90%">.............</span></td>
-          <td><span class="d" style="width: 90%">.............</span></td>
+          <td><span class="d" style="width: 90%">{{handover_custom_date_2}}</span></td>
+          <td><span class="d" style="width: 90%">{{handover_custom_signature_2}}</span></td>
         </tr>
         <tr>
           <td class="num">10</td>
           <td>
             <span class="d" style="width: 95%"
-              >.................................</span
+              >{{handover_custom_unit_3}}</span
             >
           </td>
           <td>
             <span class="d" style="width: 95%"
-              >.................................</span
+              >{{handover_custom_item_3}}</span
             >
           </td>
-          <td><span class="d" style="width: 90%">.............</span></td>
-          <td><span class="d" style="width: 90%">.............</span></td>
+          <td><span class="d" style="width: 90%">{{handover_custom_date_3}}</span></td>
+          <td><span class="d" style="width: 90%">{{handover_custom_signature_3}}</span></td>
         </tr>
       </table>
 
@@ -591,32 +591,32 @@
         <tr>
           <td class="num">1</td>
           <td>Үлдэгдэл цалин</td>
-          <td><span class="d" style="width: 95%">.................</span></td>
-          <td><span class="d" style="width: 95%">.................</span></td>
+          <td><span class="d" style="width: 95%">{{final_salary_amount}}</span></td>
+          <td><span class="d" style="width: 95%">{{final_salary_note}}</span></td>
         </tr>
         <tr>
           <td class="num">2</td>
           <td>Ээлжийн амралтын нөхөн олговор</td>
-          <td><span class="d" style="width: 95%">.................</span></td>
-          <td><span class="d" style="width: 95%">.................</span></td>
+          <td><span class="d" style="width: 95%">{{vacation_comp_amount}}</span></td>
+          <td><span class="d" style="width: 95%">{{vacation_comp_note}}</span></td>
         </tr>
         <tr>
           <td class="num">3</td>
           <td>Тэтгэмж / Нөхөн төлбөр</td>
-          <td><span class="d" style="width: 95%">.................</span></td>
-          <td><span class="d" style="width: 95%">.................</span></td>
+          <td><span class="d" style="width: 95%">{{severance_amount}}</span></td>
+          <td><span class="d" style="width: 95%">{{severance_note}}</span></td>
         </tr>
         <tr>
           <td class="num">4</td>
           <td>Суутгал (зээл, төлбөр гэх мэт)</td>
-          <td>- <span class="d" style="width: 85%">.................</span></td>
-          <td><span class="d" style="width: 95%">.................</span></td>
+          <td>- <span class="d" style="width: 85%">{{deduction_amount}}</span></td>
+          <td><span class="d" style="width: 95%">{{deduction_note}}</span></td>
         </tr>
         <tr>
           <td class="num">5</td>
           <td>Бусад</td>
-          <td><span class="d" style="width: 95%">.................</span></td>
-          <td><span class="d" style="width: 95%">.................</span></td>
+          <td><span class="d" style="width: 95%">{{other_payment_amount}}</span></td>
+          <td><span class="d" style="width: 95%">{{other_payment_note}}</span></td>
         </tr>
         <tr>
           <td
@@ -626,7 +626,7 @@
             Нийт олгох дүн:
           </td>
           <td style="font-weight: bold">
-            <span class="d" style="width: 95%">.................</span>
+            <span class="d" style="width: 95%">{{total_payable_amount}}</span>
           </td>
           <td></td>
         </tr>
@@ -651,8 +651,8 @@
               ></div>
               <p style="font-size: 10pt; font-style: italic">(гарын үсэг)</p>
               <p style="margin-top: 8px; line-height: 2">
-                Нэр: <span class="d dlg">........................</span><br />
-                Огноо: <span class="d dmd">.................</span>
+                Нэр: <span class="d dlg">{{handover_prepared_by_name}}</span><br />
+                Огноо: <span class="d dmd">{{handover_prepared_date}}</span>
               </p>
             </td>
             <td style="width: 33%; vertical-align: top; padding: 0 14px">
@@ -668,8 +668,8 @@
               ></div>
               <p style="font-size: 10pt; font-style: italic">(гарын үсэг)</p>
               <p style="margin-top: 8px; line-height: 2">
-                Нэр: <span class="d dlg">........................</span><br />
-                Огноо: <span class="d dmd">.................</span>
+                Нэр: <span class="d dlg">{{handover_hr_checked_by_name}}</span><br />
+                Огноо: <span class="d dmd">{{handover_hr_checked_date}}</span>
               </p>
             </td>
             <td style="width: 33%; vertical-align: top; padding-left: 14px">
@@ -685,8 +685,8 @@
               ></div>
               <p style="font-size: 10pt; font-style: italic">(гарын үсэг)</p>
               <p style="margin-top: 8px; line-height: 2">
-                Нэр: <span class="d dlg">........................</span><br />
-                Огноо: <span class="d dmd">.................</span>
+                Нэр: <span class="d dlg">{{handover_employee_received_by_name}}</span><br />
+                Огноо: <span class="d dmd">{{handover_employee_received_date}}</span>
               </p>
             </td>
           </tr>

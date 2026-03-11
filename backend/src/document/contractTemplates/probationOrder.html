@@ -138,23 +138,23 @@
       <div class="doc-title">Туршилтаар ажиллуулах хөдөлмөрийн гэрээ</div>
       <div class="doc-meta">
         <span>2023 оны ....сарын.....-ны өдөр</span>
-        <span>№<span class="d dsm">...........</span></span>
+        <span>№<span class="d dsm">{{order_number}}</span></span>
         <span>Улаанбаатар хот</span>
       </div>
 
       <p class="indent">
         Энэхүү гэрээг нэг талаас ажил олгогч "<span class="d dlg"
-          >.....................</span
+          >{{company_name}}</span
         >
-        <b>"ХХК</b> (РД:<span class="d dmd">.................</span>)-ийг
+        <b>"ХХК</b> (РД:<span class="d dmd">{{company_register_no}}</span>)-ийг
         төлөөлж <b><i>Гүйцэтгэх захирал</i></b> ажилтай
-        <span class="d dmd">.................</span> овогтой
-        <span class="d dlg">.....................</span>( цаашид ажил олгогч
+        <span class="d dmd">{{employer_last_name}}</span> овогтой
+        <span class="d dlg">{{employer_first_name}}</span>( цаашид ажил олгогч
         гэх) нөгөө талаас
-        <span class="d dxx">.............................</span> тоот хаягаар
-        оршин суух <span class="d dmd">.................</span> регистрийн
-        дугаартай <span class="d dmd">.................</span> овогтой
-        <span class="d dlg">.....................</span>
+        <span class="d dxx">{{employee_address}}</span> тоот хаягаар
+        оршин суух <span class="d dmd">{{employee_register_no}}</span> регистрийн
+        дугаартай <span class="d dmd">{{employee_last_name}}</span> овогтой
+        <span class="d dlg">{{employee_first_name}}</span>
         (цаашид ажилтан гэх) нар нь Монгол Улсын Хөдөлмөрийн тухай хуулийн
         50.1.2 дах хэсэг, мөн хуулийн 64 дүгээр зүйлийг үндэслэн дор дурдсан
         харилцан тохиролцсон нөхцөл, заалтыг хүлээн зөвшөөрсний баталгаа болгон
@@ -173,12 +173,12 @@
 
       <p class="ind1">
         <b><i>1.1</i></b> Ажиллах газар, нэгж:
-        <span class="d dxx">...................................</span>
+        <span class="d dxx">{{workplace_unit}}</span>
       </p>
 
       <p class="ind1">
         <b><i>1.2</i></b> Ажлын байрны буюу албан тушаалын нэр:
-        <span class="d dxx">...................................</span>
+        <span class="d dxx">{{employee_position}}</span>
       </p>
 
       <p class="ind1">
@@ -188,8 +188,8 @@
 
       <p class="ind1">
         1.4 Цалин, хөдөлмөрийн хөлс:<span class="d dlg"
-          >.....................</span
-        >(<span class="d dxx">...................................</span>)<b
+          >{{salary_amount}}</span
+        >(<span class="d dxx">{{salary_amount_words}}</span>)<b
           >төгрөг</b
         >
       </p>
@@ -213,7 +213,7 @@
 
       <p class="ind2">
         1.7&nbsp; Ажилтантай байгуулах хөдөлмөрийн гэрээ
-        <span class="d dsm">.........</span>сарын туршилтын хугацаагаар
+        <span class="d dsm">{{probation_months}}</span>сарын туршилтын хугацаагаар
         байгуулна.
       </p>
 
@@ -613,7 +613,7 @@
                 АЖИЛ ОЛГОГЧИЙГ ТӨЛӨӨЛЖ:
               </p>
               <p style="text-align: center; margin-bottom: 2px">
-                "<span class="d dlg">.....................</span>" ХХК-ИЙН
+                "<span class="d dlg">{{company_name_signature}}</span>" ХХК-ИЙН
               </p>
               <p
                 style="
@@ -625,11 +625,11 @@
                 ГҮЙЦЭТГЭХ ЗАХИРАЛ
               </p>
               <p style="margin-bottom: 20px">
-                <span class="d dxx">...................................</span>
+                <span class="d dxx">{{employer_sign_line}}</span>
               </p>
 
               <p style="margin-bottom: 16px">
-                Гарын үсэг: <span class="d dlg">.....................</span>
+                Гарын үсэг: <span class="d dlg">{{employer_signature}}</span>
               </p>
 
               <p style="margin-bottom: 8px">
@@ -651,22 +651,22 @@
                 ></span>
               </p>
 
-              <p>Огноо: <span class="d dlg">.....................</span></p>
+              <p>Огноо: <span class="d dlg">{{employer_sign_date}}</span></p>
             </td>
 
             <td style="width: 50%; vertical-align: top; padding-left: 30px">
               <p style="font-weight: bold; margin-bottom: 6px">АЖИЛТАН:</p>
               <p style="margin-bottom: 2px">
-                <span class="d dxx">...................................</span
+                <span class="d dxx">{{employee_position_signature}}</span
                 >ажилтай
               </p>
               <p style="margin-bottom: 14px">
-                <span class="d dsm">.............</span> овогтой
-                <span class="d dlg">.....................</span>
+                <span class="d dsm">{{employee_last_name_signature}}</span> овогтой
+                <span class="d dlg">{{employee_first_name_signature}}</span>
               </p>
 
               <p style="margin-bottom: 16px">
-                Гарын үсэг<span class="d dlg">.....................</span>
+                Гарын үсэг<span class="d dlg">{{employee_signature}}</span>
               </p>
 
               <p style="margin-bottom: 8px">
@@ -688,7 +688,7 @@
                 ></span>
               </p>
 
-              <p>Огноо<span class="d dlg">.....................</span></p>
+              <p>Огноо<span class="d dlg">{{employee_sign_date}}</span></p>
             </td>
           </tr>
         </table>

@@ -163,26 +163,26 @@
 
       <div class="doc-meta">
         <span
-          >20<span class="d dxs">......</span> оны
-          <span class="d dxs">......</span> сарын
-          <span class="d dxs">......</span>-ны өдөр</span
+          >20<span class="d dxs">{{nda_date_year_short}}</span> оны
+          <span class="d dxs">{{nda_date_month}}</span> сарын
+          <span class="d dxs">{{nda_date_day}}</span>-ны өдөр</span
         >
-        <span>№ <span class="d dsm">.............</span></span>
+        <span>№ <span class="d dsm">{{nda_number}}</span></span>
         <span>Улаанбаатар хот</span>
       </div>
 
       <p>
         Нууц хадгалах, хамгаалах тухай (<i>цаашид</i> <b>"Гэрээ"</b>
         <i>гэх</i>)-г нэг талаас "<span class="d dxl"
-          >...............................................</span
+          >{{company_name_in_title}}</span
         >" ХХК, түүнийг төлөөлж
         <span class="d dxl"
-          >...............................................</span
+          >{{employer_representative}}</span
         >
         (<i>цаашид</i> <b>"Ажил олгогч"</b> <i>гэх</i>), нөгөө талаас
-        <span class="d dlg">..........................</span> регистрийн
-        дугаартай <span class="d dmd">...................</span> овогтой
-        <span class="d dlg">..........................</span>
+        <span class="d dlg">{{employee_register_no}}</span> регистрийн
+        дугаартай <span class="d dmd">{{employee_last_name}}</span> овогтой
+        <span class="d dlg">{{employee_first_name}}</span>
         (<i>цаашид</i> <b>"Ажилтан"</b> <i>гэх</i>) нар нь МУ-ын Иргэний хууль,
         Байгууллагын нууцийн тухай хууль, Хувь хүний нууцын тухай хууль болон
         бусад холбогдох хууль тогтоомжийг үндэслэн, харилцан тохиролцож дараах
@@ -193,7 +193,7 @@
 
       <p>
         1. Энэхүү гэрээ нь
-        <span class="d dlg">..........................</span> ХХК-ийн мэдээллийг
+        <span class="d dlg">{{company_name}}</span> ХХК-ийн мэдээллийг
         хадгалах, ажил хэргийн нэр хүнд болон хууль ёсны ашиг сонирхлыг
         хамгаалах зорилготой.
       </p>
@@ -325,7 +325,7 @@
         <div class="sig-grid">
           <div class="sig-col-left">
             <p class="sig-name">Ажил олгогчийг төлөөлж:</p>
-            <span class="sig-dots">...................................</span>
+            <span class="sig-dots">{{employer_sign_line}}</span>
             <div class="sig-info">
               <div>Хаяг:</div>
               <div>Утас:</div>
@@ -334,7 +334,7 @@
 
           <div class="sig-col-right">
             <p class="sig-name">Ажилтан:</p>
-            <span class="sig-dots">...................................</span>
+            <span class="sig-dots">{{employee_sign_line}}</span>
             <div class="sig-info">
               <div>Хаяг:</div>
               <div>Утас:</div>

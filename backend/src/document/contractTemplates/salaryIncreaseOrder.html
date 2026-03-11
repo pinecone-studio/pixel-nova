@@ -2,13 +2,15 @@
 <html lang="mn">
   <head>
     <meta charset="UTF-8" />
-    <title>Цалин нэмэгдүүлэх тушаал</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Үндсэн Цалин Нэмэх Тушаал</title>
     <style>
       * {
         box-sizing: border-box;
         margin: 0;
         padding: 0;
       }
+
       body {
         background: #d0d0d0;
         font-family: "Times New Roman", Times, serif;
@@ -16,124 +18,240 @@
         color: #000;
         padding: 30px 16px;
       }
+
       .page {
         width: 21cm;
         min-height: 29.7cm;
         background: #fff;
         margin: 0 auto 28px auto;
-        padding: 1.8cm 2cm 2cm 2.5cm;
+        padding: 2.2cm 2cm 2cm 2.5cm;
         box-shadow: 0 3px 18px rgba(0, 0, 0, 0.2);
-        position: relative;
       }
-      .org-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: flex-start;
-        margin-bottom: 16px;
-        font-size: 11pt;
-        line-height: 1.7;
-      }
-      .org-left {
-        width: 55%;
-      }
-      .org-right {
-        width: 42%;
-        text-align: right;
-      }
-      .org-name {
+
+      /* ── Гарчиг ── */
+      .doc-title {
+        text-align: center;
+        font-size: 13.5pt;
         font-weight: bold;
-        font-size: 12pt;
+        letter-spacing: 2px;
         text-transform: uppercase;
+        margin-bottom: 6px;
       }
-      .order-meta {
+
+      .doc-subtitle {
+        text-align: center;
+        font-size: 11pt;
+        font-style: italic;
+        margin-bottom: 20px;
+      }
+
+      .doc-meta {
         display: flex;
         justify-content: space-between;
         align-items: baseline;
-        border-top: 2px solid #000;
+        margin-bottom: 18px;
+        font-size: 11.5pt;
         border-bottom: 1px solid #000;
-        padding: 5px 0;
-        margin: 14px 0 18px;
-        font-size: 11.5pt;
-        font-weight: bold;
+        padding-bottom: 10px;
       }
-      .doc-subject {
+
+      /* ── Бүлгийн гарчиг ── */
+      .sec-title {
         text-align: center;
-        font-size: 13pt;
+        font-size: 12pt;
         font-weight: bold;
+        margin: 20px 0 10px;
         text-transform: uppercase;
-        margin-bottom: 20px;
-        letter-spacing: 1px;
       }
-      .info-table {
-        width: 100%;
-        border-collapse: collapse;
-        font-size: 11.5pt;
-        margin: 14px 0 18px;
-      }
-      .info-table td {
-        padding: 6px 10px;
-        border: 1px solid #000;
-        line-height: 1.75;
-        vertical-align: middle;
-      }
-      .info-table td.lbl {
-        width: 40%;
-        font-weight: bold;
-        background: #f5f5f5;
-      }
+
       p {
         text-align: justify;
-        line-height: 1.9;
-        margin-bottom: 9px;
+        line-height: 1.85;
+        margin-bottom: 8px;
         font-size: 11.5pt;
       }
-      .indent {
-        text-indent: 1.2cm;
-      }
+
       .ind1 {
-        margin-left: 1.2cm;
+        margin-left: 40px;
       }
+
+      /* ── Цэгтэй бөглөх мөр ── */
       .d {
         display: inline-block;
         vertical-align: bottom;
         overflow: hidden;
         white-space: nowrap;
-        letter-spacing: 1.5px;
+        border-bottom: 1px solid #000;
+        letter-spacing: 1px;
         font-size: 11pt;
+        color: #000;
+        min-height: 16px;
       }
+
       .dxs {
-        width: 32px;
+        width: 30px;
       }
       .dsm {
-        width: 80px;
+        width: 75px;
       }
       .dmd {
-        width: 140px;
+        width: 130px;
       }
       .dlg {
-        width: 200px;
+        width: 190px;
       }
       .dxl {
-        width: 270px;
+        width: 260px;
       }
+      .dxxl {
+        width: 340px;
+      }
+      .dfull {
+        width: 100%;
+        display: block;
+        margin-top: 4px;
+        min-height: 18px;
+      }
+
+      /* ── Мэдээллийн хүснэгт ── */
+      table.info-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 10px 0 14px 0;
+        font-size: 11.5pt;
+      }
+
+      table.info-table td {
+        border: 1px solid #000;
+        padding: 5px 8px;
+        line-height: 1.7;
+        vertical-align: middle;
+      }
+
+      table.info-table td.label {
+        font-weight: bold;
+        width: 42%;
+        background: #f5f5f5;
+      }
+
+      table.info-table td.value {
+        width: 58%;
+      }
+
+      /* ── Цалингийн хүснэгт ── */
+      table.salary-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 10px 0 14px 0;
+        font-size: 11.5pt;
+      }
+
+      table.salary-table th {
+        border: 1px solid #000;
+        padding: 6px 8px;
+        text-align: center;
+        font-weight: bold;
+        background: #e8e8e8;
+      }
+
+      table.salary-table td {
+        border: 1px solid #000;
+        padding: 6px 10px;
+        vertical-align: middle;
+      }
+
+      table.salary-table td.center {
+        text-align: center;
+      }
+      table.salary-table td.left {
+        text-align: left;
+      }
+
+      /* ── Чагтны мөр ── */
+      .check-row {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 7px;
+        font-size: 11.5pt;
+        line-height: 1.6;
+      }
+
+      .check-box {
+        display: inline-block;
+        width: 13px;
+        height: 13px;
+        border: 1px solid #000;
+        flex-shrink: 0;
+      }
+
+      /* ── Гарын үсгийн хэсэг ── */
       .sig-section {
-        margin-top: 30px;
+        margin-top: 36px;
       }
+
+      .sig-title {
+        text-align: center;
+        font-weight: bold;
+        font-size: 12.5pt;
+        margin-bottom: 20px;
+        letter-spacing: 1px;
+      }
+
       .sig-grid {
         display: grid;
         grid-template-columns: 1fr 1fr;
-        gap: 0 40px;
+        gap: 0;
         font-size: 11.5pt;
       }
-      .sig-line {
-        border-bottom: 1px solid #000;
-        width: 200px;
-        margin: 48px 0 6px;
+
+      .sig-col-left {
+        padding-right: 24px;
       }
-      .sig-hint {
-        font-size: 10pt;
-        font-style: italic;
+      .sig-col-right {
+        padding-left: 24px;
       }
+
+      .sig-name {
+        font-weight: bold;
+        margin-bottom: 12px;
+        font-size: 11.5pt;
+      }
+
+      .sig-dots {
+        letter-spacing: 2px;
+        font-size: 11pt;
+        display: block;
+        margin-bottom: 6px;
+      }
+
+      .sig-info {
+        font-size: 11.5pt;
+        line-height: 2.2;
+        margin-top: 8px;
+      }
+
+      /* ── Тамга ── */
+      .stamp-area {
+        margin-top: 28px;
+        display: flex;
+        justify-content: center;
+      }
+
+      .stamp-circle {
+        width: 90px;
+        height: 90px;
+        border: 2px dashed #bbb;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 9pt;
+        color: #bbb;
+        text-align: center;
+        line-height: 1.5;
+      }
+
       @media print {
         body {
           background: none;
@@ -143,150 +261,294 @@
           box-shadow: none;
           margin: 0;
           page-break-after: always;
+          width: 21cm;
+          min-height: 29.7cm;
+          padding: 2.2cm 2cm 2cm 2.5cm;
         }
       }
     </style>
   </head>
   <body>
+    <!-- ═══════════════  1-Р ХУУДАС  ═══════════════ -->
     <div class="page">
-      <div class="org-header">
-        <div class="org-left">
-          <div class="org-name">
-            "<span class="d dlg">........................</span>" ХХК
-          </div>
-          <div>УБД: <span class="d dmd">.................</span></div>
-          <div>
-            Хаяг: <span class="d dxl">.................................</span>
-          </div>
-        </div>
-        <div class="org-right">
-          <div>Улаанбаатар хот</div>
-          <div>
-            20<span class="d dxs">......</span> оны
-            <span class="d dxs">......</span> сарын
-            <span class="d dxs">......</span>-ны өдөр
-          </div>
-        </div>
+      <div class="doc-title">Үндсэн цалин нэмэх тушаал</div>
+      <div class="doc-subtitle">(Захиргааны тушаал)</div>
+
+      <div class="doc-meta">
+        <span>
+          20<span class="d dxs">{{order_date_year_short}}</span> оны
+          <span class="d dxs">{{order_date_month}}</span> сарын
+          <span class="d dxs">{{order_date_day}}</span>-ны өдөр
+        </span>
+        <span>№ <span class="d dsm">{{order_number}}</span></span>
+        <span>Улаанбаатар хот</span>
       </div>
 
-      <div class="order-meta">
-        <span>ТУШААЛ</span>
-        <span>№ <span class="d dsm">.............</span></span>
-        <span>Улаанбаатар</span>
-      </div>
+      <!-- Удиртгал -->
+      <p>
+        "<span class="d dxl">{{company_name}}</span>" ХХК-ийн
+        <span class="d dxl">{{employer_representative}}</span>
+        (<i>цаашид</i> <b>"Ажил олгогч"</b> <i>гэх</i>) нь Монгол Улсын
+        Хөдөлмөрийн тухай хууль, байгууллагын дотоод журам болон холбогдох бусад
+        хууль тогтоомжийг үндэслэн, дараахь ажилтны үндсэн цалинг нэмэх тухай
+        тушаал гаргав.
+      </p>
 
-      <div class="doc-subject">Цалин нэмэгдүүлэх тухай</div>
+      <!-- НЭГ. Ажилтны мэдээлэл -->
+      <div class="sec-title">Нэг. Ажилтны мэдээлэл</div>
 
       <table class="info-table">
         <tr>
-          <td class="lbl">Ажилтны овог, нэр:</td>
-          <td><span class="d dxl">.................................</span></td>
-        </tr>
-        <tr>
-          <td class="lbl">Ажиллаж буй нэгж / хэлтэс:</td>
-          <td><span class="d dxl">.................................</span></td>
-        </tr>
-        <tr>
-          <td class="lbl">Албан тушаал:</td>
-          <td><span class="d dxl">.................................</span></td>
-        </tr>
-        <tr>
-          <td class="lbl">Ажилд орсон огноо:</td>
-          <td>
-            20<span class="d dxs">......</span> оны
-            <span class="d dxs">......</span> сарын
-            <span class="d dxs">......</span>-ны өдөр
+          <td class="label">Ажилтны овог, нэр</td>
+          <td class="value">
+            <span class="d dmd">{{employee_last_name}}</span> овогтой
+            <span class="d dlg">{{employee_first_name}}</span>
           </td>
         </tr>
         <tr>
-          <td class="lbl">Өмнөх цалингийн хэмжээ:</td>
-          <td>
-            <span class="d dxl">.................................</span> ₮
+          <td class="label">Регистрийн дугаар</td>
+          <td class="value"><span class="d dmd">{{employee_register_no}}</span></td>
+        </tr>
+        <tr>
+          <td class="label">Ажлын байр / Албан тушаал</td>
+          <td class="value"><span class="d dxl">{{employee_position}}</span></td>
+        </tr>
+        <tr>
+          <td class="label">Хэлтэс / Алба / Нэгж</td>
+          <td class="value"><span class="d dxl">{{employee_department}}</span></td>
+        </tr>
+        <tr>
+          <td class="label">Ажилд орсон огноо</td>
+          <td class="value">
+            20<span class="d dxs">{{hire_date_year_short}}</span> оны
+            <span class="d dxs">{{hire_date_month}}</span> сарын
+            <span class="d dxs">{{hire_date_day}}</span>-ны өдөр
           </td>
         </tr>
         <tr>
-          <td class="lbl">Шинэ цалингийн хэмжээ:</td>
-          <td>
-            <span class="d dxl">.................................</span> ₮
-          </td>
-        </tr>
-        <tr>
-          <td class="lbl">Хүчин төгөлдөр болох огноо:</td>
-          <td>
-            20<span class="d dxs">......</span> оны
-            <span class="d dxs">......</span> сарын
-            <span class="d dxs">......</span>-ны өдөр
+          <td class="label">Ажилласан нийт хугацаа</td>
+          <td class="value">
+            <span class="d dsm">{{total_years_worked}}</span> жил &nbsp;
+            <span class="d dsm">{{total_months_worked}}</span> сар
           </td>
         </tr>
       </table>
 
-      <p class="indent">
-        Монгол Улсын Хөдөлмөрийн тухай хуулийн холбогдох заалт, компанийн цалин
-        хөлсний журам, ажилтны ажлын үр дүнгийн үнэлгээ, нэгжийн удирдлагын
-        саналыг үндэслэн дараах шийдвэрийг гаргав.
-      </p>
+      <!-- ХОЁР. Цалингийн өөрчлөлт -->
+      <div class="sec-title">Хоёр. Цалингийн өөрчлөлт</div>
 
-      <p class="ind1">
-        <b>1.</b>
-        <span class="d dxl">.................................</span> овогтой
-        <span class="d dlg">........................</span>-ийн цалинг 20<span
-          class="d dxs"
-          >......</span
+      <table class="salary-table">
+        <tr>
+          <th style="width: 42%">Үзүүлэлт</th>
+          <th style="width: 29%">Өмнөх (₮)</th>
+          <th style="width: 29%">Шинэ (₮)</th>
+        </tr>
+        <tr>
+          <td class="left">Үндсэн цалин</td>
+          <td class="center"><span class="d dmd">{{base_salary_prev}}</span></td>
+          <td class="center"><span class="d dmd">{{base_salary_new}}</span></td>
+        </tr>
+        <tr>
+          <td class="left">Нэмэгдсэн дүн</td>
+          <td class="center" colspan="2">
+            <span class="d dmd">{{increase_amount}}</span> төгрөг
+          </td>
+        </tr>
+        <tr>
+          <td class="left">Нэмэгдэлийн хувь</td>
+          <td class="center" colspan="2">
+            <span class="d dsm">{{increase_percent}}</span> %
+          </td>
+        </tr>
+      </table>
+
+      <p>
+        Хүчин төгөлдөр болох огноо: 20<span class="d dxs"
+          >{{effective_date_year_short}}</span
         >
-        оны <span class="d dxs">......</span> дугаар сарын
-        <span class="d dxs">......</span>-ний өдрөөс эхлэн
-        <span class="d dxl">.................................</span> төгрөг
-        болгон нэмэгдүүлсүгэй.
+        оны <span class="d dxs">{{effective_date_month}}</span> сарын
+        <span class="d dxs">{{effective_date_day}}</span>-ны өдрөөс эхлэн.
       </p>
 
-      <p class="ind1"><b>2.</b> Цалин нэмэгдүүлсэн үндэслэл:</p>
-      <p style="margin-left: 2.4cm">
-        а. Ажлын үр дүн, гүйцэтгэлийн үнэлгээ:
-        <span class="d dxl">.................................</span>
-      </p>
-      <p style="margin-left: 2.4cm">
-        б. Мэргэжлийн ур чадварын өсөлт:
-        <span class="d dxl">.................................</span>
-      </p>
-      <p style="margin-left: 2.4cm">
-        в. Бусад: <span class="d dxl">.................................</span>
-      </p>
+      <!-- ГУРАВ. Үндэслэл -->
+      <div class="sec-title">Гурав. Тушаалын үндэслэл</div>
+
+      <p>3.1. Цалин нэмэх үндэслэл:</p>
 
       <p class="ind1">
-        <b>3.</b> Шинэ цалинг тооцон олгохыг Санхүүгийн алба
-        <span class="d dlg">........................</span>-д үүрэг болгосугай.
-      </p>
-      <p class="ind1">
-        <b>4.</b> Энэхүү тушаалын хэрэгжилтэд хяналт тавьж ажиллахыг Хүний
-        нөөцийн алба <span class="d dlg">........................</span>-д
-        даалгасугай.
+        <span class="check-row">
+          <span class="check-box"></span>
+          Гүйцэтгэлийн үнэлгээний үр дүн
+        </span>
+        <span class="check-row">
+          <span class="check-box"></span>
+          Ажилласан хугацаа, туршлага
+        </span>
+        <span class="check-row">
+          <span class="check-box"></span>
+          Үүрэг хариуцлага нэмэгдсэн
+        </span>
+        <span class="check-row">
+          <span class="check-box"></span>
+          Зах зээлийн цалингийн түвшинтэй нийцүүлэх
+        </span>
+        <span class="check-row">
+          <span class="check-box"></span>
+          Тусгай амжилт, шагнал
+        </span>
+        <span class="check-row">
+          <span class="check-box"></span>
+          Бусад: <span class="d dlg">{{other_reason_text}}</span>
+        </span>
       </p>
 
+      <p>3.2. Дэлгэрэнгүй тайлбар:</p>
+      <p>
+        <span class="d dfull">{{reason_detail_line_1}}</span>
+        <span class="d dfull">{{reason_detail_line_2}}</span>
+        <span class="d dfull">{{reason_detail_line_3}}</span>
+      </p>
+    </div>
+    <!-- /page 1 -->
+
+    <!-- ═══════════════  2-Р ХУУДАС  ═══════════════ -->
+    <div class="page">
+      <!-- ДӨРӨВ. Тушаалын заалт -->
+      <div class="sec-title">Дөрөв. Тушаалын заалт</div>
+
+      <p>
+        4.1. Дээрх үндэслэлийг харгалзан
+        <span class="d dmd">{{employee_last_name_clause}}</span> овогтой
+        <span class="d dlg">{{employee_first_name_clause}}</span>-ийн үндсэн цалинг 20<span
+          class="d dxs"
+          >{{effective_date_year_short_clause}}</span
+        >
+        оны <span class="d dxs">{{effective_date_month_clause}}</span> сарын
+        <span class="d dxs">{{effective_date_day_clause}}</span>-ны өдрөөс эхлэн
+        <span class="d dmd">{{base_salary_prev_clause}}</span> төгрөгөөс
+        <span class="d dmd">{{base_salary_new_clause}}</span> төгрөг болгон нэмэгдүүлэн
+        тогтоосугай.
+      </p>
+
+      <p>
+        4.2. Цалингийн өөрчлөлтийг хэрэгжүүлэх үүргийг
+        <span class="d dxl">{{implementation_department}}</span>
+        (<i>Хүний нөөцийн алба / Санхүүгийн алба</i>)-д даалгасугай.
+      </p>
+
+      <p>4.3. Энэхүү тушаалыг дараахь хэлтэс, ажилтанд хүргэсүгэй:</p>
+
+      <p class="ind1">
+        — Хүний нөөцийн алба &nbsp;|&nbsp; — Санхүүгийн алба &nbsp;|&nbsp; —
+        Холбогдох хэлтэс / алба &nbsp;|&nbsp; — Ажилтан өөрт
+      </p>
+
+      <!-- ТАВ. Хяналт -->
+      <div class="sec-title">Тав. Хяналт</div>
+
+      <p>
+        5.1. Тушаалын биелэлтэд хяналт тавих үүргийг
+        <span class="d dxl">{{control_responsible}}</span>-д хүлээлгэсүгэй.
+      </p>
+
+      <p>
+        5.2. Энэхүү тушаал нь гарын үсэг зурагдсан өдрөөс хүчин төгөлдөр болох
+        бөгөөд байгууллагын архивт хадгалагдана.
+      </p>
+
+      <!-- ЗУРГАА. Бусад -->
+      <div class="sec-title">Зургаа. Бусад зүйл</div>
+
+      <p>
+        6.1. Энэхүү тушаалтай холбоотой аливаа маргааныг Монгол Улсын
+        Хөдөлмөрийн тухай хуульд заасан журмын дагуу шийдвэрлэнэ.
+      </p>
+
+      <p>
+        6.2. Тушаалыг 3 хувь үйлдэж, нэг хувийг байгууллагын архивт, нэг хувийг
+        Хүний нөөцийн алба, нэг хувийг ажилтанд олгоно.
+      </p>
+
+      <p>
+        6.3. Ажилтан энэхүү тушаалтай танилцсанаа гарын үсэг зурж
+        баталгаажуулна.
+      </p>
+
+      <!-- ДОЛОО. Ажилтны танилцсан тэмдэглэл -->
+      <div class="sec-title">Долоо. Ажилтны танилцсан тэмдэглэл</div>
+
+      <p>
+        Би,
+        <span class="d dmd">{{employee_last_name_ack}}</span> овогтой
+        <span class="d dlg">{{employee_first_name_ack}}</span>, энэхүү тушаалтай танилцаж,
+        цалингийн өөрчлөлтийг хүлээн зөвшөөрсөн болохоо гарын үсгээрээ
+        баталгаажуулж байна.
+      </p>
+
+      <p>
+        Танилцсан огноо: 20<span class="d dxs">{{ack_date_year_short}}</span> оны
+        <span class="d dxs">{{ack_date_month}}</span> сарын
+        <span class="d dxs">{{ack_date_day}}</span>-ны өдөр
+      </p>
+
+      <!-- ── Гарын үсэг ── -->
       <div class="sig-section">
+        <div class="sig-title">ТУШААЛ ГАРГАСАН БА ТАНИЛЦСАН:</div>
+
         <div class="sig-grid">
-          <div>
-            <p style="font-weight: bold">Гүйцэтгэх захирал:</p>
-            <div class="sig-line"></div>
-            <p class="sig-hint">(гарын үсэг, тамга)</p>
-            <div style="margin-top: 10px; line-height: 2">
+          <div class="sig-col-left">
+            <p class="sig-name">Тушаал гаргасан:</p>
+            <span class="sig-dots">{{issuer_sign_line}}</span>
+            <div class="sig-info">
               <div>
-                Нэр: <span class="d dlg">........................</span>
+                Албан тушаал:
+                <span class="d" style="width: 140px">{{issuer_title}}</span>
+              </div>
+              <div>
+                Овог нэр:&nbsp;&nbsp;&nbsp;&nbsp;
+                <span class="d" style="width: 148px">{{issuer_name}}</span>
+              </div>
+              <div>
+                Гарын үсэг:&nbsp;
+                <span class="d" style="width: 145px">{{issuer_signature}}</span>
+              </div>
+              <div>
+                Огноо:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                <span class="d" style="width: 158px">{{issuer_date}}</span>
               </div>
             </div>
           </div>
-          <div>
-            <p style="font-weight: bold">Танилцсан ажилтан:</p>
-            <div class="sig-line"></div>
-            <p class="sig-hint">(гарын үсэг)</p>
-            <div style="margin-top: 10px; line-height: 2">
+
+          <div class="sig-col-right">
+            <p class="sig-name">Ажилтан:</p>
+            <span class="sig-dots">{{employee_sign_line}}</span>
+            <div class="sig-info">
               <div>
-                Нэр: <span class="d dlg">........................</span>
+                Овог нэр:&nbsp;&nbsp;&nbsp;&nbsp;
+                <span class="d" style="width: 148px">{{employee_name}}</span>
               </div>
-              <div>Огноо: <span class="d dmd">.................</span></div>
+              <div>
+                Гарын үсэг:&nbsp;
+                <span class="d" style="width: 145px">{{employee_signature}}</span>
+              </div>
+              <div>
+                Огноо:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                <span class="d" style="width: 158px">{{employee_sign_date}}</span>
+              </div>
+              <div>
+                Утас:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                <span class="d" style="width: 163px">{{employee_phone}}</span>
+              </div>
             </div>
           </div>
         </div>
       </div>
+      <!-- /sig-section -->
+
+      <div class="stamp-area">
+        <div class="stamp-circle">Байгууллагын<br />тамга</div>
+      </div>
     </div>
+    <!-- /page 2 -->
   </body>
 </html>
