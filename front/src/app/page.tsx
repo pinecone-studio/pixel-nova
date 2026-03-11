@@ -21,7 +21,6 @@ export default function Home() {
       <Navbar />
 
       <div className="max-w-6xl mx-auto px-6 py-8 flex flex-col gap-6">
-        {/* Hero / Welcome Card */}
         <div className="w-full rounded-2xl border border-[#00CC99]/30  p-8">
           <div className="flex flex-col gap-3">
             <p className="text-[#00CC99] text-sm font-medium tracking-widest uppercase">
@@ -49,7 +48,6 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Stats Grid */}
         <div className="grid grid-cols-4 gap-4">
           {stats.map(({ value, label }) => (
             <div
