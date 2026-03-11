@@ -4,9 +4,10 @@
     "module": "ESNext",
     "moduleResolution": "Bundler",
     "outDir": ".test-dist",
-    "noEmit": false
+    "noEmit": false,
+    "types": ["node"]
   },
-  "include": [
+  "files": [
     "src/services/actionResolver.ts",
     "src/services/actionResolver.test.ts"
   ]
