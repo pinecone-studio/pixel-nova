@@ -51,12 +51,23 @@ export const auditLog = sqliteTable(
       .notNull()
       .references(() => employees.id, { onDelete: "cascade" }),
     action: text("action").notNull(),
+    phase: text("phase").notNull(),
+    actorId: text("actor_id"),
+    actorRole: text("actor_role").notNull().default("unknown"),
+    documentIds: text("document_ids").notNull().default("[]"),
+    recipientRoles: text("recipient_roles").notNull().default("[]"),
+    recipientEmails: text("recipient_emails").notNull().default("[]"),
+    incompleteFields: text("incomplete_fields").notNull().default("[]"),
     documentsGenerated: integer("documents_generated", { mode: "boolean" })
+      .notNull()
+      .default(false),
+    notificationAttempted: integer("notification_attempted", { mode: "boolean" })
       .notNull()
       .default(false),
     recipientsNotified: integer("recipients_notified", { mode: "boolean" })
       .notNull()
       .default(false),
+    notificationError: text("notification_error"),
     timestamp: text("timestamp").notNull(),
   },
   (table) => [index("audit_log_employee_id_idx").on(table.employeeId)],

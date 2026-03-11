@@ -1,5 +1,4 @@
-import test from "node:test";
-import assert from "node:assert/strict";
+import { expect, test } from "@jest/globals";
 
 import {
   buildEmployeeChangeSet,
@@ -30,7 +29,7 @@ test("resolves add_employee when status becomes ACTIVE for a new hire", () => {
     newValues: { status: "ACTIVE" },
   });
 
-  assert.equal(action, "add_employee");
+  expect(action).toBe("add_employee");
 });
 
 test("resolves add_employee when hireDate is first set alongside ACTIVE status", () => {
@@ -40,7 +39,7 @@ test("resolves add_employee when hireDate is first set alongside ACTIVE status",
     newValues: { status: "ACTIVE", hireDate: "2026-03-10" },
   });
 
-  assert.equal(action, "add_employee");
+  expect(action).toBe("add_employee");
 });
 
 test("resolves offboard_employee when terminationDate is newly set", () => {
@@ -50,7 +49,7 @@ test("resolves offboard_employee when terminationDate is newly set", () => {
     newValues: { terminationDate: "2026-03-10" },
   });
 
-  assert.equal(action, "offboard_employee");
+  expect(action).toBe("offboard_employee");
 });
 
 test("resolves offboard_employee when status becomes TERMINATED", () => {
@@ -60,7 +59,7 @@ test("resolves offboard_employee when status becomes TERMINATED", () => {
     newValues: { status: "TERMINATED" },
   });
 
-  assert.equal(action, "offboard_employee");
+  expect(action).toBe("offboard_employee");
 });
 
 test("resolves promote_employee when level increases", () => {
@@ -70,7 +69,7 @@ test("resolves promote_employee when level increases", () => {
     newValues: { level: "L2" },
   });
 
-  assert.equal(action, "promote_employee");
+  expect(action).toBe("promote_employee");
 });
 
 test("resolves change_position when department changes", () => {
@@ -80,7 +79,7 @@ test("resolves change_position when department changes", () => {
     newValues: { department: "Finance" },
   });
 
-  assert.equal(action, "change_position");
+  expect(action).toBe("change_position");
 });
 
 test("resolves change_position when branch changes", () => {
@@ -90,7 +89,7 @@ test("resolves change_position when branch changes", () => {
     newValues: { branch: "West" },
   });
 
-  assert.equal(action, "change_position");
+  expect(action).toBe("change_position");
 });
 
 test("resolves change_position when level decreases", () => {
@@ -100,7 +99,7 @@ test("resolves change_position when level decreases", () => {
     newValues: { level: "L2" },
   });
 
-  assert.equal(action, "change_position");
+  expect(action).toBe("change_position");
 });
 
 test("resolves change_position when level changes laterally", () => {
@@ -110,7 +109,7 @@ test("resolves change_position when level changes laterally", () => {
     newValues: { level: "L3" },
   });
 
-  assert.equal(action, "change_position");
+  expect(action).toBe("change_position");
 });
 
 test("returns null when no supported lifecycle rule matches", () => {
@@ -120,7 +119,7 @@ test("returns null when no supported lifecycle rule matches", () => {
     newValues: { firstName: "Janet" },
   });
 
-  assert.equal(action, null);
+  expect(action).toBeNull();
 });
 
 test("offboarding wins priority when termination and promotion signals overlap", () => {
@@ -130,7 +129,7 @@ test("offboarding wins priority when termination and promotion signals overlap",
     newValues: { terminationDate: "2026-03-10", level: "L2" },
   });
 
-  assert.equal(action, "offboard_employee");
+  expect(action).toBe("offboard_employee");
 });
 
 test("returns null when the matching action is missing from the registry config", () => {
@@ -148,7 +147,7 @@ test("returns null when the matching action is missing from the registry config"
     },
   );
 
-  assert.equal(action, null);
+  expect(action).toBeNull();
 });
 
 test("buildEmployeeChangeSet detects changed fields from a create payload", () => {
@@ -164,7 +163,7 @@ test("buildEmployeeChangeSet detects changed fields from a create payload", () =
     status: "ACTIVE",
   });
 
-  assert.deepEqual(changeSet.changedFields, [
+  expect(changeSet.changedFields).toEqual([
     "employeeCode",
     "firstName",
     "lastName",
@@ -174,8 +173,8 @@ test("buildEmployeeChangeSet detects changed fields from a create payload", () =
     "hireDate",
     "status",
   ]);
-  assert.deepEqual(changeSet.oldValues, {});
-  assert.equal(changeSet.newValues.status, "ACTIVE");
+  expect(changeSet.oldValues).toEqual({});
+  expect(changeSet.newValues.status).toBe("ACTIVE");
 });
 
 test("buildEmployeeChangeSet detects only updated employee fields", () => {
@@ -204,9 +203,9 @@ test("buildEmployeeChangeSet detects only updated employee fields", () => {
     },
   );
 
-  assert.deepEqual(changeSet.changedFields, ["branch", "level"]);
-  assert.equal(changeSet.oldValues.branch, "HQ");
-  assert.equal(changeSet.newValues.branch, "West");
+  expect(changeSet.changedFields).toEqual(["branch", "level"]);
+  expect(changeSet.oldValues.branch).toBe("HQ");
+  expect(changeSet.newValues.branch).toBe("West");
 });
 
 test("returns null when registry trigger fields do not overlap the change event", () => {
@@ -226,5 +225,5 @@ test("returns null when registry trigger fields do not overlap the change event"
     },
   );
 
-  assert.equal(action, null);
+  expect(action).toBeNull();
 });

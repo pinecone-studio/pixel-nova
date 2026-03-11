@@ -1,5 +1,6 @@
 import { createYoga } from "graphql-yoga";
 import { Hono } from "hono";
+import { cors } from "hono/cors";
 
 import { getDb } from "./db/client";
 import type { ActorRole } from "./db/queries";
@@ -8,6 +9,15 @@ import { graphqlSchema, type GraphQLContext } from "./graphql/schema";
 
 const app = new Hono<{ Bindings: CloudflareBindings }>();
 type YogaServerContext = { env: CloudflareBindings };
+
+app.use(
+  "*",
+  cors({
+    origin: ["http://localhost:3000"],
+    allowHeaders: ["Content-Type", "x-actor-id", "x-actor-role"],
+    allowMethods: ["GET", "POST", "OPTIONS"],
+  }),
+);
 
 function normalizeRole(value: string | null): ActorRole {
   if (value === "admin" || value === "hr" || value === "employee") {
@@ -27,6 +37,7 @@ const yoga = createYoga<YogaServerContext, Omit<GraphQLContext, "env">>({
       id: request.headers.get("x-actor-id"),
       role: normalizeRole(request.headers.get("x-actor-role")),
     },
+    publicOrigin: new URL(request.url).origin,
   }),
 });
 
@@ -39,7 +50,6 @@ app.get("/health", (c) =>
 
 app.all("/graphql", async (c) => yoga.fetch(c.req.raw, { env: c.env }));
 
-// Document download/preview endpoint
 app.get("/documents/:documentId", async (c) => {
   const db = getDb(c.env);
   const documentId = c.req.param("documentId");
@@ -51,7 +61,6 @@ app.get("/documents/:documentId", async (c) => {
 
   const bucket = (c.env as CloudflareBindings & { epas_documents?: R2Bucket }).epas_documents;
 
-  // R2-оос авах
   if (doc.storageUrl.startsWith("r2://") && bucket) {
     const r2Key = doc.storageUrl.replace("r2://", "");
     const r2Object = await bucket.get(r2Key);
@@ -61,7 +70,6 @@ app.get("/documents/:documentId", async (c) => {
     }
   }
 
-  // Data URL fallback
   if (doc.storageUrl.startsWith("data:")) {
     const commaIdx = doc.storageUrl.indexOf(",");
     const content = decodeURIComponent(doc.storageUrl.slice(commaIdx + 1));

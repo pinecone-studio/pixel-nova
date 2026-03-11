@@ -8,6 +8,7 @@ import { typeDefs } from "./typeDefs";
 export interface GraphQLContext extends RequestContext {
   env: CloudflareBindings;
   db: DbClient;
+  publicOrigin: string | null;
 }
 
 export const graphqlSchema = createSchema<GraphQLContext>({

@@ -4,6 +4,6 @@ export type { NormalizedActionConfig } from "./actionConfig";
 
 export { getEmployeeById, getEmployeeByCode, insertEmployee, updateEmployee, upsertEmployeeRecord } from "./employee";
 export { getDocuments, getDocumentById, insertDocument } from "./document";
-export { getAuditLogs, insertAuditLog, updateAuditLogNotified } from "./auditLog";
+export { getAuditLogs, insertAuditLog, normalizeAuditLog, updateAuditLogDelivery } from "./auditLog";
 export { normalizeActionConfig, listActionConfigs, ensureDefaultActionConfigs, upsertActionConfig } from "./actionConfig";
 export { createTriggeredActionRecords } from "./triggerAction";

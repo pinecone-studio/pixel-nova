@@ -1,24 +1,50 @@
-import { DocumentIcon, DownIcon } from "./components/icons";
+import { DocumentIcon } from "./components/icons";
+import { BiBuilding, BiFile, BiCheckCircle, BiLoader } from "react-icons/bi";
+import { fetchAuditLogs } from "@/lib/api";
 import { Navbar } from "./components/navbarSection";
-import {
-  BiBuilding,
-  BiFile,
-  BiTime,
-  BiCheckCircle,
-  BiLoader,
-} from "react-icons/bi";
 
-const stats = [
-  { value: 4, label: "Нийт баримт" },
-  { value: 2, label: "Хүлээгдэж буй" },
-  { value: 1, label: "Батлагдсан" },
-  { value: 1, label: "Шийдвэрлэгдсэн" },
-];
+export default async function Home() {
+  let totalDocs = 0;
+  let totalLogs = 0;
+  let docsGenerated = 0;
+  let notified = 0;
 
-export default function Home() {
+  try {
+    const auditLogs = await fetchAuditLogs();
+    totalLogs = auditLogs.length;
+    docsGenerated = auditLogs.filter((l) => l.documentsGenerated).length;
+    notified = auditLogs.filter((l) => l.recipientsNotified).length;
+    totalDocs = docsGenerated;
+  } catch {
+    // API холбогдоогүй бол default 0 утга
+  }
+
+  const stats = [
+    {
+      value: totalDocs,
+      label: "Нийт баримт",
+      icon: <BiFile className="w-4 h-4 text-[#00CC99]" />,
+    },
+    {
+      value: totalLogs,
+      label: "Нийт түүх",
+      icon: <BiLoader className="w-4 h-4 text-[#00CC99]" />,
+    },
+    {
+      value: docsGenerated,
+      label: "Баримт үүссэн",
+      icon: <BiCheckCircle className="w-4 h-4 text-[#00CC99]" />,
+    },
+    {
+      value: notified,
+      label: "Мэдэгдсэн",
+      icon: <BiCheckCircle className="w-4 h-4 text-[#00CC99]" />,
+    },
+  ];
+
   return (
     <div className="min-h-screen bg-[#0A0A0F]">
-      <Navbar />
+      {/* <Navbar /> */}
 
       <div className="max-w-6xl mx-auto px-6 py-8 flex flex-col gap-6">
         <div className="w-full rounded-2xl border border-[#00CC99]/30  p-8">
@@ -47,27 +73,27 @@ export default function Home() {
             </div>
           </div>
         </div>
+      </div>
 
-        <div className="grid grid-cols-4 gap-4">
-          {stats.map(({ value, label }) => (
-            <div
-              key={label}
-              className="rounded-xl border border-[#1E1E32] bg-[#0D0D18] p-5 hover:border-[#00CC99]/30 hover:bg-[#0D1A16] transition-all duration-200 group"
-            >
-              <div className="flex items-start justify-between">
-                <div className="flex flex-col gap-1">
-                  <p className="text-3xl font-bold text-white group-hover:text-[#00CC99] transition-colors duration-200">
-                    {value}
-                  </p>
-                  <p className="text-[#4A4A6A] text-xs">{label}</p>
-                </div>
-                <div className="rounded-lg w-9 h-9 border border-[#00CC99]/30 bg-[#00CC99]/5 flex items-center justify-center shadow-sm shadow-[#00CC99]/10 group-hover:border-[#00CC99]/60 transition-all duration-200">
-                  <DocumentIcon />
-                </div>
+      {/* Stats Grid */}
+      <div className="grid grid-cols-4 gap-4">
+        {stats.map(({ value, label }) => (
+          <div
+            key={label}
+            className="rounded-xl border border-[#1E1E32] bg-[#0D0D18] p-5 hover:border-[#00CC99]/30 hover:bg-[#0D1A16] transition-all duration-200 group">
+            <div className="flex items-start justify-between">
+              <div className="flex flex-col gap-1">
+                <p className="text-3xl font-bold text-white group-hover:text-[#00CC99] transition-colors duration-200">
+                  {value}
+                </p>
+                <p className="text-[#4A4A6A] text-xs">{label}</p>
+              </div>
+              <div className="rounded-lg w-9 h-9 border border-[#00CC99]/30 bg-[#00CC99]/5 flex items-center justify-center shadow-sm shadow-[#00CC99]/10 group-hover:border-[#00CC99]/60 transition-all duration-200">
+                <DocumentIcon />
               </div>
             </div>
-          ))}
-        </div>
+          </div>
+        ))}
       </div>
     </div>
   );
