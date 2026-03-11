@@ -1,8 +1,6 @@
-import Handlebars from "handlebars";
 import type { Employee } from "../db/schema";
 import { buildTemplateData } from "./templateData";
 
-// HTML template imports (bundled at build time by wrangler)
 import employmentContractHtml from "./contractTemplates/employmentContract.html";
 import probationOrderHtml from "./contractTemplates/probationOrder.html";
 import jobDescriptionHtml from "./contractTemplates/jobDescription.html";
@@ -13,7 +11,6 @@ import contractAddendumHtml from "./contractTemplates/contractAddendum.html";
 import terminationOrderHtml from "./contractTemplates/terminationOrder.html";
 import handoverSheetHtml from "./contractTemplates/handoverSheet.html";
 
-// Template registry: template filename → imported HTML string
 const TEMPLATE_MAP: Record<string, string> = {
   "employment_contract.html": employmentContractHtml,
   "probation_order.html": probationOrderHtml,
@@ -34,22 +31,29 @@ export interface GenerateDocumentInput {
   templateFile?: string;
 }
 
-/**
- * HTML template-ийг employee мэдээллээр render хийнэ.
- * Handlebars ашиглан {{placeholder}} token-уудыг employee data-аар солино.
- */
+export interface GeneratedDocumentTemplate {
+  documentName: string;
+  html: string;
+}
+
+function renderTemplateTokens(
+  templateHtml: string,
+  templateData: Record<string, string>,
+): string {
+  return templateHtml.replace(/\{\{\{?\s*([a-zA-Z0-9_]+)\s*\}?\}\}/g, (_match, token: string) => {
+    return templateData[token] ?? "";
+  });
+}
+
 function renderHtmlTemplate(
   templateHtml: string,
   input: GenerateDocumentInput,
 ): string {
   const { employee, action, generatedAt, documentId } = input;
 
-  // Handlebars compile + render
   const templateData = buildTemplateData(employee, generatedAt);
-  const compiled = Handlebars.compile(templateHtml, { noEscape: true });
-  const renderedHtml = compiled(templateData);
+  const renderedHtml = renderTemplateTokens(templateHtml, templateData);
 
-  // Metadata comment-ийг HTML-ийн <body> дараа нэмнэ
   const metadata = `
 <!-- EPAS Document Metadata
   Document ID: ${documentId}
@@ -62,62 +66,47 @@ function renderHtmlTemplate(
   Status: ${employee.status}
 -->`;
 
-  // <body> tag-ийн дараа metadata оруулна
-  return renderedHtml.replace(/<body[^>]*>/, (match) => `${match}\n${metadata}`);
+  return renderedHtml.replace(/<body[^>]*>/, (match: string) => `${match}\n${metadata}`);
 }
 
-/**
- * Plain text fallback (template олдохгүй бол)
- */
-function buildPlainTextFallback(input: GenerateDocumentInput): string {
+function buildHtmlFallback(input: GenerateDocumentInput): string {
   const { employee, action, generatedAt, documentId } = input;
-  const lines = [
-    `Document ID: ${documentId}`,
-    `Action: ${action}`,
-    `Generated At: ${generatedAt}`,
-    "",
-    "Employee Summary",
-    `- Employee Code: ${employee.employeeCode}`,
-    `- Name: ${employee.firstName} ${employee.lastName}`,
-    `- Department: ${employee.department}`,
-    `- Branch: ${employee.branch}`,
-    `- Level: ${employee.level}`,
-    `- Hire Date: ${employee.hireDate}`,
-    `- Status: ${employee.status}`,
-  ];
-  if (employee.terminationDate) {
-    lines.push(`- Termination Date: ${employee.terminationDate}`);
-  }
-  return lines.join("\n");
+  return `<!doctype html>
+<html lang="mn">
+  <head>
+    <meta charset="UTF-8" />
+    <title>${employee.employeeCode} ${action}</title>
+    <style>
+      body { font-family: "Times New Roman", serif; margin: 32px; color: #111; }
+      h1 { font-size: 20px; margin-bottom: 16px; }
+      p { margin: 0 0 8px; line-height: 1.5; }
+    </style>
+  </head>
+  <body>
+    <h1>EPAS Document</h1>
+    <p>Document ID: ${documentId}</p>
+    <p>Action: ${action}</p>
+    <p>Generated At: ${generatedAt}</p>
+    <p>Employee Code: ${employee.employeeCode}</p>
+    <p>Name: ${employee.lastName} ${employee.firstName}</p>
+    <p>Department: ${employee.department}</p>
+    <p>Branch: ${employee.branch}</p>
+    <p>Level: ${employee.level}</p>
+    <p>Status: ${employee.status}</p>
+  </body>
+</html>`;
 }
 
-export function generateEmployeeDocument(input: GenerateDocumentInput) {
+export function generateEmployeeDocument(input: GenerateDocumentInput): GeneratedDocumentTemplate {
   const templateFile = input.templateFile;
   const templateHtml = templateFile ? TEMPLATE_MAP[templateFile] : undefined;
-
-  if (templateHtml) {
-    // HTML template render
-    const content = renderHtmlTemplate(templateHtml, input);
-    const safeName = input.templateFile!.replace(".html", "");
-    const documentName = `${input.employee.employeeCode}-${safeName}-${input.generatedAt.slice(0, 10)}.html`;
-
-    return {
-      documentName,
-      storageUrl: "", // R2 upload хийгдсэний дараа бөглөгдөнө
-      content,
-      contentType: "text/html",
-    };
-  }
-
-  // Fallback: plain text
-  const content = buildPlainTextFallback(input);
-  const documentName = `${input.employee.employeeCode}-${input.action.replace(/[^a-z0-9-]+/gi, "-")}-${input.generatedAt.slice(0, 10)}.txt`;
-  const storageUrl = `data:text/plain;charset=utf-8,${encodeURIComponent(content)}`;
+  const safeName = (templateFile ?? input.action).replace(".html", "");
+  const documentName = `${input.employee.employeeCode}-${safeName}-${input.generatedAt.slice(0, 10)}.pdf`;
 
   return {
     documentName,
-    storageUrl,
-    content,
-    contentType: "text/plain",
+    html: templateHtml
+      ? renderHtmlTemplate(templateHtml, input)
+      : buildHtmlFallback(input),
   };
 }

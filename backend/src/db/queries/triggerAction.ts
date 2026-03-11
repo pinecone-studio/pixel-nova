@@ -3,6 +3,7 @@ import { and, eq } from "drizzle-orm";
 import type { DbClient } from "../client";
 import { auditLog, documents } from "../schema";
 import { generateEmployeeDocument } from "../../document/generator";
+import { renderPdfFromService } from "../../document/pdfRenderer";
 import { buildTemplateData, validateRequiredFields } from "../../document/templateData";
 import { uploadEmployeeDocumentToR2 } from "../../storage/r2";
 import { getEmployeeById } from "./employee";
@@ -14,11 +15,17 @@ export async function createTriggeredActionRecords(
   actionName: string,
   bucket?: R2Bucket,
   actor?: Actor,
+  pdfRenderer?: { serviceUrl?: string | null; secret?: string | null },
 ) {
   const employee = await getEmployeeById(db, employeeId);
 
   if (!employee) {
     throw new Error(`Employee not found for id ${employeeId}`);
+  }
+
+  const rendererUrl = pdfRenderer?.serviceUrl?.trim();
+  if (!rendererUrl) {
+    throw new Error("PDF renderer service URL is not configured");
   }
 
   const now = new Date().toISOString();
@@ -59,8 +66,14 @@ export async function createTriggeredActionRecords(
       documentId,
       templateFile: tmpl.template,
     });
+    const pdfBytes = await renderPdfFromService({
+      html: generated.html,
+      documentName: generated.documentName,
+      serviceUrl: rendererUrl,
+      secret: pdfRenderer?.secret,
+    });
 
-    let storageUrl = generated.storageUrl;
+    let storageUrl = "";
 
     if (bucket) {
       try {
@@ -75,27 +88,25 @@ export async function createTriggeredActionRecords(
           order: orderPrefix,
           templateId: tmpl.id,
           documentId,
-          documentName: `${orderPrefix}_${tmpl.id}.html`,
-          content: generated.content,
-          contentType: generated.contentType,
+          documentName: `${orderPrefix}_${tmpl.id}.pdf`,
+          content: pdfBytes,
+          contentType: "application/pdf",
           createdAt: now,
         });
         storageUrl = `r2://${r2Key}`;
       } catch (err) {
         console.error(`R2 upload failed for ${tmpl.id}:`, err);
-        if (!storageUrl) {
-          storageUrl = `data:${generated.contentType};charset=utf-8,${encodeURIComponent(generated.content)}`;
-        }
+        storageUrl = `data:application/pdf;base64,${Buffer.from(pdfBytes).toString("base64")}`;
       }
-    } else if (!storageUrl) {
-      storageUrl = `data:${generated.contentType};charset=utf-8,${encodeURIComponent(generated.content)}`;
+    } else {
+      storageUrl = `data:application/pdf;base64,${Buffer.from(pdfBytes).toString("base64")}`;
     }
 
     documentInserts.push({
       id: documentId,
       employeeId,
       action: normalizedAction,
-      documentName: `${orderPrefix}_${tmpl.id}.html`,
+      documentName: `${orderPrefix}_${tmpl.id}.pdf`,
       storageUrl,
       createdAt: now,
     });

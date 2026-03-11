@@ -27,6 +27,26 @@ function normalizeRole(value: string | null): ActorRole {
   return "unknown";
 }
 
+function parseDataUrl(dataUrl: string) {
+  const [header, payload = ""] = dataUrl.split(",", 2);
+  const contentType = header.slice(5).split(";")[0] || "text/plain";
+  const isBase64 = header.includes(";base64");
+
+  if (isBase64) {
+    return {
+      contentType,
+      bytes: Uint8Array.from(Buffer.from(payload, "base64")),
+      text: null,
+    };
+  }
+
+  return {
+    contentType,
+    bytes: null,
+    text: decodeURIComponent(payload),
+  };
+}
+
 const yoga = createYoga<YogaServerContext, Omit<GraphQLContext, "env">>({
   schema: graphqlSchema,
   graphqlEndpoint: "/graphql",
@@ -65,18 +85,26 @@ app.get("/documents/:documentId", async (c) => {
     const r2Key = doc.storageUrl.replace("r2://", "");
     const r2Object = await bucket.get(r2Key);
     if (r2Object) {
-      const content = await r2Object.text();
-      return c.html(content);
+      const contentType = r2Object.httpMetadata?.contentType ?? "application/pdf";
+      const body = await r2Object.arrayBuffer();
+      c.header("Content-Type", contentType);
+      c.header("Content-Disposition", `inline; filename="${doc.documentName}"`);
+      return c.body(body);
     }
   }
 
   if (doc.storageUrl.startsWith("data:")) {
-    const commaIdx = doc.storageUrl.indexOf(",");
-    const content = decodeURIComponent(doc.storageUrl.slice(commaIdx + 1));
-    if (doc.storageUrl.includes("text/html")) {
-      return c.html(content);
+    const parsed = parseDataUrl(doc.storageUrl);
+    c.header("Content-Type", parsed.contentType);
+    c.header("Content-Disposition", `inline; filename="${doc.documentName}"`);
+
+    if (parsed.bytes) {
+      return c.body(parsed.bytes);
     }
-    return c.text(content);
+
+    return parsed.contentType === "text/html"
+      ? c.html(parsed.text ?? "")
+      : c.text(parsed.text ?? "");
   }
 
   return c.json({ error: "Document content unavailable" }, 404);

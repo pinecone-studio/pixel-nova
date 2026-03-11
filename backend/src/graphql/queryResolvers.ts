@@ -17,6 +17,17 @@ interface AuditLogsArgs {
   employeeId?: string | null;
 }
 
+function parseDataUrl(dataUrl: string) {
+  const [header, payload = ""] = dataUrl.split(",", 2);
+  const contentType = header.slice(5).split(";")[0] || "text/plain";
+  const isBase64 = header.includes(";base64");
+
+  return {
+    contentType,
+    content: isBase64 ? payload : decodeURIComponent(payload),
+  };
+}
+
 export const queryResolvers = {
   documents: (_: unknown, args: DocumentsArgs, ctx: Ctx) =>
     getDocuments(ctx.db, args.employeeId),
@@ -40,31 +51,30 @@ export const queryResolvers = {
     const bucket = (ctx.env as CloudflareBindings & { epas_documents?: R2Bucket })
       .epas_documents;
 
-    // R2-оос авах
     if (doc.storageUrl.startsWith("r2://") && bucket) {
       const r2Key = doc.storageUrl.replace("r2://", "");
       const r2Object = await bucket.get(r2Key);
       if (r2Object) {
-        const content = await r2Object.text();
+        const contentType = r2Object.httpMetadata?.contentType ?? "application/pdf";
+        const content = contentType === "application/pdf"
+          ? Buffer.from(await r2Object.arrayBuffer()).toString("base64")
+          : await r2Object.text();
         return {
           id: doc.id,
           documentName: doc.documentName,
-          contentType: r2Object.httpMetadata?.contentType ?? "text/html",
+          contentType,
           content,
         };
       }
     }
 
-    // Data URL-оос авах (fallback)
     if (doc.storageUrl.startsWith("data:")) {
-      const commaIdx = doc.storageUrl.indexOf(",");
-      const content = decodeURIComponent(doc.storageUrl.slice(commaIdx + 1));
-      const contentType = doc.storageUrl.includes("text/html") ? "text/html" : "text/plain";
+      const parsed = parseDataUrl(doc.storageUrl);
       return {
         id: doc.id,
         documentName: doc.documentName,
-        contentType,
-        content,
+        contentType: parsed.contentType,
+        content: parsed.content,
       };
     }
 

@@ -76,7 +76,7 @@ export const auditLog = sqliteTable(
 export const recipients = sqliteTable("recipients", {
   id: text("id").primaryKey(),
   role: text("role").notNull(),
-  email: text("email").notNull().unique(),
+  email: text("email").notNull(),
 });
 
 export const actions = sqliteTable(
