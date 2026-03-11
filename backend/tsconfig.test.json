@@ -1,14 +1,10 @@
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {
-    "module": "ESNext",
-    "moduleResolution": "Bundler",
-    "outDir": ".test-dist",
-    "noEmit": false,
-    "types": ["node"]
+    "noEmit": true,
+    "types": ["./worker-configuration.d.ts", "node", "jest"]
   },
-  "files": [
-    "src/services/actionResolver.ts",
-    "src/services/actionResolver.test.ts"
+  "include": [
+    "src/**/*.ts"
   ]
 }

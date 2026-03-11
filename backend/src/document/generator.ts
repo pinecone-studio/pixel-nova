@@ -1,4 +1,6 @@
+import Handlebars from "handlebars";
 import type { Employee } from "../db/schema";
+import { buildTemplateData } from "./templateData";
 
 // HTML template imports (bundled at build time by wrangler)
 import employmentContractHtml from "./contractTemplates/employmentContract.html";
@@ -34,14 +36,18 @@ export interface GenerateDocumentInput {
 
 /**
  * HTML template-ийг employee мэдээллээр render хийнэ.
- * Template дотор байгаа placeholder цэгүүдийг хэвээр үлдээж,
- * document-ийн metadata-г HTML comment-ээр оруулна.
+ * Handlebars ашиглан {{placeholder}} token-уудыг employee data-аар солино.
  */
 function renderHtmlTemplate(
   templateHtml: string,
   input: GenerateDocumentInput,
 ): string {
   const { employee, action, generatedAt, documentId } = input;
+
+  // Handlebars compile + render
+  const templateData = buildTemplateData(employee, generatedAt);
+  const compiled = Handlebars.compile(templateHtml, { noEscape: true });
+  const renderedHtml = compiled(templateData);
 
   // Metadata comment-ийг HTML-ийн <body> дараа нэмнэ
   const metadata = `
@@ -57,7 +63,7 @@ function renderHtmlTemplate(
 -->`;
 
   // <body> tag-ийн дараа metadata оруулна
-  return templateHtml.replace(/<body[^>]*>/, (match) => `${match}\n${metadata}`);
+  return renderedHtml.replace(/<body[^>]*>/, (match) => `${match}\n${metadata}`);
 }
 
 /**

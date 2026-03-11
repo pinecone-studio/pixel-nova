@@ -1,6 +1,6 @@
 import {
   createTriggeredActionRecords,
-  updateAuditLogNotified,
+  updateAuditLogDelivery,
 } from "../db/queries";
 import { dispatchNotification } from "../notifications/dispatchNotification";
 import type { GraphQLContext } from "./schema";
@@ -17,7 +17,13 @@ export async function executeTriggeredAction(
   const bucket = (ctx.env as CloudflareBindings & { epas_documents?: R2Bucket })
     .epas_documents;
 
-  const result = await createTriggeredActionRecords(ctx.db, employeeId, action, bucket);
+  const result = await createTriggeredActionRecords(
+    ctx.db,
+    employeeId,
+    action,
+    bucket,
+    ctx.actor,
+  );
 
   const notificationResult = await dispatchNotification({
     db: ctx.db,
@@ -25,16 +31,25 @@ export async function executeTriggeredAction(
     documents: result.documents,
     action,
     apiKey: resendApiKey,
+    publicOrigin: ctx.publicOrigin,
   });
 
-  if (notificationResult.notified) {
-    await updateAuditLogNotified(ctx.db, result.auditEntry.id, true);
-    result.auditEntry.recipientsNotified = true;
-  }
+  await updateAuditLogDelivery(ctx.db, result.auditEntry.id, {
+    recipientEmails: notificationResult.recipientEmails,
+    notificationAttempted: notificationResult.notificationAttempted,
+    recipientsNotified: notificationResult.notified,
+    notificationError: notificationResult.error ?? null,
+  });
+
+  result.auditEntry.recipientEmails = notificationResult.recipientEmails;
+  result.auditEntry.notificationAttempted = notificationResult.notificationAttempted;
+  result.auditEntry.recipientsNotified = notificationResult.notified;
+  result.auditEntry.notificationError = notificationResult.error ?? null;
 
   return {
     employee: result.employee,
     documents: result.documents,
     auditLog: result.auditEntry,
+    incompleteFields: result.incompleteFields,
   };
 }

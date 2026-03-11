@@ -38,8 +38,17 @@ export const typeDefs = /* GraphQL */ `
     id: ID!
     employeeId: ID!
     action: String!
+    phase: String!
+    actorId: String
+    actorRole: String!
+    documentIds: [ID!]!
+    recipientRoles: [String!]!
+    recipientEmails: [String!]!
+    incompleteFields: [String!]!
     documentsGenerated: Boolean!
+    notificationAttempted: Boolean!
     recipientsNotified: Boolean!
+    notificationError: String
     timestamp: String!
   }
 
@@ -60,6 +69,7 @@ export const typeDefs = /* GraphQL */ `
     employee: Employee!
     documents: [Document!]!
     auditLog: AuditLog!
+    incompleteFields: [String!]!
   }
 
   type UpsertEmployeeResult {
