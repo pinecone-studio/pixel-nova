@@ -1,131 +1,238 @@
-export const AuditlogComponennt = () => {
-    const insightBars = [55, 70, 62, 80, 74, 85, 78, 90, 83, 92, 86, 95];
-const insightMonths = [
-  "1-р",
-  "2-р",
-  "3-р",
-  "4-р",
-  "5-р",
-  "6-р",
-  "7-р",
-  "8-р",
-  "9-р",
-  "10-р",
-  "11-р",
-  "12-р",
+"use client";
+import { useState } from "react";
+import {
+  CheckCircle,
+  ChevronDown,
+  DocRowIcon,
+  PaperclipIcon,
+  SearchIcon,
+} from "./icons";
+
+// ── Types ──────────────────────────────────────────────
+type DocItem = { name: string };
+type LogEntry = {
+  name: string;
+  action: string;
+  actionColor: string;
+  date: string;
+  docCount: number;
+  docs: DocItem[];
+};
+
+// ── Data ───────────────────────────────────────────────
+const logs: LogEntry[] = [
+  {
+    name: "Бат-Эрдэнэ Дорж",
+    action: "Ажилтан нэмэх",
+    actionColor:
+      "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30",
+    date: "2/24/2024 9:15:32 AM",
+    docCount: 4,
+    docs: [
+      { name: "Хөдөлмөрийн гэрээ" },
+      { name: "Нууцын гэрээ" },
+      { name: "Ажлын байрны тодорхойлолт" },
+      { name: "Туршилтаар авах тушаал" },
+    ],
+  },
+  {
+    name: "Сарангэрэл Болд",
+    action: "Дэвшүүлэх",
+    actionColor: "bg-blue-500/20 text-blue-400 border border-blue-500/30",
+    date: "6/15/2024 2:22:45 PM",
+    docCount: 1,
+    docs: [{ name: "Үндсэн цалин нэмэх тушаал" }],
+  },
+  {
+    name: "Тэмүүлэн Ганбаатар",
+    action: "Ажлаас гарах",
+    actionColor: "bg-red-500/20 text-red-400 border border-red-500/30",
+    date: "1/10/2025 10:30:00 AM",
+    docCount: 2,
+    docs: [{ name: "Тойрох хуудас" }, { name: "Ажлаас чөлөөлөх тушаал" }],
+  },
+  {
+    name: "Оюунчимэг Нямдорж",
+    action: "Албан тушаал өөрчлөх",
+    actionColor: "bg-cyan-500/20 text-cyan-400 border border-cyan-500/30",
+    date: "9/1/2024 11:45:12 AM",
+    docCount: 3,
+    docs: [
+      { name: "Шинэ гэрээ" },
+      { name: "Дэвшүүлэх тушаал" },
+      { name: "Цалингийн тодорхойлолт" },
+    ],
+  },
 ];
 
-    const insightStats = [
-  { label: "Нийт ажилтан", value: "324", change: "+12.5%", up: true },
-  { label: "Дундаж ирц", value: "96.2%", change: "+1.3%", up: true },
-  { label: "Чөлөөний хүсэлт", value: "18", change: "-3", up: false },
-  { label: "Шинэ ажилтан", value: "6", change: "+2", up: true },
-];
-const topEmployees = [
-  {
-    initials: "Б",
-    name: "Батбаяр Дорж",
-    role: "Ахлах инженер",
-    score: 98,
-    color: "bg-blue-500",
-  },
-  {
-    initials: "М",
-    name: "Мөнхзул Бат",
-    role: "Дизайнер",
-    score: 95,
-    color: "bg-gradient-to-br from-teal-400 to-emerald-500",
-  },
-  {
-    initials: "О",
-    name: "Оюунчимэг Нямдорж",
-    role: "Мэргэжилтэн",
-    score: 92,
-    color: "bg-gradient-to-br from-purple-500 to-pink-500",
-  },
-];
-    return (
-            <div className="flex flex-col gap-5">
-          <div>
-            <p className="text-white text-2xl font-bold tracking-tight">
-              Insight
-            </p>
-            <p className="text-slate-500 text-sm mt-1">
-              Байгууллагын гүйцэтгэлийн дүн шинжилгээ
-            </p>
-          </div>
-          <div className="grid grid-cols-4 gap-4">
-            {insightStats.map((s) => (
-              <div
-                key={s.label}
-                className="rounded-2xl border border-white/8 bg-[#0a0f0e] p-4"
+// ── Icons ──────────────────────────────────────────────
+
+// ── Accordion Row ──────────────────────────────────────
+const LogRow = ({ entry }: { entry: LogEntry }) => {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <div className="rounded-2xl border border-slate-700/40 bg-[#0d1117] overflow-hidden">
+      {/* Header */}
+      <button
+        onClick={() => setOpen((o) => !o)}
+        className="w-full flex items-center justify-between px-5 py-4 hover:bg-slate-800/30 transition-colors"
+      >
+        <div className="flex items-center gap-4">
+          <CheckCircle />
+          <div className="text-left">
+            <div className="flex items-center gap-2.5 flex-wrap">
+              <span className="text-white font-semibold text-sm">
+                {entry.name}
+              </span>
+              <span
+                className={`text-xs px-2.5 py-0.5 rounded-full font-medium ${entry.actionColor}`}
               >
-                <p className="text-slate-500 text-xs uppercase tracking-widest mb-3">
-                  {s.label}
-                </p>
-                <div className="flex items-end justify-between">
-                  <p className="text-3xl font-bold text-white">{s.value}</p>
-                  <span
-                    className={`text-xs px-2 py-0.5 rounded-full font-medium ${s.up ? "bg-[#0ad4b1]/15 text-[#0ad4b1]" : "bg-red-500/15 text-red-400"}`}
-                  >
-                    {s.change}
-                  </span>
-                </div>
-              </div>
-            ))}
-          </div>
-          <div className="rounded-2xl border border-white/8 bg-[#0a0f0e] p-6">
-            <div className="flex items-center justify-between mb-6">
-              <p className="text-white font-semibold">Сарын ирцийн дүн</p>
-              <span className="text-xs text-slate-500">2025 он</span>
+                {entry.action}
+              </span>
+              <span className="text-slate-500 text-xs">{entry.date}</span>
             </div>
-            <div className="flex items-end gap-2 h-32">
-              {insightBars.map((h, i) => (
-                <div
-                  key={i}
-                  className="flex-1 flex flex-col items-center gap-1"
-                >
-                  <div
-                    className="w-full rounded-t-sm bg-[#0ad4b1]/30 hover:bg-[#0ad4b1]/70 transition-colors"
-                    style={{ height: `${(h / 95) * 100}%` }}
-                  />
-                  <span className="text-[9px] text-slate-600">
-                    {insightMonths[i]}
-                  </span>
-                </div>
-              ))}
-            </div>
-          </div>
-          <div className="rounded-2xl border border-white/8 bg-[#0a0f0e] p-6">
-            <p className="text-white font-semibold mb-4">Шилдэг ажилтнууд</p>
-            <div className="flex flex-col gap-3">
-              {topEmployees.map((e, i) => (
-                <div key={i} className="flex items-center gap-4">
-                  <span className="text-slate-600 text-sm w-4">{i + 1}</span>
-                  <div
-                    className={`w-9 h-9 rounded-xl ${e.color} flex items-center justify-center text-white text-sm font-bold shrink-0`}
-                  >
-                    {e.initials}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-white text-sm font-medium">{e.name}</p>
-                    <p className="text-slate-500 text-xs">{e.role}</p>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <div className="w-28 h-1.5 rounded-full bg-white/8 overflow-hidden">
-                      <div
-                        className="h-full rounded-full bg-[#0ad4b1]"
-                        style={{ width: `${e.score}%` }}
-                      />
-                    </div>
-                    <span className="text-[#0ad4b1] text-xs font-semibold w-8 text-right">
-                      {e.score}
-                    </span>
-                  </div>
-                </div>
-              ))}
+            <div className="flex items-center gap-1.5 mt-1">
+              <PaperclipIcon />
+              <span className="text-slate-500 text-xs">
+                {entry.docCount} баримт үүсгэгдэв
+              </span>
             </div>
           </div>
         </div>
-    )
-}
+        <ChevronDown open={open} />
+      </button>
+
+      {/* Dropdown content */}
+      {open && (
+        <div className="border-t border-slate-700/40 px-5 py-3 flex flex-col gap-2 bg-[#0a0f18]">
+          {entry.docs.map((doc, i) => (
+            <div
+              key={i}
+              className="flex items-center gap-2.5 py-2 border-b border-slate-800/50 last:border-0"
+            >
+              <DocRowIcon />
+              <span className="text-slate-300 text-sm">{doc.name}</span>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
+
+// ── Main Component ─────────────────────────────────────
+export const AuditlogComponent = () => {
+  const [activeTab, setActiveTab] = useState("Бүгд");
+  const [search, setSearch] = useState("");
+
+  const tabs = ["Бүгд", "Амжилттай", "Алдаа"];
+
+  const successCount = logs.length;
+  const errorCount = 0;
+
+  const filtered = logs.filter((l) =>
+    l.name.toLowerCase().includes(search.toLowerCase()),
+  );
+
+  return (
+    <div className="min-h-screen bg-[#080c12] text-white font-sans flex flex-col gap-4 p-0">
+      {/* Search */}
+      <div className="flex items-center gap-2 bg-[#0d1117] border border-slate-700/50 rounded-xl px-4 py-2.5">
+        <SearchIcon />
+        <input
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="bg-transparent text-slate-300 text-sm outline-none placeholder:text-slate-600 w-full"
+          placeholder="Ажилтан нэрээр хайх..."
+        />
+      </div>
+
+      {/* Tabs */}
+      <div className="flex items-center gap-2">
+        {tabs.map((tab) => (
+          <button
+            key={tab}
+            onClick={() => setActiveTab(tab)}
+            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium border border-gray-500 cursor-pointer transition-all ${
+              activeTab === tab
+                ? "bg-[#0ad4b1] text-black"
+                : "text-slate-400 hover:text-slate-200"
+            }`}
+          >
+            {tab !== "Бүгд" && (
+              <svg width="14" height="14" fill="none" viewBox="0 0 24 24">
+                {tab === "Амжилттай" ? (
+                  <>
+                    <circle
+                      cx="12"
+                      cy="12"
+                      r="9"
+                      stroke="currentColor"
+                      strokeWidth="1.8"
+                    />
+                    <path
+                      d="M7.5 12l3 3 6-6"
+                      stroke="currentColor"
+                      strokeWidth="1.8"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </>
+                ) : (
+                  <>
+                    <circle
+                      cx="12"
+                      cy="12"
+                      r="9"
+                      stroke="currentColor"
+                      strokeWidth="1.8"
+                    />
+                    <path
+                      d="M9 9l6 6M15 9l-6 6"
+                      stroke="currentColor"
+                      strokeWidth="1.8"
+                      strokeLinecap="round"
+                    />
+                  </>
+                )}
+              </svg>
+            )}
+            {tab}
+          </button>
+        ))}
+      </div>
+
+      {/* Log rows */}
+      <div className="flex flex-col gap-3">
+        {filtered.map((entry, i) => (
+          <LogRow key={i} entry={entry} />
+        ))}
+      </div>
+
+      {/* Footer summary */}
+      <div className="rounded-2xl border border-slate-700/40 bg-[#0d1117] mt-2">
+        <div className="grid grid-cols-3 divide-x divide-slate-700/40 px-0 py-5">
+          <div className="flex flex-col items-center gap-1 px-6">
+            <span className="text-slate-500 text-sm">Нийт үйлдэл</span>
+            <span className="text-white text-2xl font-bold">{logs.length}</span>
+          </div>
+          <div className="flex flex-col items-center gap-1 px-6">
+            <span className="text-slate-500 text-sm">Амжилттай</span>
+            <span className="text-emerald-400 text-2xl font-bold">
+              {successCount}
+            </span>
+          </div>
+          <div className="flex flex-col items-center gap-1 px-6">
+            <span className="text-slate-500 text-sm">Алдаа</span>
+            <span className="text-red-400 text-2xl font-bold">
+              {errorCount}
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default AuditlogComponent;
