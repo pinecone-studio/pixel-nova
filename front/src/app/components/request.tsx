@@ -1,3 +1,5 @@
+ "use client";
+
 import { useState } from "react";
 import { BiCalendar, BiChevronRight, BiFile, BiPlus } from "react-icons/bi";
 
