@@ -1,5 +1,21 @@
 "use client";
 import { useState, useRef } from "react";
+import {
+  AbsentIcon,
+  ActiveIconn,
+  BuildingIcon,
+  CalIcon,
+  ChevronDown,
+  ChevronDownn,
+  FilterIcon,
+  HiredIcon,
+  LockIcon,
+  MailIcon,
+  PhoneIcon,
+  PlusIcon,
+  SearchIcon,
+  UploadIcon,
+} from "./icons";
 
 // ── Types ──────────────────────────────────────────────
 type Employee = {
@@ -75,198 +91,6 @@ const statusStyle: Record<string, string> = {
   Чөлөөтэй: "bg-blue-500/20 text-blue-400 border border-blue-500/30",
 };
 
-// ── Icons ──────────────────────────────────────────────
-const SearchIcon = () => (
-  <svg
-    width="15"
-    height="15"
-    fill="none"
-    viewBox="0 0 24 24"
-    className="text-slate-500 flex-shrink-0"
-  >
-    <circle cx="11" cy="11" r="8" stroke="currentColor" strokeWidth="1.6" />
-    <path
-      d="M21 21l-4.35-4.35"
-      stroke="currentColor"
-      strokeWidth="1.6"
-      strokeLinecap="round"
-    />
-  </svg>
-);
-const MailIcon = () => (
-  <svg
-    width="13"
-    height="13"
-    fill="none"
-    viewBox="0 0 24 24"
-    className="text-slate-500 flex-shrink-0"
-  >
-    <rect
-      x="2"
-      y="4"
-      width="20"
-      height="16"
-      rx="2"
-      stroke="currentColor"
-      strokeWidth="1.6"
-    />
-    <path
-      d="M2 8l10 6 10-6"
-      stroke="currentColor"
-      strokeWidth="1.6"
-      strokeLinecap="round"
-    />
-  </svg>
-);
-const PhoneIcon = () => (
-  <svg
-    width="13"
-    height="13"
-    fill="none"
-    viewBox="0 0 24 24"
-    className="text-slate-500 flex-shrink-0"
-  >
-    <path
-      d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.81 19.79 19.79 0 01.01 1.18 2 2 0 012 0h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.09 7.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"
-      stroke="currentColor"
-      strokeWidth="1.6"
-      strokeLinejoin="round"
-    />
-  </svg>
-);
-const BuildingIcon = () => (
-  <svg
-    width="13"
-    height="13"
-    fill="none"
-    viewBox="0 0 24 24"
-    className="text-slate-500 flex-shrink-0"
-  >
-    <rect
-      x="2"
-      y="7"
-      width="20"
-      height="14"
-      rx="1"
-      stroke="currentColor"
-      strokeWidth="1.6"
-    />
-    <path
-      d="M16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16"
-      stroke="currentColor"
-      strokeWidth="1.6"
-    />
-  </svg>
-);
-const CalIcon = () => (
-  <svg
-    width="13"
-    height="13"
-    fill="none"
-    viewBox="0 0 24 24"
-    className="text-slate-500 flex-shrink-0"
-  >
-    <rect
-      x="3"
-      y="4"
-      width="18"
-      height="18"
-      rx="2"
-      stroke="currentColor"
-      strokeWidth="1.6"
-    />
-    <path
-      d="M16 2v4M8 2v4M3 10h18"
-      stroke="currentColor"
-      strokeWidth="1.6"
-      strokeLinecap="round"
-    />
-  </svg>
-);
-const FilterIcon = () => (
-  <svg
-    width="14"
-    height="14"
-    fill="none"
-    viewBox="0 0 24 24"
-    className="text-slate-400"
-  >
-    <path
-      d="M22 3H2l8 9.46V19l4 2v-8.54L22 3z"
-      stroke="currentColor"
-      strokeWidth="1.6"
-      strokeLinejoin="round"
-    />
-  </svg>
-);
-const LockIcon = () => (
-  <svg
-    width="14"
-    height="14"
-    fill="none"
-    viewBox="0 0 24 24"
-    className="text-slate-400"
-  >
-    <rect
-      x="3"
-      y="11"
-      width="18"
-      height="11"
-      rx="2"
-      stroke="currentColor"
-      strokeWidth="1.6"
-    />
-    <path
-      d="M7 11V7a5 5 0 0110 0v4"
-      stroke="currentColor"
-      strokeWidth="1.6"
-      strokeLinecap="round"
-    />
-  </svg>
-);
-const UploadIcon = () => (
-  <svg
-    width="28"
-    height="28"
-    fill="none"
-    viewBox="0 0 24 24"
-    className="text-slate-400"
-  >
-    <path
-      d="M12 16V8M12 8l-3 3M12 8l3 3"
-      stroke="currentColor"
-      strokeWidth="1.6"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-    <path
-      d="M20.39 18.39A5 5 0 0018 9h-1.26A8 8 0 103 16.3"
-      stroke="currentColor"
-      strokeWidth="1.6"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-  </svg>
-);
-const ChevronDown = () => (
-  <svg
-    width="14"
-    height="14"
-    fill="none"
-    viewBox="0 0 24 24"
-    className="text-slate-400"
-  >
-    <path
-      d="M6 9l6 6 6-6"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-  </svg>
-);
-
-// ── Employee Form Modal ────────────────────────────────
 type ModalMode = "add" | "edit";
 const EmployeeModal = ({
   mode,
@@ -281,11 +105,11 @@ const EmployeeModal = ({
 }) => {
   const fileRef = useRef<HTMLInputElement>(null);
   const [form, setForm] = useState({
-    firstName: employee?.name.split(" ")[0] ?? "Дорж",
-    lastName: employee?.name.split(" ")[1] ?? "Дуламрагчаа",
-    email: employee?.email ?? "Dorj@company.com",
-    dept: employee?.dept ?? "Engineering",
-    role: employee?.role ?? "Junior Engineer",
+    firstName: employee?.name.split(" ")[0] ?? "",
+    lastName: employee?.name.split(" ")[1] ?? "",
+    email: employee?.email ?? "",
+    dept: employee?.dept ?? "",
+    role: employee?.role ?? "",
   });
   const [file, setFile] = useState<File | null>(null);
   const [dragging, setDragging] = useState(false);
@@ -294,11 +118,11 @@ const EmployeeModal = ({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-start justify-end bg-black/50 backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
       onClick={onClose}
     >
       <div
-        className="w-[340px] bg-[#0f1520] border-l border-slate-700/50 min-h-screen p-6 flex flex-col gap-5 overflow-y-auto"
+        className="w-[500px] h-[600px] bg-[#0f1520] border-l border-slate-700/50  p-6 flex flex-col gap-5 overflow-y-hidden rounded-lg"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
@@ -308,7 +132,7 @@ const EmployeeModal = ({
           </h2>
           <button
             onClick={onClose}
-            className="text-slate-400 hover:text-white transition-colors"
+            className="text-slate-400 hover:text-white transition-colors cursor-pointer"
           >
             ✕
           </button>
@@ -364,7 +188,7 @@ const EmployeeModal = ({
                 ))}
               </select>
               <div className="absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none">
-                <ChevronDown />
+                <ChevronDownn />
               </div>
             </div>
           </div>
@@ -421,7 +245,7 @@ const EmployeeModal = ({
                     e.stopPropagation();
                     fileRef.current?.click();
                   }}
-                  className="mt-1 px-4 py-1.5 rounded-lg border border-slate-600/60 text-slate-300 text-xs hover:border-slate-400 transition-colors"
+                  className="mt-1 px-4 py-1.5 rounded-lg border border-slate-600/60 text-slate-300 text-xs hover:border-slate-400 transition-colors cursor-pointer"
                 >
                   Оруулах
                 </button>
@@ -434,7 +258,7 @@ const EmployeeModal = ({
         <div className="flex items-center justify-end gap-3 pt-2">
           <button
             onClick={onClose}
-            className="px-5 py-2.5 rounded-xl border border-slate-600/50 text-slate-300 text-sm hover:bg-slate-800/50 transition-colors"
+            className="px-5 py-2.5 rounded-xl border border-slate-600/50 text-slate-300 text-sm hover:bg-slate-800/50 transition-colors cursor-pointer"
           >
             Татгалзах
           </button>
@@ -448,7 +272,7 @@ const EmployeeModal = ({
               });
               onClose();
             }}
-            className="flex items-center gap-1.5 px-5 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black text-sm font-semibold transition-colors"
+            className="flex items-center gap-1.5 px-5 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black text-sm font-semibold transition-colors cursor-pointer"
           >
             <svg width="14" height="14" fill="none" viewBox="0 0 24 24">
               <path
@@ -611,7 +435,7 @@ export const WorkersComponent = () => {
         style={{ gridTemplateColumns: "1.4fr 1fr 1fr" }}
       >
         {/* Total */}
-        <div className="rounded-2xl border border-slate-700/40 bg-gradient-to-br from-slate-800/60 to-[#0a0f1a] p-5">
+        <div className="rounded-2xl border border-slate-700/40 bg-gradient-to-br from-green-700/30 to-black p-5">
           <p className="text-slate-500 text-xs font-semibold uppercase tracking-widest mb-3">
             Нийт ажилчид
           </p>
@@ -630,9 +454,14 @@ export const WorkersComponent = () => {
                   ["79", "Инженерүүд"],
                   ["67", "Санхүү"],
                 ].map(([n, l]) => (
-                  <div key={l}>
-                    <p className="text-white font-bold text-lg">{n}</p>
-                    <p className="text-slate-500 text-xs">{l}</p>
+                  <div
+                    key={l}
+                    className=" border border-green-500/10 w-[158px] h-[84px] rounded-lg flex justify-center items-center"
+                  >
+                    <div>
+                      <p className="text-white text-xl font-bold">{n}</p>
+                      <p className="text-slate-500 ">{l}</p>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -674,22 +503,7 @@ export const WorkersComponent = () => {
             </span>
           </div>
           <div className="w-10 h-10 rounded-xl bg-cyan-500/20 flex items-center justify-center mb-3">
-            <svg width="20" height="20" fill="none" viewBox="0 0 24 24">
-              <circle
-                cx="12"
-                cy="12"
-                r="9"
-                stroke="#22d3ee"
-                strokeWidth="1.8"
-              />
-              <path
-                d="M7.5 12l3 3 6-6"
-                stroke="#22d3ee"
-                strokeWidth="1.8"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
+            <ActiveIconn />
           </div>
           <p className="text-5xl font-bold text-white">312</p>
           <div className="flex gap-4 mt-3">
@@ -698,9 +512,14 @@ export const WorkersComponent = () => {
               ["79", "Инженерүүд"],
               ["67", "Санхүү"],
             ].map(([n, l]) => (
-              <div key={l}>
-                <p className="text-white font-bold">{n}</p>
-                <p className="text-slate-500 text-xs">{l}</p>
+              <div
+                key={l}
+                className=" border border-green-500/10 w-[158px] h-[84px] rounded-lg flex justify-center items-center"
+              >
+                <div>
+                  <p className="text-white text-xl font-bold">{n}</p>
+                  <p className="text-slate-500 ">{l}</p>
+                </div>
               </div>
             ))}
           </div>
@@ -719,39 +538,7 @@ export const WorkersComponent = () => {
               </span>
             </div>
             <div className="w-9 h-9 rounded-xl bg-emerald-500/20 flex items-center justify-center mb-2">
-              <svg width="18" height="18" fill="none" viewBox="0 0 24 24">
-                <path
-                  d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"
-                  stroke="#4ade80"
-                  strokeWidth="1.8"
-                  strokeLinecap="round"
-                />
-                <circle
-                  cx="8.5"
-                  cy="7"
-                  r="4"
-                  stroke="#4ade80"
-                  strokeWidth="1.8"
-                />
-                <line
-                  x1="20"
-                  y1="8"
-                  x2="20"
-                  y2="14"
-                  stroke="#4ade80"
-                  strokeWidth="1.8"
-                  strokeLinecap="round"
-                />
-                <line
-                  x1="23"
-                  y1="11"
-                  x2="17"
-                  y2="11"
-                  stroke="#4ade80"
-                  strokeWidth="1.8"
-                  strokeLinecap="round"
-                />
-              </svg>
+              <HiredIcon />
             </div>
             <p className="text-4xl font-bold text-white">18</p>
           </div>
@@ -766,23 +553,7 @@ export const WorkersComponent = () => {
               </span>
             </div>
             <div className="w-9 h-9 rounded-xl bg-purple-500/20 flex items-center justify-center mb-2">
-              <svg width="18" height="18" fill="none" viewBox="0 0 24 24">
-                <rect
-                  x="3"
-                  y="4"
-                  width="18"
-                  height="18"
-                  rx="2"
-                  stroke="#a78bfa"
-                  strokeWidth="1.8"
-                />
-                <path
-                  d="M16 2v4M8 2v4M3 10h18"
-                  stroke="#a78bfa"
-                  strokeWidth="1.8"
-                  strokeLinecap="round"
-                />
-              </svg>
+              <AbsentIcon />
             </div>
             <p className="text-4xl font-bold text-white">12</p>
           </div>
@@ -802,10 +573,10 @@ export const WorkersComponent = () => {
         </div>
         <div className="flex items-center gap-2 ml-auto">
           <button className="flex items-center gap-2 px-3 py-2 rounded-xl bg-[#0d1117] border border-slate-700/50 text-slate-300 text-sm hover:bg-slate-800 transition-colors">
-            <FilterIcon /> Бүгд <ChevronDown />
+            <FilterIcon /> Бүгд <ChevronDownn />
           </button>
           <button className="flex items-center gap-2 px-3 py-2 rounded-xl bg-[#0d1117] border border-slate-700/50 text-slate-300 text-sm hover:bg-slate-800 transition-colors">
-            <LockIcon /> Бүгд <ChevronDown />
+            <LockIcon /> Бүгд <ChevronDownn />
           </button>
         </div>
       </div>
@@ -824,16 +595,9 @@ export const WorkersComponent = () => {
       <div className="flex justify-end mt-2">
         <button
           onClick={() => setShowAdd(true)}
-          className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black font-semibold text-sm transition-colors shadow-lg shadow-emerald-500/20"
+          className="flex items-center cursor-pointer gap-2 px-5 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black font-semibold text-sm transition-colors shadow-lg shadow-emerald-500/20"
         >
-          <svg width="15" height="15" fill="none" viewBox="0 0 24 24">
-            <path
-              d="M12 5v14M5 12h14"
-              stroke="currentColor"
-              strokeWidth="2.2"
-              strokeLinecap="round"
-            />
-          </svg>
+          <PlusIcon />
           Ажилтан нэмэх
         </button>
       </div>

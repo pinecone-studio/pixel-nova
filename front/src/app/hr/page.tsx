@@ -18,27 +18,22 @@ import {
   UsersIcon,
 } from "../components/icons";
 import { FiFilter } from "react-icons/fi";
-import { BiToggleLeft, BiToggleRight, BiX } from "react-icons/bi";
 import { GrDocument } from "react-icons/gr";
-import { triggerAction } from "@/lib/api";
-import type { TriggerActionResult } from "@/lib/types";
-
 import { RequestsComponent } from "../components/requestsComponent";
 import { WorkersComponent } from "../components/workersComponent";
 import { FilesComponent } from "../components/filesComponent";
-
 import { SettingsComponent } from "../components/settingsComponent";
 import AuditlogComponent from "../components/auditlogComponent";
 
 type NavItem = { key: string; label: string; icon: React.ReactNode };
 
 const navItems: NavItem[] = [
-  { key: "dashboard", label: "dashboard", icon: <GrDocument /> },
+  { key: "dashboard", label: "Хяналтын самбар", icon: <GrDocument /> },
   { key: "users", label: "Ажилтнууд", icon: <UsersIcon /> },
   { key: "requests", label: "Хүсэлтүүд", icon: <AuditLog /> },
   { key: "files", label: "Баримт бичигүүд", icon: <CubaIcon /> },
-  { key: "auditlog", label: "Audit Log", icon: <InsightIcon /> },
-  { key: "settings", label: "Settings", icon: <SettingsIcon /> },
+  { key: "auditlog", label: "Хянах хэсэг", icon: <InsightIcon /> },
+  { key: "settings", label: "Тохиргоо", icon: <SettingsIcon /> },
 ];
 
 const barData = [38, 52, 44, 61, 55, 67, 70, 63, 72, 78, 82, 88];
