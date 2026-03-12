@@ -9,11 +9,12 @@ import { RxAvatar } from "react-icons/rx";
 
 const navItems = [
   { icon: <BiHome className="w-4 h-4" />, label: "Нүүр", href: "/" },
-  { icon: <FactIcon />, label: "Баримтууд" },
+  { icon: <FactIcon />, label: "Баримтууд", href: "/files" },
 
   {
     icon: <RxAvatar className="w-4 h-4" />,
     label: "Профайл",
+    href: "/profile",
   },
 ];
 
