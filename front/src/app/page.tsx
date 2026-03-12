@@ -36,6 +36,24 @@ function formatDate(value: string) {
   });
 }
 
+const employeeDocuments = [
+  {
+    title: "Хөдөлмөрийн гэрээ",
+    fileName: "01_employment_contract.pdf",
+    date: "2/24/2024",
+  },
+  {
+    title: "Туршилтаар авах тушаал",
+    fileName: "02_probation_order.pdf",
+    date: "2/24/2024",
+  },
+  {
+    title: "Ажлын байрны тодорхойлолт",
+    fileName: "03_job_description.pdf",
+    date: "2/24/2024",
+  },
+];
+
 export default function Home() {
   const [step, setStep] = useState<AuthStep>("employee-code");
   const [employeeCode, setEmployeeCode] = useState("");
@@ -241,7 +259,89 @@ export default function Home() {
         </div>
 
         {/* Quick actions */}
-        <Request />
+        <div className="flex flex-col gap-4">
+          <div className="flex items-baseline justify-between">
+            <div>
+              <h2 className="text-white text-xl font-semibold">Шуурхай үйлдлүүд</h2>
+              <p className="text-[#4A4A6A] text-sm mt-0.5">Хүсэлт илгээх</p>
+            </div>
+            <a href="#" className="flex items-center gap-1 text-[#00CC99] text-sm font-medium hover:underline">
+              Бүх хүсэлтүүд <BiChevronRight className="w-4 h-4" />
+            </a>
+          </div>
+
+          <div className="grid grid-cols-3 gap-4">
+            {quickActions.map((action) => (
+              <div
+                key={action.title}
+                className={`${action.bg} rounded-2xl border border-[#1a1a30] p-5 flex items-center justify-between gap-4 hover:border-[#00CC99]/30 transition-colors`}
+              >
+                <div className="flex items-center gap-4">
+                  <div className="w-10 h-10 rounded-xl bg-[#00CC99]/10 border border-[#00CC99]/20 flex items-center justify-center shrink-0">
+                    {action.icon}
+                  </div>
+                  <div>
+                    <p className="text-white text-sm font-semibold">{action.title}</p>
+                    <p className="text-[#4A4A6A] text-xs mt-0.5">{action.desc}</p>
+                  </div>
+                </div>
+                <button className="w-8 h-8 rounded-lg border border-[#2A2A40] flex items-center justify-center text-[#4A4A6A] hover:border-[#00CC99]/40 hover:text-[#00CC99] transition-colors shrink-0">
+                  <BiPlus className="w-4 h-4" />
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <section className="flex flex-col gap-6">
+          <div className="flex items-center gap-4">
+            <h2 className="text-[24px] font-semibold tracking-[-0.02em] text-white">
+              Бүртгэл
+            </h2>
+            <span className="rounded-full border border-[#233246] bg-[#162130] px-4 py-1 text-[14px] font-medium text-[#94A3B8]">
+              {employeeDocuments.length} баримт
+            </span>
+          </div>
+
+          <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
+            {employeeDocuments.map((document) => (
+              <article
+                key={document.fileName}
+                className="flex h-[178px] w-full max-w-[323px] flex-col rounded-[28px] border border-[#0E2741] bg-[linear-gradient(180deg,#03101d_0%,#041424_100%)] p-7 shadow-[0_0_0_1px_rgba(255,255,255,0.03)_inset]"
+              >
+                <div className="flex items-start gap-5">
+                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-[18px] border border-[#24374F] bg-[#132131]">
+                    <FactIcon />
+                  </div>
+                  <div className="flex min-w-0 flex-1 flex-col gap-1 pt-1">
+                    <h3 className="max-w-[217px] text-[17px] font-semibold leading-5 text-[#E7EDF5]">
+                      {document.title}
+                    </h3>
+                    <p className="truncate text-[13px] text-[#6E7D90]">
+                      {document.fileName}
+                    </p>
+                    <p className="text-[13px] text-[#8D9AAC]">{document.date}</p>
+                  </div>
+                </div>
+
+                <div className="mt-auto flex items-center gap-3">
+                  <button className="flex h-9 w-full items-center justify-center gap-2 rounded-2xl bg-[#142131] text-[15px] font-medium text-[#D6DEE8] transition-colors hover:bg-[#1A2B40]">
+                    <BiShowAlt className="h-[18px] w-[18px]" />
+                    Харах
+                  </button>
+                  <button
+                    aria-label={`${document.title} татах`}
+                    className="flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl bg-[#142131] text-[#D6DEE8] transition-colors hover:bg-[#1A2B40]"
+                  >
+                    <BiDownload className="h-[18px] w-[18px]" />
+                  </button>
+                </div>
+              </article>
+            ))}
+          </div>
+        </section>
+
+        <FooterSection />
       </div>
     </div>
   );
