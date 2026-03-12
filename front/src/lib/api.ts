@@ -5,12 +5,14 @@ import type {
   ActionConfig,
   DocumentContent,
   TriggerActionResult,
+  RequestOtpResult,
+  AuthSession,
+  Employee,
 } from "./types";
-
-// ===== QUERIES =====
 
 export async function fetchDocuments(
   employeeId: string,
+  authToken?: string,
 ): Promise<Document[]> {
   const data = await graphql<{ documents: Document[] }>(
     `query ($employeeId: ID!) {
@@ -24,28 +26,14 @@ export async function fetchDocuments(
       }
     }`,
     { employeeId },
-  );
-  return data.documents;
-}
-
-export async function fetchAllDocuments(): Promise<Document[]> {
-  const data = await graphql<{ documents: Document[] }>(
-    `query {
-      documents(employeeId: "all") {
-        id
-        employeeId
-        action
-        documentName
-        storageUrl
-        createdAt
-      }
-    }`,
+    authToken ? { authToken } : undefined,
   );
   return data.documents;
 }
 
 export async function fetchAuditLogs(
   employeeId?: string,
+  authToken?: string,
 ): Promise<AuditLog[]> {
   const data = await graphql<{ auditLogs: AuditLog[] }>(
     `query ($employeeId: ID) {
@@ -59,6 +47,7 @@ export async function fetchAuditLogs(
       }
     }`,
     employeeId ? { employeeId } : {},
+    authToken ? { authToken } : undefined,
   );
   return data.auditLogs;
 }
@@ -79,6 +68,7 @@ export async function fetchActions(): Promise<ActionConfig[]> {
 
 export async function fetchDocumentContent(
   documentId: string,
+  authToken?: string,
 ): Promise<DocumentContent | null> {
   const data = await graphql<{ documentContent: DocumentContent | null }>(
     `query ($documentId: ID!) {
@@ -90,11 +80,10 @@ export async function fetchDocumentContent(
       }
     }`,
     { documentId },
+    authToken ? { authToken } : undefined,
   );
   return data.documentContent;
 }
-
-// ===== MUTATIONS =====
 
 export async function triggerAction(
   employeeId: string,
@@ -128,6 +117,82 @@ export async function triggerAction(
     { employeeId, action },
   );
   return data.triggerAction;
+}
+
+export async function requestOtp(employeeCode: string): Promise<RequestOtpResult> {
+  const data = await graphql<{ requestOtp: RequestOtpResult }>(
+    `mutation ($employeeCode: String!) {
+      requestOtp(employeeCode: $employeeCode) {
+        success
+        maskedEmail
+        expiresAt
+      }
+    }`,
+    { employeeCode },
+  );
+
+  return data.requestOtp;
+}
+
+export async function verifyOtp(employeeCode: string, code: string): Promise<AuthSession> {
+  const data = await graphql<{ verifyOtp: AuthSession }>(
+    `mutation ($employeeCode: String!, $code: String!) {
+      verifyOtp(employeeCode: $employeeCode, code: $code) {
+        token
+        expiresAt
+        employee {
+          id
+          employeeCode
+          firstName
+          lastName
+          department
+          branch
+          level
+          email
+          status
+          hireDate
+        }
+      }
+    }`,
+    { employeeCode, code },
+  );
+
+  return data.verifyOtp;
+}
+
+export async function fetchMe(authToken: string): Promise<Employee | null> {
+  const data = await graphql<{ me: Employee | null }>(
+    `query {
+      me {
+        id
+        employeeCode
+        firstName
+        lastName
+        department
+        branch
+        level
+        email
+        status
+        hireDate
+      }
+    }`,
+    undefined,
+    { authToken },
+  );
+
+  return data.me;
+}
+
+export async function logout(authToken: string): Promise<boolean> {
+  const data = await graphql<{ logout: boolean }>(
+    `mutation {
+      logout
+    }`,
+    undefined,
+    { authToken },
+  );
+
+  return data.logout;
 }
 
 export { getDocumentPreviewUrl };

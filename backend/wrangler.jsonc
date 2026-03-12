@@ -37,6 +37,9 @@
       "fallthrough": true,
     },
   ],
+  "vars": {
+    "PDF_RENDERER_URL": "https://pdf-renderer-production-1240.up.railway.app/"
+  },
   /**
    * Smart Placement
    * https://developers.cloudflare.com/workers/configuration/smart-placement/#smart-placement
@@ -54,17 +57,21 @@
    * Note: Use secrets to store sensitive data.
    * https://developers.cloudflare.com/workers/configuration/secrets/
    *
-   * RESEND_API_KEY — set as a secret:
+   * RESEND_API_KEY - set as a secret:
    *   wrangler secret put RESEND_API_KEY
-   * PDF_RENDERER_SECRET — optional shared secret for the renderer:
+   * DOCUMENT_LINK_SECRET - shared secret used to sign 7-day document URLs:
+   *   wrangler secret put DOCUMENT_LINK_SECRET
+   * TEST_OTP_EMAIL - optional fallback inbox for all OTP emails during demo:
+   *   wrangler secret put TEST_OTP_EMAIL
+   * PDF_RENDERER_SECRET - optional shared secret for the renderer:
    *   wrangler secret put PDF_RENDERER_SECRET
    *
    * For local dev, create .dev.vars and add:
    *   RESEND_API_KEY=re_xxxxxxxxxxxx
    *   PDF_RENDERER_URL=http://localhost:4001
-   *   PDF_RENDERER_SECRET=your_shared_secret
+   *   DOCUMENT_LINK_SECRET=your_document_link_secret
+   *   TEST_OTP_EMAIL=you@example.com
    */
-  // "vars": {  "PDF_RENDERER_URL": "http://localhost:4001" }
   /**
    * Service Bindings (communicate between multiple Workers)
    * https://developers.cloudflare.com/workers/wrangler/configuration/#service-bindings

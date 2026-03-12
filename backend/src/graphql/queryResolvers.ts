@@ -15,6 +15,9 @@ interface DocumentsArgs {
 
 interface AuditLogsArgs {
   employeeId?: string | null;
+  action?: string | null;
+  fromDate?: string | null;
+  toDate?: string | null;
 }
 
 function parseDataUrl(dataUrl: string) {
@@ -28,12 +31,27 @@ function parseDataUrl(dataUrl: string) {
   };
 }
 
+function resolveEmployeeScopedId(ctx: Ctx, requestedId?: string | null) {
+  if (ctx.actor.role === "employee") {
+    return ctx.actor.id;
+  }
+
+  return requestedId;
+}
+
 export const queryResolvers = {
+  me: (_: unknown, __: unknown, ctx: Ctx) => ctx.currentEmployee,
+
   documents: (_: unknown, args: DocumentsArgs, ctx: Ctx) =>
-    getDocuments(ctx.db, args.employeeId),
+    getDocuments(ctx.db, resolveEmployeeScopedId(ctx, args.employeeId)),
 
   auditLogs: (_: unknown, args: AuditLogsArgs, ctx: Ctx) =>
-    getAuditLogs(ctx.db, args.employeeId),
+    getAuditLogs(ctx.db, {
+      employeeId: resolveEmployeeScopedId(ctx, args.employeeId),
+      action: args.action,
+      fromDate: args.fromDate,
+      toDate: args.toDate,
+    }),
 
   actions: async (_: unknown, __: unknown, ctx: Ctx) => {
     await ensureDefaultActionConfigs(ctx.db);
@@ -47,6 +65,9 @@ export const queryResolvers = {
   ) => {
     const doc = await getDocumentById(ctx.db, args.documentId);
     if (!doc) return null;
+    if (ctx.actor.role === "employee" && doc.employeeId !== ctx.actor.id) {
+      return null;
+    }
 
     const bucket = (ctx.env as CloudflareBindings & { epas_documents?: R2Bucket })
       .epas_documents;
