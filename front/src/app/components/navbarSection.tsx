@@ -9,16 +9,19 @@ import { RxAvatar } from "react-icons/rx";
 
 const navItems = [
   { icon: <BiHome className="w-4 h-4" />, label: "Нүүр", href: "/" },
-  { icon: <FactIcon />, label: "Баримтууд" },
+  { icon: <FactIcon />, label: "Баримтууд", href: "/files" },
 
   {
     icon: <RxAvatar className="w-4 h-4" />,
     label: "Профайл",
+    href: "/profile",
   },
 ];
 
 export const Navbar = () => {
   const pathname = usePathname();
+
+  if (pathname === "/" || pathname.startsWith("/auth")) return null;
 
   return (
     <nav className="w-full bg-[#0A0A0F] border-b border-[#1A1A2E] px-6 py-0 flex items-center justify-between h-16 shadow-lg shadow-black/40">

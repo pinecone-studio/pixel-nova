@@ -160,6 +160,32 @@ export async function verifyOtp(employeeCode: string, code: string): Promise<Aut
   return data.verifyOtp;
 }
 
+export async function loginWithCode(employeeCode: string): Promise<AuthSession> {
+  const data = await graphql<{ loginWithCode: AuthSession }>(
+    `mutation ($employeeCode: String!) {
+      loginWithCode(employeeCode: $employeeCode) {
+        token
+        expiresAt
+        employee {
+          id
+          employeeCode
+          firstName
+          lastName
+          department
+          branch
+          level
+          email
+          status
+          hireDate
+        }
+      }
+    }`,
+    { employeeCode },
+  );
+
+  return data.loginWithCode;
+}
+
 export async function fetchMe(authToken: string): Promise<Employee | null> {
   const data = await graphql<{ me: Employee | null }>(
     `query {
@@ -168,12 +194,20 @@ export async function fetchMe(authToken: string): Promise<Employee | null> {
         employeeCode
         firstName
         lastName
+        firstNameEng
+        lastNameEng
         department
         branch
         level
         email
         status
         hireDate
+        imageUrl
+        github
+        entraId
+        birthDayAndMonth
+        isKpi
+        isSalaryCompany
       }
     }`,
     undefined,

@@ -125,6 +125,38 @@ export async function verifyEmployeeOtp(
   };
 }
 
+export async function createEmployeeCodeSession(
+  db: DbClient,
+  employeeCode: string,
+) {
+  const normalizedCode = employeeCode.trim().toUpperCase();
+  const employee = await getEmployeeByCode(db, normalizedCode);
+
+  if (!employee) {
+    throw new Error("Employee code not found");
+  }
+
+  await db.delete(authSessions).where(eq(authSessions.employeeId, employee.id));
+
+  const token = createSessionToken();
+  const now = new Date();
+  const expiresAt = new Date(now.getTime() + SESSION_TTL_MS).toISOString();
+
+  await db.insert(authSessions).values({
+    id: crypto.randomUUID(),
+    employeeId: employee.id,
+    tokenHash: await hashSecret(token),
+    expiresAt,
+    createdAt: now.toISOString(),
+  });
+
+  return {
+    token,
+    expiresAt,
+    employee,
+  };
+}
+
 export async function getSessionByToken(db: DbClient, token: string) {
   const tokenHash = await hashSecret(token);
   const [session] = await db

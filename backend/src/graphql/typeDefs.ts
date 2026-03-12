@@ -149,6 +149,7 @@ export const typeDefs = /* GraphQL */ `
   type Mutation {
     requestOtp(employeeCode: String!): RequestOtpResult!
     verifyOtp(employeeCode: String!, code: String!): AuthSession!
+    loginWithCode(employeeCode: String!): AuthSession!
     logout: Boolean!
     triggerAction(employeeId: ID!, action: String!, dryRun: Boolean, overrideRecipients: [String!]): TriggerActionResult!
     upsertEmployee(input: UpsertEmployeeInput!): UpsertEmployeeResult!

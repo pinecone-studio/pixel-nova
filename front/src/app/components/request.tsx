@@ -9,19 +9,22 @@ export const Request = () => {
       icon: <BiCalendar className="w-5 h-5 text-[#00CC99]" />,
       title: "Чөлөө авах",
       desc: "Эзлийн амралт, өвчний чөлөө",
-      bg: "bg-[#111120]",
+      bg: "border-[#0D3470] bg-[radial-gradient(circle_at_top_left,_rgba(20,84,180,0.28),_transparent_42%),linear-gradient(180deg,#03101d_0%,#04090f_100%)]",
+      iconBg: "bg-[#0D2231]/90 border border-[#103A57]",
     },
     {
       icon: <BiCalendar className="w-5 h-5 text-[#00CC99]" />,
       title: "Тойрох хуудас",
       desc: "Тойрох хуудас авах хүсэлт",
-      bg: "bg-gradient-to-br from-[#1a1040] to-[#0d0d2b]",
+      bg: "border-[#43218A] bg-[radial-gradient(circle_at_top_left,_rgba(112,68,216,0.28),_transparent_42%),linear-gradient(180deg,#130b22_0%,#05090f_100%)]",
+      iconBg: "bg-[#182140]/90 border border-[#28307A]",
     },
     {
-      icon: <BiFile className="w-5 h-5 text-[#00CC99]" />,
+      icon: <BiFile className="w-5 h-5 text-[#2A8CFF]" />,
       title: "Томилолт",
       desc: "Томилолт авах хүсэлт",
-      bg: "bg-[#0d1a14]",
+      bg: "border-[#0B5A36] bg-[radial-gradient(circle_at_top_left,_rgba(10,120,62,0.3),_transparent_42%),linear-gradient(180deg,#05160d_0%,#05090f_100%)]",
+      iconBg: "bg-[#082934]/90 border border-[#114357]",
     },
   ];
 
@@ -40,33 +43,38 @@ export const Request = () => {
         </a>
       </div>
 
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-3 gap-5">
         {quickActions.map((action) => (
           <div
             key={action.title}
-            className={`${action.bg} rounded-2xl border border-[#1a1a30] p-5 flex items-center justify-between gap-4 hover:border-[#00CC99]/30 transition-colors`}
+            className={`${action.bg} rounded-2xl border p-5 flex items-center justify-between gap-4 shadow-[0_0_0_1px_rgba(255,255,255,0.03)_inset] transition-colors`}
           >
             <div className="flex items-center gap-4">
-              <div className="w-10 h-10 rounded-xl bg-[#00CC99]/10 border border-[#00CC99]/20 flex items-center justify-center shrink-0">
+              {/* icon box */}
+              <div
+                className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${action.iconBg}`}
+              >
                 {action.icon}
               </div>
+
               <div>
-                <p className="text-white text-sm font-semibold">
+                <p className="text-white text-base font-semibold">
                   {action.title}
                 </p>
-                <p className="text-[#4A4A6A] text-xs mt-0.5">{action.desc}</p>
+                <p className="text-gray-400 text-sm mt-0.5">{action.desc}</p>
               </div>
             </div>
+
+            {/* plus button */}
             <button
-              className="w-8 h-8 rounded-lg border border-[#2A2A40] flex items-center justify-center text-[#4A4A6A] hover:border-[#00CC99]/40 hover:text-[#00CC99] transition-colors shrink-0"
               onClick={() => setActiveTab(action.title)}
+              className="w-10 h-10 rounded-xl border border-white/10 flex items-center justify-center text-gray-400 hover:text-white hover:border-white/20 transition"
             >
-              <BiPlus className="w-4 h-4" />
+              <BiPlus className="w-5 h-5" />
             </button>
           </div>
         ))}
       </div>
-
       {activeTab === "Чөлөө авах" && (
         <div className="fixed inset-0 flex items-center justify-center bg-black/60 backdrop-blur-sm">
           <div className="w-[480px] rounded-2xl bg-[#0f0f0f] text-white p-7 border border-gray-800 shadow-xl">
@@ -167,7 +175,7 @@ export const Request = () => {
 
       {activeTab === "Тойрох хуудас" && (
         <div className="fixed inset-0 flex items-center justify-center bg-black/60 z-50">
-          <div className="w-[460px] rounded-2xl bg-[#0f0f0f] text-white p-7 border border-gray-800 shadow-2xl">
+          <div className="w-[460px] rounded-2xl bg-[#03080F] text-white p-7 border border-gray-800 shadow-2xl">
             <div className="flex items-start justify-between mb-1">
               <h2 className="text-xl font-semibold">
                 Тойрох хуудас авах хүсэлт
@@ -194,7 +202,7 @@ export const Request = () => {
             </p>
 
             <label className="block text-sm font-medium mb-1.5">Төрөл</label>
-            <select className="w-full mb-5 bg-[#0f0f0f] border border-gray-700 rounded-lg p-2.5 text-gray-400 text-sm appearance-none cursor-pointer focus:outline-none focus:border-gray-500">
+            <select className="w-full mb-5 bg-[#03080F] border border-gray-700 rounded-lg p-2.5 text-gray-400 text-sm appearance-none cursor-pointer focus:outline-none focus:border-gray-500">
               <option>Сонгоно уу</option>
             </select>
 

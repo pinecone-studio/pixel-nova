@@ -30,6 +30,7 @@ export {
 export {
   requestEmployeeOtp,
   verifyEmployeeOtp,
+  createEmployeeCodeSession,
   getSessionByToken,
   deleteSessionByToken,
 } from "./auth";

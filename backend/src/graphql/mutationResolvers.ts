@@ -1,4 +1,5 @@
 import {
+  createEmployeeCodeSession,
   deleteSessionByToken,
   ensureDefaultActionConfigs,
   getEmployeeById,
@@ -87,6 +88,9 @@ export const mutationResolvers = {
 
   verifyOtp: async (_: unknown, args: { employeeCode: string; code: string }, ctx: Ctx) =>
     verifyEmployeeOtp(ctx.db, args.employeeCode, args.code),
+
+  loginWithCode: async (_: unknown, args: { employeeCode: string }, ctx: Ctx) =>
+    createEmployeeCodeSession(ctx.db, args.employeeCode),
 
   logout: async (_: unknown, __: unknown, ctx: Ctx) => {
     if (!ctx.sessionToken) {
