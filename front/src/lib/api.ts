@@ -168,12 +168,20 @@ export async function fetchMe(authToken: string): Promise<Employee | null> {
         employeeCode
         firstName
         lastName
+        firstNameEng
+        lastNameEng
         department
         branch
         level
         email
         status
         hireDate
+        imageUrl
+        github
+        entraId
+        birthDayAndMonth
+        isKpi
+        isSalaryCompany
       }
     }`,
     undefined,

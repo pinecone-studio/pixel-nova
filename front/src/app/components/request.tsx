@@ -15,13 +15,13 @@ export const Request = () => {
       icon: <BiCalendar className="w-5 h-5 text-[#00CC99]" />,
       title: "Тойрох хуудас",
       desc: "Тойрох хуудас авах хүсэлт",
-      bg: "bg-gradient-to-br from-[#1a1040] to-[#0d0d2b]",
+      bg: "bg-[#111120]",
     },
     {
       icon: <BiFile className="w-5 h-5 text-[#00CC99]" />,
       title: "Томилолт",
       desc: "Томилолт авах хүсэлт",
-      bg: "bg-[#0d1a14]",
+      bg: "bg-[#111120]",
     },
   ];
 
