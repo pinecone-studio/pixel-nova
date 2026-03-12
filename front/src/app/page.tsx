@@ -1,30 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import {
-  BiBuilding,
-  BiCheckCircle,
-  BiChevronRight,
-  BiDownload,
-  BiFile,
-  BiLogOut,
-  BiPlus,
-  BiShield,
-  BiShowAlt,
-} from "react-icons/bi";
-import {
-  fetchAuditLogs,
-  fetchDocuments,
-  fetchMe,
-  logout,
-  requestOtp,
-  verifyOtp,
-} from "@/lib/api";
+import { BiDownload, BiShowAlt } from "react-icons/bi";
+import { fetchAuditLogs, fetchDocuments, fetchMe } from "@/lib/api";
 import type { AuditLog, Document, Employee } from "@/lib/types";
 
 import { FooterSection } from "./components/footerSection";
 import { FactIcon } from "./components/icons";
-import { Request } from "./components/Request";
+import { Request } from "./components/request";
 
 const TOKEN_STORAGE_KEY = "epas_auth_token";
 
@@ -217,7 +200,7 @@ export default function Home() {
           </div>
 
           {/* Leave balance card */}
-          <div className="shrink-0 rounded-xl border border-[#1a1a30] bg-[#0a0a14] p-5 flex flex-col gap-3 min-w-[180px]">
+          <div className="shrink-0 rounded-xl border border-[#1a1a30] bg-[#0a0a14] p-5 flex flex-col gap-3 min-w-45">
             <div className="flex items-center justify-between gap-6">
               <div>
                 <p className="text-white text-2xl font-bold">4d 1h</p>
@@ -279,14 +262,14 @@ export default function Home() {
             {employeeDocuments.map((document) => (
               <article
                 key={document.fileName}
-                className="flex h-[178px] w-full max-w-[323px] flex-col rounded-[28px] border border-[#0E2741] bg-[linear-gradient(180deg,#03101d_0%,#041424_100%)] p-7 shadow-[0_0_0_1px_rgba(255,255,255,0.03)_inset]"
+                className="flex h-45 w-full max-w-80.75 flex-col rounded-[28px] border border-[#0E2741] bg-[linear-gradient(180deg,#03101d_0%,#041424_100%)] p-7 shadow-[0_0_0_1px_rgba(255,255,255,0.03)_inset]"
               >
                 <div className="flex items-start gap-5">
                   <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-[18px] border border-[#24374F] bg-[#132131]">
                     <FactIcon />
                   </div>
                   <div className="flex min-w-0 flex-1 flex-col gap-1 pt-1">
-                    <h3 className="max-w-[217px] text-[17px] font-semibold leading-5 text-[#E7EDF5]">
+                    <h3 className="max-w-54.25 text-[17px] font-semibold leading-5 text-[#E7EDF5]">
                       {document.title}
                     </h3>
                     <p className="truncate text-[13px] text-[#6E7D90]">
@@ -300,14 +283,14 @@ export default function Home() {
 
                 <div className="mt-auto flex items-center gap-3">
                   <button className="flex h-9 w-full items-center justify-center gap-2 rounded-2xl bg-[#142131] text-[15px] font-medium text-[#D6DEE8] transition-colors hover:bg-[#1A2B40]">
-                    <BiShowAlt className="h-[18px] w-[18px]" />
+                    <BiShowAlt className="h-4.5 w-4.5" />
                     Харах
                   </button>
                   <button
                     aria-label={`${document.title} татах`}
                     className="flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl bg-[#142131] text-[#D6DEE8] transition-colors hover:bg-[#1A2B40]"
                   >
-                    <BiDownload className="h-[18px] w-[18px]" />
+                    <BiDownload className="h-4.5 w-4.5" />
                   </button>
                 </div>
               </article>
