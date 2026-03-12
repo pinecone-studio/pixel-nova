@@ -1694,7 +1694,7 @@ export const ScrollIcon = () => {
         <path
           d="M18 36L30 24L18 12"
           stroke="#99A1AF"
-          stroke-width="4"
+          strokeWidth="4"
           strokeLinecap="round"
           strokeLinejoin="round"
         />
@@ -2013,6 +2013,81 @@ export const SortIcon = () => (
       d="M7 16V4m0 0L3 8m4-4l4 4M17 8v12m0 0l4-4m-4 4l-4-4"
       stroke="currentColor"
       strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </svg>
+);
+
+export const CheckCircle = () => (
+  <svg width="28" height="28" fill="none" viewBox="0 0 24 24">
+    <circle cx="12" cy="12" r="10" stroke="#0ad4b1" strokeWidth="1.6" />
+    <path
+      d="M7.5 12l3 3 6-6"
+      stroke="#0ad4b1"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </svg>
+);
+
+export const PaperclipIcon = () => (
+  <svg
+    width="14"
+    height="14"
+    fill="none"
+    viewBox="0 0 24 24"
+    className="text-slate-500"
+  >
+    <path
+      d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66L9.41 17.41a2 2 0 01-2.83-2.83l8.49-8.48"
+      stroke="currentColor"
+      strokeWidth="1.6"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </svg>
+);
+
+export const DocRowIcon = () => (
+  <svg
+    width="14"
+    height="14"
+    fill="none"
+    viewBox="0 0 24 24"
+    className="text-slate-500 flex-shrink-0"
+  >
+    <rect
+      x="4"
+      y="3"
+      width="16"
+      height="18"
+      rx="2"
+      stroke="currentColor"
+      strokeWidth="1.6"
+    />
+    <path
+      d="M8 8h8M8 12h8M8 16h5"
+      stroke="currentColor"
+      strokeWidth="1.6"
+      strokeLinecap="round"
+    />
+  </svg>
+);
+
+export const ChevronDown = ({ open }: { open: boolean }) => (
+  <svg
+    width="18"
+    height="18"
+    fill="none"
+    viewBox="0 0 24 24"
+    className={`text-slate-500 transition-transform duration-200 ${open ? "rotate-180" : ""}`}
+  >
+    <path
+      d="M6 9l6 6 6-6"
+      stroke="currentColor"
+      strokeWidth="1.8"
       strokeLinecap="round"
       strokeLinejoin="round"
     />
