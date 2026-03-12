@@ -1,4 +1,14 @@
-import { BiBuilding, BiCalendar, BiFile, BiPlus, BiChevronRight } from "react-icons/bi";
+import {
+  BiBuilding,
+  BiCalendar,
+  BiChevronRight,
+  BiDownload,
+  BiFile,
+  BiPlus,
+  BiShowAlt,
+} from "react-icons/bi";
+import { FooterSection } from "./components/footerSection";
+import { FactIcon } from "./components/icons";
 
 const quickActions = [
   {
@@ -18,6 +28,24 @@ const quickActions = [
     title: "Томилолт",
     desc: "Томилолт авах хүсэлт",
     bg: "bg-[#0d1a14]",
+  },
+];
+
+const employeeDocuments = [
+  {
+    title: "Хөдөлмөрийн гэрээ",
+    fileName: "01_employment_contract.pdf",
+    date: "2/24/2024",
+  },
+  {
+    title: "Туршилтаар авах тушаал",
+    fileName: "02_probation_order.pdf",
+    date: "2/24/2024",
+  },
+  {
+    title: "Ажлын байрны тодорхойлолт",
+    fileName: "03_job_description.pdf",
+    date: "2/24/2024",
   },
 ];
 
@@ -132,6 +160,56 @@ export default function Home() {
             ))}
           </div>
         </div>
+
+        <section className="flex flex-col gap-6">
+          <div className="flex items-center gap-4">
+            <h2 className="text-[24px] font-semibold tracking-[-0.02em] text-white">
+              Бүртгэл
+            </h2>
+            <span className="rounded-full border border-[#233246] bg-[#162130] px-4 py-1 text-[14px] font-medium text-[#94A3B8]">
+              {employeeDocuments.length} баримт
+            </span>
+          </div>
+
+          <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
+            {employeeDocuments.map((document) => (
+              <article
+                key={document.fileName}
+                className="flex h-[178px] w-full max-w-[323px] flex-col rounded-[28px] border border-[#0E2741] bg-[linear-gradient(180deg,#03101d_0%,#041424_100%)] p-7 shadow-[0_0_0_1px_rgba(255,255,255,0.03)_inset]"
+              >
+                <div className="flex items-start gap-5">
+                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-[18px] border border-[#24374F] bg-[#132131]">
+                    <FactIcon />
+                  </div>
+                  <div className="flex min-w-0 flex-1 flex-col gap-1 pt-1">
+                    <h3 className="max-w-[217px] text-[17px] font-semibold leading-5 text-[#E7EDF5]">
+                      {document.title}
+                    </h3>
+                    <p className="truncate text-[13px] text-[#6E7D90]">
+                      {document.fileName}
+                    </p>
+                    <p className="text-[13px] text-[#8D9AAC]">{document.date}</p>
+                  </div>
+                </div>
+
+                <div className="mt-auto flex items-center gap-3">
+                  <button className="flex h-9 w-full items-center justify-center gap-2 rounded-2xl bg-[#142131] text-[15px] font-medium text-[#D6DEE8] transition-colors hover:bg-[#1A2B40]">
+                    <BiShowAlt className="h-[18px] w-[18px]" />
+                    Харах
+                  </button>
+                  <button
+                    aria-label={`${document.title} татах`}
+                    className="flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl bg-[#142131] text-[#D6DEE8] transition-colors hover:bg-[#1A2B40]"
+                  >
+                    <BiDownload className="h-[18px] w-[18px]" />
+                  </button>
+                </div>
+              </article>
+            ))}
+          </div>
+        </section>
+
+        <FooterSection />
       </div>
     </div>
   );
