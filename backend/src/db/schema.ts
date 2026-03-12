@@ -90,12 +90,43 @@ export const actions = sqliteTable(
   (table) => [index("actions_name_idx").on(table.name)],
 );
 
+export const otpCodes = sqliteTable(
+  "otp_codes",
+  {
+    id: text("id").primaryKey(),
+    employeeId: text("employee_id")
+      .notNull()
+      .references(() => employees.id, { onDelete: "cascade" }),
+    codeHash: text("code_hash").notNull(),
+    attemptsRemaining: integer("attempts_remaining").notNull().default(5),
+    expiresAt: text("expires_at").notNull(),
+    createdAt: text("created_at").notNull(),
+  },
+  (table) => [index("otp_codes_employee_id_idx").on(table.employeeId)],
+);
+
+export const authSessions = sqliteTable(
+  "auth_sessions",
+  {
+    id: text("id").primaryKey(),
+    employeeId: text("employee_id")
+      .notNull()
+      .references(() => employees.id, { onDelete: "cascade" }),
+    tokenHash: text("token_hash").notNull().unique(),
+    expiresAt: text("expires_at").notNull(),
+    createdAt: text("created_at").notNull(),
+  },
+  (table) => [index("auth_sessions_employee_id_idx").on(table.employeeId)],
+);
+
 export const schema = {
   employees,
   documents,
   auditLog,
   recipients,
   actions,
+  otpCodes,
+  authSessions,
 };
 
 export type Employee = typeof employees.$inferSelect;
@@ -108,3 +139,7 @@ export type Recipient = typeof recipients.$inferSelect;
 export type NewRecipient = typeof recipients.$inferInsert;
 export type ActionConfig = typeof actions.$inferSelect;
 export type NewActionConfig = typeof actions.$inferInsert;
+export type OtpCode = typeof otpCodes.$inferSelect;
+export type NewOtpCode = typeof otpCodes.$inferInsert;
+export type AuthSession = typeof authSessions.$inferSelect;
+export type NewAuthSession = typeof authSessions.$inferInsert;

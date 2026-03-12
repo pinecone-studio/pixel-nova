@@ -4,8 +4,9 @@ import { cors } from "hono/cors";
 
 import { getDb } from "./db/client";
 import type { ActorRole } from "./db/queries";
-import { getDocumentById } from "./db/queries";
+import { getDocumentById, getSessionByToken } from "./db/queries";
 import { graphqlSchema, type GraphQLContext } from "./graphql/schema";
+import { validateDocumentAccess } from "./notifications/documentLinks";
 
 const app = new Hono<{ Bindings: CloudflareBindings }>();
 type YogaServerContext = { env: CloudflareBindings };
@@ -14,7 +15,7 @@ app.use(
   "*",
   cors({
     origin: ["http://localhost:3000"],
-    allowHeaders: ["Content-Type", "x-actor-id", "x-actor-role"],
+    allowHeaders: ["Content-Type", "Authorization", "x-actor-id", "x-actor-role"],
     allowMethods: ["GET", "POST", "OPTIONS"],
   }),
 );
@@ -25,6 +26,15 @@ function normalizeRole(value: string | null): ActorRole {
   }
 
   return "unknown";
+}
+
+function extractBearerToken(header: string | null) {
+  if (!header) {
+    return null;
+  }
+
+  const match = header.match(/^Bearer\s+(.+)$/i);
+  return match?.[1]?.trim() ?? null;
 }
 
 function parseDataUrl(dataUrl: string) {
@@ -51,14 +61,33 @@ const yoga = createYoga<YogaServerContext, Omit<GraphQLContext, "env">>({
   schema: graphqlSchema,
   graphqlEndpoint: "/graphql",
   landingPage: false,
-  context: ({ request, env }) => ({
-    db: getDb(env),
-    actor: {
-      id: request.headers.get("x-actor-id"),
-      role: normalizeRole(request.headers.get("x-actor-role")),
-    },
-    publicOrigin: new URL(request.url).origin,
-  }),
+  context: async ({ request, env }) => {
+    const db = getDb(env);
+    const sessionToken = extractBearerToken(request.headers.get("authorization"));
+    const session = sessionToken ? await getSessionByToken(db, sessionToken) : null;
+    const actor = session
+      ? {
+          id: session.employee.id,
+          role: "employee" as const,
+        }
+      : sessionToken
+        ? {
+            id: null,
+            role: "unknown" as const,
+          }
+        : {
+            id: request.headers.get("x-actor-id"),
+            role: normalizeRole(request.headers.get("x-actor-role")),
+          };
+
+    return {
+      db,
+      actor,
+      currentEmployee: session?.employee ?? null,
+      sessionToken,
+      publicOrigin: new URL(request.url).origin,
+    };
+  },
 });
 
 app.get("/health", (c) =>
@@ -73,6 +102,20 @@ app.all("/graphql", async (c) => yoga.fetch(c.req.raw, { env: c.env }));
 app.get("/documents/:documentId", async (c) => {
   const db = getDb(c.env);
   const documentId = c.req.param("documentId");
+  const signingSecret =
+    (c.env as CloudflareBindings & { DOCUMENT_LINK_SECRET?: string })
+      .DOCUMENT_LINK_SECRET ?? "";
+  const isAuthorized = await validateDocumentAccess({
+    documentId,
+    expires: c.req.query("expires") ?? null,
+    signature: c.req.query("signature") ?? null,
+    signingSecret,
+  });
+
+  if (!isAuthorized) {
+    return c.json({ error: "Invalid or expired document link" }, 403);
+  }
+
   const doc = await getDocumentById(db, documentId);
 
   if (!doc) {

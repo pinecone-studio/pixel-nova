@@ -65,3 +65,15 @@ export interface UpsertEmployeeResult {
   resolvedAction?: string | null;
   triggeredActionResult?: TriggerActionResult | null;
 }
+
+export interface RequestOtpResult {
+  success: boolean;
+  maskedEmail: string;
+  expiresAt: string;
+}
+
+export interface AuthSession {
+  token: string;
+  expiresAt: string;
+  employee: Employee;
+}

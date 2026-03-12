@@ -1,4 +1,4 @@
-import { and, eq } from "drizzle-orm";
+import { and, eq, gte, lt } from "drizzle-orm";
 
 import type { DbClient } from "../client";
 import { auditLog, documents } from "../schema";
@@ -29,8 +29,31 @@ export async function createTriggeredActionRecords(
   }
 
   const now = new Date().toISOString();
-  const auditId = crypto.randomUUID();
   const normalizedAction = actionName.trim();
+
+  // FR-06 Idempotency: ижил employeeId + action + өдөр дээр duplicate шалгах
+  const todayStart = now.slice(0, 10) + "T00:00:00.000Z";
+  const tomorrowStart = new Date(new Date(todayStart).getTime() + 86400000).toISOString();
+  const [existingAudit] = await db
+    .select({ id: auditLog.id })
+    .from(auditLog)
+    .where(
+      and(
+        eq(auditLog.employeeId, employeeId),
+        eq(auditLog.action, normalizedAction),
+        gte(auditLog.timestamp, todayStart),
+        lt(auditLog.timestamp, tomorrowStart),
+      ),
+    )
+    .limit(1);
+
+  if (existingAudit) {
+    throw new Error(
+      `Duplicate action: "${normalizedAction}" already triggered for employee ${employeeId} today. Skipped to prevent duplicate document generation.`,
+    );
+  }
+
+  const auditId = crypto.randomUUID();
 
   const actionRegistry = await import("../../config/action-registry.json");
   const actionConfig = (actionRegistry.actions as Record<string, {
