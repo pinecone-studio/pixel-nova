@@ -20,6 +20,8 @@ const navItems = [
 export const Navbar = () => {
   const pathname = usePathname();
 
+  if (pathname === "/" || pathname.startsWith("/auth")) return null;
+
   return (
     <nav className="w-full bg-[#0A0A0F] border-b border-[#1A1A2E] px-6 py-0 flex items-center justify-between h-16 shadow-lg shadow-black/40">
       {/* Logo */}
