@@ -3,10 +3,13 @@ import {
   deleteSessionByToken,
   ensureDefaultActionConfigs,
   getEmployeeById,
+  getLeaveRequestById,
+  insertLeaveRequest,
   listActionConfigs,
   requestEmployeeOtp,
   upsertActionConfig,
   upsertEmployeeRecord,
+  updateLeaveRequestStatus,
   verifyEmployeeOtp,
 } from "../db/queries";
 import {
@@ -174,4 +177,49 @@ export const mutationResolvers = {
     args: { input: UpdateRegistryInput },
     ctx: Ctx,
   ) => upsertActionConfig(ctx.db, args.input),
+
+  submitLeaveRequest: async (
+    _: unknown,
+    args: { type: string; startTime: string; endTime: string; reason: string },
+    ctx: Ctx,
+  ) => {
+    if (ctx.actor.role !== "employee" || !ctx.actor.id) {
+      throw new Error("Unauthorized");
+    }
+    const row = await insertLeaveRequest(ctx.db, {
+      employeeId: ctx.actor.id,
+      type: args.type,
+      startTime: args.startTime,
+      endTime: args.endTime,
+      reason: args.reason,
+    });
+    if (!row) throw new Error("Failed to create leave request");
+    return getLeaveRequestById(ctx.db, row.id);
+  },
+
+  approveLeaveRequest: async (
+    _: unknown,
+    args: { id: string; note?: string | null },
+    ctx: Ctx,
+  ) => {
+    if (ctx.actor.role !== "hr" && ctx.actor.role !== "admin") {
+      throw new Error("Unauthorized");
+    }
+    const row = await updateLeaveRequestStatus(ctx.db, args.id, "approved", args.note);
+    if (!row) throw new Error("Leave request not found");
+    return row;
+  },
+
+  rejectLeaveRequest: async (
+    _: unknown,
+    args: { id: string; note?: string | null },
+    ctx: Ctx,
+  ) => {
+    if (ctx.actor.role !== "hr" && ctx.actor.role !== "admin") {
+      throw new Error("Unauthorized");
+    }
+    const row = await updateLeaveRequestStatus(ctx.db, args.id, "rejected", args.note);
+    if (!row) throw new Error("Leave request not found");
+    return row;
+  },
 };

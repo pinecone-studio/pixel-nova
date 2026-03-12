@@ -8,6 +8,7 @@ import type {
   RequestOtpResult,
   AuthSession,
   Employee,
+  LeaveRequest,
 } from "./types";
 
 export async function fetchDocuments(
@@ -231,6 +232,96 @@ export async function logout(authToken: string): Promise<boolean> {
   );
 
   return data.logout;
+}
+
+const LEAVE_REQUEST_FIELDS = `
+  id
+  employeeId
+  employee {
+    id
+    employeeCode
+    firstName
+    lastName
+    department
+    jobTitle
+    level
+  }
+  type
+  startTime
+  endTime
+  reason
+  status
+  note
+  createdAt
+  updatedAt
+`;
+
+export async function submitLeaveRequest(
+  data: { type: string; startTime: string; endTime: string; reason: string },
+  authToken: string,
+): Promise<LeaveRequest> {
+  const result = await graphql<{ submitLeaveRequest: LeaveRequest }>(
+    `mutation ($type: String!, $startTime: String!, $endTime: String!, $reason: String!) {
+      submitLeaveRequest(type: $type, startTime: $startTime, endTime: $endTime, reason: $reason) {
+        ${LEAVE_REQUEST_FIELDS}
+      }
+    }`,
+    data,
+    { authToken },
+  );
+  return result.submitLeaveRequest;
+}
+
+export async function fetchLeaveRequests(status?: string): Promise<LeaveRequest[]> {
+  const result = await graphql<{ leaveRequests: LeaveRequest[] }>(
+    `query ($status: String) {
+      leaveRequests(status: $status) {
+        ${LEAVE_REQUEST_FIELDS}
+      }
+    }`,
+    { status: status ?? null },
+    { actorRole: "hr" },
+  );
+  return result.leaveRequests;
+}
+
+export async function fetchMyLeaveRequests(authToken: string): Promise<LeaveRequest[]> {
+  const result = await graphql<{ myLeaveRequests: LeaveRequest[] }>(
+    `query {
+      myLeaveRequests {
+        ${LEAVE_REQUEST_FIELDS}
+      }
+    }`,
+    undefined,
+    { authToken },
+  );
+  return result.myLeaveRequests;
+}
+
+export async function approveLeaveRequest(id: string, note?: string): Promise<LeaveRequest> {
+  const result = await graphql<{ approveLeaveRequest: LeaveRequest }>(
+    `mutation ($id: ID!, $note: String) {
+      approveLeaveRequest(id: $id, note: $note) {
+        ${LEAVE_REQUEST_FIELDS}
+      }
+    }`,
+    { id, note: note ?? null },
+    { actorRole: "hr" },
+  );
+  return result.approveLeaveRequest;
+}
+
+export async function rejectLeaveRequest(id: string, note?: string): Promise<LeaveRequest> {
+  const result = await graphql<{ rejectLeaveRequest: LeaveRequest }>(
+    `mutation ($id: ID!, $note: String) {
+      rejectLeaveRequest(id: $id, note: $note) {
+        ${LEAVE_REQUEST_FIELDS}
+      }
+    }`,
+    { id, note: note ?? null },
+    { actorRole: "hr" },
+  );
+  return result.rejectLeaveRequest;
 }
 
 export { getDocumentPreviewUrl };

@@ -3,6 +3,7 @@ import {
   getDocumentById,
   getDocuments,
   getAuditLogs,
+  getLeaveRequests,
   listActionConfigs,
 } from "../db/queries";
 import type { GraphQLContext } from "./schema";
@@ -56,6 +57,20 @@ export const queryResolvers = {
   actions: async (_: unknown, __: unknown, ctx: Ctx) => {
     await ensureDefaultActionConfigs(ctx.db);
     return listActionConfigs(ctx.db);
+  },
+
+  leaveRequests: (_: unknown, args: { status?: string | null }, ctx: Ctx) => {
+    if (ctx.actor.role !== "hr" && ctx.actor.role !== "admin") {
+      throw new Error("Unauthorized");
+    }
+    return getLeaveRequests(ctx.db, { status: args.status ?? undefined });
+  },
+
+  myLeaveRequests: (_: unknown, __: unknown, ctx: Ctx) => {
+    if (ctx.actor.role !== "employee" || !ctx.actor.id) {
+      throw new Error("Unauthorized");
+    }
+    return getLeaveRequests(ctx.db, { employeeId: ctx.actor.id });
   },
 
   documentContent: async (

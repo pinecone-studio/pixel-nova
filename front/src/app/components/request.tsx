@@ -1,8 +1,161 @@
 import { useState } from "react";
-import { BiCalendar, BiChevronRight, BiFile, BiPlus } from "react-icons/bi";
+import { BiCalendar, BiChevronDown, BiChevronRight, BiFile, BiPlus } from "react-icons/bi";
+import { submitLeaveRequest } from "@/lib/api";
+
+const TOKEN_KEY = "epas_auth_token";
+
+const DIALOG_BG = "bg-[#030810]";
+const DIALOG_BORDER = "border-[#1a2035]";
+const INPUT_CLASS = `w-full bg-[#040d18] border border-[#1a2035] rounded-lg p-2.5 text-sm text-gray-300 focus:outline-none focus:border-[#00CC99]/40 appearance-none`;
+const TEXTAREA_CLASS = `w-full bg-[#040d18] border border-[#1a2035] rounded-lg p-3 text-sm text-gray-300 placeholder-gray-600 resize-none focus:outline-none focus:border-[#00CC99]/40`;
+
+function CloseBtn({ onClick }: { onClick: () => void }) {
+  return (
+    <button onClick={onClick} className="text-gray-500 hover:text-white transition-colors">
+      <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+        <line x1="18" y1="6" x2="6" y2="18" />
+        <line x1="6" y1="6" x2="18" y2="18" />
+      </svg>
+    </button>
+  );
+}
+
+function SendBtn({ onClick, disabled }: { onClick?: () => void; disabled?: boolean }) {
+  return (
+    <button
+      onClick={onClick}
+      disabled={disabled}
+      className="bg-[#00CC99] hover:bg-[#00b388] disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-medium px-5 py-2.5 rounded-lg flex items-center gap-2 transition-colors"
+    >
+      <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+        <line x1="22" y1="2" x2="11" y2="13" />
+        <polygon points="22 2 15 22 11 13 2 9 22 2" />
+      </svg>
+      {disabled ? "Илгээж байна..." : "Илгээх"}
+    </button>
+  );
+}
+
+function BackBtn({ onClick }: { onClick: () => void }) {
+  return (
+    <button
+      onClick={onClick}
+      className="border border-[#1a2035] px-5 py-2.5 rounded-lg text-sm text-gray-400 hover:bg-white/5 hover:text-white transition-colors"
+    >
+      Буцах
+    </button>
+  );
+}
+
+function SelectField({
+  label,
+  id,
+  options,
+  placeholder = "Сонгоно уу",
+  value,
+  onChange,
+}: {
+  label: string;
+  id: string;
+  options: string[];
+  placeholder?: string;
+  value?: string;
+  onChange?: (v: string) => void;
+}) {
+  return (
+    <div className="flex flex-col gap-1.5">
+      <label htmlFor={id} className="text-sm font-medium text-white">
+        {label}
+      </label>
+      <div className="relative">
+        <select id={id} className={INPUT_CLASS} value={value} onChange={(e) => onChange?.(e.target.value)}>
+          <option value="">{placeholder}</option>
+          {options.map((opt) => (
+            <option key={opt} value={opt}>
+              {opt}
+            </option>
+          ))}
+        </select>
+        <BiChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 pointer-events-none" />
+      </div>
+    </div>
+  );
+}
+
+function UploadArea({ label, subtitle }: { label: string; subtitle?: string }) {
+  return (
+    <div className="flex flex-col gap-1.5">
+      <span className="text-sm font-medium text-white">{label}</span>
+      <div className="border border-dashed border-[#1a2035] rounded-xl p-7 flex flex-col items-center gap-2 hover:border-[#00CC99]/30 transition-colors cursor-pointer">
+        <svg xmlns="http://www.w3.org/2000/svg" className="w-8 h-8 text-gray-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+          <polyline points="16 16 12 12 8 16" />
+          <line x1="12" y1="12" x2="12" y2="21" />
+          <path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3" />
+        </svg>
+        <p className="text-sm font-medium text-white">
+          {subtitle ?? "Файл хавсаргах (Заавал биш)"}
+        </p>
+        <p className="text-xs text-gray-500">JPEG, PNG, PDG, and MP4 formats, up to 50MB</p>
+        <button className="mt-1 border border-[#1a2035] text-xs text-gray-300 px-4 py-1.5 rounded-lg hover:bg-white/5 transition-colors">
+          Оруулах
+        </button>
+      </div>
+    </div>
+  );
+}
 
 export const Request = () => {
   const [activeTab, setActiveTab] = useState<string | null>(null);
+  const [submitted, setSubmitted] = useState(false);
+  const [sending, setSending] = useState(false);
+  const [sendError, setSendError] = useState<string | null>(null);
+
+  // Leave form state
+  const [leaveType, setLeaveType] = useState("");
+  const [leaveStart, setLeaveStart] = useState("");
+  const [leaveEnd, setLeaveEnd] = useState("");
+  const [leaveReason, setLeaveReason] = useState("");
+
+  async function handleSend() {
+    setSending(true);
+    setSendError(null);
+    try {
+      const token = window.localStorage.getItem(TOKEN_KEY);
+      if (activeTab === "Чөлөө авах") {
+        if (!token) {
+          throw new Error("Нэвтрэх шаардлагатай");
+        }
+        await submitLeaveRequest(
+          {
+            type: leaveType || "Ээлжийн амралт",
+            startTime: leaveStart || new Date().toISOString(),
+            endTime: leaveEnd || new Date().toISOString(),
+            reason: leaveReason,
+          },
+          token,
+        );
+      }
+      setSubmitted(true);
+      setTimeout(() => {
+        setSubmitted(false);
+        setActiveTab(null);
+        setLeaveType("");
+        setLeaveStart("");
+        setLeaveEnd("");
+        setLeaveReason("");
+      }, 2000);
+    } catch (err) {
+      setSendError(err instanceof Error ? err.message : "Алдаа гарлаа. Дахин оролдоно уу.");
+    } finally {
+      setSending(false);
+    }
+  }
+
+  function closeDialog() {
+    setSubmitted(false);
+    setSendError(null);
+    setActiveTab(null);
+  }
 
   const quickActions = [
     {
@@ -50,22 +203,14 @@ export const Request = () => {
             className={`${action.bg} rounded-2xl border p-5 flex items-center justify-between gap-4 shadow-[0_0_0_1px_rgba(255,255,255,0.03)_inset] transition-colors`}
           >
             <div className="flex items-center gap-4">
-              {/* icon box */}
-              <div
-                className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${action.iconBg}`}
-              >
+              <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${action.iconBg}`}>
                 {action.icon}
               </div>
-
               <div>
-                <p className="text-white text-base font-semibold">
-                  {action.title}
-                </p>
+                <p className="text-white text-base font-semibold">{action.title}</p>
                 <p className="text-gray-400 text-sm mt-0.5">{action.desc}</p>
               </div>
             </div>
-
-            {/* plus button */}
             <button
               onClick={() => setActiveTab(action.title)}
               className="w-10 h-10 rounded-xl border border-white/10 flex items-center justify-center text-gray-400 hover:text-white hover:border-white/20 transition"
@@ -75,272 +220,169 @@ export const Request = () => {
           </div>
         ))}
       </div>
-      {activeTab === "Чөлөө авах" && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-          <div className="w-[480px] rounded-2xl bg-[#0f0f0f] text-white p-7 border border-gray-800 shadow-xl">
-            <div className="flex justify-between items-center mb-1">
-              <h2 className="text-xl font-semibold">Чөлөөний хүсэлт</h2>
-              <button
-                onClick={() => setActiveTab(null)}
-                className="text-gray-400 hover:text-white transition-colors"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="w-5 h-5"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                >
-                  <line x1="18" y1="6" x2="6" y2="18" />
-                  <line x1="6" y1="6" x2="18" y2="18" />
-                </svg>
-              </button>
+
+      {/* ── Success overlay (shared) ── */}
+      {submitted && activeTab && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black/60 backdrop-blur-sm z-50">
+          <div className={`w-[360px] rounded-2xl ${DIALOG_BG} text-white p-8 border ${DIALOG_BORDER} shadow-2xl flex flex-col items-center gap-4`}>
+            <div className="w-14 h-14 rounded-full bg-[#00CC99]/15 border border-[#00CC99]/30 flex items-center justify-center">
+              <svg xmlns="http://www.w3.org/2000/svg" className="w-7 h-7 text-[#00CC99]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                <polyline points="20 6 9 17 4 12" />
+              </svg>
             </div>
-            <p className="text-sm text-gray-500 mb-6">
-              Таны чөлөө авах боломжит үлдэгдэл
-              <span className="text-white font-medium">4 цаг.</span>
-            </p>
-
-            <label className="block text-sm font-medium mb-1.5">
-              Чөлөөний төрөл
-            </label>
-            <select className="w-full mb-5 bg-[#0f0f0f] border border-gray-700 rounded-lg p-2.5 text-sm text-gray-300 focus:outline-none focus:border-gray-500">
-              <option>Сонгоно уу</option>
-            </select>
-
-            <label className="block text-sm font-medium mb-3">Төрөл</label>
-            <div className="flex gap-8 mb-6">
-              <label className="flex items-center gap-2.5 cursor-pointer">
-                <div className="w-5 h-5 rounded-full border-2 border-gray-600 flex items-center justify-center">
-                  <div className="w-2 h-2 rounded-full bg-transparent" />
-                </div>
-                <span className="text-sm text-gray-300">Өдрөөр</span>
-              </label>
-              <label className="flex items-center gap-2.5 cursor-pointer">
-                <div className="w-5 h-5 rounded-full border-2 border-gray-600 flex items-center justify-center">
-                  <div className="w-2 h-2 rounded-full bg-transparent" />
-                </div>
-                <span className="text-sm text-gray-300">Цагаар</span>
-              </label>
-            </div>
-
-            <div className="flex gap-4 mb-5">
-              <div className="flex flex-col flex-1">
-                <label className="text-sm font-medium mb-1.5">Эхлэх цаг</label>
-                <select className="bg-[#0f0f0f] border border-gray-700 rounded-lg p-2.5 text-sm text-gray-300 focus:outline-none focus:border-gray-500">
-                  <option>Сонгох</option>
-                </select>
-              </div>
-              <div className="flex flex-col flex-1">
-                <label className="text-sm font-medium mb-1.5">Дуусах цаг</label>
-                <select className="bg-[#0f0f0f] border border-gray-700 rounded-lg p-2.5 text-sm text-gray-300 focus:outline-none focus:border-gray-500">
-                  <option>Сонгох</option>
-                </select>
-              </div>
-            </div>
-
-            <label className="block text-sm font-medium mb-1.5">Шалтгаан</label>
-            <textarea
-              placeholder="Чөлөө авах шалтгаанаа бичнэ үү..."
-              rows={3}
-              className="w-full bg-[#0f0f0f] border border-gray-700 rounded-lg p-3 text-sm text-gray-300 placeholder-gray-600 mb-6 resize-none focus:outline-none focus:border-gray-500"
-            />
-
-            <div className="flex justify-end gap-3">
-              <button
-                onClick={() => setActiveTab(null)}
-                className="border border-gray-700 px-5 py-2.5 rounded-lg text-sm hover:bg-gray-800 transition-colors"
-              >
-                Буцах
-              </button>
-              <button className="bg-teal-500 hover:bg-teal-400 text-white text-sm font-medium px-5 py-2.5 rounded-lg flex items-center gap-2 transition-colors">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="w-4 h-4"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                >
-                  <line x1="22" y1="2" x2="11" y2="13" />
-                  <polygon points="22 2 15 22 11 13 2 9 22 2" />
-                </svg>
-                Илгээх
-              </button>
+            <div className="text-center">
+              <p className="text-white font-semibold text-lg">Хүсэлт амжилттай илгээгдлээ</p>
+              <p className="text-gray-500 text-sm mt-1">Таны хүсэлтийг хянаж үзнэ</p>
             </div>
           </div>
         </div>
       )}
 
-      {activeTab === "Тойрох хуудас" && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black/60 z-50">
-          <div className="w-[460px] rounded-2xl bg-[#03080F] text-white p-7 border border-gray-800 shadow-2xl">
-            <div className="flex items-start justify-between mb-1">
-              <h2 className="text-xl font-semibold">
-                Тойрох хуудас авах хүсэлт
-              </h2>
-              <button
-                onClick={() => setActiveTab(null)}
-                className="text-gray-400 hover:text-white transition-colors mt-0.5"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="w-5 h-5"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                >
-                  <line x1="18" y1="6" x2="6" y2="18" />
-                  <line x1="6" y1="6" x2="18" y2="18" />
-                </svg>
-              </button>
-            </div>
-            <p className="text-sm text-gray-500 mb-6">
-              Тойрох хуудас авах шалтгаан болон файл оруулна уу
-            </p>
-
-            <label className="block text-sm font-medium mb-1.5">Төрөл</label>
-            <select className="w-full mb-5 bg-[#03080F] border border-gray-700 rounded-lg p-2.5 text-gray-400 text-sm appearance-none cursor-pointer focus:outline-none focus:border-gray-500">
-              <option>Сонгоно уу</option>
-            </select>
-
-            <label className="block text-sm font-medium mb-2">
-              Файл хавсаргах
-            </label>
-            <div className="border-2 border-dashed border-gray-700 rounded-xl p-8 text-center mb-5 hover:border-gray-500 transition-colors cursor-pointer">
-              <div className="flex justify-center mb-3">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="w-9 h-9 text-gray-400"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                >
-                  <polyline points="16 16 12 12 8 16" />
-                  <line x1="12" y1="12" x2="12" y2="21" />
-                  <path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3" />
-                </svg>
+      {/* ── Чөлөөний хүсэлт dialog ── */}
+      {activeTab === "Чөлөө авах" && !submitted && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black/60 backdrop-blur-sm z-50">
+          <div className={`w-[460px] rounded-2xl ${DIALOG_BG} text-white p-7 border ${DIALOG_BORDER} shadow-2xl flex flex-col gap-5`}>
+            {/* header */}
+            <div className="flex justify-between items-start">
+              <div>
+                <h2 className="text-xl font-semibold">Чөлөөний хүсэлт</h2>
+                <p className="text-sm text-gray-500 mt-1">
+                  Таны чөлөө авах боломжит үлдэгдэл{" "}
+                  <span className="text-white font-medium">4 цаг.</span>
+                </p>
               </div>
-              <p className="text-sm font-medium mb-1">
-                Файл хавсаргах (Заавал биш)
-              </p>
-              <p className="text-xs text-gray-500 mb-4">
-                JPEG, PNG, PDG, and MP4 formats, up to 50MB
-              </p>
-              <button className="border border-gray-600 text-sm px-5 py-1.5 rounded-lg hover:bg-gray-800 transition-colors">
-                Оруулах
-              </button>
+              <CloseBtn onClick={closeDialog} />
             </div>
 
-            <label className="block text-sm font-medium mb-1.5">Шалтгаан</label>
-            <textarea
-              placeholder="Чөлөө авах шалтгаанаа бичнэ үү..."
-              rows={3}
-              className="w-full bg-[#0f0f0f] border border-gray-700 rounded-lg p-3 text-sm text-gray-300 placeholder-gray-600 mb-6 resize-none focus:outline-none focus:border-gray-500"
+            {/* Чөлөөний төрөл */}
+            <SelectField
+              label="Чөлөөний төрөл"
+              id="leave-type"
+              options={["Ээлжийн амралт", "Өвчний чөлөө", "Гэр бүлийн үндэслэлтэй", "Цалингүй чөлөө"]}
+              value={leaveType}
+              onChange={setLeaveType}
             />
 
+            {/* Төрөл radios */}
+            <div className="flex flex-col gap-2">
+              <span className="text-sm font-medium text-white">Төрөл</span>
+              <div className="flex gap-8">
+                {["Өдрөөр", "Цагаар"].map((opt) => (
+                  <label key={opt} className="flex items-center gap-2.5 cursor-pointer">
+                    <div className="w-5 h-5 rounded-full border-2 border-[#1a2035] flex items-center justify-center">
+                      <div className="w-2 h-2 rounded-full bg-transparent" />
+                    </div>
+                    <span className="text-sm text-gray-300">{opt}</span>
+                  </label>
+                ))}
+              </div>
+            </div>
+
+            {/* Time range */}
+            <div className="flex gap-4">
+              {[
+                { label: "Эхлэх цаг", id: "start-time", val: leaveStart, set: setLeaveStart },
+                { label: "Дуусах цаг", id: "end-time", val: leaveEnd, set: setLeaveEnd },
+              ].map(({ label, id, val, set }) => (
+                <div key={id} className="flex flex-col gap-1.5 flex-1">
+                  <label htmlFor={id} className="text-sm font-medium text-white">
+                    {label}
+                  </label>
+                  <div className="relative">
+                    <select id={id} className={INPUT_CLASS} value={val} onChange={(e) => set(e.target.value)}>
+                      <option value="">Сонгох</option>
+                      {["08:00","09:00","10:00","11:00","12:00","13:00","14:00","15:00","16:00","17:00","18:00"].map((t) => (
+                        <option key={t} value={t}>{t}</option>
+                      ))}
+                    </select>
+                    <BiChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 pointer-events-none" />
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Шалтгаан */}
+            <div className="flex flex-col gap-1.5">
+              <label className="text-sm font-medium text-white">Шалтгаан</label>
+              <textarea rows={3} placeholder="Чөлөө авах шалтгаанаа бичнэ үү..." className={TEXTAREA_CLASS} value={leaveReason} onChange={(e) => setLeaveReason(e.target.value)} />
+            </div>
+
+            {/* error */}
+            {sendError && (
+              <p className="text-red-400 text-xs bg-red-500/10 border border-red-500/20 rounded-lg px-3 py-2">{sendError}</p>
+            )}
+
+            {/* footer */}
             <div className="flex justify-end gap-3">
-              <button
-                className="border border-gray-700 text-sm px-5 py-2.5 rounded-lg hover:bg-gray-800 transition-colors"
-                onClick={() => setActiveTab(null)}
-              >
-                Буцах
-              </button>
-              <button className="bg-teal-500 hover:bg-teal-400 text-sm font-medium px-5 py-2.5 rounded-lg transition-colors flex items-center gap-2">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="w-4 h-4"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                >
-                  <line x1="22" y1="2" x2="11" y2="13" />
-                  <polygon points="22 2 15 22 11 13 2 9 22 2" />
-                </svg>
-                Илгээх
-              </button>
+              <BackBtn onClick={closeDialog} />
+              <SendBtn onClick={handleSend} disabled={sending} />
             </div>
           </div>
         </div>
       )}
-      {activeTab === "Томилолт" && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black/60 z-50">
-          <div className="w-[460px] rounded-2xl bg-[#0f0f0f] text-white p-7 border border-gray-800 shadow-2xl">
-            <div className="flex items-start justify-between mb-1">
-              <h2 className="text-xl font-semibold">Томилолтын мэдээлэл</h2>
-              <button
-                onClick={() => setActiveTab(null)}
-                className="text-gray-400 hover:text-white transition-colors mt-0.5"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="w-5 h-5"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                >
-                  <line x1="18" y1="6" x2="6" y2="18" />
-                  <line x1="6" y1="6" x2="18" y2="18" />
-                </svg>
-              </button>
-            </div>
-            <p className="text-sm text-gray-500 mb-6">
-              Томилолтын мэдээлэлээ оруулна уу.
-            </p>
 
-            <label className="block text-sm font-medium mb-2">
-              Файл хавсаргах
-            </label>
-            <div className="border-2 border-dashed border-gray-700 rounded-xl p-8 text-center mb-6 hover:border-gray-500 transition-colors cursor-pointer">
-              <div className="flex justify-center mb-3">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="w-9 h-9 text-gray-400"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                >
-                  <polyline points="16 16 12 12 8 16" />
-                  <line x1="12" y1="12" x2="12" y2="21" />
-                  <path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3" />
-                </svg>
+      {/* ── Тойрох хуудас dialog ── */}
+      {activeTab === "Тойрох хуудас" && !submitted && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black/60 backdrop-blur-sm z-50">
+          <div className={`w-[460px] rounded-2xl ${DIALOG_BG} text-white p-7 border ${DIALOG_BORDER} shadow-2xl flex flex-col gap-5`}>
+            {/* header */}
+            <div className="flex justify-between items-start">
+              <div>
+                <h2 className="text-xl font-semibold">Тойрох хуудас авах хүсэлт</h2>
+                <p className="text-sm text-gray-500 mt-1">
+                  Тойрох хуудас авах шалтгаан болон файл оруулна уу
+                </p>
               </div>
-              <p className="text-sm font-medium mb-1">Файл хавсаргана уу.</p>
-              <p className="text-xs text-gray-500 mb-4">
-                JPEG, PNG, PDG, and MP4 formats, up to 50MB
-              </p>
-              <button className="border border-gray-600 text-sm px-5 py-1.5 rounded-lg hover:bg-gray-800 transition-colors">
-                Оруулах
-              </button>
+              <CloseBtn onClick={closeDialog} />
             </div>
 
+            {/* Төрөл */}
+            <SelectField
+              label="Төрөл"
+              id="clearance-type"
+              options={["Ажлаас гарах", "Дотоод шилжилт", "Гадаад томилолт", "Бусад"]}
+            />
+
+            {/* Файл хавсаргах */}
+            <UploadArea label="Файл хавсаргах" />
+
+            {/* Шалтгаан */}
+            <div className="flex flex-col gap-1.5">
+              <label className="text-sm font-medium text-white">Шалтгаан</label>
+              <textarea rows={3} placeholder="Чөлөө авах шалтгаанаа бичнэ үү..." className={TEXTAREA_CLASS} />
+            </div>
+
+            {/* footer */}
             <div className="flex justify-end gap-3">
-              <button
-                className="border border-gray-700 text-sm px-5 py-2.5 rounded-lg hover:bg-gray-800 transition-colors"
-                onClick={() => setActiveTab(null)}
-              >
-                Буцах
-              </button>
-              <button className="bg-teal-500 hover:bg-teal-400 text-sm font-medium px-5 py-2.5 rounded-lg transition-colors flex items-center gap-2">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="w-4 h-4"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                >
-                  <line x1="22" y1="2" x2="11" y2="13" />
-                  <polygon points="22 2 15 22 11 13 2 9 22 2" />
-                </svg>
-                Илгээх
-              </button>
+              <BackBtn onClick={closeDialog} />
+              <SendBtn onClick={handleSend} />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Томилолт dialog ── */}
+      {activeTab === "Томилолт" && !submitted && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black/60 backdrop-blur-sm z-50">
+          <div className={`w-[460px] rounded-2xl ${DIALOG_BG} text-white p-7 border ${DIALOG_BORDER} shadow-2xl flex flex-col gap-5`}>
+            {/* header */}
+            <div className="flex justify-between items-start">
+              <div>
+                <h2 className="text-xl font-semibold">Томилолтын мэдээлэл</h2>
+                <p className="text-sm text-gray-500 mt-1">
+                  Томилолтын мэдээлэлээ оруулна уу.
+                </p>
+              </div>
+              <CloseBtn onClick={closeDialog} />
+            </div>
+
+            {/* Файл хавсаргах */}
+            <UploadArea label="Файл хавсаргах" subtitle="Файл хавсаргана уу." />
+
+            {/* footer */}
+            <div className="flex justify-end gap-3">
+              <BackBtn onClick={closeDialog} />
+              <SendBtn onClick={handleSend} />
             </div>
           </div>
         </div>

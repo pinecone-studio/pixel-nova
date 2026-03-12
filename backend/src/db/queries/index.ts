@@ -35,3 +35,9 @@ export {
   deleteSessionByToken,
 } from "./auth";
 export { createTriggeredActionRecords } from "./triggerAction";
+export {
+  insertLeaveRequest,
+  getLeaveRequests,
+  getLeaveRequestById,
+  updateLeaveRequestStatus,
+} from "./leaveRequest";

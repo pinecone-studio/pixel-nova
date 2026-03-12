@@ -140,12 +140,28 @@ export const typeDefs = /* GraphQL */ `
     content: String!
   }
 
+  type LeaveRequest {
+    id: ID!
+    employeeId: ID!
+    employee: Employee!
+    type: String!
+    startTime: String!
+    endTime: String!
+    reason: String!
+    status: String!
+    note: String
+    createdAt: String!
+    updatedAt: String!
+  }
+
   type Query {
     me: Employee
     documents(employeeId: ID!): [Document!]!
     auditLogs(employeeId: ID, action: String, fromDate: String, toDate: String): [AuditLog!]!
     actions: [ActionConfig!]!
     documentContent(documentId: ID!): DocumentContent
+    leaveRequests(status: String): [LeaveRequest!]!
+    myLeaveRequests: [LeaveRequest!]!
   }
 
   type Mutation {
@@ -157,5 +173,8 @@ export const typeDefs = /* GraphQL */ `
     upsertEmployee(input: UpsertEmployeeInput!): UpsertEmployeeResult!
     resolveEmployeeAction(input: ResolveEmployeeActionInput!): ResolvedEmployeeAction
     updateRegistry(input: UpdateActionRegistryInput!): ActionConfig!
+    submitLeaveRequest(type: String!, startTime: String!, endTime: String!, reason: String!): LeaveRequest!
+    approveLeaveRequest(id: ID!, note: String): LeaveRequest!
+    rejectLeaveRequest(id: ID!, note: String): LeaveRequest!
   }
 `;
