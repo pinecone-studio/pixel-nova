@@ -2093,3 +2093,261 @@ export const ChevronDown = ({ open }: { open: boolean }) => (
     />
   </svg>
 );
+
+export const MailIcon = () => (
+  <svg
+    width="13"
+    height="13"
+    fill="none"
+    viewBox="0 0 24 24"
+    className="text-slate-500 flex-shrink-0"
+  >
+    <rect
+      x="2"
+      y="4"
+      width="20"
+      height="16"
+      rx="2"
+      stroke="currentColor"
+      strokeWidth="1.6"
+    />
+    <path
+      d="M2 8l10 6 10-6"
+      stroke="currentColor"
+      strokeWidth="1.6"
+      strokeLinecap="round"
+    />
+  </svg>
+);
+
+export const PhoneIcon = () => (
+  <svg
+    width="13"
+    height="13"
+    fill="none"
+    viewBox="0 0 24 24"
+    className="text-slate-500 flex-shrink-0"
+  >
+    <path
+      d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.81 19.79 19.79 0 01.01 1.18 2 2 0 012 0h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.09 7.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"
+      stroke="currentColor"
+      strokeWidth="1.6"
+      strokeLinejoin="round"
+    />
+  </svg>
+);
+
+export const BuildingIcon = () => (
+  <svg
+    width="13"
+    height="13"
+    fill="none"
+    viewBox="0 0 24 24"
+    className="text-slate-500 flex-shrink-0"
+  >
+    <rect
+      x="2"
+      y="7"
+      width="20"
+      height="14"
+      rx="1"
+      stroke="currentColor"
+      strokeWidth="1.6"
+    />
+    <path
+      d="M16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16"
+      stroke="currentColor"
+      strokeWidth="1.6"
+    />
+  </svg>
+);
+
+export const LockIcon = () => (
+  <svg
+    width="14"
+    height="14"
+    fill="none"
+    viewBox="0 0 24 24"
+    className="text-slate-400"
+  >
+    <rect
+      x="3"
+      y="11"
+      width="18"
+      height="11"
+      rx="2"
+      stroke="currentColor"
+      strokeWidth="1.6"
+    />
+    <path
+      d="M7 11V7a5 5 0 0110 0v4"
+      stroke="currentColor"
+      strokeWidth="1.6"
+      strokeLinecap="round"
+    />
+  </svg>
+);
+
+export const UploadIcon = () => (
+  <svg
+    width="28"
+    height="28"
+    fill="none"
+    viewBox="0 0 24 24"
+    className="text-slate-400"
+  >
+    <path
+      d="M12 16V8M12 8l-3 3M12 8l3 3"
+      stroke="currentColor"
+      strokeWidth="1.6"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+    <path
+      d="M20.39 18.39A5 5 0 0018 9h-1.26A8 8 0 103 16.3"
+      stroke="currentColor"
+      strokeWidth="1.6"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </svg>
+);
+
+export const ChevronDownn = () => (
+  <svg
+    width="14"
+    height="14"
+    fill="none"
+    viewBox="0 0 24 24"
+    className="text-slate-400"
+  >
+    <path
+      d="M6 9l6 6 6-6"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </svg>
+);
+
+export const ActiveIconn = () => {
+  return (
+    <svg
+      width="48"
+      height="48"
+      viewBox="0 0 48 48"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        d="M0 14C0 6.26801 6.26801 0 14 0H34C41.732 0 48 6.26801 48 14V34C48 41.732 41.732 48 34 48H14C6.26801 48 0 41.732 0 34V14Z"
+        fill="#2B7FFF"
+      />
+      <path
+        d="M33.8006 22C34.2573 24.2413 33.9318 26.5714 32.8785 28.6018C31.8251 30.6322 30.1075 32.24 28.0121 33.1573C25.9167 34.0746 23.5702 34.2458 21.3639 33.6424C19.1576 33.0389 17.2248 31.6974 15.8879 29.8414C14.551 27.9854 13.8907 25.7272 14.0173 23.4434C14.1438 21.1595 15.0495 18.9881 16.5833 17.2912C18.117 15.5942 20.1862 14.4744 22.4457 14.1184C24.7052 13.7625 27.0184 14.1918 28.9996 15.335"
+        stroke="white"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M21 23L24 26L34 16"
+        stroke="white"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+};
+
+export const HiredIcon = () => {
+  return (
+    <svg
+      width="48"
+      height="48"
+      viewBox="0 0 48 48"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        d="M0 14C0 6.26801 6.26801 0 14 0H34C41.732 0 48 6.26801 48 14V34C48 41.732 41.732 48 34 48H14C6.26801 48 0 41.732 0 34V14Z"
+        fill="#00A63E"
+      />
+      <path
+        d="M28 33V31C28 29.9391 27.5786 28.9217 26.8284 28.1716C26.0783 27.4214 25.0609 27 24 27H18C16.9391 27 15.9217 27.4214 15.1716 28.1716C14.4214 28.9217 14 29.9391 14 31V33"
+        stroke="white"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M21 23C23.2091 23 25 21.2091 25 19C25 16.7909 23.2091 15 21 15C18.7909 15 17 16.7909 17 19C17 21.2091 18.7909 23 21 23Z"
+        stroke="white"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M31 19.9999V25.9999"
+        stroke="white"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M34 22.9999H28"
+        stroke="white"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+};
+
+export const AbsentIcon = () => {
+  return (
+    <svg
+      width="48"
+      height="48"
+      viewBox="0 0 48 48"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        d="M0 14C0 6.26801 6.26801 0 14 0H34C41.732 0 48 6.26801 48 14V34C48 41.732 41.732 48 34 48H14C6.26801 48 0 41.732 0 34V14Z"
+        fill="#AD46FF"
+      />
+      <path
+        d="M20 14V18"
+        stroke="white"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M28 14V18"
+        stroke="white"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M31 16H17C15.8954 16 15 16.8954 15 18V32C15 33.1046 15.8954 34 17 34H31C32.1046 34 33 33.1046 33 32V18C33 16.8954 32.1046 16 31 16Z"
+        stroke="white"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M15 22H33"
+        stroke="white"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+};
