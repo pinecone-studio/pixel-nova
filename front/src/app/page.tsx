@@ -205,7 +205,7 @@ export default function Home() {
               Сайн байна уу?
             </p>
             <h1 className="text-white text-4xl font-bold tracking-tight">
-              Бат-Эрдэнэ Др ож
+              Бат-Эрдэнэ Дрож
             </h1>
             <p className="text-[#4A4A6A] text-sm leading-relaxed max-w-lg">
               Та хөдөлмөрийн баримт бичиг болон ажлын түүхээ авах боломжтой. Бүх
