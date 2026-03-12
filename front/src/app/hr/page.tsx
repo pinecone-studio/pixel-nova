@@ -18,9 +18,10 @@ import {
   UsersIcon,
 } from "../components/icons";
 import { FiFilter } from "react-icons/fi";
-import { BiToggleLeft, BiToggleRight } from "react-icons/bi";
-
+import { BiToggleLeft, BiToggleRight, BiX } from "react-icons/bi";
 import { GrDocument } from "react-icons/gr";
+import { triggerAction } from "@/lib/api";
+import type { TriggerActionResult } from "@/lib/types";
 
 type NavItem = { key: string; label: string; icon: React.ReactNode };
 
@@ -324,8 +325,48 @@ const settingSections = [
   },
 ];
 
+const ACTIONS = [
+  { value: "add_employee", label: "Ажилтан нэмэх (Onboarding)" },
+  { value: "promote_employee", label: "Цалин нэмэх" },
+  { value: "change_position", label: "Албан тушаал өөрчлөх" },
+  { value: "offboard_employee", label: "Ажлаас гаргах (Offboarding)" },
+];
+
 export default function HrPage() {
   const [activeKey, setActiveKey] = useState("files");
+
+  // triggerAction modal state
+  const [modalOpen, setModalOpen] = useState(false);
+  const [empId, setEmpId] = useState("");
+  const [action, setAction] = useState("add_employee");
+  const [triggerLoading, setTriggerLoading] = useState(false);
+  const [triggerResult, setTriggerResult] = useState<TriggerActionResult | null>(null);
+  const [triggerError, setTriggerError] = useState<string | null>(null);
+
+  function openModal() {
+    setModalOpen(true);
+    setEmpId("");
+    setAction("add_employee");
+    setTriggerResult(null);
+    setTriggerError(null);
+  }
+
+  async function handleTrigger(e: React.FormEvent) {
+    e.preventDefault();
+    if (!empId.trim()) return;
+    setTriggerLoading(true);
+    setTriggerError(null);
+    setTriggerResult(null);
+    try {
+      const result = await triggerAction(empId.trim(), action);
+      setTriggerResult(result);
+    } catch (err) {
+      setTriggerError(err instanceof Error ? err.message : "Алдаа гарлаа.");
+    } finally {
+      setTriggerLoading(false);
+    }
+  }
+
   const [toggles, setToggles] = useState<Record<string, boolean>>(() => {
     const init: Record<string, boolean> = {};
     settingSections.forEach((s) =>
@@ -351,7 +392,7 @@ export default function HrPage() {
                 Бүх ажилтны жагсаалт болон мэдээлэл
               </p>
             </div>
-            <button className="flex items-center gap-2 h-9 px-4 rounded-lg bg-[#0ad4b1] text-[#060d0c] text-sm font-semibold hover:bg-[#12e6c0] transition-colors">
+            <button onClick={openModal} className="flex items-center gap-2 h-9 px-4 rounded-lg bg-[#0ad4b1] text-[#060d0c] text-sm font-semibold hover:bg-[#12e6c0] transition-colors">
               ＋ Ажилтан нэмэх
             </button>
           </div>
@@ -912,6 +953,96 @@ export default function HrPage() {
           </button>
         </aside>
 
+        {/* ── Trigger Action Modal ── */}
+        {modalOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+            <div className="w-[460px] rounded-2xl bg-[#0a0f0e] border border-white/10 p-7 shadow-2xl flex flex-col gap-5">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-white text-lg font-bold">Баримт үүсгэх</h2>
+                  <p className="text-slate-500 text-sm mt-0.5">Ажилтны үйлдлийг идэвхжүүлнэ</p>
+                </div>
+                <button onClick={() => setModalOpen(false)} className="text-slate-500 hover:text-white transition-colors">
+                  <BiX className="text-xl" />
+                </button>
+              </div>
+
+              {!triggerResult ? (
+                <form onSubmit={handleTrigger} className="flex flex-col gap-4">
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-white/70 text-sm font-medium">Ажилтны ID</label>
+                    <input
+                      type="text"
+                      value={empId}
+                      onChange={(e) => setEmpId(e.target.value)}
+                      placeholder="Жишээ: abc123"
+                      autoFocus
+                      className="w-full h-10 px-4 rounded-xl bg-[#060d0c] border border-white/10 text-white placeholder:text-slate-600 focus:outline-none focus:border-[#0ad4b1]/50 transition-colors text-sm"
+                    />
+                  </div>
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-white/70 text-sm font-medium">Үйлдэл</label>
+                    <select
+                      value={action}
+                      onChange={(e) => setAction(e.target.value)}
+                      className="w-full h-10 px-4 rounded-xl bg-[#060d0c] border border-white/10 text-white focus:outline-none focus:border-[#0ad4b1]/50 transition-colors text-sm"
+                    >
+                      {ACTIONS.map((a) => (
+                        <option key={a.value} value={a.value}>{a.label}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {triggerError && (
+                    <div className="px-4 py-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-sm">
+                      {triggerError}
+                    </div>
+                  )}
+
+                  <div className="flex justify-end gap-3 pt-1">
+                    <button type="button" onClick={() => setModalOpen(false)} className="h-9 px-5 rounded-lg border border-white/10 text-slate-400 text-sm hover:bg-white/5 transition-colors">
+                      Болих
+                    </button>
+                    <button
+                      type="submit"
+                      disabled={triggerLoading || !empId.trim()}
+                      className="h-9 px-5 rounded-lg bg-[#0ad4b1] hover:bg-[#12e6c0] disabled:opacity-50 disabled:cursor-not-allowed text-[#060d0c] text-sm font-semibold transition-colors flex items-center gap-2"
+                    >
+                      {triggerLoading && <span className="w-3.5 h-3.5 border-2 border-[#060d0c]/30 border-t-[#060d0c] rounded-full animate-spin" />}
+                      {triggerLoading ? "Үүсгэж байна..." : "Баримт үүсгэх"}
+                    </button>
+                  </div>
+                </form>
+              ) : (
+                <div className="flex flex-col gap-4">
+                  <div className="px-4 py-3 rounded-xl bg-[#0ad4b1]/10 border border-[#0ad4b1]/20 text-[#0ad4b1] text-sm flex items-start gap-2">
+                    <span className="text-base">✓</span>
+                    <span>
+                      <strong>{triggerResult.documents.length} баримт</strong> үүсгэгдэж, имэйл илгээгдлээ
+                    </span>
+                  </div>
+                  {triggerResult.documents.length > 0 && (
+                    <div className="flex flex-col gap-1.5">
+                      <p className="text-slate-500 text-xs uppercase tracking-wider">Үүсгэгдсэн баримтууд</p>
+                      <div className="flex flex-col gap-1">
+                        {triggerResult.documents.map((doc) => (
+                          <div key={doc.id} className="flex items-center gap-2 px-3 py-2 rounded-lg bg-white/3 border border-white/5">
+                            <span className="text-slate-400 text-sm">📄</span>
+                            <span className="text-slate-300 text-sm">{doc.documentName}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  <button onClick={() => setModalOpen(false)} className="w-full h-9 rounded-lg bg-[#0ad4b1]/10 border border-[#0ad4b1]/20 text-[#0ad4b1] text-sm font-medium hover:bg-[#0ad4b1]/20 transition-colors">
+                    Хаах
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
         {/* ── Main ── */}
         <main className="flex-1 overflow-y-auto flex flex-col">
           <header className="h-14 border-b border-white/8 flex items-center justify-between px-6 shrink-0 bg-[#060d0c]">
@@ -923,7 +1054,7 @@ export default function HrPage() {
               </span>
             </div>
             <div className="flex items-center gap-3">
-              <button className="flex items-center gap-2 h-9 px-4 rounded-lg border cursor-pointer border-[#0ad4b1]/50 bg-linear-to-br from-[#0a3b33] to-[#0ad4b1]/20 text-white text-sm font-medium hover:border-[#0ad4b1] transition-colors">
+              <button onClick={openModal} className="flex items-center gap-2 h-9 px-4 rounded-lg border cursor-pointer border-[#0ad4b1]/50 bg-linear-to-br from-[#0a3b33] to-[#0ad4b1]/20 text-white text-sm font-medium hover:border-[#0ad4b1] transition-colors">
                 <span>＋</span> Ажилтан нэмэх
               </button>
               <div className="relative">
