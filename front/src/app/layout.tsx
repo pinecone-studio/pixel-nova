@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import LayoutShell from "./hr/layoutShell";
+import { Navbar } from "./components/navbarSection";
+import { FooterSection } from "./components/footerSection";
 
 export const metadata: Metadata = {
   title: "EPAS - Employee Paperwork Automation System",
@@ -16,7 +17,9 @@ export default function RootLayout({
     <html lang="mn">
       <body>
         <div className="min-h-screen bg-[#0A0A0F]">
-          <LayoutShell>{children}</LayoutShell>
+          <Navbar />
+          {children}
+          <FooterSection/>
         </div>
       </body>
     </html>

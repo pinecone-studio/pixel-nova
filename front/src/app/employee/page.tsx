@@ -6,7 +6,6 @@ import { BiDownload, BiShowAlt } from "react-icons/bi";
 import { fetchAuditLogs, fetchDocuments, fetchMe } from "@/lib/api";
 import type { AuditLog, Document, Employee } from "@/lib/types";
 
-import { FooterSection } from "../components/footerSection";
 import { FactIcon } from "../components/icons";
 import { Request } from "../components/request";
 
@@ -213,7 +212,7 @@ export default function EmployeePage() {
             {documentCards.map((document) => (
               <article
                 key={document.fileName}
-                className="flex h-45 w-full max-w-80.75 flex-col rounded-[28px] border border-[#0E2741] bg-[linear-gradient(180deg,#03101d_0%,#041424_100%)] p-7 shadow-[0_0_0_1px_rgba(255,255,255,0.03)_inset]"
+                className="flex h-45 w-full flex-col rounded-[28px] border border-[#0E2741] bg-[linear-gradient(180deg,#03101d_0%,#041424_100%)] p-7 shadow-[0_0_0_1px_rgba(255,255,255,0.03)_inset]"
               >
                 <div className="flex items-start gap-5">
                   <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-[18px] border border-[#24374F] bg-[#132131]">
@@ -247,7 +246,6 @@ export default function EmployeePage() {
           </div>
         </section>
 
-        <FooterSection />
       </div>
     </div>
   );
