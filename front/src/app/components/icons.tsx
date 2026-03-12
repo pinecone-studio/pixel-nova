@@ -1559,3 +1559,462 @@ export const TrendIcon = () => (
     />
   </svg>
 );
+
+export const ReqIcon = () => {
+  return (
+    <svg
+      width="64"
+      height="64"
+      viewBox="0 0 64 64"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        d="M0 16C0 7.16344 7.16344 0 16 0H48C56.8366 0 64 7.16344 64 16V48C64 56.8366 56.8366 64 48 64H16C7.16344 64 0 56.8366 0 48V16Z"
+        fill="#2B7FFF"
+      />
+      <path
+        d="M36.0007 18.6666H24.0007C23.2934 18.6666 22.6151 18.9476 22.115 19.4477C21.6149 19.9478 21.334 20.626 21.334 21.3333V42.6666C21.334 43.3739 21.6149 44.0521 22.115 44.5522C22.6151 45.0523 23.2934 45.3333 24.0007 45.3333H40.0007C40.7079 45.3333 41.3862 45.0523 41.8863 44.5522C42.3864 44.0521 42.6673 43.3739 42.6673 42.6666V25.3333L36.0007 18.6666Z"
+        stroke="white"
+        strokeWidth="2.66667"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M34.666 18.6666V24C34.666 24.7072 34.947 25.3855 35.4471 25.8856C35.9472 26.3857 36.6254 26.6666 37.3327 26.6666H42.666"
+        stroke="white"
+        strokeWidth="2.66667"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M29.3327 28H26.666"
+        stroke="white"
+        strokeWidth="2.66667"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M37.3327 33.3334H26.666"
+        stroke="white"
+        strokeWidth="2.66667"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M37.3327 38.6666H26.666"
+        stroke="white"
+        strokeWidth="2.66667"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+};
+
+export const AcepptedIcon = () => {
+  return (
+    <svg
+      width="48"
+      height="48"
+      viewBox="0 0 48 48"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        d="M0 14C0 6.26801 6.26801 0 14 0H34C41.732 0 48 6.26801 48 14V34C48 41.732 41.732 48 34 48H14C6.26801 48 0 41.732 0 34V14Z"
+        fill="#00A63E"
+      />
+      <path
+        d="M33.8006 22C34.2573 24.2413 33.9318 26.5714 32.8785 28.6018C31.8251 30.6322 30.1075 32.24 28.0121 33.1573C25.9167 34.0746 23.5702 34.2458 21.3639 33.6424C19.1576 33.0389 17.2248 31.6974 15.8879 29.8414C14.551 27.9854 13.8907 25.7272 14.0173 23.4434C14.1438 21.1595 15.0495 18.9881 16.5833 17.2912C18.117 15.5942 20.1862 14.4744 22.4457 14.1184C24.7052 13.7625 27.0184 14.1918 28.9996 15.335"
+        stroke="white"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M21 23L24 26L34 16"
+        stroke="white"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+};
+
+export const RejectedIcon = () => {
+  return (
+    <svg
+      width="48"
+      height="48"
+      viewBox="0 0 48 48"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        d="M0 14C0 6.26801 6.26801 0 14 0H34C41.732 0 48 6.26801 48 14V34C48 41.732 41.732 48 34 48H14C6.26801 48 0 41.732 0 34V14Z"
+        fill="#FB2C36"
+      />
+      <path
+        d="M24 34C29.5228 34 34 29.5228 34 24C34 18.4772 29.5228 14 24 14C18.4772 14 14 18.4772 14 24C14 29.5228 18.4772 34 24 34Z"
+        stroke="white"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M27 21L21 27"
+        stroke="white"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M21 21L27 27"
+        stroke="white"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+};
+
+export const ScrollIcon = () => {
+  return (
+    <svg
+      width="48"
+      height="48"
+      viewBox="0 0 48 48"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <g opacity="0.5">
+        <path
+          d="M18 36L30 24L18 12"
+          stroke="#99A1AF"
+          stroke-width="4"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </g>
+    </svg>
+  );
+};
+
+export const DocIconn = () => {
+  return (
+    <svg
+      width="16"
+      height="16"
+      fill="none"
+      viewBox="0 0 24 24"
+      className="text-slate-400"
+    >
+      <rect
+        x="4"
+        y="3"
+        width="16"
+        height="18"
+        rx="2"
+        stroke="currentColor"
+        strokeWidth="1.6"
+      />
+      <path
+        d="M8 8h8M8 12h8M8 16h5"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+};
+
+export const ClockIconn = () => (
+  <svg
+    width="16"
+    height="16"
+    fill="none"
+    viewBox="0 0 24 24"
+    className="text-slate-400"
+  >
+    <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="1.6" />
+    <path
+      d="M12 7v5l3 3"
+      stroke="currentColor"
+      strokeWidth="1.6"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </svg>
+);
+
+export const CalIcon = () => (
+  <svg
+    width="16"
+    height="16"
+    fill="none"
+    viewBox="0 0 24 24"
+    className="text-slate-400"
+  >
+    <rect
+      x="3"
+      y="4"
+      width="18"
+      height="18"
+      rx="2"
+      stroke="currentColor"
+      strokeWidth="1.6"
+    />
+    <path
+      d="M16 2v4M8 2v4M3 10h18"
+      stroke="currentColor"
+      strokeWidth="1.6"
+      strokeLinecap="round"
+    />
+  </svg>
+);
+
+export const DotsIcon = () => (
+  <svg
+    width="16"
+    height="16"
+    fill="none"
+    viewBox="0 0 24 24"
+    className="text-slate-400"
+  >
+    <circle cx="12" cy="5" r="1.5" fill="currentColor" />
+    <circle cx="12" cy="12" r="1.5" fill="currentColor" />
+    <circle cx="12" cy="19" r="1.5" fill="currentColor" />
+  </svg>
+);
+
+export const EyeIcon = () => (
+  <svg
+    width="15"
+    height="15"
+    fill="none"
+    viewBox="0 0 24 24"
+    className="text-slate-400"
+  >
+    <path
+      d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"
+      stroke="currentColor"
+      strokeWidth="1.6"
+    />
+    <circle cx="12" cy="12" r="3" stroke="currentColor" strokeWidth="1.6" />
+  </svg>
+);
+
+export const FilterIcon = () => (
+  <svg
+    width="16"
+    height="16"
+    fill="none"
+    viewBox="0 0 24 24"
+    className="text-slate-300"
+  >
+    <path
+      d="M22 3H2l8 9.46V19l4 2v-8.54L22 3z"
+      stroke="currentColor"
+      strokeWidth="1.6"
+      strokeLinejoin="round"
+    />
+  </svg>
+);
+
+export const DownloadIcon = () => (
+  <svg
+    width="16"
+    height="16"
+    fill="none"
+    viewBox="0 0 24 24"
+    className="text-slate-300"
+  >
+    <path
+      d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"
+      stroke="currentColor"
+      strokeWidth="1.6"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </svg>
+);
+
+export const SearchIcon = () => (
+  <svg
+    width="16"
+    height="16"
+    fill="none"
+    viewBox="0 0 24 24"
+    className="text-slate-500"
+  >
+    <circle cx="11" cy="11" r="8" stroke="currentColor" strokeWidth="1.6" />
+    <path
+      d="M21 21l-4.35-4.35"
+      stroke="currentColor"
+      strokeWidth="1.6"
+      strokeLinecap="round"
+    />
+  </svg>
+);
+
+export const ChevronRight = () => (
+  <svg width="20" height="20" fill="none" viewBox="0 0 24 24">
+    <path
+      d="M9 18l6-6-6-6"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </svg>
+);
+
+export const PreviewIcon = () => {
+  return (
+    <svg width="16" height="16" fill="none" viewBox="0 0 24 24">
+      <path
+        d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"
+        stroke="currentColor"
+        strokeWidth="1.6"
+      />
+      <circle cx="12" cy="12" r="3" stroke="currentColor" strokeWidth="1.6" />
+    </svg>
+  );
+};
+
+export const OnboardIcon = () => (
+  <svg width="20" height="20" fill="none" viewBox="0 0 24 24">
+    <path
+      d="M5 12h14M13 6l6 6-6 6"
+      stroke="white"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </svg>
+);
+
+export const ActiveIcon = () => (
+  <svg width="20" height="20" fill="none" viewBox="0 0 24 24">
+    <circle cx="12" cy="12" r="9" stroke="white" strokeWidth="1.8" />
+    <path
+      d="M12 7v5l3 3"
+      stroke="white"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+    />
+  </svg>
+);
+
+export const OffboardIcon = () => (
+  <svg width="20" height="20" fill="none" viewBox="0 0 24 24">
+    <path
+      d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"
+      stroke="white"
+      strokeWidth="1.8"
+      strokeLinejoin="round"
+    />
+    <path
+      d="M12 9v4M12 17h.01"
+      stroke="white"
+      strokeWidth="2"
+      strokeLinecap="round"
+    />
+  </svg>
+);
+
+export const EyeIconn = () => (
+  <svg width="15" height="15" fill="none" viewBox="0 0 24 24">
+    <path
+      d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"
+      stroke="currentColor"
+      strokeWidth="1.6"
+    />
+    <circle cx="12" cy="12" r="3" stroke="currentColor" strokeWidth="1.6" />
+  </svg>
+);
+
+export const TrashIcon = () => {
+  return (
+    <svg
+      width="16"
+      height="16"
+      viewBox="0 0 16 16"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        d="M6.66602 7.33325V11.3333"
+        stroke="#DE3B3D"
+        strokeOpacity="0.6"
+        strokeWidth="1.33333"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M9.33398 7.33325V11.3333"
+        stroke="#DE3B3D"
+        strokeOpacity="0.6"
+        strokeWidth="1.33333"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M12.6673 4V13.3333C12.6673 13.687 12.5268 14.0261 12.2768 14.2761C12.0267 14.5262 11.6876 14.6667 11.334 14.6667H4.66732C4.3137 14.6667 3.97456 14.5262 3.72451 14.2761C3.47446 14.0261 3.33398 13.687 3.33398 13.3333V4"
+        stroke="#DE3B3D"
+        strokeOpacity="0.6"
+        strokeWidth="1.33333"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M2 4H14"
+        stroke="#DE3B3D"
+        strokeOpacity="0.6"
+        strokeWidth="1.33333"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M5.33398 3.99992V2.66659C5.33398 2.31296 5.47446 1.97382 5.72451 1.72378C5.97456 1.47373 6.3137 1.33325 6.66732 1.33325H9.33398C9.68761 1.33325 10.0267 1.47373 10.2768 1.72378C10.5268 1.97382 10.6673 2.31296 10.6673 2.66659V3.99992"
+        stroke="#DE3B3D"
+        strokeOpacity="0.6"
+        strokeWidth="1.33333"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+};
+
+export const PlusIcon = () => (
+  <svg width="16" height="16" fill="none" viewBox="0 0 24 24">
+    <path
+      d="M12 5v14M5 12h14"
+      stroke="currentColor"
+      strokeWidth="2.2"
+      strokeLinecap="round"
+    />
+  </svg>
+);
+
+export const SortIcon = () => (
+  <svg
+    width="18"
+    height="18"
+    fill="none"
+    viewBox="0 0 24 24"
+    className="inline ml-1 opacity-60"
+  >
+    <path
+      d="M7 16V4m0 0L3 8m4-4l4 4M17 8v12m0 0l4-4m-4 4l-4-4"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </svg>
+);
