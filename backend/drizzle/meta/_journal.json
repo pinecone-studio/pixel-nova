@@ -29,6 +29,13 @@
       "when": 1773228600000,
       "tag": "0003_remove_recipient_email_unique",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1773315000000,
+      "tag": "0004_employee_otp_auth",
+      "breakpoints": true
     }
   ]
 }

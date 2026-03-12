@@ -9,6 +9,7 @@ export async function executeTriggeredAction(
   ctx: GraphQLContext,
   employeeId: string,
   action: string,
+  options?: { dryRun?: boolean; overrideRecipients?: string[] },
 ) {
   const resendApiKey =
     (ctx.env as CloudflareBindings & { RESEND_API_KEY?: string })
@@ -19,6 +20,9 @@ export async function executeTriggeredAction(
   const pdfRendererSecret =
     (ctx.env as CloudflareBindings & { PDF_RENDERER_SECRET?: string })
       .PDF_RENDERER_SECRET ?? "";
+  const documentLinkSecret =
+    (ctx.env as CloudflareBindings & { DOCUMENT_LINK_SECRET?: string })
+      .DOCUMENT_LINK_SECRET ?? "";
 
   const bucket = (ctx.env as CloudflareBindings & { epas_documents?: R2Bucket })
     .epas_documents;
@@ -35,26 +39,41 @@ export async function executeTriggeredAction(
     },
   );
 
-  const notificationResult = await dispatchNotification({
-    db: ctx.db,
-    employee: result.employee,
-    documents: result.documents,
-    action,
-    apiKey: resendApiKey,
-    publicOrigin: ctx.publicOrigin,
-  });
+  // dryRun=true үед email dispatch алгасна (document үүсгэнэ, email илгээхгүй)
+  if (options?.dryRun) {
+    await updateAuditLogDelivery(ctx.db, result.auditEntry.id, {
+      recipientEmails: [],
+      notificationAttempted: false,
+      recipientsNotified: false,
+      notificationError: "dryRun: email dispatch skipped",
+    });
+    result.auditEntry.notificationAttempted = false;
+    result.auditEntry.recipientsNotified = false;
+    result.auditEntry.notificationError = "dryRun: email dispatch skipped";
+  } else {
+    const notificationResult = await dispatchNotification({
+      db: ctx.db,
+      employee: result.employee,
+      documents: result.documents,
+      action,
+      apiKey: resendApiKey,
+      publicOrigin: ctx.publicOrigin,
+      documentLinkSecret,
+      overrideRecipients: options?.overrideRecipients,
+    });
 
-  await updateAuditLogDelivery(ctx.db, result.auditEntry.id, {
-    recipientEmails: notificationResult.recipientEmails,
-    notificationAttempted: notificationResult.notificationAttempted,
-    recipientsNotified: notificationResult.notified,
-    notificationError: notificationResult.error ?? null,
-  });
+    await updateAuditLogDelivery(ctx.db, result.auditEntry.id, {
+      recipientEmails: notificationResult.recipientEmails,
+      notificationAttempted: notificationResult.notificationAttempted,
+      recipientsNotified: notificationResult.notified,
+      notificationError: notificationResult.error ?? null,
+    });
 
-  result.auditEntry.recipientEmails = notificationResult.recipientEmails;
-  result.auditEntry.notificationAttempted = notificationResult.notificationAttempted;
-  result.auditEntry.recipientsNotified = notificationResult.notified;
-  result.auditEntry.notificationError = notificationResult.error ?? null;
+    result.auditEntry.recipientEmails = notificationResult.recipientEmails;
+    result.auditEntry.notificationAttempted = notificationResult.notificationAttempted;
+    result.auditEntry.recipientsNotified = notificationResult.notified;
+    result.auditEntry.notificationError = notificationResult.error ?? null;
+  }
 
   return {
     employee: result.employee,

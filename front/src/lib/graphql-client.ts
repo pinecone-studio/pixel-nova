@@ -8,6 +8,7 @@ interface GraphQLResponse<T> {
 interface GraphQLRequestOptions {
   actorId?: string;
   actorRole?: "hr" | "employee";
+  authToken?: string;
 }
 
 export async function graphql<T>(
@@ -24,6 +25,9 @@ export async function graphql<T>(
   }
   if (options?.actorRole) {
     headers["x-actor-role"] = options.actorRole;
+  }
+  if (options?.authToken) {
+    headers.Authorization = `Bearer ${options.authToken}`;
   }
 
   const response = await fetch(`${API_URL}/graphql`, {

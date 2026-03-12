@@ -82,6 +82,18 @@ export const typeDefs = /* GraphQL */ `
     action: String!
   }
 
+  type AuthSession {
+    token: String!
+    expiresAt: String!
+    employee: Employee!
+  }
+
+  type RequestOtpResult {
+    success: Boolean!
+    maskedEmail: String!
+    expiresAt: String!
+  }
+
   input UpsertEmployeeInput {
     id: ID!
     employeeCode: String!
@@ -127,14 +139,18 @@ export const typeDefs = /* GraphQL */ `
   }
 
   type Query {
+    me: Employee
     documents(employeeId: ID!): [Document!]!
-    auditLogs(employeeId: ID): [AuditLog!]!
+    auditLogs(employeeId: ID, action: String, fromDate: String, toDate: String): [AuditLog!]!
     actions: [ActionConfig!]!
     documentContent(documentId: ID!): DocumentContent
   }
 
   type Mutation {
-    triggerAction(employeeId: ID!, action: String!): TriggerActionResult!
+    requestOtp(employeeCode: String!): RequestOtpResult!
+    verifyOtp(employeeCode: String!, code: String!): AuthSession!
+    logout: Boolean!
+    triggerAction(employeeId: ID!, action: String!, dryRun: Boolean, overrideRecipients: [String!]): TriggerActionResult!
     upsertEmployee(input: UpsertEmployeeInput!): UpsertEmployeeResult!
     resolveEmployeeAction(input: ResolveEmployeeActionInput!): ResolvedEmployeeAction
     updateRegistry(input: UpdateActionRegistryInput!): ActionConfig!

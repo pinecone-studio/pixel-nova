@@ -1,4 +1,4 @@
-import { desc, eq } from "drizzle-orm";
+import { and, desc, eq, gte, lte } from "drizzle-orm";
 
 import type { DbClient } from "../client";
 import { auditLog } from "../schema";
@@ -30,12 +30,31 @@ export function normalizeAuditLog(row: typeof auditLog.$inferSelect) {
 
 export async function getAuditLogs(
   db: DbClient,
-  employeeId?: string | null,
+  filters?: {
+    employeeId?: string | null;
+    action?: string | null;
+    fromDate?: string | null;
+    toDate?: string | null;
+  },
 ) {
-  const query = db.select().from(auditLog);
+  const conditions = [];
 
-  const rows = employeeId
-    ? await query.where(eq(auditLog.employeeId, employeeId)).orderBy(desc(auditLog.timestamp))
+  if (filters?.employeeId) {
+    conditions.push(eq(auditLog.employeeId, filters.employeeId));
+  }
+  if (filters?.action) {
+    conditions.push(eq(auditLog.action, filters.action));
+  }
+  if (filters?.fromDate) {
+    conditions.push(gte(auditLog.timestamp, filters.fromDate));
+  }
+  if (filters?.toDate) {
+    conditions.push(lte(auditLog.timestamp, filters.toDate));
+  }
+
+  const query = db.select().from(auditLog);
+  const rows = conditions.length > 0
+    ? await query.where(and(...conditions)).orderBy(desc(auditLog.timestamp))
     : await query.orderBy(desc(auditLog.timestamp));
 
   return rows.map(normalizeAuditLog);

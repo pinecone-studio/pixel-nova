@@ -13,6 +13,8 @@ export interface DispatchNotificationInput {
   action: string;
   apiKey: string;
   publicOrigin?: string | null;
+  documentLinkSecret?: string | null;
+  overrideRecipients?: string[];
 }
 
 export interface DispatchNotificationResult {
@@ -39,12 +41,17 @@ function normalizeEmails(emails: string[]) {
 export async function dispatchNotification(
   input: DispatchNotificationInput,
 ): Promise<DispatchNotificationResult> {
-  const roles = getRecipientsForAction(input.action);
-
-  const resolvedEmails = roles.length > 0
-    ? await resolveRecipients(input.db, roles)
-    : await getAllRecipientEmails(input.db);
-  const emails = normalizeEmails(resolvedEmails);
+  // overrideRecipients байвал registry-ийн recipients-г солино
+  let emails: string[];
+  if (input.overrideRecipients && input.overrideRecipients.length > 0) {
+    emails = normalizeEmails(input.overrideRecipients);
+  } else {
+    const roles = getRecipientsForAction(input.action);
+    const resolvedEmails = roles.length > 0
+      ? await resolveRecipients(input.db, roles)
+      : await getAllRecipientEmails(input.db);
+    emails = normalizeEmails(resolvedEmails);
+  }
 
   if (emails.length === 0) {
     return {
@@ -56,18 +63,22 @@ export async function dispatchNotification(
     };
   }
 
-  const documentLinks = input.documents
-    .map((document) => {
-      const url = buildDocumentDeliveryUrl({
+  const maybeLinks = await Promise.all(
+    input.documents.map(async (document) => {
+      const url = await buildDocumentDeliveryUrl({
         documentId: document.id,
         storageUrl: document.storageUrl,
         publicOrigin: input.publicOrigin,
+        signingSecret: input.documentLinkSecret,
       });
 
       return url
         ? { name: document.documentName, url }
         : null;
-    })
+    }),
+  );
+
+  const documentLinks = maybeLinks
     .filter((document): document is { name: string; url: string } => document !== null);
 
   if (documentLinks.length === 0) {

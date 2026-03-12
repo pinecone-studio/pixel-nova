@@ -74,7 +74,7 @@
       }
 
       .d {
-        display: inline-block;
+        display: inline;
         vertical-align: bottom;
         overflow: hidden;
         white-space: nowrap;
@@ -144,23 +144,17 @@
       <p>
         Энэхүү Хөдөлмөрийн гэрээ (<i>цаашид</i> <b>Гэрээ</b> <i>гэх</i>)-г Нэг
         талаас
-        <span class="d dxl"
-          >{{company_address}}</span
-        >
-        хаягт байрлах, <span class="d dsm">{{company_register_no}}</span> улсын бүртгэлийн
-        дугаартай,
-        <span class="d dlg">{{company_name}}</span> /байгууллагын нэр/
-        түүнийг
-        <span class="d dxl"
-          >{{employer_representative}}</span
-        >
+        <span class="d dxl">{{company_address}}</span>
+        хаягт байрлах, <span class="d dsm">{{company_register_no}}</span> улсын
+        бүртгэлийн дугаартай,
+        <span class="d dlg">{{company_name}}</span> /байгууллагын нэр/ түүнийг
+        <span class="d dxl">{{employer_representative}}</span>
         үндсэн дээр төлөөлөн /төлөөлсөн хүний албан тушаал, нэр/ <i>/цаашид</i>
         <b>Ажил олгогч</b> <i>гэх/</i>, Нөгөө талаас
-        <span class="d dxl"
-          >{{employee_address}}</span
-        >
-        хаягт оршин суух, <span class="d dsm">{{employee_register_no}}</span> регистрийн
-        дугаартай <span class="d dmd">{{employee_last_name}}</span> овогтой
+        <span class="d dxl">{{employee_address}}</span>
+        хаягт оршин суух,
+        <span class="d dsm">{{employee_register_no}}</span> регистрийн дугаартай
+        <span class="d dmd">{{employee_last_name}}</span> овогтой
         <span class="d dlg">{{employee_first_name}}</span> /цаашид
         <b>Ажилтан</b> гэх/ нар (хамтад нь <b>Талууд</b> гэх) Монгол Улсын
         Хөдөлмөрийн тухай хууль, түүнтэй нийцүүлэн гаргасан байгууллагын
@@ -233,12 +227,14 @@
         <span class="d dsm">{{workdays_count}}</span> хоног байна.
       </p>
       <p class="ind2">
-        II. Хоногт ажлын <span class="d dxs">{{daily_work_hours}}</span> цагаар тооцон долоо
-        хоногийн <span class="d dxs">{{weekly_work_hours}}</span> цаг ажиллана.
+        II. Хоногт ажлын <span class="d dxs">{{daily_work_hours}}</span> цагаар
+        тооцон долоо хоногийн
+        <span class="d dxs">{{weekly_work_hours}}</span> цаг ажиллана.
       </p>
       <p class="ind2">
-        III. Ажил эхлэх цаг <span class="d dsm">{{work_start_time}}</span> цагт байна.
-        Үдийн завсарлага <span class="d dsm">{{break_start_time}}</span> -
+        III. Ажил эхлэх цаг <span class="d dsm">{{work_start_time}}</span> цагт
+        байна. Үдийн завсарлага
+        <span class="d dsm">{{break_start_time}}</span> -
         <span class="d dsm">{{break_end_time}}</span> цагт байна.
       </p>
       <p class="ind2">
@@ -255,9 +251,7 @@
       <p class="ind1">
         3.2.1. Ажилтны нэг сарын үндсэн цалин
         <span class="d dmd">{{monthly_base_salary_amount}}</span> ₮ /
-        <span class="d dxl"
-          >{{monthly_base_salary_words}}</span
-        >
+        <span class="d dxl">{{monthly_base_salary_words}}</span>
         / байна.
       </p>
       <p class="ind1">
@@ -267,9 +261,9 @@
       <p class="ind1">
         3.2.3. Ажил олгогч нь Ажилтны үндсэн цалинг сар бүрийн
         <span class="d dxs">{{salary_pay_day_1}}</span> ба
-        <span class="d dxs">{{salary_pay_day_2}}</span>-ны өдрүүдэд 2 (хоёр) хуваан олгоно.
-        Хэрэв цалин олгох өдөр нь баярын болон амралтын өдөр таарвал өмнөх ажлын
-        өдөр олгоно.
+        <span class="d dxs">{{salary_pay_day_2}}</span>-ны өдрүүдэд 2 (хоёр)
+        хуваан олгоно. Хэрэв цалин олгох өдөр нь баярын болон амралтын өдөр
+        таарвал өмнөх ажлын өдөр олгоно.
       </p>
       <p class="ind1">
         3.2.4. Илүү цагаар ажилласан болон бүх нийтийн амралтын бусад өдрөөр
@@ -325,8 +319,9 @@
         ажиллах үүрэгтэй.
       </p>
       <p class="ind1">
-        4.2.2. <span class="d dsm">{{weekly_plan_cycle_days}}</span> хоног бүрээр ажлын
-        төлөвлөгөө гарган батлуулж, хуваарийн дагуу ажил үүргээ гүйцэтгэнэ.
+        4.2.2. <span class="d dsm">{{weekly_plan_cycle_days}}</span> хоног
+        бүрээр ажлын төлөвлөгөө гарган батлуулж, хуваарийн дагуу ажил үүргээ
+        гүйцэтгэнэ.
       </p>
       <p class="ind1">
         4.2.3. Мэргэжил, ур чадвараа байнга дээшлүүлэн идэвх санаачилгатай
@@ -561,41 +556,29 @@
       <p><b>Ажил олгогч:</b></p>
       <p>
         Хаяг:
-        <span class="d" style="width: 350px"
-          >{{company_legal_address}}</span
-        >
+        <span class="d" style="width: 350px">{{company_legal_address}}</span>
       </p>
       <p>
         Утас:
-        <span class="d" style="width: 200px"
-          >{{company_legal_phone}}</span
-        >
+        <span class="d" style="width: 200px">{{company_legal_phone}}</span>
       </p>
       <p>
         Факс:
-        <span class="d" style="width: 200px"
-          >{{company_legal_fax}}</span
-        >
+        <span class="d" style="width: 200px">{{company_legal_fax}}</span>
       </p>
 
       <p style="margin-top: 12px"><b>Ажилтан:</b></p>
       <p>
         Хаяг:
-        <span class="d" style="width: 350px"
-          >{{employee_legal_address}}</span
-        >
+        <span class="d" style="width: 350px">{{employee_legal_address}}</span>
       </p>
       <p>
         Утас:
-        <span class="d" style="width: 200px"
-          >{{employee_legal_phone}}</span
-        >
+        <span class="d" style="width: 200px">{{employee_legal_phone}}</span>
       </p>
       <p>
         Факс:
-        <span class="d" style="width: 200px"
-          >{{employee_legal_fax}}</span
-        >
+        <span class="d" style="width: 200px">{{employee_legal_fax}}</span>
       </p>
 
       <!-- garin usgiin heseg shu -->

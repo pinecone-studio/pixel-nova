@@ -1,9 +1,12 @@
 import {
+  deleteSessionByToken,
   ensureDefaultActionConfigs,
   getEmployeeById,
   listActionConfigs,
+  requestEmployeeOtp,
   upsertActionConfig,
   upsertEmployeeRecord,
+  verifyEmployeeOtp,
 } from "../db/queries";
 import {
   buildEmployeeChangeSet,
@@ -17,6 +20,8 @@ type Ctx = GraphQLContext;
 interface TriggerActionArgs {
   employeeId: string;
   action: string;
+  dryRun?: boolean | null;
+  overrideRecipients?: string[] | null;
 }
 
 interface UpsertEmployeeInput {
@@ -57,8 +62,38 @@ interface UpdateRegistryInput {
 }
 
 export const mutationResolvers = {
+  requestOtp: async (_: unknown, args: { employeeCode: string }, ctx: Ctx) => {
+    const resendApiKey =
+      (ctx.env as CloudflareBindings & { RESEND_API_KEY?: string }).RESEND_API_KEY ?? "";
+
+    if (!resendApiKey) {
+      throw new Error("RESEND_API_KEY is not configured");
+    }
+
+    const result = await requestEmployeeOtp(ctx.db, args.employeeCode, resendApiKey);
+    return {
+      success: true,
+      maskedEmail: result.maskedEmail,
+      expiresAt: result.expiresAt,
+    };
+  },
+
+  verifyOtp: async (_: unknown, args: { employeeCode: string; code: string }, ctx: Ctx) =>
+    verifyEmployeeOtp(ctx.db, args.employeeCode, args.code),
+
+  logout: async (_: unknown, __: unknown, ctx: Ctx) => {
+    if (!ctx.sessionToken) {
+      return true;
+    }
+
+    return deleteSessionByToken(ctx.db, ctx.sessionToken);
+  },
+
   triggerAction: (_: unknown, args: TriggerActionArgs, ctx: Ctx) =>
-    executeTriggeredAction(ctx, args.employeeId, args.action),
+    executeTriggeredAction(ctx, args.employeeId, args.action, {
+      dryRun: args.dryRun ?? false,
+      overrideRecipients: args.overrideRecipients ?? undefined,
+    }),
 
   upsertEmployee: async (
     _: unknown,
