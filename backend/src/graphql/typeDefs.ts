@@ -14,6 +14,7 @@ export const typeDefs = /* GraphQL */ `
     github: String
     department: String!
     branch: String!
+    jobTitle: String!
     level: String!
     hireDate: String!
     terminationDate: String
@@ -107,6 +108,7 @@ export const typeDefs = /* GraphQL */ `
     github: String
     department: String!
     branch: String!
+    jobTitle: String
     level: String!
     hireDate: String!
     terminationDate: String

@@ -15,6 +15,7 @@ export const employees = sqliteTable(
     github: text("github"),
     department: text("department").notNull(),
     branch: text("branch").notNull(),
+    jobTitle: text("job_title").notNull().default(""),
     level: text("level").notNull(),
     hireDate: text("hire_date").notNull(),
     terminationDate: text("termination_date"),

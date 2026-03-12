@@ -140,7 +140,7 @@ export default function EmployeePage() {
             <div className="flex gap-2 mt-1 flex-wrap">
               {employee ? (
                 <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#00CC99]/15 text-[#00CC99] text-xs font-semibold border border-[#00CC99]/20">
-                  {employee.employeeCode} · {employee.department} · {employee.level}
+                  {employee.employeeCode} · {employee.department} · {employee.jobTitle} · {employee.level}
                 </span>
               ) : null}
               {error ? (
@@ -183,9 +183,7 @@ export default function EmployeePage() {
                 <div className="absolute inset-0 flex items-center justify-center">
                   <span className="text-white text-xs font-semibold">
                     {leaveUsed}
-                    <span className="text-[#4A4A6A] text-[10px]">
-                      /{leaveTotal}
-                    </span>
+                    <span className="text-[#4A4A6A] text-[10px]">/{leaveTotal}</span>
                   </span>
                 </div>
               </div>
@@ -228,9 +226,7 @@ export default function EmployeePage() {
                     <p className="truncate text-[13px] text-[#6E7D90]">
                       {document.fileName}
                     </p>
-                    <p className="text-[13px] text-[#8D9AAC]">
-                      {document.date}
-                    </p>
+                    <p className="text-[13px] text-[#8D9AAC]">{document.date}</p>
                   </div>
                 </div>
 

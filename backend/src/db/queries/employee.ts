@@ -67,6 +67,7 @@ export async function upsertEmployeeRecord(
         github: employee.github ?? previousEmployee.github,
         department: employee.department,
         branch: employee.branch,
+        jobTitle: employee.jobTitle ?? previousEmployee.jobTitle ?? previousEmployee.level,
         level: employee.level,
         hireDate: employee.hireDate,
         terminationDate,
