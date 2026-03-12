@@ -11,6 +11,7 @@ export interface Employee {
   github?: string | null;
   department: string;
   branch: string;
+  jobTitle: string;
   level: string;
   hireDate: string;
   terminationDate?: string | null;

@@ -97,6 +97,7 @@ export async function triggerAction(
           firstName
           lastName
           department
+          jobTitle
           level
         }
         documents {
@@ -147,6 +148,7 @@ export async function verifyOtp(employeeCode: string, code: string): Promise<Aut
           lastName
           department
           branch
+          jobTitle
           level
           email
           status
@@ -173,6 +175,7 @@ export async function loginWithCode(employeeCode: string): Promise<AuthSession> 
           lastName
           department
           branch
+          jobTitle
           level
           email
           status
@@ -198,6 +201,7 @@ export async function fetchMe(authToken: string): Promise<Employee | null> {
         lastNameEng
         department
         branch
+        jobTitle
         level
         email
         status

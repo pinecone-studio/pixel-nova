@@ -36,6 +36,7 @@ export function buildTemplateData(
   const date = new Date(generatedAt);
   const hireDate = employee.hireDate ? new Date(employee.hireDate) : null;
   const termDate = employee.terminationDate ? new Date(employee.terminationDate) : null;
+  const jobTitle = employee.jobTitle ?? employee.level ?? "";
 
   return {
     // Employee fields
@@ -54,9 +55,9 @@ export function buildTemplateData(
     employee_legal_phone: "",
     employee_legal_fax: "",
     employee_phone: "",
-    employee_position: employee.level ?? "",
-    employee_position_clause: employee.level ?? "",
-    employee_position_signature: employee.level ?? "",
+    employee_position: jobTitle,
+    employee_position_clause: jobTitle,
+    employee_position_signature: jobTitle,
     employee_department: employee.department ?? "",
     employee_first_name_clause: employee.firstName ?? "",
     employee_last_name_clause: employee.lastName ?? "",
@@ -71,8 +72,8 @@ export function buildTemplateData(
     current_department: employee.department ?? "",
     branch: employee.branch ?? "",
     level: employee.level ?? "",
-    position_name: employee.level ?? "",
-    position_title: employee.level ?? "",
+    position_name: jobTitle,
+    position_title: jobTitle,
     job_grade_level: employee.level ?? "",
 
     // Dates — contract
@@ -142,7 +143,7 @@ export function buildTemplateData(
     // Handover sheet employee info
     handover_employee_name: `${employee.lastName ?? ""} ${employee.firstName ?? ""}`.trim(),
     handover_employee_department: employee.department ?? "",
-    handover_employee_position: employee.level ?? "",
+    handover_employee_position: jobTitle,
 
     // Salary (placeholder defaults)
     monthly_base_salary_amount: "",
@@ -197,9 +198,9 @@ export function buildTemplateData(
     from_department: "",
     from_position: "",
     to_department: employee.department ?? "",
-    to_position: employee.level ?? "",
+    to_position: jobTitle,
     new_department: employee.department ?? "",
-    new_position: employee.level ?? "",
-    current_position: employee.level ?? "",
+    new_position: jobTitle,
+    current_position: jobTitle,
   };
 }

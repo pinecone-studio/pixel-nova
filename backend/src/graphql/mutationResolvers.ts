@@ -38,6 +38,7 @@ interface UpsertEmployeeInput {
   github?: string | null;
   department: string;
   branch: string;
+  jobTitle?: string | null;
   level: string;
   hireDate: string;
   terminationDate?: string | null;
@@ -111,7 +112,10 @@ export const mutationResolvers = {
     args: { input: UpsertEmployeeInput },
     ctx: Ctx,
   ) => {
-    const persisted = await upsertEmployeeRecord(ctx.db, args.input);
+    const persisted = await upsertEmployeeRecord(ctx.db, {
+      ...args.input,
+      jobTitle: args.input.jobTitle ?? undefined,
+    });
     await ensureDefaultActionConfigs(ctx.db);
 
     const changeSet = buildEmployeeChangeSet(

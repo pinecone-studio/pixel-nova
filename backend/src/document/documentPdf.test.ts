@@ -17,6 +17,7 @@ const mockEmployee: Employee = {
   github: "dorj-dev",
   department: "Engineering",
   branch: "Ulaanbaatar",
+  jobTitle: "Software Engineer",
   level: "Senior Developer",
   hireDate: "2024-02-24",
   terminationDate: null,

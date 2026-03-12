@@ -17,6 +17,7 @@ export async function runDbSmoke(env: Pick<CloudflareBindings, "DB">) {
     lastName: "Test",
     department: "Engineering",
     branch: "HQ",
+    jobTitle: "Software Engineer",
     level: "L1",
     hireDate: new Date().toISOString(),
     terminationDate: null,
