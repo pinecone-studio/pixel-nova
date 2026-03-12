@@ -279,6 +279,9 @@ export default function Home() {
                 </div>
               </div>
             </div>
+            <button className="w-full text-center text-xs text-[#8888AA] border border-[#2A2A40] rounded-lg py-1.5 hover:border-[#00CC99]/40 hover:text-white transition-colors">
+              Дэлгэрэнгүй
+            </button>
           </div>
         ) : (
           <>

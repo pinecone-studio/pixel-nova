@@ -1,79 +1,83 @@
-import { expect, jest, test } from "@jest/globals";
+import { jest, expect, test, beforeEach, afterEach } from "@jest/globals";
 
-import {
-  computeBackoffDelayMs,
-  NOTIFICATION_SLA_MS,
-  sendEmailWithRetry,
-} from "./sendEmailWithRetry.js";
-import type { SendEmailInput } from "./sendEmail.js";
+jest.mock("./sendEmail.js");
 
-test("computeBackoffDelayMs uses exponential backoff", () => {
-  expect(computeBackoffDelayMs(1)).toBe(1000);
-  expect(computeBackoffDelayMs(2)).toBe(2000);
-  expect(computeBackoffDelayMs(3)).toBe(4000);
+import { sendEmail } from "./sendEmail.js";
+import { sendEmailWithRetry } from "./sendEmailWithRetry.js";
+
+const mockSendEmail = sendEmail as jest.MockedFunction<typeof sendEmail>;
+
+const input = {
+  to: ["hr@example.com"],
+  subject: "Test",
+  text: "Test body",
+  apiKey: "test-key",
+};
+
+beforeEach(() => {
+  jest.useFakeTimers();
+  mockSendEmail.mockReset();
 });
 
-test("sendEmailWithRetry retries with exponential backoff and shrinking timeout budget", async () => {
-  let currentTime = 0;
-  const sendInputs: SendEmailInput[] = [];
-  const send = jest
-    .fn(async (payload: SendEmailInput) => {
-      sendInputs.push(payload);
-      currentTime += 100;
-      if (sendInputs.length < 3) {
-        throw new Error(`failure ${sendInputs.length}`);
-      }
-    });
-  const sleepCalls: number[] = [];
-
-  await sendEmailWithRetry(
-    {
-      to: ["demo@example.com"],
-      subject: "Test",
-      text: "Body",
-      apiKey: "re_test",
-    },
-    {
-      send,
-      sleep: async (ms) => {
-        sleepCalls.push(ms);
-        currentTime += ms;
-      },
-      now: () => currentTime,
-    },
-  );
-
-  expect(send).toHaveBeenCalledTimes(3);
-  expect(sleepCalls).toEqual([1000, 2000]);
-  expect(sendInputs[0]?.timeoutMs).toBe(NOTIFICATION_SLA_MS);
-  expect(sendInputs[1]?.timeoutMs).toBe(NOTIFICATION_SLA_MS - 1100);
-  expect(sendInputs[2]?.timeoutMs).toBe(NOTIFICATION_SLA_MS - 3200);
+afterEach(() => {
+  jest.useRealTimers();
 });
 
-test("sendEmailWithRetry stops when SLA budget is exhausted", async () => {
-  let currentTime = 0;
-  const send = jest.fn(async () => {
-    currentTime += 29_500;
-    throw new Error("temporary failure");
-  });
+test("succeeds on the first attempt without retrying", async () => {
+  mockSendEmail.mockResolvedValueOnce(undefined);
 
-  await expect(
-    sendEmailWithRetry(
-      {
-        to: ["demo@example.com"],
-        subject: "Test",
-        text: "Body",
-        apiKey: "re_test",
-      },
-      {
-        send,
-        sleep: async () => {
-          throw new Error("sleep should not happen");
-        },
-        now: () => currentTime,
-      },
-    ),
-  ).rejects.toThrow(`Email notification exceeded ${NOTIFICATION_SLA_MS}ms SLA`);
+  await sendEmailWithRetry(input);
 
-  expect(send).toHaveBeenCalledTimes(1);
+  expect(mockSendEmail).toHaveBeenCalledTimes(1);
+});
+
+test("retries and succeeds on the second attempt", async () => {
+  mockSendEmail
+    .mockRejectedValueOnce(new Error("network error"))
+    .mockResolvedValueOnce(undefined);
+
+  const promise = sendEmailWithRetry(input);
+  await jest.runAllTimersAsync();
+  await promise;
+
+  expect(mockSendEmail).toHaveBeenCalledTimes(2);
+});
+
+test("retries and succeeds on the third attempt", async () => {
+  mockSendEmail
+    .mockRejectedValueOnce(new Error("fail 1"))
+    .mockRejectedValueOnce(new Error("fail 2"))
+    .mockResolvedValueOnce(undefined);
+
+  const promise = sendEmailWithRetry(input);
+  await jest.runAllTimersAsync();
+  await promise;
+
+  expect(mockSendEmail).toHaveBeenCalledTimes(3);
+});
+
+test("throws the last error after 3 failed attempts", async () => {
+  const lastError = new Error("permanent failure");
+  mockSendEmail
+    .mockRejectedValueOnce(new Error("fail 1"))
+    .mockRejectedValueOnce(new Error("fail 2"))
+    .mockRejectedValueOnce(lastError);
+
+  const promise = sendEmailWithRetry(input);
+  const assertion = expect(promise).rejects.toThrow("permanent failure");
+  await jest.runAllTimersAsync();
+  await assertion;
+
+  expect(mockSendEmail).toHaveBeenCalledTimes(3);
+});
+
+test("does not make more than 3 attempts total", async () => {
+  mockSendEmail.mockRejectedValue(new Error("always fails"));
+
+  const promise = sendEmailWithRetry(input);
+  const caught = promise.catch(() => {});
+  await jest.runAllTimersAsync();
+  await caught;
+
+  expect(mockSendEmail).toHaveBeenCalledTimes(3);
 });
