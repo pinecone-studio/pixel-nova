@@ -65,12 +65,19 @@ export const mutationResolvers = {
   requestOtp: async (_: unknown, args: { employeeCode: string }, ctx: Ctx) => {
     const resendApiKey =
       (ctx.env as CloudflareBindings & { RESEND_API_KEY?: string }).RESEND_API_KEY ?? "";
+    const testOtpEmail =
+      (ctx.env as CloudflareBindings & { TEST_OTP_EMAIL?: string }).TEST_OTP_EMAIL ?? "";
 
     if (!resendApiKey) {
       throw new Error("RESEND_API_KEY is not configured");
     }
 
-    const result = await requestEmployeeOtp(ctx.db, args.employeeCode, resendApiKey);
+    const result = await requestEmployeeOtp(
+      ctx.db,
+      args.employeeCode,
+      resendApiKey,
+      testOtpEmail,
+    );
     return {
       success: true,
       maskedEmail: result.maskedEmail,

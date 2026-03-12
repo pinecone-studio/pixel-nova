@@ -18,12 +18,18 @@ export async function requestEmployeeOtp(
   db: DbClient,
   employeeCode: string,
   apiKey: string,
+  testOtpEmail?: string | null,
 ) {
   const normalizedCode = employeeCode.trim().toUpperCase();
   const employee = await getEmployeeByCode(db, normalizedCode);
+  const deliveryEmail = testOtpEmail?.trim() || employee?.email || null;
 
-  if (!employee || !employee.email) {
-    throw new Error("Employee code not found or employee email is missing");
+  if (!employee) {
+    throw new Error("Employee code not found");
+  }
+
+  if (!deliveryEmail) {
+    throw new Error("Employee email is missing and TEST_OTP_EMAIL is not configured");
   }
 
   const otpCode = generateOtpCode();
@@ -41,16 +47,16 @@ export async function requestEmployeeOtp(
   });
 
   await sendEmailWithRetry({
-    to: [employee.email],
-    subject: "EPAS ??????? ???",
-    text: `???? EPAS ??????? ??? ???????? ???: ${otpCode}. ??? 10 ??????? ????? ???????? ?????.`,
-    html: `<p>???? EPAS ??????? ??? ???????? ???: <strong>${otpCode}</strong></p><p>??? 10 ??????? ????? ???????? ?????.</p>`,
+    to: [deliveryEmail],
+    subject: "EPAS login code",
+    text: `Your EPAS one-time password is: ${otpCode}. The code expires in 10 minutes.`,
+    html: `<p>Your EPAS one-time password is: <strong>${otpCode}</strong></p><p>The code expires in 10 minutes.</p>`,
     apiKey,
   });
 
   return {
     employee,
-    maskedEmail: maskEmail(employee.email),
+    maskedEmail: maskEmail(deliveryEmail),
     expiresAt,
   };
 }
