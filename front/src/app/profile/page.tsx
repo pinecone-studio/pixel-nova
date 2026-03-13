@@ -68,6 +68,7 @@ export default function Profile() {
   const [employee, setEmployee] = useState<Employee | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [hrMessage, setHrMessage] = useState(false);
 
   const hydrateProfile = useEffectEvent(async (token: string) => {
     setLoading(true);
@@ -85,7 +86,9 @@ export default function Profile() {
     } catch (profileError) {
       window.localStorage.removeItem(TOKEN_STORAGE_KEY);
       setError(
-        err instanceof Error ? err.message : "Профайл ачаалж чадсангүй.",
+        profileError instanceof Error
+          ? profileError.message
+          : "Профайл ачаалж чадсангүй.",
       );
       router.replace("/auth/employee");
     } finally {
@@ -175,13 +178,20 @@ export default function Profile() {
 
         <div className="bg-linear-to-r from-gray-900 to-teal-950 rounded-2xl p-6 mb-[32px] border border-gray-800">
           <div className="flex items-center gap-5">
-            <Image
-              src={employee?.imageUrl || "https://i.pravatar.cc/100?img=11"}
-              alt="Profile"
-              width={112}
-              height={112}
-              className="w-20 h-20 rounded-full object-cover border-2 border-teal-500"
-            />
+            {employee?.imageUrl ? (
+              <Image
+                src={employee.imageUrl}
+                alt="Profile"
+                width={112}
+                height={112}
+                className="w-20 h-20 rounded-full object-cover border-2 border-teal-500"
+                unoptimized
+              />
+            ) : (
+              <div className="flex h-20 w-20 items-center justify-center rounded-full border-2 border-teal-500 bg-teal-950 text-xl font-semibold text-teal-200">
+                {getInitials(employee)}
+              </div>
+            )}
             <div>
               <h2 className="text-2xl font-bold text-white">{displayName}</h2>
               <p className="text-gray-400 text-sm mb-3">{displayNameEng}</p>
@@ -223,26 +233,7 @@ export default function Profile() {
                   label: "Албан тушаал",
                   value: employee?.jobTitle ?? "Мэдээлэлгүй",
                 },
-                {
-                  icon: <Senior />,
-                  label: "Зэрэглэл",
-                  value: employee?.level ?? "Мэдээлэлгүй",
-                },
-                {
-                  icon: <Heltes />,
-                  label: "Хэлтэс",
-                  value: employee?.department ?? "Мэдээлэлгүй",
-                },
-                {
-                  icon: <Salbar />,
-                  label: "Салбар",
-                  value: employee?.branch ?? "Мэдээлэлгүй",
-                },
-                {
-                  icon: <AjildOrson />,
-                  label: "Ажилд орсон",
-                  value: formatDate(employee?.hireDate),
-                },
+                ...employmentInfo.slice(1),
                 {
                   icon: <Ajillasan />,
                   label: "Ажилласан хугацаа",
@@ -272,28 +263,7 @@ export default function Profile() {
             </h3>
             <div className="border border-gray-800 w-100"></div>
             <div className="mt-5">
-              {[
-                {
-                  icon: <AjiltniiCode />,
-                  label: "Ажилтны код",
-                  value: employee?.employeeCode ?? "Мэдээлэлгүй",
-                },
-                {
-                  icon: <Email />,
-                  label: "Имэйл",
-                  value: employee?.email ?? "Мэдээлэлгүй",
-                },
-                {
-                  icon: <TursunUdur />,
-                  label: "Төрсөн өдөр",
-                  value: employee?.birthDayAndMonth ?? "Мэдээлэлгүй",
-                },
-                {
-                  icon: <Github />,
-                  label: "GitHub",
-                  value: employee?.github ?? "Мэдээлэлгүй",
-                },
-              ].map((item) => (
+              {personalInfo.map((item) => (
                 <div
                   key={item.label}
                   className="flex items-center gap-3 h-[68px]">

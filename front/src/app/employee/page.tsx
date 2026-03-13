@@ -209,17 +209,17 @@ export default function EmployeePage() {
               : fallbackDocuments.map((document) => (
                   <article
                     key={document.fileName}
-                    className="flex h-45 w-full max-w-80.75 flex-col rounded-[28px] border border-[#0E2741] bg-[linear-gradient(180deg,#03101d_0%,#041424_100%)] p-7 shadow-[0_0_0_1px_rgba(255,255,255,0.03)_inset]"
+                    className="flex h-45 w-full max-w-80.75 flex-col items-center rounded-[28px] border border-[#0E2741] bg-[linear-gradient(180deg,#03101d_0%,#041424_100%)] p-7 text-center shadow-[0_0_0_1px_rgba(255,255,255,0.03)_inset]"
                   >
-                    <div className="flex items-start gap-5">
+                    <div className="flex flex-col items-center gap-5">
                       <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-[18px] border border-[#24374F] bg-[#132131]">
                         <FactIcon />
                       </div>
-                      <div className="flex min-w-0 flex-1 flex-col gap-1 pt-1">
+                      <div className="flex min-w-0 flex-1 flex-col items-center gap-1 pt-1">
                         <h3 className="max-w-54.25 text-[17px] font-semibold leading-5 text-[#E7EDF5]">
                           {document.title}
                         </h3>
-                        <p className="truncate text-[13px] text-[#6E7D90]">
+                        <p className="max-w-full break-all text-[13px] text-[#6E7D90]">
                           {document.fileName}
                         </p>
                         <p className="text-[13px] text-[#8D9AAC]">{document.date}</p>
