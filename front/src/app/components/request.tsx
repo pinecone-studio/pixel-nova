@@ -116,15 +116,18 @@ export const Request = () => {
   const [leaveEnd, setLeaveEnd] = useState("");
   const [leaveReason, setLeaveReason] = useState("");
 
+  // Тойрох хуудас form state
+  const [clearanceType, setClearanceType] = useState("");
+  const [clearanceReason, setClearanceReason] = useState("");
+
   async function handleSend() {
     setSending(true);
     setSendError(null);
     try {
       const token = window.localStorage.getItem(TOKEN_KEY);
+      if (!token) throw new Error("Нэвтрэх шаардлагатай");
+
       if (activeTab === "Чөлөө авах") {
-        if (!token) {
-          throw new Error("Нэвтрэх шаардлагатай");
-        }
         await submitLeaveRequest(
           {
             type: leaveType || "Ээлжийн амралт",
@@ -134,7 +137,28 @@ export const Request = () => {
           },
           token,
         );
+      } else if (activeTab === "Тойрох хуудас") {
+        await submitLeaveRequest(
+          {
+            type: `Тойрох хуудас${clearanceType ? ` — ${clearanceType}` : ""}`,
+            startTime: new Date().toISOString(),
+            endTime: new Date().toISOString(),
+            reason: clearanceReason,
+          },
+          token,
+        );
+      } else if (activeTab === "Томилолт") {
+        await submitLeaveRequest(
+          {
+            type: "Томилолт",
+            startTime: new Date().toISOString(),
+            endTime: new Date().toISOString(),
+            reason: clearanceReason,
+          },
+          token,
+        );
       }
+
       setSubmitted(true);
       setTimeout(() => {
         setSubmitted(false);
@@ -143,6 +167,8 @@ export const Request = () => {
         setLeaveStart("");
         setLeaveEnd("");
         setLeaveReason("");
+        setClearanceType("");
+        setClearanceReason("");
       }, 2000);
     } catch (err) {
       setSendError(err instanceof Error ? err.message : "Алдаа гарлаа. Дахин оролдоно уу.");
@@ -341,6 +367,8 @@ export const Request = () => {
               label="Төрөл"
               id="clearance-type"
               options={["Ажлаас гарах", "Дотоод шилжилт", "Гадаад томилолт", "Бусад"]}
+              value={clearanceType}
+              onChange={setClearanceType}
             />
 
             {/* Файл хавсаргах */}
@@ -349,13 +377,18 @@ export const Request = () => {
             {/* Шалтгаан */}
             <div className="flex flex-col gap-1.5">
               <label className="text-sm font-medium text-white">Шалтгаан</label>
-              <textarea rows={3} placeholder="Чөлөө авах шалтгаанаа бичнэ үү..." className={TEXTAREA_CLASS} />
+              <textarea rows={3} placeholder="Шалтгаанаа бичнэ үү..." className={TEXTAREA_CLASS} value={clearanceReason} onChange={(e) => setClearanceReason(e.target.value)} />
             </div>
+
+            {/* error */}
+            {sendError && (
+              <p className="text-red-400 text-xs bg-red-500/10 border border-red-500/20 rounded-lg px-3 py-2">{sendError}</p>
+            )}
 
             {/* footer */}
             <div className="flex justify-end gap-3">
               <BackBtn onClick={closeDialog} />
-              <SendBtn onClick={handleSend} />
+              <SendBtn onClick={handleSend} disabled={sending} />
             </div>
           </div>
         </div>
@@ -379,10 +412,21 @@ export const Request = () => {
             {/* Файл хавсаргах */}
             <UploadArea label="Файл хавсаргах" subtitle="Файл хавсаргана уу." />
 
+            {/* Шалтгаан */}
+            <div className="flex flex-col gap-1.5">
+              <label className="text-sm font-medium text-white">Шалтгаан</label>
+              <textarea rows={3} placeholder="Томилолтын шалтгаанаа бичнэ үү..." className={TEXTAREA_CLASS} value={clearanceReason} onChange={(e) => setClearanceReason(e.target.value)} />
+            </div>
+
+            {/* error */}
+            {sendError && (
+              <p className="text-red-400 text-xs bg-red-500/10 border border-red-500/20 rounded-lg px-3 py-2">{sendError}</p>
+            )}
+
             {/* footer */}
             <div className="flex justify-end gap-3">
               <BackBtn onClick={closeDialog} />
-              <SendBtn onClick={handleSend} />
+              <SendBtn onClick={handleSend} disabled={sending} />
             </div>
           </div>
         </div>

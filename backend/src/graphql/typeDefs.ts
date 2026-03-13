@@ -133,6 +133,14 @@ export const typeDefs = /* GraphQL */ `
     newValues: JSON!
   }
 
+  input UploadHrDocumentInput {
+    employeeId: ID!
+    action: String!
+    documentName: String!
+    contentType: String!
+    contentBase64: String!
+  }
+
   type DocumentContent {
     id: ID!
     documentName: String!
@@ -156,6 +164,7 @@ export const typeDefs = /* GraphQL */ `
 
   type Query {
     me: Employee
+    employees(search: String, status: String, department: String): [Employee!]!
     documents(employeeId: ID!): [Document!]!
     auditLogs(employeeId: ID, action: String, fromDate: String, toDate: String): [AuditLog!]!
     actions: [ActionConfig!]!
@@ -176,5 +185,6 @@ export const typeDefs = /* GraphQL */ `
     submitLeaveRequest(type: String!, startTime: String!, endTime: String!, reason: String!): LeaveRequest!
     approveLeaveRequest(id: ID!, note: String): LeaveRequest!
     rejectLeaveRequest(id: ID!, note: String): LeaveRequest!
+    uploadHrDocument(input: UploadHrDocumentInput!): Document!
   }
 `;

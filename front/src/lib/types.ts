@@ -36,8 +36,17 @@ export interface AuditLog {
   id: string;
   employeeId: string;
   action: string;
+  phase: string;
+  actorId?: string | null;
+  actorRole: string;
+  documentIds: string[];
+  recipientRoles: string[];
+  recipientEmails: string[];
+  incompleteFields: string[];
   documentsGenerated: boolean;
+  notificationAttempted: boolean;
   recipientsNotified: boolean;
+  notificationError?: string | null;
   timestamp: string;
 }
 
@@ -65,6 +74,39 @@ export interface UpsertEmployeeResult {
   employee: Employee;
   resolvedAction?: string | null;
   triggeredActionResult?: TriggerActionResult | null;
+}
+
+export interface UploadHrDocumentInput {
+  employeeId: string;
+  action: string;
+  documentName: string;
+  contentType: string;
+  contentBase64: string;
+}
+
+export interface UpsertEmployeeInput {
+  id: string;
+  employeeCode: string;
+  firstName: string;
+  lastName: string;
+  firstNameEng?: string | null;
+  lastNameEng?: string | null;
+  entraId?: string | null;
+  email?: string | null;
+  imageUrl?: string | null;
+  github?: string | null;
+  department: string;
+  branch: string;
+  jobTitle?: string | null;
+  level: string;
+  hireDate: string;
+  terminationDate?: string | null;
+  status: string;
+  numberOfVacationDays?: number | null;
+  isSalaryCompany?: boolean | null;
+  isKpi?: boolean | null;
+  birthDayAndMonth?: string | null;
+  birthdayPoster?: string | null;
 }
 
 export interface RequestOtpResult {

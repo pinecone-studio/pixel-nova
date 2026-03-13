@@ -3,8 +3,8 @@
 import { useEffect, useEffectEvent, useState } from "react";
 import { useRouter } from "next/navigation";
 
-import { fetchAuditLogs, fetchDocuments, fetchMe } from "@/lib/api";
-import type { AuditLog, Document, Employee } from "@/lib/types";
+import { fetchDocuments, fetchMe } from "@/lib/api";
+import type { Document, Employee } from "@/lib/types";
 
 import { ContractPreview } from "../components/contractPreview";
 import { FooterSection } from "../components/footerSection";
@@ -12,16 +12,6 @@ import { FactIcon } from "../components/icons";
 import { Request } from "../components/request";
 
 const TOKEN_STORAGE_KEY = "epas_auth_token";
-
-function formatDate(value: string) {
-  return new Date(value).toLocaleString("mn-MN", {
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-}
 
 const fallbackDocuments = [
   {
@@ -46,7 +36,6 @@ export default function EmployeePage() {
   const [authToken, setAuthToken] = useState("");
   const [employee, setEmployee] = useState<Employee | null>(null);
   const [documents, setDocuments] = useState<Document[]>([]);
-  const [auditLogs, setAuditLogs] = useState<AuditLog[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -62,21 +51,16 @@ export default function EmployeePage() {
         return;
       }
 
-      const [docs, logs] = await Promise.all([
-        fetchDocuments(me.id, token),
-        fetchAuditLogs(undefined, token),
-      ]);
+      const docs = await fetchDocuments(me.id, token);
 
       setAuthToken(token);
       setEmployee(me);
       setDocuments(docs);
-      setAuditLogs(logs);
     } catch (authError) {
       window.localStorage.removeItem(TOKEN_STORAGE_KEY);
       setAuthToken("");
       setEmployee(null);
       setDocuments([]);
-      setAuditLogs([]);
       setError(
         authError instanceof Error
           ? authError.message
@@ -210,9 +194,6 @@ export default function EmployeePage() {
             </h2>
             <span className="rounded-full border border-[#233246] bg-[#162130] px-4 py-1 text-[14px] font-medium text-[#94A3B8]">
               {(documents.length > 0 ? documents.length : fallbackDocuments.length)} баримт
-            </span>
-            <span className="rounded-full border border-[#233246] bg-[#162130] px-4 py-1 text-[14px] font-medium text-[#94A3B8]">
-              {auditLogs.length} activity log
             </span>
           </div>
 

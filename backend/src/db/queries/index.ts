@@ -10,6 +10,7 @@ export type { NormalizedActionConfig } from "./actionConfig";
 export {
   getEmployeeById,
   getEmployeeByCode,
+  listEmployees,
   insertEmployee,
   updateEmployee,
   upsertEmployeeRecord,

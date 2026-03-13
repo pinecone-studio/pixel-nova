@@ -4,6 +4,7 @@ import {
   getDocuments,
   getAuditLogs,
   getLeaveRequests,
+  listEmployees,
   listActionConfigs,
 } from "../db/queries";
 import type { GraphQLContext } from "./schema";
@@ -42,6 +43,22 @@ function resolveEmployeeScopedId(ctx: Ctx, requestedId?: string | null) {
 
 export const queryResolvers = {
   me: (_: unknown, __: unknown, ctx: Ctx) => ctx.currentEmployee,
+
+  employees: (
+    _: unknown,
+    args: { search?: string | null; status?: string | null; department?: string | null },
+    ctx: Ctx,
+  ) => {
+    if (ctx.actor.role !== "hr" && ctx.actor.role !== "admin") {
+      throw new Error("Unauthorized");
+    }
+
+    return listEmployees(ctx.db, {
+      search: args.search ?? undefined,
+      status: args.status ?? undefined,
+      department: args.department ?? undefined,
+    });
+  },
 
   documents: (_: unknown, args: DocumentsArgs, ctx: Ctx) =>
     getDocuments(ctx.db, resolveEmployeeScopedId(ctx, args.employeeId)),

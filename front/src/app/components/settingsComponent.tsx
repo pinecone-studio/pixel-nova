@@ -1,7 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { BiToggleLeft, BiToggleRight } from "react-icons/bi";
+
+const STORAGE_KEY = "epas_hr_settings";
 
 const settingSections = [
   {
@@ -75,33 +77,82 @@ const settingSections = [
   },
 ];
 
-export const SettingsComponent = () => {
-  const [toggles, setToggles] = useState<Record<string, boolean>>(() => {
-    const init: Record<string, boolean> = {};
-    settingSections.forEach((section) =>
-      section.items.forEach((item) => {
-        init[item.id] = item.default;
-      }),
-    );
-    return init;
-  });
+function buildDefaultToggles() {
+  const initial: Record<string, boolean> = {};
+  settingSections.forEach((section) =>
+    section.items.forEach((item) => {
+      initial[item.id] = item.default;
+    }),
+  );
+  return initial;
+}
 
-  const toggle = (id: string) =>
-    setToggles((prev) => ({ ...prev, [id]: !prev[id] }));
+export const SettingsComponent = () => {
+  const defaults = buildDefaultToggles();
+  const saveTimerRef = useRef<number | null>(null);
+  const [toggles, setToggles] = useState<Record<string, boolean>>(() => {
+    if (typeof window === "undefined") {
+      return defaults;
+    }
+
+    try {
+      const raw = window.localStorage.getItem(STORAGE_KEY);
+      if (!raw) return defaults;
+      const parsed = JSON.parse(raw) as Record<string, boolean>;
+      return { ...defaults, ...parsed };
+    } catch (error) {
+      console.error(error);
+      return defaults;
+    }
+  });
+  const [saveState, setSaveState] = useState<"idle" | "saved">("idle");
+
+  function persist(next: Record<string, boolean>) {
+    try {
+      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+      setSaveState("saved");
+      if (saveTimerRef.current) {
+        window.clearTimeout(saveTimerRef.current);
+      }
+      saveTimerRef.current = window.setTimeout(() => setSaveState("idle"), 1800);
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  function toggle(id: string) {
+    setToggles((prev) => {
+      const next = { ...prev, [id]: !prev[id] };
+      persist(next);
+      return next;
+    });
+  }
+
+  function resetSettings() {
+    setToggles(defaults);
+    window.localStorage.removeItem(STORAGE_KEY);
+    setSaveState("idle");
+  }
 
   return (
     <div className="flex flex-col gap-5">
-      <div>
-        <p className="text-white text-2xl font-bold tracking-tight">Тохиргоо</p>
-        <p className="text-slate-500 text-sm mt-1">
-          Системийн ерөнхий тохиргоо болон хувийн сонголтууд
-        </p>
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <p className="text-white text-2xl font-bold tracking-tight">Тохиргоо</p>
+          <p className="text-slate-500 text-sm mt-1">
+            Системийн ерөнхий тохиргоо болон хувийн сонголтууд
+          </p>
+        </div>
+        <div className="text-xs text-slate-400 mt-1">
+          {saveState === "saved" ? "Локал дээр хадгалагдлаа" : " "}
+        </div>
       </div>
 
       {settingSections.map((section) => (
         <div
           key={section.title}
-          className="rounded-2xl border border-white/8 bg-[#0a0f0e] overflow-hidden">
+          className="rounded-2xl border border-white/8 bg-[#0a0f0e] overflow-hidden"
+        >
           <div className="px-6 py-4 border-b border-white/5">
             <p className="text-white font-semibold">{section.title}</p>
           </div>
@@ -110,10 +161,9 @@ export const SettingsComponent = () => {
             <div
               key={item.id}
               className={`flex items-center justify-between px-6 py-4 ${
-                index < section.items.length - 1
-                  ? "border-b border-white/5"
-                  : ""
-              }`}>
+                index < section.items.length - 1 ? "border-b border-white/5" : ""
+              }`}
+            >
               <div>
                 <p className="text-white text-sm font-medium">{item.label}</p>
                 <p className="text-slate-500 text-xs mt-0.5">{item.desc}</p>
@@ -136,8 +186,11 @@ export const SettingsComponent = () => {
           Доорх үйлдлүүд буцаагдахгүй тул болгоомжтой хэрэглэнэ.
         </p>
         <div className="flex gap-3">
-          <button className="h-9 px-4 rounded-lg border border-red-500/30 text-red-400 text-sm hover:bg-red-500/10 transition-colors">
-            Бүх өгөгдлийг цэвэрлэх
+          <button
+            onClick={resetSettings}
+            className="h-9 px-4 rounded-lg border border-red-500/30 text-red-400 text-sm hover:bg-red-500/10 transition-colors"
+          >
+            Тохиргоог анхдагч болгох
           </button>
           <button className="h-9 px-4 rounded-lg bg-red-500/20 border border-red-500/30 text-red-400 text-sm hover:bg-red-500/30 transition-colors">
             Бүртгэл устгах
