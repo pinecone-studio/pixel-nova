@@ -1,10 +1,15 @@
 "use client";
 
+import { useEffect, useEffectEvent, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { BiHome } from "react-icons/bi";
 import { GrNotification } from "react-icons/gr";
 import { RxAvatar } from "react-icons/rx";
+import { fetchMe } from "@/lib/api";
+import type { Employee } from "@/lib/types";
+
+const TOKEN_STORAGE_KEY = "epas_auth_token";
 
 import { DocumentIcon, DownIcon, FactIcon } from "./icons";
 
@@ -24,8 +29,39 @@ function isActivePath(pathname: string, href: string) {
 
 export function Navbar() {
   const pathname = usePathname();
+  const [employee, setEmployee] = useState<Employee | null>(null);
+
+  const hydrateNavbar = useEffectEvent(async (token: string) => {
+    try {
+      const me = await fetchMe(token);
+      setEmployee(me);
+    } catch {
+      setEmployee(null);
+    }
+  });
+
+  useEffect(() => {
+    if (pathname === "/" || pathname.startsWith("/auth")) {
+      return;
+    }
+
+    const storedToken = window.localStorage.getItem(TOKEN_STORAGE_KEY);
+    if (!storedToken) {
+      return;
+    }
+
+    void hydrateNavbar(storedToken);
+  }, [pathname]);
 
   if (pathname === "/" || pathname.startsWith("/auth")) return null;
+
+  const displayName = employee
+    ? `${employee.lastName} ${employee.firstName}`
+    : "Employee";
+  const avatarLetter =
+    employee?.firstName?.trim().charAt(0).toUpperCase() ||
+    employee?.lastName?.trim().charAt(0).toUpperCase() ||
+    "E";
 
   return (
     <nav className="flex h-16 w-full items-center justify-between border-b border-[#1A1A2E] bg-[#0A0A0F] px-6 py-0 shadow-lg shadow-black/40">

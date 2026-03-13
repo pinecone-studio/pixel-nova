@@ -230,7 +230,6 @@ export default function EmployeePage() {
           </div>
         </section>
 
-        <FooterSection />
       </div>
     </div>
   );

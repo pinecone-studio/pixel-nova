@@ -188,22 +188,22 @@ export const Request = () => {
       icon: <BiCalendar className="w-5 h-5 text-[#00CC99]" />,
       title: "Чөлөө авах",
       desc: "Эзлийн амралт, өвчний чөлөө",
-      bg: "border-[#0D3470] bg-[radial-gradient(circle_at_top_left,_rgba(20,84,180,0.28),_transparent_42%),linear-gradient(180deg,#03101d_0%,#04090f_100%)]",
-      iconBg: "bg-[#0D2231]/90 border border-[#103A57]",
+      bg: "border-[#123C77] bg-[radial-gradient(circle_at_top_left,_rgba(22,95,210,0.30),_transparent_38%),linear-gradient(180deg,#031224_0%,#03070d_100%)]",
+      iconBg: "border-[#0C3F61] bg-[linear-gradient(180deg,rgba(7,43,62,0.95)_0%,rgba(6,24,35,0.95)_100%)]",
     },
     {
       icon: <BiCalendar className="w-5 h-5 text-[#00CC99]" />,
       title: "Тойрох хуудас",
       desc: "Тойрох хуудас авах хүсэлт",
-      bg: "border-[#43218A] bg-[radial-gradient(circle_at_top_left,_rgba(112,68,216,0.28),_transparent_42%),linear-gradient(180deg,#130b22_0%,#05090f_100%)]",
-      iconBg: "bg-[#182140]/90 border border-[#28307A]",
+      bg: "border-[#5B269D] bg-[radial-gradient(circle_at_top_left,_rgba(129,81,244,0.30),_transparent_38%),linear-gradient(180deg,#180e2a_0%,#04070d_100%)]",
+      iconBg: "border-[#29397A] bg-[linear-gradient(180deg,rgba(27,29,75,0.95)_0%,rgba(16,18,38,0.95)_100%)]",
     },
     {
       icon: <BiFile className="w-5 h-5 text-[#2A8CFF]" />,
       title: "Томилолт",
       desc: "Томилолт авах хүсэлт",
-      bg: "border-[#0B5A36] bg-[radial-gradient(circle_at_top_left,_rgba(10,120,62,0.3),_transparent_42%),linear-gradient(180deg,#05160d_0%,#05090f_100%)]",
-      iconBg: "bg-[#082934]/90 border border-[#114357]",
+      bg: "border-[#0E6A3F] bg-[radial-gradient(circle_at_top_left,_rgba(12,137,74,0.30),_transparent_38%),linear-gradient(180deg,#05160e_0%,#04070c_100%)]",
+      iconBg: "border-[#0E4360] bg-[linear-gradient(180deg,rgba(7,37,58,0.95)_0%,rgba(8,24,34,0.95)_100%)]",
     },
   ];
 
@@ -222,26 +222,34 @@ export const Request = () => {
         </a>
       </div>
 
-      <div className="grid grid-cols-3 gap-5">
+      <div className="grid grid-cols-3 gap-6">
         {quickActions.map((action) => (
           <div
             key={action.title}
-            className={`${action.bg} rounded-2xl border p-5 flex items-center justify-between gap-4 shadow-[0_0_0_1px_rgba(255,255,255,0.03)_inset] transition-colors`}
+            className={`${action.bg} flex min-h-[144px] items-center justify-between gap-4 rounded-[32px] border px-8 py-9 shadow-[0_0_0_1px_rgba(255,255,255,0.03)_inset]`}
           >
             <div className="flex items-center gap-4">
-              <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${action.iconBg}`}>
+              <div
+                className={`flex h-16 w-16 shrink-0 items-center justify-center rounded-[22px] border ${action.iconBg}`}
+              >
                 {action.icon}
               </div>
-              <div>
-                <p className="text-white text-base font-semibold">{action.title}</p>
-                <p className="text-gray-400 text-sm mt-0.5">{action.desc}</p>
+
+              <div className="max-w-[220px]">
+                <p className="text-[20px] font-semibold leading-7 text-white">
+                  {action.title}
+                </p>
+                <p className="mt-1 text-[16px] leading-6 text-[#7C8698]">
+                  {action.desc}
+                </p>
               </div>
             </div>
+
             <button
               onClick={() => setActiveTab(action.title)}
-              className="w-10 h-10 rounded-xl border border-white/10 flex items-center justify-center text-gray-400 hover:text-white hover:border-white/20 transition"
+              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-[#8B96A8] transition-colors hover:bg-white/5 hover:text-white"
             >
-              <BiPlus className="w-5 h-5" />
+              <BiPlus className="h-8 w-8" />
             </button>
           </div>
         ))}

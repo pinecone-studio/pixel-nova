@@ -1,11 +1,8 @@
 "use client";
 
-import { useEffect, useEffectEvent, useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useEffect, useEffectEvent, useState } from "react";
 import Image from "next/image";
-
-import { fetchMe } from "@/lib/api";
-import type { Employee } from "@/lib/types";
+import { useRouter } from "next/navigation";
 import {
   AjildOrson,
   Ajillasan,
@@ -23,11 +20,15 @@ import {
   Senior,
   TursunUdur,
 } from "../components/icons";
+import { fetchMe } from "@/lib/api";
+import type { Employee } from "@/lib/types";
 
 const TOKEN_STORAGE_KEY = "epas_auth_token";
 
-function formatDate(value?: string | null) {
-  if (!value) return "Мэдээлэлгүй";
+function formatHireDate(value?: string | null) {
+  if (!value) {
+    return "Мэдээлэл алга";
+  }
 
   return new Date(value).toLocaleDateString("mn-MN", {
     year: "numeric",
@@ -35,6 +36,8 @@ function formatDate(value?: string | null) {
     day: "numeric",
   });
 }
+
+
 
 function getTenure(hireDate?: string | null) {
   if (!hireDate) return "Мэдээлэлгүй";
@@ -62,7 +65,6 @@ function getInitials(employee: Employee | null) {
 
 export default function Profile() {
   const router = useRouter();
-  const [hrMessage, setHrMessage] = useState(false);
   const [employee, setEmployee] = useState<Employee | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -80,7 +82,7 @@ export default function Profile() {
       }
 
       setEmployee(me);
-    } catch (err) {
+    } catch (profileError) {
       window.localStorage.removeItem(TOKEN_STORAGE_KEY);
       setError(
         err instanceof Error ? err.message : "Профайл ачаалж чадсангүй.",
@@ -101,22 +103,62 @@ export default function Profile() {
     void hydrateProfile(storedToken);
   }, [router]);
 
-  const fullName = useMemo(() => {
-    if (!employee) return "Ажилтан";
-    return `${employee.lastName} ${employee.firstName}`;
-  }, [employee]);
-
-  const englishName = useMemo(() => {
-    if (!employee) return "Employee";
-    const first = employee.firstNameEng ?? employee.firstName;
-    const last = employee.lastNameEng ?? employee.lastName;
-    return `${last} ${first}`;
-  }, [employee]);
+  const displayName = employee
+    ? `${employee.lastName} ${employee.firstName}`
+    : "Д. Бат-Эрдэнэ";
+  const displayNameEng =
+    employee?.lastNameEng || employee?.firstNameEng
+      ? `${employee.lastNameEng ?? ""} ${employee.firstNameEng ?? ""}`.trim()
+      : "D. Bat-Erdene";
+  const employmentInfo = [
+    {
+      icon: <AlbanTushaal />,
+      label: "Албан тушаал",
+      value: employee?.level ?? "Мэдээлэл алга",
+    },
+    { icon: <Heltes />, label: "Хэлтэс", value: employee?.department ?? "Мэдээлэл алга" },
+    { icon: <Salbar />, label: "Салбар", value: employee?.branch ?? "Мэдээлэл алга" },
+    {
+      icon: <AjildOrson />,
+      label: "Ажилд орсон",
+      value: formatHireDate(employee?.hireDate),
+    },
+    {
+      icon: <Ajillasan />,
+      label: "Төлөв",
+      value: employee?.status ?? "Мэдээлэл алга",
+    },
+  ];
+  const personalInfo = [
+    {
+      icon: <AjiltniiCode />,
+      label: "Ажилтны код",
+      value: employee?.employeeCode ?? "Мэдээлэл алга",
+    },
+    {
+      icon: <Email />,
+      label: "Имэйл",
+      value: employee?.email ?? "Мэдээлэл алга",
+    },
+    {
+      icon: <TursunUdur />,
+      label: "Төрсөн өдөр",
+      value: employee?.birthDayAndMonth ?? "Мэдээлэл алга",
+    },
+    {
+      icon: <Github />,
+      label: "GitHub",
+      value: employee?.github ?? "Мэдээлэл алга",
+    },
+  ];
 
   if (loading) {
     return (
       <div className="min-h-screen bg-black text-white flex items-center justify-center">
-        Профайл ачаалж байна...
+        <div className="flex items-center gap-3 text-sm text-white/70">
+          <span className="h-5 w-5 animate-spin rounded-full border-2 border-white/20 border-t-white" />
+          Профайл ачаалж байна...
+        </div>
       </div>
     );
   }
@@ -133,43 +175,37 @@ export default function Profile() {
 
         <div className="bg-linear-to-r from-gray-900 to-teal-950 rounded-2xl p-6 mb-[32px] border border-gray-800">
           <div className="flex items-center gap-5">
-            {employee?.imageUrl ? (
-              <Image
-                src={employee.imageUrl}
-                alt={fullName}
-                width={112}
-                height={112}
-                className="w-20 h-20 rounded-full object-cover border-2 border-teal-500"
-              />
-            ) : (
-              <div className="w-20 h-20 rounded-full border-2 border-teal-500 bg-teal-950 flex items-center justify-center text-2xl font-bold text-teal-300">
-                {getInitials(employee)}
-              </div>
-            )}
-
+            <Image
+              src={employee?.imageUrl || "https://i.pravatar.cc/100?img=11"}
+              alt="Profile"
+              width={112}
+              height={112}
+              className="w-20 h-20 rounded-full object-cover border-2 border-teal-500"
+            />
             <div>
-              <h2 className="text-2xl font-bold text-white">{fullName}</h2>
-              <p className="text-gray-400 text-sm mb-3">{englishName}</p>
+              <h2 className="text-2xl font-bold text-white">{displayName}</h2>
+              <p className="text-gray-400 text-sm mb-3">{displayNameEng}</p>
               <div className="flex gap-2 flex-wrap">
                 <span className="flex items-center gap-1 text-xs border border-teal-600 text-teal-400 px-3 py-1 rounded-full">
                   <span>
-                    <AlbanTushaal />
-                  </span>
-                  {employee?.jobTitle ?? "Тодорхойгүй"}
+                    <Senior />
+                  </span>{" "}
+                  {employee?.level ?? "Мэдээлэл алга"}
                 </span>
                 <span className="flex items-center gap-1 text-xs border border-gray-700 text-white px-3 py-1 rounded-full">
                   <span>
                     <Engineering />
-                  </span>
-                  {employee?.department ?? "Тодорхойгүй"}
+                  </span>{" "}
+                  {employee?.department ?? "Мэдээлэл алга"}
                 </span>
                 <span className="flex items-center gap-1 text-xs border border-teal-600 text-teal-400 px-3 py-1 rounded-full">
                   <span>
                     <Idevhtei />
-                  </span>
-                  {employee?.status ?? "Тодорхойгүй"}
+                  </span>{" "}
+                  {employee?.status ?? "Мэдээлэл алга"}
                 </span>
               </div>
+              {error ? <p className="mt-3 text-sm text-red-400">{error}</p> : null}
             </div>
           </div>
         </div>
@@ -343,7 +379,7 @@ export default function Profile() {
                   </span>
                 </div>
                 <span className="mt-4 text-xs text-gray-500">
-                  {employee?.entraId ?? "Мэдээлэлгүй"}
+                  {employee?.entraId ?? "Мэдээлэл алга"}
                 </span>
               </div>
             </div>
