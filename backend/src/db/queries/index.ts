@@ -10,6 +10,7 @@ export type { NormalizedActionConfig } from "./actionConfig";
 export {
   getEmployeeById,
   getEmployeeByCode,
+  listEmployees,
   insertEmployee,
   updateEmployee,
   upsertEmployeeRecord,
@@ -35,3 +36,9 @@ export {
   deleteSessionByToken,
 } from "./auth";
 export { createTriggeredActionRecords } from "./triggerAction";
+export {
+  insertLeaveRequest,
+  getLeaveRequests,
+  getLeaveRequestById,
+  updateLeaveRequestStatus,
+} from "./leaveRequest";

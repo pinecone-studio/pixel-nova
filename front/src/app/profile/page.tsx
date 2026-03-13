@@ -84,11 +84,8 @@ export default function Profile() {
       setEmployee(me);
     } catch (profileError) {
       window.localStorage.removeItem(TOKEN_STORAGE_KEY);
-      setEmployee(null);
       setError(
-        profileError instanceof Error
-          ? profileError.message
-          : "Профайл мэдээлэл ачаалж чадсангүй.",
+        err instanceof Error ? err.message : "Профайл ачаалж чадсангүй.",
       );
       router.replace("/auth/employee");
     } finally {
@@ -171,10 +168,12 @@ export default function Profile() {
       <div className="mx-auto w-full max-w-[1056px]">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-white">Профайл</h1>
-          <p className="text-gray-400 mt-1">Таны хувийн болон ажлын мэдээлэл.</p>
+          <p className="text-gray-400 mt-1">
+            Таны хувийн болон ажлын мэдээлэл.
+          </p>
         </div>
 
-        <div className="bg-gradient-to-r from-gray-900 to-teal-950 rounded-2xl p-6 mb-[32px] border border-gray-800">
+        <div className="bg-linear-to-r from-gray-900 to-teal-950 rounded-2xl p-6 mb-[32px] border border-gray-800">
           <div className="flex items-center gap-5">
             <Image
               src={employee?.imageUrl || "https://i.pravatar.cc/100?img=11"}
@@ -213,20 +212,54 @@ export default function Profile() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-[56px] mb-[32px] min-h-[479px]">
           <div className="bg-gray-900 rounded-2xl p-6 border border-gray-800 h-full">
-            <h3 className="text-white font-semibold text-lg mb-5">Ажлын мэдээлэл</h3>
+            <h3 className="text-white font-semibold text-lg mb-5">
+              Ажлын мэдээлэл
+            </h3>
             <div className="border border-gray-800 w-100"></div>
             <div className="mt-5">
-              {employmentInfo.map((item) => (
+              {[
+                {
+                  icon: <AlbanTushaal />,
+                  label: "Албан тушаал",
+                  value: employee?.jobTitle ?? "Мэдээлэлгүй",
+                },
+                {
+                  icon: <Senior />,
+                  label: "Зэрэглэл",
+                  value: employee?.level ?? "Мэдээлэлгүй",
+                },
+                {
+                  icon: <Heltes />,
+                  label: "Хэлтэс",
+                  value: employee?.department ?? "Мэдээлэлгүй",
+                },
+                {
+                  icon: <Salbar />,
+                  label: "Салбар",
+                  value: employee?.branch ?? "Мэдээлэлгүй",
+                },
+                {
+                  icon: <AjildOrson />,
+                  label: "Ажилд орсон",
+                  value: formatDate(employee?.hireDate),
+                },
+                {
+                  icon: <Ajillasan />,
+                  label: "Ажилласан хугацаа",
+                  value: getTenure(employee?.hireDate),
+                },
+              ].map((item) => (
                 <div
                   key={item.label}
-                  className="flex items-center gap-3 h-[68px]"
-                >
-                  <div className="w-9 h-9 bg-teal-900/50 rounded-lg flex items-center justify-center text-sm flex-shrink-0">
+                  className="flex items-center gap-3 h-[68px]">
+                  <div className="w-9 h-9 bg-teal-900/50 rounded-lg flex items-center justify-center text-sm shrink-0">
                     {item.icon}
                   </div>
                   <div>
                     <p className="text-gray-500 text-xs">{item.label}</p>
-                    <p className="text-white font-medium text-sm">{item.value}</p>
+                    <p className="text-white font-medium text-sm">
+                      {item.value}
+                    </p>
                   </div>
                 </div>
               ))}
@@ -234,33 +267,74 @@ export default function Profile() {
           </div>
 
           <div className="bg-gray-900 rounded-2xl p-6 border border-gray-800 relative h-full">
-            <h3 className="text-white font-semibold text-lg mb-5">Хувийн мэдээлэл</h3>
+            <h3 className="text-white font-semibold text-lg mb-5">
+              Хувийн мэдээлэл
+            </h3>
             <div className="border border-gray-800 w-100"></div>
             <div className="mt-5">
-              {personalInfo.map((item) => (
+              {[
+                {
+                  icon: <AjiltniiCode />,
+                  label: "Ажилтны код",
+                  value: employee?.employeeCode ?? "Мэдээлэлгүй",
+                },
+                {
+                  icon: <Email />,
+                  label: "Имэйл",
+                  value: employee?.email ?? "Мэдээлэлгүй",
+                },
+                {
+                  icon: <TursunUdur />,
+                  label: "Төрсөн өдөр",
+                  value: employee?.birthDayAndMonth ?? "Мэдээлэлгүй",
+                },
+                {
+                  icon: <Github />,
+                  label: "GitHub",
+                  value: employee?.github ?? "Мэдээлэлгүй",
+                },
+              ].map((item) => (
                 <div
                   key={item.label}
-                  className="flex items-center gap-3 h-[68px]"
-                >
-                  <div className="w-9 h-9 bg-teal-900/50 rounded-lg flex items-center justify-center text-sm flex-shrink-0">
+                  className="flex items-center gap-3 h-[68px]">
+                  <div className="w-9 h-9 bg-teal-900/50 rounded-lg flex items-center justify-center text-sm shrink-0">
                     {item.icon}
                   </div>
                   <div>
                     <p className="text-gray-500 text-xs">{item.label}</p>
-                    <p className="text-white font-medium text-sm">{item.value}</p>
+                    <p className="text-white font-medium text-sm">
+                      {item.value}
+                    </p>
                   </div>
                 </div>
               ))}
             </div>
 
-            
+            <div className="absolute bottom-5 right-5 flex items-center gap-2">
+              <span className="text-xs text-gray-400 flex items-center gap-1">
+                <span className="text-base">HR</span> Мессеж
+              </span>
+              <button
+                onClick={() => setHrMessage(!hrMessage)}
+                className={`w-10 h-5 rounded-full transition-colors duration-200 relative ${
+                  hrMessage ? "bg-teal-500" : "bg-gray-600"
+                }`}>
+                <span
+                  className={`absolute top-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform duration-200 ${
+                    hrMessage ? "translate-x-5" : "translate-x-0.5"
+                  }`}
+                />
+              </button>
+            </div>
           </div>
         </div>
 
         <div className="bg-gray-900 rounded-2xl border border-gray-800 overflow-hidden">
           <div className="h-[83px] flex flex-col pt-[17px] px-[25px]">
-            <h3 className="text-white font-semibold text-lg h-[28px]">Нэмэлт мэдээлэл</h3>
-            <p className="text-gray-500 text-4 mt-sm h-[28px] flex items-center h-[20px]">
+            <h3 className="text-white font-semibold text-lg h-[28px]">
+              Нэмэлт мэдээлэл
+            </h3>
+            <p className="text-gray-500 text-4 mt-sm h-[28px] flex items-center">
               Таны гэрээний болон бусад мэдээлэл
             </p>
           </div>

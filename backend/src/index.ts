@@ -14,9 +14,22 @@ type YogaServerContext = { env: CloudflareBindings };
 app.use(
   "*",
   cors({
-    origin: ["http://localhost:3000"],
+    origin: (origin) => {
+      if (!origin) return "*";
+      if (
+        origin.startsWith("http://localhost") ||
+        origin.startsWith("https://localhost") ||
+        origin.includes("pixel-nova") ||
+        origin.includes("pages.dev") ||
+        origin.includes("vercel.app")
+      ) {
+        return origin;
+      }
+      return "http://localhost:3000";
+    },
     allowHeaders: ["Content-Type", "Authorization", "x-actor-id", "x-actor-role"],
     allowMethods: ["GET", "POST", "OPTIONS"],
+    credentials: true,
   }),
 );
 

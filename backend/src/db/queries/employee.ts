@@ -1,4 +1,4 @@
-import { eq } from "drizzle-orm";
+import { and, asc, eq } from "drizzle-orm";
 
 import type { DbClient } from "../client";
 import { employees } from "../schema";
@@ -21,6 +21,70 @@ export async function getEmployeeByCode(db: DbClient, employeeCode: string) {
     .limit(1);
 
   return employee ?? null;
+}
+
+export async function listEmployees(
+  db: DbClient,
+  filters?: {
+    search?: string;
+    status?: string;
+    department?: string;
+  },
+) {
+  const search = filters?.search?.trim();
+  const whereClause = search
+    ? and(
+        filters?.status ? eq(employees.status, filters.status) : undefined,
+        filters?.department ? eq(employees.department, filters.department) : undefined,
+        // SQLite doesn't support ILIKE, so match several columns with LIKE
+        // and let OR semantics happen via repeated queries would be wasteful.
+      )
+    : and(
+        filters?.status ? eq(employees.status, filters.status) : undefined,
+        filters?.department ? eq(employees.department, filters.department) : undefined,
+      );
+
+  if (!search) {
+    return db.select().from(employees).where(whereClause).orderBy(asc(employees.lastName), asc(employees.firstName));
+  }
+
+  const term = `%${search}%`;
+  return db
+    .select()
+    .from(employees)
+    .where(
+      and(
+        filters?.status ? eq(employees.status, filters.status) : undefined,
+        filters?.department ? eq(employees.department, filters.department) : undefined,
+      ),
+    )
+    .orderBy(asc(employees.lastName), asc(employees.firstName))
+    .then((rows) =>
+      rows.filter((row) =>
+        [
+          row.firstName,
+          row.lastName,
+          row.employeeCode,
+          row.email ?? "",
+          row.department,
+          row.jobTitle,
+        ].some((value) => value.toLowerCase().includes(search.toLowerCase())),
+      ),
+    );
+}
+
+async function generateEmployeeCode(db: DbClient) {
+  const rows = await db
+    .select({ employeeCode: employees.employeeCode })
+    .from(employees);
+
+  const maxNumeric = rows.reduce((max, row) => {
+    const match = row.employeeCode.match(/(\d+)$/);
+    if (!match) return max;
+    return Math.max(max, Number(match[1]));
+  }, 0);
+
+  return `EMP${String(maxNumeric + 1).padStart(4, "0")}`;
 }
 
 export async function insertEmployee(
@@ -49,6 +113,9 @@ export async function upsertEmployeeRecord(
   employee: typeof employees.$inferInsert,
 ) {
   const previousEmployee = await getEmployeeById(db, employee.id);
+  const resolvedEmployeeCode = employee.employeeCode?.trim()
+    ? employee.employeeCode.trim().toUpperCase()
+    : previousEmployee?.employeeCode ?? await generateEmployeeCode(db);
   const terminationDate =
     employee.terminationDate === undefined
       ? previousEmployee?.terminationDate ?? null
@@ -56,7 +123,7 @@ export async function upsertEmployeeRecord(
 
   const nextEmployee = previousEmployee
     ? await updateEmployee(db, employee.id, {
-        employeeCode: employee.employeeCode,
+        employeeCode: resolvedEmployeeCode,
         firstName: employee.firstName,
         lastName: employee.lastName,
         firstNameEng: employee.firstNameEng ?? previousEmployee.firstNameEng,
@@ -80,6 +147,7 @@ export async function upsertEmployeeRecord(
       })
     : await insertEmployee(db, {
         ...employee,
+        employeeCode: resolvedEmployeeCode,
         terminationDate,
       });
 

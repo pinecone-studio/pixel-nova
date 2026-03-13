@@ -8,11 +8,59 @@ import type {
   RequestOtpResult,
   AuthSession,
   Employee,
+  LeaveRequest,
+  UploadHrDocumentInput,
+  UpsertEmployeeInput,
+  UpsertEmployeeResult,
 } from "./types";
+
+export async function fetchEmployees(filters?: {
+  search?: string;
+  status?: string;
+  department?: string;
+}): Promise<Employee[]> {
+  const data = await graphql<{ employees: Employee[] }>(
+    `query ($search: String, $status: String, $department: String) {
+      employees(search: $search, status: $status, department: $department) {
+        id
+        employeeCode
+        firstName
+        lastName
+        firstNameEng
+        lastNameEng
+        entraId
+        email
+        imageUrl
+        github
+        department
+        branch
+        jobTitle
+        level
+        hireDate
+        terminationDate
+        status
+        numberOfVacationDays
+        isSalaryCompany
+        isKpi
+        birthDayAndMonth
+        birthdayPoster
+      }
+    }`,
+    {
+      search: filters?.search ?? null,
+      status: filters?.status ?? null,
+      department: filters?.department ?? null,
+    },
+    { actorRole: "hr" },
+  );
+
+  return data.employees;
+}
 
 export async function fetchDocuments(
   employeeId: string,
   authToken?: string,
+  actorRole?: "hr" | "employee",
 ): Promise<Document[]> {
   const data = await graphql<{ documents: Document[] }>(
     `query ($employeeId: ID!) {
@@ -26,7 +74,12 @@ export async function fetchDocuments(
       }
     }`,
     { employeeId },
-    authToken ? { authToken } : undefined,
+    authToken || actorRole
+      ? {
+          ...(authToken ? { authToken } : {}),
+          ...(actorRole ? { actorRole } : {}),
+        }
+      : undefined,
   );
   return data.documents;
 }
@@ -41,8 +94,17 @@ export async function fetchAuditLogs(
         id
         employeeId
         action
+        phase
+        actorId
+        actorRole
+        documentIds
+        recipientRoles
+        recipientEmails
+        incompleteFields
         documentsGenerated
+        notificationAttempted
         recipientsNotified
+        notificationError
         timestamp
       }
     }`,
@@ -69,6 +131,7 @@ export async function fetchActions(): Promise<ActionConfig[]> {
 export async function fetchDocumentContent(
   documentId: string,
   authToken?: string,
+  actorRole?: "hr" | "employee",
 ): Promise<DocumentContent | null> {
   const data = await graphql<{ documentContent: DocumentContent | null }>(
     `query ($documentId: ID!) {
@@ -80,9 +143,35 @@ export async function fetchDocumentContent(
       }
     }`,
     { documentId },
-    authToken ? { authToken } : undefined,
+    authToken || actorRole
+      ? {
+          ...(authToken ? { authToken } : {}),
+          ...(actorRole ? { actorRole } : {}),
+        }
+      : undefined,
   );
   return data.documentContent;
+}
+
+export async function uploadHrDocument(
+  input: UploadHrDocumentInput,
+): Promise<Document> {
+  const data = await graphql<{ uploadHrDocument: Document }>(
+    `mutation ($input: UploadHrDocumentInput!) {
+      uploadHrDocument(input: $input) {
+        id
+        employeeId
+        action
+        documentName
+        storageUrl
+        createdAt
+      }
+    }`,
+    { input },
+    { actorRole: "hr" },
+  );
+
+  return data.uploadHrDocument;
 }
 
 export async function triggerAction(
@@ -118,6 +207,46 @@ export async function triggerAction(
     { employeeId, action },
   );
   return data.triggerAction;
+}
+
+export async function upsertEmployee(
+  input: UpsertEmployeeInput,
+): Promise<UpsertEmployeeResult> {
+  const data = await graphql<{ upsertEmployee: UpsertEmployeeResult }>(
+    `mutation ($input: UpsertEmployeeInput!) {
+      upsertEmployee(input: $input) {
+        employee {
+          id
+          employeeCode
+          firstName
+          lastName
+          firstNameEng
+          lastNameEng
+          entraId
+          email
+          imageUrl
+          github
+          department
+          branch
+          jobTitle
+          level
+          hireDate
+          terminationDate
+          status
+          numberOfVacationDays
+          isSalaryCompany
+          isKpi
+          birthDayAndMonth
+          birthdayPoster
+        }
+        resolvedAction
+      }
+    }`,
+    { input },
+    { actorRole: "hr" },
+  );
+
+  return data.upsertEmployee;
 }
 
 export async function requestOtp(employeeCode: string): Promise<RequestOtpResult> {
@@ -231,6 +360,96 @@ export async function logout(authToken: string): Promise<boolean> {
   );
 
   return data.logout;
+}
+
+const LEAVE_REQUEST_FIELDS = `
+  id
+  employeeId
+  employee {
+    id
+    employeeCode
+    firstName
+    lastName
+    department
+    jobTitle
+    level
+  }
+  type
+  startTime
+  endTime
+  reason
+  status
+  note
+  createdAt
+  updatedAt
+`;
+
+export async function submitLeaveRequest(
+  data: { type: string; startTime: string; endTime: string; reason: string },
+  authToken: string,
+): Promise<LeaveRequest> {
+  const result = await graphql<{ submitLeaveRequest: LeaveRequest }>(
+    `mutation ($type: String!, $startTime: String!, $endTime: String!, $reason: String!) {
+      submitLeaveRequest(type: $type, startTime: $startTime, endTime: $endTime, reason: $reason) {
+        ${LEAVE_REQUEST_FIELDS}
+      }
+    }`,
+    data,
+    { authToken },
+  );
+  return result.submitLeaveRequest;
+}
+
+export async function fetchLeaveRequests(status?: string): Promise<LeaveRequest[]> {
+  const result = await graphql<{ leaveRequests: LeaveRequest[] }>(
+    `query ($status: String) {
+      leaveRequests(status: $status) {
+        ${LEAVE_REQUEST_FIELDS}
+      }
+    }`,
+    { status: status ?? null },
+    { actorRole: "hr" },
+  );
+  return result.leaveRequests;
+}
+
+export async function fetchMyLeaveRequests(authToken: string): Promise<LeaveRequest[]> {
+  const result = await graphql<{ myLeaveRequests: LeaveRequest[] }>(
+    `query {
+      myLeaveRequests {
+        ${LEAVE_REQUEST_FIELDS}
+      }
+    }`,
+    undefined,
+    { authToken },
+  );
+  return result.myLeaveRequests;
+}
+
+export async function approveLeaveRequest(id: string, note?: string): Promise<LeaveRequest> {
+  const result = await graphql<{ approveLeaveRequest: LeaveRequest }>(
+    `mutation ($id: ID!, $note: String) {
+      approveLeaveRequest(id: $id, note: $note) {
+        ${LEAVE_REQUEST_FIELDS}
+      }
+    }`,
+    { id, note: note ?? null },
+    { actorRole: "hr" },
+  );
+  return result.approveLeaveRequest;
+}
+
+export async function rejectLeaveRequest(id: string, note?: string): Promise<LeaveRequest> {
+  const result = await graphql<{ rejectLeaveRequest: LeaveRequest }>(
+    `mutation ($id: ID!, $note: String) {
+      rejectLeaveRequest(id: $id, note: $note) {
+        ${LEAVE_REQUEST_FIELDS}
+      }
+    }`,
+    { id, note: note ?? null },
+    { actorRole: "hr" },
+  );
+  return result.rejectLeaveRequest;
 }
 
 export { getDocumentPreviewUrl };

@@ -3,16 +3,21 @@ import {
   deleteSessionByToken,
   ensureDefaultActionConfigs,
   getEmployeeById,
+  getLeaveRequestById,
+  insertDocument,
+  insertLeaveRequest,
   listActionConfigs,
   requestEmployeeOtp,
   upsertActionConfig,
   upsertEmployeeRecord,
+  updateLeaveRequestStatus,
   verifyEmployeeOtp,
 } from "../db/queries";
 import {
   buildEmployeeChangeSet,
   resolveEmployeeLifecycleAction,
 } from "../services/actionResolver";
+import { uploadEmployeeDocumentToR2 } from "../storage/r2";
 import type { GraphQLContext } from "./schema";
 import { executeTriggeredAction } from "./helpers";
 
@@ -61,6 +66,14 @@ interface UpdateRegistryInput {
   name: string;
   phase: string;
   triggerFields: string[];
+}
+
+interface UploadHrDocumentInput {
+  employeeId: string;
+  action: string;
+  documentName: string;
+  contentType: string;
+  contentBase64: string;
 }
 
 export const mutationResolvers = {
@@ -174,4 +187,111 @@ export const mutationResolvers = {
     args: { input: UpdateRegistryInput },
     ctx: Ctx,
   ) => upsertActionConfig(ctx.db, args.input),
+
+  submitLeaveRequest: async (
+    _: unknown,
+    args: { type: string; startTime: string; endTime: string; reason: string },
+    ctx: Ctx,
+  ) => {
+    if (ctx.actor.role !== "employee" || !ctx.actor.id) {
+      throw new Error("Unauthorized");
+    }
+    const row = await insertLeaveRequest(ctx.db, {
+      employeeId: ctx.actor.id,
+      type: args.type,
+      startTime: args.startTime,
+      endTime: args.endTime,
+      reason: args.reason,
+    });
+    if (!row) throw new Error("Failed to create leave request");
+    return getLeaveRequestById(ctx.db, row.id);
+  },
+
+  approveLeaveRequest: async (
+    _: unknown,
+    args: { id: string; note?: string | null },
+    ctx: Ctx,
+  ) => {
+    if (ctx.actor.role !== "hr" && ctx.actor.role !== "admin") {
+      throw new Error("Unauthorized");
+    }
+    const row = await updateLeaveRequestStatus(ctx.db, args.id, "approved", args.note);
+    if (!row) throw new Error("Leave request not found");
+    return row;
+  },
+
+  rejectLeaveRequest: async (
+    _: unknown,
+    args: { id: string; note?: string | null },
+    ctx: Ctx,
+  ) => {
+    if (ctx.actor.role !== "hr" && ctx.actor.role !== "admin") {
+      throw new Error("Unauthorized");
+    }
+    const row = await updateLeaveRequestStatus(ctx.db, args.id, "rejected", args.note);
+    if (!row) throw new Error("Leave request not found");
+    return row;
+  },
+
+  uploadHrDocument: async (
+    _: unknown,
+    args: { input: UploadHrDocumentInput },
+    ctx: Ctx,
+  ) => {
+    if (ctx.actor.role !== "hr" && ctx.actor.role !== "admin") {
+      throw new Error("Unauthorized");
+    }
+
+    const employee = await getEmployeeById(ctx.db, args.input.employeeId);
+    if (!employee) {
+      throw new Error("Employee not found");
+    }
+
+    const createdAt = new Date().toISOString();
+    const documentId = crypto.randomUUID();
+    const action = args.input.action.trim() || "hr-upload";
+    const documentName = args.input.documentName.trim() || "Баримт";
+    const bucket = (ctx.env as CloudflareBindings & { epas_documents?: R2Bucket })
+      .epas_documents;
+
+    let storageUrl: string;
+
+    if (bucket) {
+      const r2Key = await uploadEmployeeDocumentToR2({
+        bucket,
+        employeeId: employee.id,
+        employeeCode: employee.employeeCode,
+        lastName: employee.lastName,
+        firstName: employee.firstName,
+        phase: "hr-upload",
+        action,
+        order: "manual",
+        templateId: documentId,
+        documentId,
+        documentName,
+        content: Uint8Array.from(Buffer.from(args.input.contentBase64, "base64")),
+        contentType: args.input.contentType,
+        createdAt,
+      });
+
+      storageUrl = `r2://${r2Key}`;
+    } else {
+      storageUrl = `data:${args.input.contentType};base64,${args.input.contentBase64}`;
+    }
+
+    const inserted = await insertDocument(ctx.db, {
+      id: documentId,
+      employeeId: employee.id,
+      action,
+      documentName,
+      storageUrl,
+      createdAt,
+    });
+
+    if (!inserted) {
+      throw new Error("Failed to save document");
+    }
+
+    return inserted;
+  },
 };
