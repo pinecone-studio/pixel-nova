@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 
-import { fetchEmployees, uploadHrDocument, upsertEmployee } from "@/lib/api";
+import { fetchEmployees, upsertEmployee } from "@/lib/api";
 import type { Employee, UpsertEmployeeInput } from "@/lib/types";
 import {
   AbsentIcon,
@@ -75,7 +75,7 @@ function statusStyle(status: string) {
 function employeeToForm(employee?: Employee | null): EmployeeFormState {
   return {
     id: employee?.id ?? globalThis.crypto.randomUUID(),
-    employeeCode: employee?.employeeCode ?? "Автоматаар үүснэ",
+    employeeCode: employee?.employeeCode ?? "",
     firstName: employee?.firstName ?? "",
     lastName: employee?.lastName ?? "",
     email: employee?.email ?? "",
@@ -99,11 +99,9 @@ function EmployeeModal({
   employee?: Employee | null;
   saving: boolean;
   onClose: () => void;
-  onSave: (value: EmployeeFormState, attachment?: File | null) => Promise<void>;
+  onSave: (value: EmployeeFormState) => Promise<void>;
 }) {
   const [form, setForm] = useState<EmployeeFormState>(() => employeeToForm(employee));
-  const [attachment, setAttachment] = useState<File | null>(null);
-  const [fileName, setFileName] = useState("");
 
   function updateField<Key extends keyof EmployeeFormState>(
     key: Key,
@@ -146,20 +144,18 @@ function EmployeeModal({
             className="bg-transparent border border-slate-700/60 rounded-xl px-3 py-2.5 text-slate-200 text-sm outline-none"
             placeholder="Нэр"
           />
-          {mode === "edit" ? (
-            <input
-              value={form.employeeCode}
-              onChange={(event) =>
-                updateField("employeeCode", event.target.value.toUpperCase())
-              }
-              className="bg-transparent border border-slate-700/60 rounded-xl px-3 py-2.5 text-slate-200 text-sm outline-none"
-              placeholder="Employee code"
-            />
-          ) : null}
+          <input
+            value={form.employeeCode}
+            onChange={(event) =>
+              updateField("employeeCode", event.target.value.toUpperCase())
+            }
+            className="bg-transparent border border-slate-700/60 rounded-xl px-3 py-2.5 text-slate-200 text-sm outline-none"
+            placeholder="Employee code"
+          />
           <input
             value={form.email}
             onChange={(event) => updateField("email", event.target.value)}
-            className="bg-transparent border border-slate-700/60 rounded-xl px-3 py-2.5 text-slate-200 text-sm outline-none col-span-2"
+            className="bg-transparent border border-slate-700/60 rounded-xl px-3 py-2.5 text-slate-200 text-sm outline-none"
             placeholder="Имэйл"
           />
           <select
@@ -181,38 +177,6 @@ function EmployeeModal({
           />
         </div>
 
-        <div className="flex flex-col gap-2">
-          <p className="text-white text-sm font-medium">Файл хавсаргах</p>
-          <label className="rounded-2xl border border-dashed border-slate-600/70 px-6 py-10 flex flex-col items-center justify-center gap-3 text-center cursor-pointer hover:border-slate-400/70 transition-colors">
-            <div className="w-10 h-10 rounded-full border border-slate-600/70 flex items-center justify-center text-slate-300 text-lg">
-              ⤴
-            </div>
-            <div>
-              <p className="text-white text-base font-medium">
-                Файл хавсаргах (Заавал биш)
-              </p>
-              <p className="text-slate-500 text-xs mt-1">
-                JPEG, PNG, PDG, and MP4 formats, up to 50MB
-              </p>
-            </div>
-            <span className="px-5 py-2 rounded-xl border border-slate-600/70 text-slate-200 text-sm">
-              Оруулах
-            </span>
-            <input
-              type="file"
-              className="hidden"
-              onChange={(event) => {
-                const nextFile = event.target.files?.[0] ?? null;
-                setAttachment(nextFile);
-                setFileName(nextFile?.name ?? "");
-              }}
-            />
-          </label>
-          {fileName ? (
-            <p className="text-xs text-slate-400">Сонгосон файл: {fileName}</p>
-          ) : null}
-        </div>
-
         <div className="flex items-center justify-end gap-3">
           <button
             onClick={onClose}
@@ -221,7 +185,7 @@ function EmployeeModal({
             Татгалзах
           </button>
           <button
-            onClick={() => void onSave(form, attachment)}
+            onClick={() => void onSave(form)}
             disabled={saving}
             className="px-5 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 disabled:opacity-60 text-black text-sm font-semibold transition-colors"
           >
@@ -312,19 +276,6 @@ export function WorkersComponent() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  async function fileToBase64(file: File) {
-    return new Promise<string>((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = () => {
-        const result = typeof reader.result === "string" ? reader.result : "";
-        resolve(result.split(",", 2)[1] ?? "");
-      };
-      reader.onerror = () =>
-        reject(reader.error ?? new Error("Файл уншиж чадсангүй."));
-      reader.readAsDataURL(file);
-    });
-  }
-
   useEffect(() => {
     let cancelled = false;
 
@@ -380,14 +331,14 @@ export function WorkersComponent() {
     );
   }).length;
 
-  async function handleSave(form: EmployeeFormState, attachment?: File | null) {
+  async function handleSave(form: EmployeeFormState) {
     setSaving(true);
     setError(null);
 
     try {
       const payload: UpsertEmployeeInput = {
         id: form.id,
-        employeeCode: editEmp ? form.employeeCode : "",
+        employeeCode: form.employeeCode,
         firstName: form.firstName,
         lastName: form.lastName,
         email: form.email || null,
@@ -411,17 +362,6 @@ export function WorkersComponent() {
       };
 
       const result = await upsertEmployee(payload);
-
-      if (attachment) {
-        const contentBase64 = await fileToBase64(attachment);
-        await uploadHrDocument({
-          employeeId: result.employee.id,
-          action: "employee-attachment",
-          documentName: attachment.name,
-          contentType: attachment.type || "application/octet-stream",
-          contentBase64,
-        });
-      }
 
       setEmployees((prev) => {
         const exists = prev.some((employee) => employee.id === result.employee.id);

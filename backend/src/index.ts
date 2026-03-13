@@ -27,7 +27,12 @@ app.use(
       }
       return "http://localhost:3000";
     },
-    allowHeaders: ["Content-Type", "Authorization", "x-actor-id", "x-actor-role"],
+    allowHeaders: [
+      "Content-Type",
+      "Authorization",
+      "x-actor-id",
+      "x-actor-role",
+    ],
     allowMethods: ["GET", "POST", "OPTIONS"],
     credentials: true,
   }),
@@ -49,7 +54,6 @@ function extractBearerToken(header: string | null) {
   const match = header.match(/^Bearer\s+(.+)$/i);
   return match?.[1]?.trim() ?? null;
 }
-
 function parseDataUrl(dataUrl: string) {
   const [header, payload = ""] = dataUrl.split(",", 2);
   const contentType = header.slice(5).split(";")[0] || "text/plain";
@@ -76,8 +80,12 @@ const yoga = createYoga<YogaServerContext, Omit<GraphQLContext, "env">>({
   landingPage: false,
   context: async ({ request, env }) => {
     const db = getDb(env);
-    const sessionToken = extractBearerToken(request.headers.get("authorization"));
-    const session = sessionToken ? await getSessionByToken(db, sessionToken) : null;
+    const sessionToken = extractBearerToken(
+      request.headers.get("authorization"),
+    );
+    const session = sessionToken
+      ? await getSessionByToken(db, sessionToken)
+      : null;
     const actor = session
       ? {
           id: session.employee.id,
@@ -135,13 +143,15 @@ app.get("/documents/:documentId", async (c) => {
     return c.json({ error: "Document not found" }, 404);
   }
 
-  const bucket = (c.env as CloudflareBindings & { epas_documents?: R2Bucket }).epas_documents;
+  const bucket = (c.env as CloudflareBindings & { epas_documents?: R2Bucket })
+    .epas_documents;
 
   if (doc.storageUrl.startsWith("r2://") && bucket) {
     const r2Key = doc.storageUrl.replace("r2://", "");
     const r2Object = await bucket.get(r2Key);
     if (r2Object) {
-      const contentType = r2Object.httpMetadata?.contentType ?? "application/pdf";
+      const contentType =
+        r2Object.httpMetadata?.contentType ?? "application/pdf";
       const body = await r2Object.arrayBuffer();
       c.header("Content-Type", contentType);
       c.header("Content-Disposition", `inline; filename="${doc.documentName}"`);
