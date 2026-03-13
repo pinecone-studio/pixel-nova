@@ -26,9 +26,7 @@ import type { Employee } from "@/lib/types";
 const TOKEN_STORAGE_KEY = "epas_auth_token";
 
 function formatHireDate(value?: string | null) {
-  if (!value) {
-    return "Мэдээлэл алга";
-  }
+  if (!value) return "Мэдээлэлгүй";
 
   return new Date(value).toLocaleDateString("mn-MN", {
     year: "numeric",
@@ -36,8 +34,6 @@ function formatHireDate(value?: string | null) {
     day: "numeric",
   });
 }
-
-
 
 function getTenure(hireDate?: string | null) {
   if (!hireDate) return "Мэдээлэлгүй";
@@ -58,16 +54,12 @@ function getTenure(hireDate?: string | null) {
   return `${years} жил ${remainingMonths} сар`;
 }
 
-function getInitials(employee: Employee | null) {
-  if (!employee) return "EP";
-  return `${employee.lastName?.[0] ?? ""}${employee.firstName?.[0] ?? ""}`.toUpperCase();
-}
-
 export default function Profile() {
   const router = useRouter();
   const [employee, setEmployee] = useState<Employee | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [hrMessage, setHrMessage] = useState(true);
 
   const hydrateProfile = useEffectEvent(async (token: string) => {
     setLoading(true);
@@ -85,7 +77,9 @@ export default function Profile() {
     } catch (profileError) {
       window.localStorage.removeItem(TOKEN_STORAGE_KEY);
       setError(
-        err instanceof Error ? err.message : "Профайл ачаалж чадсангүй.",
+        profileError instanceof Error
+          ? profileError.message
+          : "Профайл ачаалж чадсангүй.",
       );
       router.replace("/auth/employee");
     } finally {
@@ -101,56 +95,7 @@ export default function Profile() {
     }
 
     void hydrateProfile(storedToken);
-  }, [router]);
-
-  const displayName = employee
-    ? `${employee.lastName} ${employee.firstName}`
-    : "Д. Бат-Эрдэнэ";
-  const displayNameEng =
-    employee?.lastNameEng || employee?.firstNameEng
-      ? `${employee.lastNameEng ?? ""} ${employee.firstNameEng ?? ""}`.trim()
-      : "D. Bat-Erdene";
-  const employmentInfo = [
-    {
-      icon: <AlbanTushaal />,
-      label: "Албан тушаал",
-      value: employee?.level ?? "Мэдээлэл алга",
-    },
-    { icon: <Heltes />, label: "Хэлтэс", value: employee?.department ?? "Мэдээлэл алга" },
-    { icon: <Salbar />, label: "Салбар", value: employee?.branch ?? "Мэдээлэл алга" },
-    {
-      icon: <AjildOrson />,
-      label: "Ажилд орсон",
-      value: formatHireDate(employee?.hireDate),
-    },
-    {
-      icon: <Ajillasan />,
-      label: "Төлөв",
-      value: employee?.status ?? "Мэдээлэл алга",
-    },
-  ];
-  const personalInfo = [
-    {
-      icon: <AjiltniiCode />,
-      label: "Ажилтны код",
-      value: employee?.employeeCode ?? "Мэдээлэл алга",
-    },
-    {
-      icon: <Email />,
-      label: "Имэйл",
-      value: employee?.email ?? "Мэдээлэл алга",
-    },
-    {
-      icon: <TursunUdur />,
-      label: "Төрсөн өдөр",
-      value: employee?.birthDayAndMonth ?? "Мэдээлэл алга",
-    },
-    {
-      icon: <Github />,
-      label: "GitHub",
-      value: employee?.github ?? "Мэдээлэл алга",
-    },
-  ];
+  }, [hydrateProfile, router]);
 
   if (loading) {
     return (
@@ -163,17 +108,79 @@ export default function Profile() {
     );
   }
 
+  const displayName = employee
+    ? `${employee.lastName} ${employee.firstName}`
+    : "Профайл";
+  const displayNameEng =
+    employee?.lastNameEng || employee?.firstNameEng
+      ? `${employee.lastNameEng ?? ""} ${employee.firstNameEng ?? ""}`.trim()
+      : "Employee";
+
+  const workInfo = [
+    {
+      icon: <AlbanTushaal />,
+      label: "Албан тушаал",
+      value: employee?.jobTitle ?? "Мэдээлэлгүй",
+    },
+    {
+      icon: <Senior />,
+      label: "Зэрэглэл",
+      value: employee?.level ?? "Мэдээлэлгүй",
+    },
+    {
+      icon: <Heltes />,
+      label: "Хэлтэс",
+      value: employee?.department ?? "Мэдээлэлгүй",
+    },
+    {
+      icon: <Salbar />,
+      label: "Салбар",
+      value: employee?.branch ?? "Мэдээлэлгүй",
+    },
+    {
+      icon: <AjildOrson />,
+      label: "Ажилд орсон",
+      value: formatHireDate(employee?.hireDate),
+    },
+    {
+      icon: <Ajillasan />,
+      label: "Ажилласан хугацаа",
+      value: getTenure(employee?.hireDate),
+    },
+  ];
+
+  const personalInfo = [
+    {
+      icon: <AjiltniiCode />,
+      label: "Ажилтны код",
+      value: employee?.employeeCode ?? "Мэдээлэлгүй",
+    },
+    {
+      icon: <Email />,
+      label: "Имэйл",
+      value: employee?.email ?? "Мэдээлэлгүй",
+    },
+    {
+      icon: <TursunUdur />,
+      label: "Төрсөн өдөр",
+      value: employee?.birthDayAndMonth ?? "Мэдээлэлгүй",
+    },
+    {
+      icon: <Github />,
+      label: "GitHub",
+      value: employee?.github ?? "Мэдээлэлгүй",
+    },
+  ];
+
   return (
     <div className="min-h-screen bg-black text-white pt-[33px] pb-[199px] font-sans">
       <div className="mx-auto w-full max-w-[1056px]">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-white">Профайл</h1>
-          <p className="text-gray-400 mt-1">
-            Таны хувийн болон ажлын мэдээлэл.
-          </p>
+          <p className="text-gray-400 mt-1">Таны хувийн болон ажлын мэдээлэл.</p>
         </div>
 
-        <div className="bg-linear-to-r from-gray-900 to-teal-950 rounded-2xl p-6 mb-[32px] border border-gray-800">
+        <div className="bg-linear-to-r from-gray-900 to-teal-950 rounded-2xl p-6 mb-8 border border-gray-800">
           <div className="flex items-center gap-5">
             <Image
               src={employee?.imageUrl || "https://i.pravatar.cc/100?img=11"}
@@ -187,22 +194,13 @@ export default function Profile() {
               <p className="text-gray-400 text-sm mb-3">{displayNameEng}</p>
               <div className="flex gap-2 flex-wrap">
                 <span className="flex items-center gap-1 text-xs border border-teal-600 text-teal-400 px-3 py-1 rounded-full">
-                  <span>
-                    <Senior />
-                  </span>{" "}
-                  {employee?.level ?? "Мэдээлэл алга"}
+                  <Senior /> {employee?.level ?? "Мэдээлэлгүй"}
                 </span>
                 <span className="flex items-center gap-1 text-xs border border-gray-700 text-white px-3 py-1 rounded-full">
-                  <span>
-                    <Engineering />
-                  </span>{" "}
-                  {employee?.department ?? "Мэдээлэл алга"}
+                  <Engineering /> {employee?.department ?? "Мэдээлэлгүй"}
                 </span>
                 <span className="flex items-center gap-1 text-xs border border-teal-600 text-teal-400 px-3 py-1 rounded-full">
-                  <span>
-                    <Idevhtei />
-                  </span>{" "}
-                  {employee?.status ?? "Мэдээлэл алга"}
+                  <Idevhtei /> {employee?.status ?? "Мэдээлэлгүй"}
                 </span>
               </div>
               {error ? <p className="mt-3 text-sm text-red-400">{error}</p> : null}
@@ -210,56 +208,19 @@ export default function Profile() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-[56px] mb-[32px] min-h-[479px]">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-14 mb-8 min-h-[479px]">
           <div className="bg-gray-900 rounded-2xl p-6 border border-gray-800 h-full">
-            <h3 className="text-white font-semibold text-lg mb-5">
-              Ажлын мэдээлэл
-            </h3>
-            <div className="border border-gray-800 w-100"></div>
+            <h3 className="text-white font-semibold text-lg mb-5">Ажлын мэдээлэл</h3>
+            <div className="border border-gray-800" />
             <div className="mt-5">
-              {[
-                {
-                  icon: <AlbanTushaal />,
-                  label: "Албан тушаал",
-                  value: employee?.jobTitle ?? "Мэдээлэлгүй",
-                },
-                {
-                  icon: <Senior />,
-                  label: "Зэрэглэл",
-                  value: employee?.level ?? "Мэдээлэлгүй",
-                },
-                {
-                  icon: <Heltes />,
-                  label: "Хэлтэс",
-                  value: employee?.department ?? "Мэдээлэлгүй",
-                },
-                {
-                  icon: <Salbar />,
-                  label: "Салбар",
-                  value: employee?.branch ?? "Мэдээлэлгүй",
-                },
-                {
-                  icon: <AjildOrson />,
-                  label: "Ажилд орсон",
-                  value: formatDate(employee?.hireDate),
-                },
-                {
-                  icon: <Ajillasan />,
-                  label: "Ажилласан хугацаа",
-                  value: getTenure(employee?.hireDate),
-                },
-              ].map((item) => (
-                <div
-                  key={item.label}
-                  className="flex items-center gap-3 h-[68px]">
+              {workInfo.map((item) => (
+                <div key={item.label} className="flex items-center gap-3 h-[68px]">
                   <div className="w-9 h-9 bg-teal-900/50 rounded-lg flex items-center justify-center text-sm shrink-0">
                     {item.icon}
                   </div>
                   <div>
                     <p className="text-gray-500 text-xs">{item.label}</p>
-                    <p className="text-white font-medium text-sm">
-                      {item.value}
-                    </p>
+                    <p className="text-white font-medium text-sm">{item.value}</p>
                   </div>
                 </div>
               ))}
@@ -267,44 +228,17 @@ export default function Profile() {
           </div>
 
           <div className="bg-gray-900 rounded-2xl p-6 border border-gray-800 relative h-full">
-            <h3 className="text-white font-semibold text-lg mb-5">
-              Хувийн мэдээлэл
-            </h3>
-            <div className="border border-gray-800 w-100"></div>
+            <h3 className="text-white font-semibold text-lg mb-5">Хувийн мэдээлэл</h3>
+            <div className="border border-gray-800" />
             <div className="mt-5">
-              {[
-                {
-                  icon: <AjiltniiCode />,
-                  label: "Ажилтны код",
-                  value: employee?.employeeCode ?? "Мэдээлэлгүй",
-                },
-                {
-                  icon: <Email />,
-                  label: "Имэйл",
-                  value: employee?.email ?? "Мэдээлэлгүй",
-                },
-                {
-                  icon: <TursunUdur />,
-                  label: "Төрсөн өдөр",
-                  value: employee?.birthDayAndMonth ?? "Мэдээлэлгүй",
-                },
-                {
-                  icon: <Github />,
-                  label: "GitHub",
-                  value: employee?.github ?? "Мэдээлэлгүй",
-                },
-              ].map((item) => (
-                <div
-                  key={item.label}
-                  className="flex items-center gap-3 h-[68px]">
+              {personalInfo.map((item) => (
+                <div key={item.label} className="flex items-center gap-3 h-[68px]">
                   <div className="w-9 h-9 bg-teal-900/50 rounded-lg flex items-center justify-center text-sm shrink-0">
                     {item.icon}
                   </div>
                   <div>
                     <p className="text-gray-500 text-xs">{item.label}</p>
-                    <p className="text-white font-medium text-sm">
-                      {item.value}
-                    </p>
+                    <p className="text-white font-medium text-sm">{item.value}</p>
                   </div>
                 </div>
               ))}
@@ -318,7 +252,8 @@ export default function Profile() {
                 onClick={() => setHrMessage(!hrMessage)}
                 className={`w-10 h-5 rounded-full transition-colors duration-200 relative ${
                   hrMessage ? "bg-teal-500" : "bg-gray-600"
-                }`}>
+                }`}
+              >
                 <span
                   className={`absolute top-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform duration-200 ${
                     hrMessage ? "translate-x-5" : "translate-x-0.5"
@@ -331,10 +266,8 @@ export default function Profile() {
 
         <div className="bg-gray-900 rounded-2xl border border-gray-800 overflow-hidden">
           <div className="h-[83px] flex flex-col pt-[17px] px-[25px]">
-            <h3 className="text-white font-semibold text-lg h-[28px]">
-              Нэмэлт мэдээлэл
-            </h3>
-            <p className="text-gray-500 text-4 mt-sm h-[28px] flex items-center">
+            <h3 className="text-white font-semibold text-lg h-[28px]">Нэмэлт мэдээлэл</h3>
+            <p className="text-gray-500 text-sm h-[28px] flex items-center">
               Таны гэрээний болон бусад мэдээлэл
             </p>
           </div>
@@ -379,7 +312,7 @@ export default function Profile() {
                   </span>
                 </div>
                 <span className="mt-4 text-xs text-gray-500">
-                  {employee?.entraId ?? "Мэдээлэл алга"}
+                  {employee?.entraId ?? "Мэдээлэлгүй"}
                 </span>
               </div>
             </div>
