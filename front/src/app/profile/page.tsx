@@ -59,7 +59,7 @@ export default function Profile() {
   const [employee, setEmployee] = useState<Employee | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [hrMessage, setHrMessage] = useState(true);
+  const [hrMessage, setHrMessage] = useState(false);
 
   const hydrateProfile = useEffectEvent(async (token: string) => {
     setLoading(true);
@@ -182,13 +182,20 @@ export default function Profile() {
 
         <div className="bg-linear-to-r from-gray-900 to-teal-950 rounded-2xl p-6 mb-8 border border-gray-800">
           <div className="flex items-center gap-5">
-            <Image
-              src={employee?.imageUrl || "https://i.pravatar.cc/100?img=11"}
-              alt="Profile"
-              width={112}
-              height={112}
-              className="w-20 h-20 rounded-full object-cover border-2 border-teal-500"
-            />
+            {employee?.imageUrl ? (
+              <Image
+                src={employee.imageUrl}
+                alt="Profile"
+                width={112}
+                height={112}
+                className="w-20 h-20 rounded-full object-cover border-2 border-teal-500"
+                unoptimized
+              />
+            ) : (
+              <div className="flex h-20 w-20 items-center justify-center rounded-full border-2 border-teal-500 bg-teal-950 text-xl font-semibold text-teal-200">
+                {getInitials(employee)}
+              </div>
+            )}
             <div>
               <h2 className="text-2xl font-bold text-white">{displayName}</h2>
               <p className="text-gray-400 text-sm mb-3">{displayNameEng}</p>
@@ -213,8 +220,22 @@ export default function Profile() {
             <h3 className="text-white font-semibold text-lg mb-5">Ажлын мэдээлэл</h3>
             <div className="border border-gray-800" />
             <div className="mt-5">
-              {workInfo.map((item) => (
-                <div key={item.label} className="flex items-center gap-3 h-[68px]">
+              {[
+                {
+                  icon: <AlbanTushaal />,
+                  label: "Албан тушаал",
+                  value: employee?.jobTitle ?? "Мэдээлэлгүй",
+                },
+                ...employmentInfo.slice(1),
+                {
+                  icon: <Ajillasan />,
+                  label: "Ажилласан хугацаа",
+                  value: getTenure(employee?.hireDate),
+                },
+              ].map((item) => (
+                <div
+                  key={item.label}
+                  className="flex items-center gap-3 h-[68px]">
                   <div className="w-9 h-9 bg-teal-900/50 rounded-lg flex items-center justify-center text-sm shrink-0">
                     {item.icon}
                   </div>
@@ -232,7 +253,9 @@ export default function Profile() {
             <div className="border border-gray-800" />
             <div className="mt-5">
               {personalInfo.map((item) => (
-                <div key={item.label} className="flex items-center gap-3 h-[68px]">
+                <div
+                  key={item.label}
+                  className="flex items-center gap-3 h-[68px]">
                   <div className="w-9 h-9 bg-teal-900/50 rounded-lg flex items-center justify-center text-sm shrink-0">
                     {item.icon}
                   </div>
