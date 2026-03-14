@@ -1,5 +1,7 @@
 import {
   createTriggeredActionRecords,
+  ensureDefaultActionConfigs,
+  getActionConfigByName,
   updateAuditLogDelivery,
 } from "../db/queries";
 import { dispatchNotification } from "../notifications/dispatchNotification";
@@ -9,7 +11,11 @@ export async function executeTriggeredAction(
   ctx: GraphQLContext,
   employeeId: string,
   action: string,
-  options?: { dryRun?: boolean; overrideRecipients?: string[] },
+  options?: {
+    dryRun?: boolean;
+    overrideRecipients?: string[];
+    actionConfig?: Awaited<ReturnType<typeof getActionConfigByName>>;
+  },
 ) {
   const resendApiKey =
     (ctx.env as CloudflareBindings & { RESEND_API_KEY?: string })
@@ -26,6 +32,9 @@ export async function executeTriggeredAction(
 
   const bucket = (ctx.env as CloudflareBindings & { epas_documents?: R2Bucket })
     .epas_documents;
+  await ensureDefaultActionConfigs(ctx.db);
+  const actionConfig =
+    options?.actionConfig ?? await getActionConfigByName(ctx.db, action);
 
   const result = await createTriggeredActionRecords(
     ctx.db,
@@ -37,6 +46,7 @@ export async function executeTriggeredAction(
       serviceUrl: pdfRendererUrl,
       secret: pdfRendererSecret,
     },
+    actionConfig,
   );
 
   // dryRun=true үед email dispatch алгасна (document үүсгэнэ, email илгээхгүй)
@@ -60,6 +70,7 @@ export async function executeTriggeredAction(
       publicOrigin: ctx.publicOrigin,
       documentLinkSecret,
       overrideRecipients: options?.overrideRecipients,
+      recipientRoles: actionConfig?.recipients,
     });
 
     await updateAuditLogDelivery(ctx.db, result.auditEntry.id, {

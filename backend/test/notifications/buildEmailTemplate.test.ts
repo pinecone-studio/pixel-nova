@@ -1,6 +1,6 @@
 import { expect, test } from "@jest/globals";
 
-import { buildEmailTemplate } from "./buildEmailTemplate.js";
+import { buildEmailTemplate } from "../../src/notifications/buildEmailTemplate.js";
 
 const singleDoc = {
   employeeName: "Бат-Эрдэнэ Дорж",

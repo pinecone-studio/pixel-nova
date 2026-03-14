@@ -1,5 +1,7 @@
 "use client";
 
+import { gql } from "@apollo/client";
+import { useApolloClient, useQuery } from "@apollo/client/react";
 import { useEffect, useMemo, useState } from "react";
 import {
   AuditLog as AuditLogIcon,
@@ -24,13 +26,8 @@ import { WorkersComponent } from "../components/workersComponent";
 import { FilesComponent } from "../components/filesComponent";
 import { SettingsComponent } from "../components/settingsComponent";
 import AuditlogComponent from "../components/auditlogComponent";
-import {
-  fetchAuditLogs,
-  fetchDocuments,
-  fetchEmployees,
-  fetchLeaveRequests,
-} from "@/lib/api";
-import type { Document, Employee, LeaveRequest } from "@/lib/types";
+import { buildGraphQLHeaders } from "@/lib/apollo-client";
+import type { Document, Employee, LeaveRequest, AuditLog } from "@/lib/types";
 
 type NavItem = { key: string; label: string; icon: React.ReactNode };
 
@@ -52,13 +49,103 @@ type DashboardRequest = LeaveRequest & {
   color: string;
 };
 
+const GET_EMPLOYEES = gql`
+  query GetEmployees($search: String, $status: String, $department: String) {
+    employees(search: $search, status: $status, department: $department) {
+      id
+      employeeCode
+      firstName
+      lastName
+      firstNameEng
+      lastNameEng
+      entraId
+      email
+      imageUrl
+      github
+      department
+      branch
+      jobTitle
+      level
+      hireDate
+      terminationDate
+      status
+      numberOfVacationDays
+      isSalaryCompany
+      isKpi
+      birthDayAndMonth
+      birthdayPoster
+    }
+  }
+`;
+
+const GET_LEAVE_REQUESTS = gql`
+  query GetLeaveRequests($status: String) {
+    leaveRequests(status: $status) {
+      id
+      employeeId
+      employee {
+        id
+        employeeCode
+        firstName
+        lastName
+        department
+        jobTitle
+        level
+      }
+      type
+      startTime
+      endTime
+      reason
+      status
+      note
+      createdAt
+      updatedAt
+    }
+  }
+`;
+
+const GET_AUDIT_LOGS = gql`
+  query GetAuditLogs($employeeId: ID) {
+    auditLogs(employeeId: $employeeId) {
+      id
+      employeeId
+      action
+      phase
+      actorId
+      actorRole
+      documentIds
+      recipientRoles
+      recipientEmails
+      incompleteFields
+      documentsGenerated
+      notificationAttempted
+      recipientsNotified
+      notificationError
+      timestamp
+    }
+  }
+`;
+
+const GET_DOCUMENTS = gql`
+  query GetDocuments($employeeId: ID!) {
+    documents(employeeId: $employeeId) {
+      id
+      employeeId
+      action
+      documentName
+      storageUrl
+      createdAt
+    }
+  }
+`;
+
 const navItems: NavItem[] = [
-  { key: "dashboard", label: "Хяналтын самбар", icon: <GrDocument /> },
-  { key: "users", label: "Ажилтнууд", icon: <UsersIcon /> },
-  { key: "requests", label: "Хүсэлтүүд", icon: <AuditLogIcon /> },
-  { key: "files", label: "Баримт бичгүүд", icon: <CubaIcon /> },
-  { key: "auditlog", label: "Хяналтын бүртгэл", icon: <InsightIcon /> },
-  { key: "settings", label: "Тохиргоо", icon: <SettingsIcon /> },
+  { key: "dashboard", label: "Ð¥ÑÐ½Ð°Ð»Ñ‚Ñ‹Ð½ ÑÐ°Ð¼Ð±Ð°Ñ€", icon: <GrDocument /> },
+  { key: "users", label: "ÐÐ¶Ð¸Ð»Ñ‚Ð½ÑƒÑƒÐ´", icon: <UsersIcon /> },
+  { key: "requests", label: "Ð¥Ò¯ÑÑÐ»Ñ‚Ò¯Ò¯Ð´", icon: <AuditLogIcon /> },
+  { key: "files", label: "Ð‘Ð°Ñ€Ð¸Ð¼Ñ‚ Ð±Ð¸Ñ‡Ð³Ò¯Ò¯Ð´", icon: <CubaIcon /> },
+  { key: "auditlog", label: "Ð¥ÑÐ½Ð°Ð»Ñ‚Ñ‹Ð½ Ð±Ò¯Ñ€Ñ‚Ð³ÑÐ»", icon: <InsightIcon /> },
+  { key: "settings", label: "Ð¢Ð¾Ñ…Ð¸Ñ€Ð³Ð¾Ð¾", icon: <SettingsIcon /> },
 ];
 
 const avatarColors = [
@@ -73,11 +160,11 @@ const avatarColors = [
 function formatElapsed(value: string) {
   const diff = Date.now() - new Date(value).getTime();
   const hours = Math.max(1, Math.floor(diff / (1000 * 60 * 60)));
-  if (hours < 24) return `${hours} цагийн өмнө`;
+  if (hours < 24) return `${hours} Ñ†Ð°Ð³Ð¸Ð¹Ð½ Ó©Ð¼Ð½Ó©`;
   const days = Math.floor(hours / 24);
-  if (days < 30) return `${days} өдрийн өмнө`;
+  if (days < 30) return `${days} Ó©Ð´Ñ€Ð¸Ð¹Ð½ Ó©Ð¼Ð½Ó©`;
   const months = Math.floor(days / 30);
-  return `${months} сарын өмнө`;
+  return `${months} ÑÐ°Ñ€Ñ‹Ð½ Ó©Ð¼Ð½Ó©`;
 }
 
 function getApprovalRate(requests: LeaveRequest[]) {
@@ -124,59 +211,101 @@ function buildDashboardRequests(requests: LeaveRequest[]): DashboardRequest[] {
     }));
 }
 
-async function fetchAllDocuments(employees: Employee[]) {
-  if (employees.length === 0) return [] as Document[];
+export default function HrPage() {
+  const apolloClient = useApolloClient();
+  const [activeKey, setActiveKey] = useState("dashboard");
+  const [documentCount, setDocumentCount] = useState(0);
+  const [documentsLoading, setDocumentsLoading] = useState(true);
 
-  const allDocuments = await Promise.all(
-    employees.map((employee) => fetchDocuments(employee.id, undefined, "hr")),
+  const queryContext = useMemo(
+    () => ({
+      headers: buildGraphQLHeaders({ actorRole: "hr" }),
+    }),
+    [],
   );
 
-  return allDocuments.flat();
-}
+  const { data: employeesData, loading: employeesLoading } = useQuery<{
+    employees: Employee[];
+  }>(GET_EMPLOYEES, {
+    variables: { search: null, status: null, department: null },
+    context: queryContext,
+    fetchPolicy: "cache-and-network",
+  });
 
-export default function HrPage() {
-  const [activeKey, setActiveKey] = useState("dashboard");
-  const [employees, setEmployees] = useState<Employee[]>([]);
-  const [requests, setRequests] = useState<LeaveRequest[]>([]);
-  const [documentCount, setDocumentCount] = useState(0);
-  const [auditCount, setAuditCount] = useState(0);
-  const [loading, setLoading] = useState(true);
+  const { data: leaveRequestsData, loading: leaveRequestsLoading } = useQuery<{
+    leaveRequests: LeaveRequest[];
+  }>(GET_LEAVE_REQUESTS, {
+    variables: { status: null },
+    context: queryContext,
+    fetchPolicy: "cache-and-network",
+  });
+
+  const { data: auditLogsData, loading: auditLogsLoading } = useQuery<{
+    auditLogs: AuditLog[];
+  }>(GET_AUDIT_LOGS, {
+    variables: { employeeId: null },
+    context: queryContext,
+    fetchPolicy: "cache-and-network",
+  });
+
+  const employees = employeesData?.employees ?? [];
+  const requests = leaveRequestsData?.leaveRequests ?? [];
+  const auditLogs = auditLogsData?.auditLogs ?? [];
+  const loading =
+    employeesLoading || leaveRequestsLoading || auditLogsLoading || documentsLoading;
 
   useEffect(() => {
     let cancelled = false;
 
-    async function loadDashboard() {
+    async function loadDocumentCount() {
+      if (employees.length === 0) {
+        setDocumentCount(0);
+        setDocumentsLoading(false);
+        return;
+      }
+
+      setDocumentsLoading(true);
+
       try {
-        const [employeeData, requestData, auditData] = await Promise.all([
-          fetchEmployees(),
-          fetchLeaveRequests(),
-          fetchAuditLogs(),
-        ]);
+        const allDocuments = await Promise.all(
+          employees.map((employee) =>
+            apolloClient.query<{ documents: Document[] }>({
+              query: GET_DOCUMENTS,
+              variables: { employeeId: employee.id },
+              context: queryContext,
+              fetchPolicy: "network-only",
+            }),
+          ),
+        );
 
-        if (cancelled) return;
+        if (cancelled) {
+          return;
+        }
 
-        setEmployees(employeeData);
-        setRequests(requestData);
-        setAuditCount(auditData.length);
-
-        const documents = await fetchAllDocuments(employeeData);
-        if (cancelled) return;
-        setDocumentCount(documents.length);
+        setDocumentCount(
+          allDocuments.reduce(
+            (total, result) => total + (result.data?.documents?.length ?? 0),
+            0,
+          ),
+        );
       } catch (error) {
-        console.error(error);
+        if (!cancelled) {
+          console.error(error);
+          setDocumentCount(0);
+        }
       } finally {
         if (!cancelled) {
-          setLoading(false);
+          setDocumentsLoading(false);
         }
       }
     }
 
-    loadDashboard();
+    void loadDocumentCount();
 
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [apolloClient, employees, queryContext]);
 
   const stats = useMemo<DashboardStats>(() => {
     const departments = new Set(
@@ -185,7 +314,7 @@ export default function HrPage() {
 
     const pendingRequests = requests.filter((request) => request.status === "pending").length;
     const approvedRequests = requests.filter((request) => request.status === "approved").length;
-    const onLeaveStatuses = new Set(["Чөлөөтэй", "Амралттай", "Түр чөлөөтэй"]);
+    const onLeaveStatuses = new Set(["Ð§Ó©Ð»Ó©Ó©Ñ‚ÑÐ¹", "ÐÐ¼Ñ€Ð°Ð»Ñ‚Ñ‚Ð°Ð¹", "Ð¢Ò¯Ñ€ Ñ‡Ó©Ð»Ó©Ó©Ñ‚ÑÐ¹"]);
     const employeesOnLeave = employees.filter((employee) =>
       onLeaveStatuses.has(employee.status),
     ).length;
@@ -222,6 +351,8 @@ export default function HrPage() {
     });
   }, [employees]);
 
+  const auditCount = auditLogs.length;
+
   const renderContent = () => {
     if (activeKey === "users") return <WorkersComponent />;
     if (activeKey === "requests") return <RequestsComponent />;
@@ -236,7 +367,7 @@ export default function HrPage() {
           <div className="relative flex items-start justify-between">
             <div>
               <p className="text-xs uppercase tracking-[0.2em] text-white font-medium mb-3">
-                Нийт ажилчид
+                ÐÐ¸Ð¹Ñ‚ Ð°Ð¶Ð¸Ð»Ñ‡Ð¸Ð´
               </p>
               <div className="flex items-center gap-3 mb-1">
                 <p className="text-5xl font-bold text-[#0ad4b1]">
@@ -248,7 +379,7 @@ export default function HrPage() {
                 </span>
               </div>
               <p className="text-white text-sm">
-                Audit бүртгэл: {loading ? "..." : auditCount}
+                Audit Ð±Ò¯Ñ€Ñ‚Ð³ÑÐ»: {loading ? "..." : auditCount}
               </p>
             </div>
             <div className="w-14 h-14 rounded-2xl bg-[#0ad4b1] flex items-center justify-center shadow-[0_8px_24px_rgba(10,212,177,0.4)]">
@@ -277,13 +408,13 @@ export default function HrPage() {
                   ...
                 </button>
               </div>
-              <p className="text-slate-400 text-sm mb-3">Хүлээгдэж буй</p>
+              <p className="text-slate-400 text-sm mb-3">Ð¥Ò¯Ð»ÑÑÐ³Ð´ÑÐ¶ Ð±ÑƒÐ¹</p>
               <p className="text-4xl font-bold text-white mb-3">
                 {loading ? "..." : stats.pendingRequests}
               </p>
               <div className="flex items-center gap-1.5 text-orange-400 text-xs">
                 <ClockIcon className="w-3.5 h-3.5" />
-                <span>{loading ? "..." : stats.urgentCount} яаралтай</span>
+                <span>{loading ? "..." : stats.urgentCount} ÑÐ°Ñ€Ð°Ð»Ñ‚Ð°Ð¹</span>
               </div>
             </div>
           </div>
@@ -298,13 +429,13 @@ export default function HrPage() {
                   ...
                 </button>
               </div>
-              <p className="text-slate-400 text-sm mb-3">Баталсан</p>
+              <p className="text-slate-400 text-sm mb-3">Ð‘Ð°Ñ‚Ð°Ð»ÑÐ°Ð½</p>
               <p className="text-4xl font-bold text-white mb-3">
                 {loading ? "..." : stats.approvedRequests}
               </p>
               <div className="flex items-center gap-1.5 text-[#0ad4b1] text-xs">
                 <ArrowUpRightIcon className="w-3.5 h-3.5" />
-                <span>Батлах хувь {stats.approvalRate}%</span>
+                <span>Ð‘Ð°Ñ‚Ð»Ð°Ñ… Ñ…ÑƒÐ²ÑŒ {stats.approvalRate}%</span>
               </div>
             </div>
           </div>
@@ -314,25 +445,25 @@ export default function HrPage() {
             {
               icon: <BriefcaseIcon />,
               value: loading ? "..." : String(stats.departmentCount),
-              label: "Хэлтэс",
+              label: "Ð¥ÑÐ»Ñ‚ÑÑ",
               color: "bg-blue-500/20 text-blue-400",
             },
             {
               icon: <FileIcon />,
               value: loading ? "..." : String(stats.documentCount),
-              label: "Баримт",
+              label: "Ð‘Ð°Ñ€Ð¸Ð¼Ñ‚",
               color: "bg-purple-500/20 text-purple-400",
             },
             {
               icon: <CalendarIcon />,
               value: loading ? "..." : String(stats.employeesOnLeave),
-              label: "Чөлөөтэй",
+              label: "Ð§Ó©Ð»Ó©Ó©Ñ‚ÑÐ¹",
               color: "bg-pink-500/20 text-pink-400",
             },
             {
               icon: <TrendIcon />,
               value: loading ? "..." : `${stats.approvalRate}%`,
-              label: "Шийдвэрлэлт",
+              label: "Ð¨Ð¸Ð¹Ð´Ð²ÑÑ€Ð»ÑÐ»Ñ‚",
               color: "bg-[#0ad4b1]/20 text-[#0ad4b1]",
             },
           ].map((stat) => (
@@ -357,29 +488,29 @@ export default function HrPage() {
         <div className="rounded-2xl border border-[#0ad4b1]/40 bg-[#0a0f0e] overflow-hidden">
           <div className="flex items-center justify-between px-6 py-5 border-b border-dashed border-[#0ad4b1]/30">
             <div>
-              <p className="text-white text-xl font-bold">Хүлээгдэж буй хүсэлтүүд</p>
+              <p className="text-white text-xl font-bold">Ð¥Ò¯Ð»ÑÑÐ³Ð´ÑÐ¶ Ð±ÑƒÐ¹ Ñ…Ò¯ÑÑÐ»Ñ‚Ò¯Ò¯Ð´</p>
               <p className="text-slate-500 text-sm mt-0.5">
-                Сүүлийн pending leave request-үүд
+                Ð¡Ò¯Ò¯Ð»Ð¸Ð¹Ð½ pending leave request-Ò¯Ò¯Ð´
               </p>
             </div>
             <div className="flex items-center gap-3">
               <button className="flex items-center gap-2 h-9 px-4 rounded-lg border border-white/10 text-slate-300 text-sm hover:border-white/20 transition-colors">
-                <FiFilter /> Шүүх
+                <FiFilter /> Ð¨Ò¯Ò¯Ñ…
               </button>
               <button
                 onClick={() => setActiveKey("requests")}
                 className="flex items-center gap-2 h-9 px-4 rounded-lg bg-[#085044] text-[#0ad4b1] text-sm font-semibold hover:bg-[#0ad4b1]/20 transition-colors"
               >
-                Бүгдийг харах <ArrowUpRightIcon className="w-3.5 h-3.5" />
+                Ð‘Ò¯Ð³Ð´Ð¸Ð¹Ð³ Ñ…Ð°Ñ€Ð°Ñ… <ArrowUpRightIcon className="w-3.5 h-3.5" />
               </button>
             </div>
           </div>
           <div className="flex flex-col">
             {loading ? (
-              <div className="px-6 py-8 text-sm text-slate-500">Уншиж байна...</div>
+              <div className="px-6 py-8 text-sm text-slate-500">Ð£Ð½ÑˆÐ¸Ð¶ Ð±Ð°Ð¹Ð½Ð°...</div>
             ) : dashboardRequests.length === 0 ? (
               <div className="px-6 py-8 text-sm text-slate-500">
-                Pending хүсэлт олдсонгүй
+                Pending Ñ…Ò¯ÑÑÐ»Ñ‚ Ð¾Ð»Ð´ÑÐ¾Ð½Ð³Ò¯Ð¹
               </div>
             ) : (
               dashboardRequests.map((request) => (
@@ -400,7 +531,7 @@ export default function HrPage() {
                       </p>
                       {request.urgent && (
                         <span className="px-2 py-0.5 rounded-full bg-red-500/20 text-red-400 text-xs font-medium border border-red-500/20">
-                          Яаралтай
+                          Ð¯Ð°Ñ€Ð°Ð»Ñ‚Ð°Ð¹
                         </span>
                       )}
                     </div>
@@ -469,7 +600,7 @@ export default function HrPage() {
           <header className="h-14 border-b border-white/8 flex items-center justify-between px-6 shrink-0 bg-[#060d0c]">
             <div className="flex items-center gap-2 text-sm">
               <span className="text-slate-500">HR</span>
-              <span className="text-slate-600">›</span>
+              <span className="text-slate-600">â€º</span>
               <span className="text-[#0ad4b1] font-semibold">
                 {navItems.find((item) => item.key === activeKey)?.label}
               </span>
@@ -479,7 +610,7 @@ export default function HrPage() {
                 onClick={() => setActiveKey("users")}
                 className="flex items-center gap-2 h-9 px-4 rounded-lg border cursor-pointer border-[#0ad4b1]/50 bg-linear-to-br from-[#0a3b33] to-[#0ad4b1]/20 text-white text-sm font-medium hover:border-[#0ad4b1] transition-colors"
               >
-                <span>＋</span> Ажилтан нэмэх
+                <span>ï¼‹</span> ÐÐ¶Ð¸Ð»Ñ‚Ð°Ð½ Ð½ÑÐ¼ÑÑ…
               </button>
               <div className="relative">
                 <button className="h-9 w-9 rounded-lg border border-[#0ad4b1] cursor-pointer text-slate-300 flex items-center justify-center hover:border-white/40 transition-colors">

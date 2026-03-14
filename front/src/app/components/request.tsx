@@ -1,8 +1,39 @@
+import { gql } from "@apollo/client";
+import { useMutation } from "@apollo/client/react";
 import { useState } from "react";
 import { BiCalendar, BiChevronDown, BiChevronRight, BiFile, BiPlus } from "react-icons/bi";
-import { submitLeaveRequest } from "@/lib/api";
+
+import { buildGraphQLHeaders } from "@/lib/apollo-client";
+import type { LeaveRequest } from "@/lib/types";
 
 const TOKEN_KEY = "epas_auth_token";
+
+const SUBMIT_LEAVE_REQUEST = gql`
+  mutation SubmitLeaveRequest(
+    $type: String!
+    $startTime: String!
+    $endTime: String!
+    $reason: String!
+  ) {
+    submitLeaveRequest(
+      type: $type
+      startTime: $startTime
+      endTime: $endTime
+      reason: $reason
+    ) {
+      id
+      employeeId
+      type
+      startTime
+      endTime
+      reason
+      status
+      note
+      createdAt
+      updatedAt
+    }
+  }
+`;
 
 const DIALOG_BG = "bg-[#030810]";
 const DIALOG_BORDER = "border-[#1a2035]";
@@ -93,9 +124,9 @@ function UploadArea({ label, subtitle }: { label: string; subtitle?: string }) {
           <path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3" />
         </svg>
         <p className="text-sm font-medium text-white">
-          {subtitle ?? "Файл хавсаргах (Заавал биш)"}
+          {subtitle ?? "Файл хавсаргах (заавал биш)"}
         </p>
-        <p className="text-xs text-gray-500">JPEG, PNG, PDG, and MP4 formats, up to 50MB</p>
+        <p className="text-xs text-gray-500">JPEG, PNG, PDF, and MP4 formats, up to 50MB</p>
         <button className="mt-1 border border-[#1a2035] text-xs text-gray-300 px-4 py-1.5 rounded-lg hover:bg-white/5 transition-colors">
           Оруулах
         </button>
@@ -107,56 +138,64 @@ function UploadArea({ label, subtitle }: { label: string; subtitle?: string }) {
 export const Request = () => {
   const [activeTab, setActiveTab] = useState<string | null>(null);
   const [submitted, setSubmitted] = useState(false);
-  const [sending, setSending] = useState(false);
   const [sendError, setSendError] = useState<string | null>(null);
 
-  // Leave form state
   const [leaveType, setLeaveType] = useState("");
   const [leaveStart, setLeaveStart] = useState("");
   const [leaveEnd, setLeaveEnd] = useState("");
   const [leaveReason, setLeaveReason] = useState("");
 
-  // Тойрох хуудас form state
   const [clearanceType, setClearanceType] = useState("");
   const [clearanceReason, setClearanceReason] = useState("");
 
-  async function handleSend() {
-    setSending(true);
-    setSendError(null);
-    try {
-      const token = window.localStorage.getItem(TOKEN_KEY);
-      if (!token) throw new Error("Нэвтрэх шаардлагатай");
+  const [submitLeaveRequest, { loading: sending }] = useMutation<{
+    submitLeaveRequest: LeaveRequest;
+  }>(SUBMIT_LEAVE_REQUEST);
 
+  async function sendRequest(payload: {
+    type: string;
+    startTime: string;
+    endTime: string;
+    reason: string;
+  }) {
+    const token = window.localStorage.getItem(TOKEN_KEY);
+    if (!token) {
+      throw new Error("Нэвтрэх шаардлагатай");
+    }
+
+    await submitLeaveRequest({
+      variables: payload,
+      context: {
+        headers: buildGraphQLHeaders({ authToken: token }),
+      },
+    });
+  }
+
+  async function handleSend() {
+    setSendError(null);
+
+    try {
       if (activeTab === "Чөлөө авах") {
-        await submitLeaveRequest(
-          {
-            type: leaveType || "Ээлжийн амралт",
-            startTime: leaveStart || new Date().toISOString(),
-            endTime: leaveEnd || new Date().toISOString(),
-            reason: leaveReason,
-          },
-          token,
-        );
+        await sendRequest({
+          type: leaveType || "Ээлжийн амралт",
+          startTime: leaveStart || new Date().toISOString(),
+          endTime: leaveEnd || new Date().toISOString(),
+          reason: leaveReason,
+        });
       } else if (activeTab === "Тойрох хуудас") {
-        await submitLeaveRequest(
-          {
-            type: `Тойрох хуудас${clearanceType ? ` — ${clearanceType}` : ""}`,
-            startTime: new Date().toISOString(),
-            endTime: new Date().toISOString(),
-            reason: clearanceReason,
-          },
-          token,
-        );
+        await sendRequest({
+          type: `Тойрох хуудас${clearanceType ? ` - ${clearanceType}` : ""}`,
+          startTime: new Date().toISOString(),
+          endTime: new Date().toISOString(),
+          reason: clearanceReason,
+        });
       } else if (activeTab === "Томилолт") {
-        await submitLeaveRequest(
-          {
-            type: "Томилолт",
-            startTime: new Date().toISOString(),
-            endTime: new Date().toISOString(),
-            reason: clearanceReason,
-          },
-          token,
-        );
+        await sendRequest({
+          type: "Томилолт",
+          startTime: new Date().toISOString(),
+          endTime: new Date().toISOString(),
+          reason: clearanceReason,
+        });
       }
 
       setSubmitted(true);
@@ -172,8 +211,6 @@ export const Request = () => {
       }, 2000);
     } catch (err) {
       setSendError(err instanceof Error ? err.message : "Алдаа гарлаа. Дахин оролдоно уу.");
-    } finally {
-      setSending(false);
     }
   }
 
@@ -187,7 +224,7 @@ export const Request = () => {
     {
       icon: <BiCalendar className="w-5 h-5 text-[#00CC99]" />,
       title: "Чөлөө авах",
-      desc: "Эзлийн амралт, өвчний чөлөө",
+      desc: "Ээлжийн амралт, өвчний чөлөө",
       bg: "border-[#123C77] bg-[radial-gradient(circle_at_top_left,_rgba(22,95,210,0.30),_transparent_38%),linear-gradient(180deg,#031224_0%,#03070d_100%)]",
       iconBg: "border-[#0C3F61] bg-[linear-gradient(180deg,rgba(7,43,62,0.95)_0%,rgba(6,24,35,0.95)_100%)]",
     },
@@ -255,7 +292,6 @@ export const Request = () => {
         ))}
       </div>
 
-      {/* ── Success overlay (shared) ── */}
       {submitted && activeTab && (
         <div className="fixed inset-0 flex items-center justify-center bg-black/60 backdrop-blur-sm z-50">
           <div className={`w-[360px] rounded-2xl ${DIALOG_BG} text-white p-8 border ${DIALOG_BORDER} shadow-2xl flex flex-col items-center gap-4`}>
@@ -272,23 +308,19 @@ export const Request = () => {
         </div>
       )}
 
-      {/* ── Чөлөөний хүсэлт dialog ── */}
       {activeTab === "Чөлөө авах" && !submitted && (
         <div className="fixed inset-0 flex items-center justify-center bg-black/60 backdrop-blur-sm z-50">
           <div className={`w-[460px] rounded-2xl ${DIALOG_BG} text-white p-7 border ${DIALOG_BORDER} shadow-2xl flex flex-col gap-5`}>
-            {/* header */}
             <div className="flex justify-between items-start">
               <div>
                 <h2 className="text-xl font-semibold">Чөлөөний хүсэлт</h2>
                 <p className="text-sm text-gray-500 mt-1">
-                  Таны чөлөө авах боломжит үлдэгдэл{" "}
-                  <span className="text-white font-medium">4 цаг.</span>
+                  Таны чөлөө авах боломжит үлдэгдэл <span className="text-white font-medium">4 цаг.</span>
                 </p>
               </div>
               <CloseBtn onClick={closeDialog} />
             </div>
 
-            {/* Чөлөөний төрөл */}
             <SelectField
               label="Чөлөөний төрөл"
               id="leave-type"
@@ -297,22 +329,6 @@ export const Request = () => {
               onChange={setLeaveType}
             />
 
-            {/* Төрөл radios */}
-            <div className="flex flex-col gap-2">
-              <span className="text-sm font-medium text-white">Төрөл</span>
-              <div className="flex gap-8">
-                {["Өдрөөр", "Цагаар"].map((opt) => (
-                  <label key={opt} className="flex items-center gap-2.5 cursor-pointer">
-                    <div className="w-5 h-5 rounded-full border-2 border-[#1a2035] flex items-center justify-center">
-                      <div className="w-2 h-2 rounded-full bg-transparent" />
-                    </div>
-                    <span className="text-sm text-gray-300">{opt}</span>
-                  </label>
-                ))}
-              </div>
-            </div>
-
-            {/* Time range */}
             <div className="flex gap-4">
               {[
                 { label: "Эхлэх цаг", id: "start-time", val: leaveStart, set: setLeaveStart },
@@ -335,18 +351,15 @@ export const Request = () => {
               ))}
             </div>
 
-            {/* Шалтгаан */}
             <div className="flex flex-col gap-1.5">
               <label className="text-sm font-medium text-white">Шалтгаан</label>
               <textarea rows={3} placeholder="Чөлөө авах шалтгаанаа бичнэ үү..." className={TEXTAREA_CLASS} value={leaveReason} onChange={(e) => setLeaveReason(e.target.value)} />
             </div>
 
-            {/* error */}
             {sendError && (
               <p className="text-red-400 text-xs bg-red-500/10 border border-red-500/20 rounded-lg px-3 py-2">{sendError}</p>
             )}
 
-            {/* footer */}
             <div className="flex justify-end gap-3">
               <BackBtn onClick={closeDialog} />
               <SendBtn onClick={handleSend} disabled={sending} />
@@ -355,11 +368,9 @@ export const Request = () => {
         </div>
       )}
 
-      {/* ── Тойрох хуудас dialog ── */}
       {activeTab === "Тойрох хуудас" && !submitted && (
         <div className="fixed inset-0 flex items-center justify-center bg-black/60 backdrop-blur-sm z-50">
           <div className={`w-[460px] rounded-2xl ${DIALOG_BG} text-white p-7 border ${DIALOG_BORDER} shadow-2xl flex flex-col gap-5`}>
-            {/* header */}
             <div className="flex justify-between items-start">
               <div>
                 <h2 className="text-xl font-semibold">Тойрох хуудас авах хүсэлт</h2>
@@ -370,7 +381,6 @@ export const Request = () => {
               <CloseBtn onClick={closeDialog} />
             </div>
 
-            {/* Төрөл */}
             <SelectField
               label="Төрөл"
               id="clearance-type"
@@ -379,21 +389,17 @@ export const Request = () => {
               onChange={setClearanceType}
             />
 
-            {/* Файл хавсаргах */}
             <UploadArea label="Файл хавсаргах" />
 
-            {/* Шалтгаан */}
             <div className="flex flex-col gap-1.5">
               <label className="text-sm font-medium text-white">Шалтгаан</label>
               <textarea rows={3} placeholder="Шалтгаанаа бичнэ үү..." className={TEXTAREA_CLASS} value={clearanceReason} onChange={(e) => setClearanceReason(e.target.value)} />
             </div>
 
-            {/* error */}
             {sendError && (
               <p className="text-red-400 text-xs bg-red-500/10 border border-red-500/20 rounded-lg px-3 py-2">{sendError}</p>
             )}
 
-            {/* footer */}
             <div className="flex justify-end gap-3">
               <BackBtn onClick={closeDialog} />
               <SendBtn onClick={handleSend} disabled={sending} />
@@ -402,36 +408,30 @@ export const Request = () => {
         </div>
       )}
 
-      {/* ── Томилолт dialog ── */}
       {activeTab === "Томилолт" && !submitted && (
         <div className="fixed inset-0 flex items-center justify-center bg-black/60 backdrop-blur-sm z-50">
           <div className={`w-[460px] rounded-2xl ${DIALOG_BG} text-white p-7 border ${DIALOG_BORDER} shadow-2xl flex flex-col gap-5`}>
-            {/* header */}
             <div className="flex justify-between items-start">
               <div>
                 <h2 className="text-xl font-semibold">Томилолтын мэдээлэл</h2>
                 <p className="text-sm text-gray-500 mt-1">
-                  Томилолтын мэдээлэлээ оруулна уу.
+                  Томилолтын мэдээллээ оруулна уу.
                 </p>
               </div>
               <CloseBtn onClick={closeDialog} />
             </div>
 
-            {/* Файл хавсаргах */}
             <UploadArea label="Файл хавсаргах" subtitle="Файл хавсаргана уу." />
 
-            {/* Шалтгаан */}
             <div className="flex flex-col gap-1.5">
               <label className="text-sm font-medium text-white">Шалтгаан</label>
               <textarea rows={3} placeholder="Томилолтын шалтгаанаа бичнэ үү..." className={TEXTAREA_CLASS} value={clearanceReason} onChange={(e) => setClearanceReason(e.target.value)} />
             </div>
 
-            {/* error */}
             {sendError && (
               <p className="text-red-400 text-xs bg-red-500/10 border border-red-500/20 rounded-lg px-3 py-2">{sendError}</p>
             )}
 
-            {/* footer */}
             <div className="flex justify-end gap-3">
               <BackBtn onClick={closeDialog} />
               <SendBtn onClick={handleSend} disabled={sending} />

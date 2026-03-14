@@ -5,6 +5,7 @@ import { cors } from "hono/cors";
 import { getDb } from "./db/client";
 import type { ActorRole } from "./db/queries";
 import { getDocumentById, getSessionByToken } from "./db/queries";
+import { processEmployeeLifecycleEvent } from "./events/processEmployeeLifecycleEvent";
 import { graphqlSchema, type GraphQLContext } from "./graphql/schema";
 import { validateDocumentAccess } from "./notifications/documentLinks";
 
@@ -176,4 +177,31 @@ app.get("/documents/:documentId", async (c) => {
   return c.json({ error: "Document content unavailable" }, 404);
 });
 
-export default app;
+const worker = {
+  fetch: app.fetch,
+  queue: async (batch: MessageBatch<unknown>, env: CloudflareBindings) => {
+    const db = getDb(env);
+
+    for (const message of batch.messages) {
+      try {
+        await processEmployeeLifecycleEvent(
+          {
+            env,
+            db,
+            actor: { id: "queue-consumer", role: "hr" },
+            publicOrigin: null,
+            currentEmployee: null,
+            sessionToken: null,
+          },
+          message.body as Parameters<typeof processEmployeeLifecycleEvent>[1],
+        );
+        message.ack();
+      } catch (error) {
+        console.error("Failed to process lifecycle event", error);
+        message.retry();
+      }
+    }
+  },
+};
+
+export default worker;

@@ -25,6 +25,7 @@ export {
 export {
   normalizeActionConfig,
   listActionConfigs,
+  getActionConfigByName,
   ensureDefaultActionConfigs,
   upsertActionConfig,
 } from "./actionConfig";
@@ -36,6 +37,11 @@ export {
   deleteSessionByToken,
 } from "./auth";
 export { createTriggeredActionRecords } from "./triggerAction";
+export {
+  getProcessedEventById,
+  tryStartProcessedEvent,
+  finishProcessedEvent,
+} from "./eventProcessing";
 export {
   insertLeaveRequest,
   getLeaveRequests,

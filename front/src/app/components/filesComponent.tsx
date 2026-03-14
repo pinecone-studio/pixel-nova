@@ -1,13 +1,10 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { gql } from "@apollo/client";
+import { useApolloClient, useMutation, useQuery } from "@apollo/client/react";
+import { useMemo, useState } from "react";
 
-import {
-  fetchDocumentContent,
-  fetchDocuments,
-  fetchEmployees,
-  uploadHrDocument,
-} from "@/lib/api";
+import { buildGraphQLHeaders } from "@/lib/apollo-client";
 import type { Document, DocumentContent, Employee } from "@/lib/types";
 import {
   ActiveIcon,
@@ -20,6 +17,72 @@ import {
   ReqIcon,
   SearchIcon,
 } from "./icons";
+
+const GET_EMPLOYEES = gql`
+  query GetEmployees($search: String, $status: String, $department: String) {
+    employees(search: $search, status: $status, department: $department) {
+      id
+      employeeCode
+      firstName
+      lastName
+      firstNameEng
+      lastNameEng
+      entraId
+      email
+      imageUrl
+      github
+      department
+      branch
+      jobTitle
+      level
+      hireDate
+      terminationDate
+      status
+      numberOfVacationDays
+      isSalaryCompany
+      isKpi
+      birthDayAndMonth
+      birthdayPoster
+    }
+  }
+`;
+
+const GET_DOCUMENTS = gql`
+  query GetDocuments($employeeId: ID!) {
+    documents(employeeId: $employeeId) {
+      id
+      employeeId
+      action
+      documentName
+      storageUrl
+      createdAt
+    }
+  }
+`;
+
+const GET_DOCUMENT_CONTENT = gql`
+  query GetDocumentContent($documentId: ID!) {
+    documentContent(documentId: $documentId) {
+      id
+      documentName
+      contentType
+      content
+    }
+  }
+`;
+
+const UPLOAD_HR_DOCUMENT = gql`
+  mutation UploadHrDocument($input: UploadHrDocumentInput!) {
+    uploadHrDocument(input: $input) {
+      id
+      employeeId
+      action
+      documentName
+      storageUrl
+      createdAt
+    }
+  }
+`;
 
 type FileRow = {
   document: Document;
@@ -48,13 +111,13 @@ function formatDate(value: string) {
 
 function stageKeyForEmployee(employee?: Employee) {
   if (!employee) return "active";
-  if (employee.status === "Тасалсан") return "offboarding";
-  if (employee.status === "Ирсэн") return "active";
+  if (employee.status === "Ð¢Ð°ÑÐ°Ð»ÑÐ°Ð½") return "offboarding";
+  if (employee.status === "Ð˜Ñ€ÑÑÐ½") return "active";
   return "onboarding";
 }
 
 function statusLabel(document: Document) {
-  return document.storageUrl ? "Баталгаажсан" : "Draft";
+  return document.storageUrl ? "Ð‘Ð°Ñ‚Ð°Ð»Ð³Ð°Ð°Ð¶ÑÐ°Ð½" : "Draft";
 }
 
 function fileToBase64(file: File) {
@@ -65,7 +128,7 @@ function fileToBase64(file: File) {
       const base64 = result.split(",", 2)[1] ?? "";
       resolve(base64);
     };
-    reader.onerror = () => reject(reader.error ?? new Error("Файл уншиж чадсангүй."));
+    reader.onerror = () => reject(reader.error ?? new Error("Ð¤Ð°Ð¹Ð» ÑƒÐ½ÑˆÐ¸Ð¶ Ñ‡Ð°Ð´ÑÐ°Ð½Ð³Ò¯Ð¹."));
     reader.readAsDataURL(file);
   });
 }
@@ -79,32 +142,23 @@ function FilePreviewModal({
   mode: "preview" | "download";
   onClose: () => void;
 }) {
-  const [content, setContent] = useState<DocumentContent | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const queryContext = useMemo(
+    () => ({
+      headers: buildGraphQLHeaders({ actorRole: "hr" }),
+    }),
+    [],
+  );
 
-  useEffect(() => {
-    let cancelled = false;
+  const { data, loading, error } = useQuery<{ documentContent: DocumentContent | null }>(
+    GET_DOCUMENT_CONTENT,
+    {
+      variables: { documentId: row.document.id },
+      context: queryContext,
+      fetchPolicy: "network-only",
+    },
+  );
 
-    async function load() {
-      try {
-        const result = await fetchDocumentContent(row.document.id, undefined, "hr");
-        if (cancelled) return;
-        if (!result) throw new Error("Баримтын агуулга олдсонгүй.");
-        setContent(result);
-      } catch (err) {
-        if (cancelled) return;
-        setError(err instanceof Error ? err.message : "Баримт ачаалж чадсангүй.");
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    }
-
-    void load();
-    return () => {
-      cancelled = true;
-    };
-  }, [row.document.id]);
+  const content = data?.documentContent ?? null;
 
   function handleDownload() {
     if (!content) return;
@@ -133,7 +187,7 @@ function FilePreviewModal({
             </p>
             <p className="text-slate-500 text-xs mt-0.5">
               {row.employee
-                ? `${row.employee.lastName} ${row.employee.firstName} • ${row.employee.employeeCode}`
+                ? `${row.employee.lastName} ${row.employee.firstName} â€¢ ${row.employee.employeeCode}`
                 : row.document.employeeId}
             </p>
           </div>
@@ -141,18 +195,18 @@ function FilePreviewModal({
             onClick={onClose}
             className="text-slate-400 hover:text-white transition-colors text-lg"
           >
-            ✕
+            âœ•
           </button>
         </div>
 
         <div className="h-[70vh] bg-[#080c12] p-6">
           {loading ? (
             <div className="w-full h-full rounded-2xl border border-slate-700/40 flex items-center justify-center text-slate-400 text-sm">
-              Уншиж байна...
+              Ð£Ð½ÑˆÐ¸Ð¶ Ð±Ð°Ð¹Ð½Ð°...
             </div>
           ) : error ? (
             <div className="w-full h-full rounded-2xl border border-red-500/20 bg-red-500/5 flex items-center justify-center text-red-400 text-sm">
-              {error}
+              {error.message}
             </div>
           ) : mode === "download" ? (
             <div className="w-full h-full rounded-2xl border border-slate-700/40 flex flex-col items-center justify-center gap-4">
@@ -163,7 +217,7 @@ function FilePreviewModal({
                 className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black font-semibold text-sm transition-colors"
               >
                 <DownloadIcon />
-                Татах
+                Ð¢Ð°Ñ‚Ð°Ñ…
               </button>
             </div>
           ) : content?.contentType === "text/html" ? (
@@ -180,7 +234,7 @@ function FilePreviewModal({
             />
           ) : (
             <div className="w-full h-full rounded-2xl border border-slate-700/40 flex items-center justify-center text-slate-500 text-sm">
-              Preview бэлэн биш байна.
+              Preview Ð±ÑÐ»ÑÐ½ Ð±Ð¸Ñˆ Ð±Ð°Ð¹Ð½Ð°.
             </div>
           )}
         </div>
@@ -205,17 +259,28 @@ function NewDocModal({
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const queryContext = useMemo(
+    () => ({
+      headers: buildGraphQLHeaders({ actorRole: "hr" }),
+    }),
+    [],
+  );
+
+  const [uploadDocument] = useMutation(UPLOAD_HR_DOCUMENT, {
+    context: queryContext,
+  });
+
   async function handleSubmit() {
     if (!employeeId) {
-      setError("Ажилтан сонгоно уу.");
+      setError("ÐÐ¶Ð¸Ð»Ñ‚Ð°Ð½ ÑÐ¾Ð½Ð³Ð¾Ð½Ð¾ ÑƒÑƒ.");
       return;
     }
     if (!documentName.trim()) {
-      setError("Баримтын нэр оруулна уу.");
+      setError("Ð‘Ð°Ñ€Ð¸Ð¼Ñ‚Ñ‹Ð½ Ð½ÑÑ€ Ð¾Ñ€ÑƒÑƒÐ»Ð½Ð° ÑƒÑƒ.");
       return;
     }
     if (!file) {
-      setError("Файл сонгоно уу.");
+      setError("Ð¤Ð°Ð¹Ð» ÑÐ¾Ð½Ð³Ð¾Ð½Ð¾ ÑƒÑƒ.");
       return;
     }
 
@@ -224,17 +289,21 @@ function NewDocModal({
 
     try {
       const contentBase64 = await fileToBase64(file);
-      await uploadHrDocument({
-        employeeId,
-        action: action.trim() || "hr-upload",
-        documentName: documentName.trim(),
-        contentType: file.type || "application/octet-stream",
-        contentBase64,
+      await uploadDocument({
+        variables: {
+          input: {
+            employeeId,
+            action: action.trim() || "hr-upload",
+            documentName: documentName.trim(),
+            contentType: file.type || "application/octet-stream",
+            contentBase64,
+          },
+        },
       });
       await onUploaded();
       onClose();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Баримт upload хийж чадсангүй.");
+      setError(err instanceof Error ? err.message : "Ð‘Ð°Ñ€Ð¸Ð¼Ñ‚ upload Ñ…Ð¸Ð¹Ð¶ Ñ‡Ð°Ð´ÑÐ°Ð½Ð³Ò¯Ð¹.");
     } finally {
       setSaving(false);
     }
@@ -250,17 +319,17 @@ function NewDocModal({
         onClick={(event) => event.stopPropagation()}
       >
         <div className="flex items-center justify-between">
-          <h2 className="text-white text-xl font-bold">Шинэ баримт</h2>
+          <h2 className="text-white text-xl font-bold">Ð¨Ð¸Ð½Ñ Ð±Ð°Ñ€Ð¸Ð¼Ñ‚</h2>
           <button
             onClick={onClose}
             className="text-slate-400 hover:text-white transition-colors text-lg"
           >
-            ✕
+            âœ•
           </button>
         </div>
 
         <label className="flex flex-col gap-2">
-          <span className="text-sm text-slate-300">Ажилтан</span>
+          <span className="text-sm text-slate-300">ÐÐ¶Ð¸Ð»Ñ‚Ð°Ð½</span>
           <select
             value={employeeId}
             onChange={(event) => setEmployeeId(event.target.value)}
@@ -285,17 +354,17 @@ function NewDocModal({
         </label>
 
         <label className="flex flex-col gap-2">
-          <span className="text-sm text-slate-300">Баримтын нэр</span>
+          <span className="text-sm text-slate-300">Ð‘Ð°Ñ€Ð¸Ð¼Ñ‚Ñ‹Ð½ Ð½ÑÑ€</span>
           <input
             value={documentName}
             onChange={(event) => setDocumentName(event.target.value)}
             className="h-11 rounded-xl border border-slate-700/50 bg-[#0d1117] px-3 text-sm text-white outline-none"
-            placeholder="Жишээ: Нэмэлт гэрээ"
+            placeholder="Ð–Ð¸ÑˆÑÑ: ÐÑÐ¼ÑÐ»Ñ‚ Ð³ÑÑ€ÑÑ"
           />
         </label>
 
         <label className="flex flex-col gap-2">
-          <span className="text-sm text-slate-300">Файл</span>
+          <span className="text-sm text-slate-300">Ð¤Ð°Ð¹Ð»</span>
           <input
             type="file"
             onChange={(event) => setFile(event.target.files?.[0] ?? null)}
@@ -310,14 +379,14 @@ function NewDocModal({
             onClick={onClose}
             className="px-5 py-2.5 rounded-xl border border-slate-700/50 text-slate-300 text-sm"
           >
-            Болих
+            Ð‘Ð¾Ð»Ð¸Ñ…
           </button>
           <button
             onClick={handleSubmit}
             disabled={saving}
             className="px-5 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 disabled:opacity-60 text-black text-sm font-semibold transition-colors"
           >
-            {saving ? "Илгээж байна..." : "Хадгалах"}
+            {saving ? "Ð˜Ð»Ð³ÑÑÐ¶ Ð±Ð°Ð¹Ð½Ð°..." : "Ð¥Ð°Ð´Ð³Ð°Ð»Ð°Ñ…"}
           </button>
         </div>
       </div>
@@ -326,28 +395,49 @@ function NewDocModal({
 }
 
 export function FilesComponent() {
-  const [rows, setRows] = useState<FileRow[]>([]);
-  const [employees, setEmployees] = useState<Employee[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const apolloClient = useApolloClient();
   const [search, setSearch] = useState("");
   const [showModal, setShowModal] = useState(false);
   const [previewRow, setPreviewRow] = useState<FileRow | null>(null);
   const [downloadRow, setDownloadRow] = useState<FileRow | null>(null);
+  const [rows, setRows] = useState<FileRow[]>([]);
+  const [loadingRows, setLoadingRows] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const queryContext = useMemo(
+    () => ({
+      headers: buildGraphQLHeaders({ actorRole: "hr" }),
+    }),
+    [],
+  );
+
+  const { data, loading } = useQuery<{ employees: Employee[] }>(GET_EMPLOYEES, {
+    variables: { search: null, status: null, department: null },
+    context: queryContext,
+    fetchPolicy: "cache-and-network",
+  });
+
+  const employees = data?.employees ?? [];
 
   async function loadRows() {
-    setLoading(true);
+    setLoadingRows(true);
     setError(null);
 
     try {
-      const employeeList = await fetchEmployees();
-      setEmployees(employeeList);
-
       const documentLists = await Promise.all(
-        employeeList.map(async (employee) => ({
-          employee,
-          docs: await fetchDocuments(employee.id, undefined, "hr"),
-        })),
+        employees.map(async (employee) => {
+          const result = await apolloClient.query<{ documents: Document[] }>({
+            query: GET_DOCUMENTS,
+            variables: { employeeId: employee.id },
+            context: queryContext,
+            fetchPolicy: "network-only",
+          });
+
+          return {
+            employee,
+            docs: result.data?.documents ?? [],
+          };
+        }),
       );
 
       const nextRows = documentLists
@@ -366,16 +456,21 @@ export function FilesComponent() {
       setRows(nextRows);
     } catch (err) {
       setError(
-        err instanceof Error ? err.message : "Баримтуудыг ачаалж чадсангүй.",
+        err instanceof Error ? err.message : "Ð‘Ð°Ñ€Ð¸Ð¼Ñ‚ÑƒÑƒÐ´Ñ‹Ð³ Ð°Ñ‡Ð°Ð°Ð»Ð¶ Ñ‡Ð°Ð´ÑÐ°Ð½Ð³Ò¯Ð¹.",
       );
     } finally {
-      setLoading(false);
+      setLoadingRows(false);
     }
   }
 
-  useEffect(() => {
+  useMemo(() => {
+    if (employees.length === 0) {
+      setRows([]);
+      setLoadingRows(false);
+      return;
+    }
     void loadRows();
-  }, []);
+  }, [employees]);
 
   const filtered = useMemo(
     () =>
@@ -404,7 +499,7 @@ export function FilesComponent() {
 
   const stages = [
     {
-      label: "Ажилд орох үе",
+      label: "ÐÐ¶Ð¸Ð»Ð´ Ð¾Ñ€Ð¾Ñ… Ò¯Ðµ",
       sub: "Onboarding",
       count: stageCounts.onboarding,
       icon: <OnboardIcon />,
@@ -413,7 +508,7 @@ export function FilesComponent() {
       bg: "bg-linear-to-br from-green-600/40 to-black",
     },
     {
-      label: "Ажиллах үе",
+      label: "ÐÐ¶Ð¸Ð»Ð»Ð°Ñ… Ò¯Ðµ",
       sub: "Active Employment",
       count: stageCounts.active,
       icon: <ActiveIcon />,
@@ -422,7 +517,7 @@ export function FilesComponent() {
       bg: "bg-linear-to-br from-[#06B6D4]/40 to-black",
     },
     {
-      label: "Ажлаас гарах үе",
+      label: "ÐÐ¶Ð»Ð°Ð°Ñ Ð³Ð°Ñ€Ð°Ñ… Ò¯Ðµ",
       sub: "Offboarding",
       count: stageCounts.offboarding,
       icon: <OffboardIcon />,
@@ -431,6 +526,8 @@ export function FilesComponent() {
       bg: "bg-linear-to-br from-red-600/40 to-black",
     },
   ];
+
+  const isLoading = loading || loadingRows;
 
   return (
     <div className="flex gap-5 min-h-screen bg-[#080c12] text-white font-sans p-0">
@@ -459,7 +556,7 @@ export function FilesComponent() {
       <div className="w-[500px] flex-shrink-0 flex flex-col gap-5">
         <div>
           <p className="text-slate-400 text-lg font-semibold uppercase tracking-widest mb-3">
-            Нийт баримт
+            ÐÐ¸Ð¹Ñ‚ Ð±Ð°Ñ€Ð¸Ð¼Ñ‚
           </p>
           <div className="rounded-2xl border border-slate-700/40 bg-linear-to-br from-blue-600/40 to-black p-5 flex flex-col justify-between h-44">
             <div className="w-12 h-12 rounded-xl bg-blue-500/20 flex items-center justify-center">
@@ -468,7 +565,7 @@ export function FilesComponent() {
             <div>
               <p className="text-6xl font-bold text-white">{filtered.length}</p>
               <div className="flex items-center justify-between mt-1">
-                <p className="text-slate-400 text-sm">Нийт баримт</p>
+                <p className="text-slate-400 text-sm">ÐÐ¸Ð¹Ñ‚ Ð±Ð°Ñ€Ð¸Ð¼Ñ‚</p>
                 <p className="text-emerald-400 text-sm font-semibold">Live data</p>
               </div>
             </div>
@@ -477,7 +574,7 @@ export function FilesComponent() {
 
         <div>
           <p className="text-slate-400 text-lg font-semibold uppercase tracking-widest mb-3">
-            Үе шатаар
+            Ò®Ðµ ÑˆÐ°Ñ‚Ð°Ð°Ñ€
           </p>
           <div className="flex flex-col gap-8">
             {stages.map((stage) => (
@@ -510,7 +607,7 @@ export function FilesComponent() {
               <SearchIcon />
               <input
                 className="bg-transparent text-slate-400 text-sm outline-none placeholder:text-slate-600 w-full"
-                placeholder="Баримт, action, employee-оор хайх"
+                placeholder="Ð‘Ð°Ñ€Ð¸Ð¼Ñ‚, action, employee-Ð¾Ð¾Ñ€ Ñ…Ð°Ð¹Ñ…"
                 value={search}
                 onChange={(event) => setSearch(event.target.value)}
               />
@@ -521,23 +618,23 @@ export function FilesComponent() {
             className="grid items-center px-5 py-3.5 border-b border-slate-700/40 bg-slate-800/20"
             style={{ gridTemplateColumns: "2fr 1.3fr 1fr 1fr 0.9fr" }}
           >
-            <span className="text-slate-400 font-medium">Баримт бичиг</span>
-            <span className="text-slate-400 font-medium">Ажилтан</span>
-            <span className="text-slate-400 font-medium">Огноо</span>
-            <span className="text-slate-400 font-medium">Төлөв</span>
-            <span className="text-slate-400 font-medium">Үйлдэл</span>
+            <span className="text-slate-400 font-medium">Ð‘Ð°Ñ€Ð¸Ð¼Ñ‚ Ð±Ð¸Ñ‡Ð¸Ð³</span>
+            <span className="text-slate-400 font-medium">ÐÐ¶Ð¸Ð»Ñ‚Ð°Ð½</span>
+            <span className="text-slate-400 font-medium">ÐžÐ³Ð½Ð¾Ð¾</span>
+            <span className="text-slate-400 font-medium">Ð¢Ó©Ð»Ó©Ð²</span>
+            <span className="text-slate-400 font-medium">Ò®Ð¹Ð»Ð´ÑÐ»</span>
           </div>
 
-          {loading ? (
+          {isLoading ? (
             <div className="py-12 flex items-center justify-center gap-3 text-slate-500 text-sm">
               <span className="w-4 h-4 border-2 border-slate-700 border-t-slate-400 rounded-full animate-spin" />
-              Уншиж байна...
+              Ð£Ð½ÑˆÐ¸Ð¶ Ð±Ð°Ð¹Ð½Ð°...
             </div>
           ) : error ? (
             <div className="py-12 text-center text-red-400 text-sm">{error}</div>
           ) : filtered.length === 0 ? (
             <div className="py-12 text-center text-slate-500 text-sm">
-              Баримт олдсонгүй
+              Ð‘Ð°Ñ€Ð¸Ð¼Ñ‚ Ð¾Ð»Ð´ÑÐ¾Ð½Ð³Ò¯Ð¹
             </div>
           ) : (
             filtered.map((row) => (
@@ -593,7 +690,7 @@ export function FilesComponent() {
           )}
 
           <div className="px-5 py-3.5">
-            <span className="text-slate-500 text-sm">Нийт {filtered.length} баримт</span>
+            <span className="text-slate-500 text-sm">ÐÐ¸Ð¹Ñ‚ {filtered.length} Ð±Ð°Ñ€Ð¸Ð¼Ñ‚</span>
           </div>
         </div>
 
@@ -603,7 +700,7 @@ export function FilesComponent() {
             className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black font-semibold text-sm transition-colors shadow-lg shadow-emerald-500/20"
           >
             <PlusIcon />
-            Шинэ баримт
+            Ð¨Ð¸Ð½Ñ Ð±Ð°Ñ€Ð¸Ð¼Ñ‚
           </button>
         </div>
       </div>

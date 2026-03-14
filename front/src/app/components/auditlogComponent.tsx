@@ -1,12 +1,10 @@
 "use client";
 
+import { gql } from "@apollo/client";
+import { useApolloClient, useLazyQuery, useQuery } from "@apollo/client/react";
 import { useEffect, useMemo, useState } from "react";
 
-import {
-  fetchAuditLogs,
-  fetchDocumentContent,
-  fetchDocuments,
-} from "@/lib/api";
+import { buildGraphQLHeaders } from "@/lib/apollo-client";
 import type { AuditLog, Document, DocumentContent } from "@/lib/types";
 import {
   CheckCircle,
@@ -26,6 +24,52 @@ type LogEntry = {
   audit: AuditLog;
   docs: LogDocument[];
 };
+
+const GET_AUDIT_LOGS = gql`
+  query GetAuditLogsForComponent {
+    auditLogs {
+      id
+      employeeId
+      action
+      phase
+      actorId
+      actorRole
+      documentIds
+      recipientRoles
+      recipientEmails
+      incompleteFields
+      documentsGenerated
+      notificationAttempted
+      recipientsNotified
+      notificationError
+      timestamp
+    }
+  }
+`;
+
+const GET_DOCUMENTS = gql`
+  query GetAuditDocuments($employeeId: ID!) {
+    documents(employeeId: $employeeId) {
+      id
+      employeeId
+      action
+      documentName
+      storageUrl
+      createdAt
+    }
+  }
+`;
+
+const GET_DOCUMENT_CONTENT = gql`
+  query GetAuditDocumentContent($documentId: ID!) {
+    documentContent(documentId: $documentId) {
+      id
+      documentName
+      contentType
+      content
+    }
+  }
+`;
 
 function buildDataUrl(content: DocumentContent) {
   if (content.contentType === "application/pdf") {
@@ -130,45 +174,67 @@ function DocumentModal({
   mode: "preview" | "download";
   onClose: () => void;
 }) {
-  const [loading, setLoading] = useState(mode === "preview");
   const [error, setError] = useState<string | null>(null);
-  const [content, setContent] = useState<DocumentContent | null>(null);
+  const [loadContent, { data, loading }] = useLazyQuery<{
+    documentContent: DocumentContent | null;
+  }>(GET_DOCUMENT_CONTENT, {
+    fetchPolicy: "network-only",
+  });
+
+  const content = data?.documentContent ?? null;
 
   useEffect(() => {
-    let cancelled = false;
-
-    async function load() {
-      try {
-        const result = await fetchDocumentContent(doc.id);
-        if (cancelled) return;
-        if (!result) {
-          throw new Error("Баримтын агуулга олдсонгүй.");
-        }
-        setContent(result);
-      } catch (err) {
-        if (cancelled) return;
-        setError(err instanceof Error ? err.message : "Баримт уншиж чадсангүй.");
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
+    if (mode !== "preview") {
+      return;
     }
 
-    void load();
-    return () => {
-      cancelled = true;
-    };
-  }, [doc.id]);
+    void loadContent({
+      variables: {
+        documentId: doc.id,
+      },
+      context: {
+        headers: buildGraphQLHeaders({ actorRole: "hr" }),
+      },
+    }).catch((err) => {
+      setError(err instanceof Error ? err.message : "Баримт нээж чадсангүй.");
+    });
+  }, [doc.id, loadContent, mode]);
 
-  function handleDownload() {
-    if (!content) return;
+  async function ensureContent() {
+    if (content) {
+      return content;
+    }
 
-    const href = buildDataUrl(content);
-    const link = window.document.createElement("a");
-    link.href = href;
-    link.download = content.documentName;
-    window.document.body.appendChild(link);
-    link.click();
-    link.remove();
+    const result = await loadContent({
+      variables: {
+        documentId: doc.id,
+      },
+      context: {
+        headers: buildGraphQLHeaders({ actorRole: "hr" }),
+      },
+    });
+
+    const nextContent = result.data?.documentContent ?? null;
+    if (!nextContent) {
+      throw new Error("Баримтын агуулга олдсонгүй.");
+    }
+
+    return nextContent;
+  }
+
+  async function handleDownload() {
+    try {
+      const nextContent = await ensureContent();
+      const href = buildDataUrl(nextContent);
+      const link = window.document.createElement("a");
+      link.href = href;
+      link.download = nextContent.documentName;
+      window.document.body.appendChild(link);
+      link.click();
+      link.remove();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Баримтыг татаж чадсангүй.");
+    }
   }
 
   return (
@@ -208,7 +274,7 @@ function DocumentModal({
               <DocBigIcon />
               <p className="text-white text-sm font-medium">{doc.name}</p>
               <button
-                onClick={handleDownload}
+                onClick={() => void handleDownload()}
                 className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black text-sm font-semibold transition-colors"
               >
                 <DownloadIcon /> Татах
@@ -293,13 +359,9 @@ function LogRow({ entry }: { entry: LogEntry }) {
                 <PaperclipIcon />
                 <span className="text-slate-400 text-xs">{audit.action}</span>
                 <span className="text-slate-600 text-xs">•</span>
-                <span className="text-slate-500 text-xs">
-                  {docs.length} баримт
-                </span>
+                <span className="text-slate-500 text-xs">{docs.length} баримт</span>
                 <span className="text-slate-600 text-xs">•</span>
-                <span className="text-slate-500 text-xs">
-                  {audit.actorRole}
-                </span>
+                <span className="text-slate-500 text-xs">{audit.actorRole}</span>
               </div>
             </div>
           </div>
@@ -371,67 +433,109 @@ function LogRow({ entry }: { entry: LogEntry }) {
 export function AuditlogComponent() {
   const [activeTab, setActiveTab] = useState("Бүгд");
   const [search, setSearch] = useState("");
-  const [entries, setEntries] = useState<LogEntry[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [hydratedEntries, setHydratedEntries] = useState<LogEntry[]>([]);
+  const [documentsLoading, setDocumentsLoading] = useState(false);
+  const [documentsError, setDocumentsError] = useState<string | null>(null);
+  const apolloClient = useApolloClient();
+
+  const { data, loading, error } = useQuery<{ auditLogs: AuditLog[] }>(
+    GET_AUDIT_LOGS,
+    {
+      context: {
+        headers: buildGraphQLHeaders({ actorRole: "hr" }),
+      },
+      fetchPolicy: "network-only",
+    },
+  );
 
   useEffect(() => {
     let cancelled = false;
 
-    async function load() {
-      setLoading(true);
-      setError(null);
+    async function hydrateDocuments() {
+      const audits = data?.auditLogs ?? [];
+      if (audits.length === 0) {
+        setHydratedEntries([]);
+        return;
+      }
+
+      setDocumentsLoading(true);
+      setDocumentsError(null);
 
       try {
-        const audits = await fetchAuditLogs();
         const uniqueEmployeeIds = Array.from(
           new Set(audits.map((audit) => audit.employeeId)),
         );
 
         const documentLists = await Promise.all(
-          uniqueEmployeeIds.map(async (employeeId) => ({
-            employeeId,
-            docs: await fetchDocuments(employeeId),
-          })),
+          uniqueEmployeeIds.map(async (employeeId) => {
+            const result = await apolloClient.query<{ documents: Document[] }>({
+              query: GET_DOCUMENTS,
+              variables: { employeeId },
+              context: {
+                headers: buildGraphQLHeaders({ actorRole: "hr" }),
+              },
+              fetchPolicy: "network-only",
+            });
+
+            return {
+              employeeId,
+              docs: result.data?.documents ?? [],
+            };
+          }),
         );
+
+        if (cancelled) {
+          return;
+        }
 
         const documentsByEmployee = new Map<string, Document[]>(
           documentLists.map((item) => [item.employeeId, item.docs]),
         );
 
-        const hydratedEntries: LogEntry[] = audits.map((audit) => {
-          const employeeDocs = documentsByEmployee.get(audit.employeeId) ?? [];
-          const docs = employeeDocs
-            .filter((doc) => audit.documentIds.includes(doc.id))
-            .map((doc) => ({
-              id: doc.id,
-              name: doc.documentName,
-              createdAt: doc.createdAt,
-            }));
+        setHydratedEntries(
+          audits.map((audit) => {
+            const employeeDocs = documentsByEmployee.get(audit.employeeId) ?? [];
+            const docs = employeeDocs
+              .filter((doc) => audit.documentIds.includes(doc.id))
+              .map((doc) => ({
+                id: doc.id,
+                name: doc.documentName,
+                createdAt: doc.createdAt,
+              }));
 
-          return { audit, docs };
-        });
-
-        if (!cancelled) {
-          setEntries(hydratedEntries);
-        }
+            return { audit, docs };
+          }),
+        );
       } catch (err) {
         if (!cancelled) {
-          setError(
-            err instanceof Error ? err.message : "Audit log ачаалж чадсангүй.",
+          setDocumentsError(
+            err instanceof Error
+              ? err.message
+              : "Audit document-уудыг ачаалж чадсангүй.",
           );
         }
       } finally {
-        if (!cancelled) setLoading(false);
+        if (!cancelled) {
+          setDocumentsLoading(false);
+        }
       }
     }
 
-    void load();
+    void hydrateDocuments();
 
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [apolloClient, data?.auditLogs]);
+
+  const entries = useMemo<LogEntry[]>(() => {
+    const audits = data?.auditLogs ?? [];
+    if (hydratedEntries.length > 0) {
+      return hydratedEntries;
+    }
+
+    return audits.map((audit) => ({ audit, docs: [] }));
+  }, [data?.auditLogs, hydratedEntries]);
 
   const tabs = ["Бүгд", "Амжилттай", "Алдаатай"];
 
@@ -492,14 +596,14 @@ export function AuditlogComponent() {
         ))}
       </div>
 
-      {error ? (
+      {error || documentsError ? (
         <div className="rounded-2xl border border-red-500/20 bg-red-500/5 px-5 py-4 text-sm text-red-400">
-          {error}
+          {error?.message ?? documentsError}
         </div>
       ) : null}
 
       <div className="flex flex-col gap-3">
-        {loading ? (
+        {loading || documentsLoading ? (
           <div className="py-12 flex items-center justify-center gap-3 text-slate-500 text-sm">
             <span className="w-4 h-4 border-2 border-slate-700 border-t-slate-400 rounded-full animate-spin" />
             Уншиж байна...

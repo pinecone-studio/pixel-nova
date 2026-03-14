@@ -1,4 +1,4 @@
-import { and, eq, gte, lt } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 
 import type { DbClient } from "../client";
 import { auditLog, documents } from "../schema";
@@ -6,6 +6,7 @@ import { generateEmployeeDocument } from "../../document/generator";
 import { renderPdfFromService } from "../../document/pdfRenderer";
 import { buildTemplateData, validateRequiredFields } from "../../document/templateData";
 import { uploadEmployeeDocumentToR2 } from "../../storage/r2";
+import type { NormalizedActionConfig } from "./actionConfig";
 import { getEmployeeById } from "./employee";
 import type { Actor } from "./types";
 
@@ -16,6 +17,7 @@ export async function createTriggeredActionRecords(
   bucket?: R2Bucket,
   actor?: Actor,
   pdfRenderer?: { serviceUrl?: string | null; secret?: string | null },
+  actionConfig?: NormalizedActionConfig | null,
 ) {
   const employee = await getEmployeeById(db, employeeId);
 
@@ -30,39 +32,10 @@ export async function createTriggeredActionRecords(
 
   const now = new Date().toISOString();
   const normalizedAction = actionName.trim();
-
-  // FR-06 Idempotency: ижил employeeId + action + өдөр дээр duplicate шалгах
-  const todayStart = now.slice(0, 10) + "T00:00:00.000Z";
-  const tomorrowStart = new Date(new Date(todayStart).getTime() + 86400000).toISOString();
-  const [existingAudit] = await db
-    .select({ id: auditLog.id })
-    .from(auditLog)
-    .where(
-      and(
-        eq(auditLog.employeeId, employeeId),
-        eq(auditLog.action, normalizedAction),
-        gte(auditLog.timestamp, todayStart),
-        lt(auditLog.timestamp, tomorrowStart),
-      ),
-    )
-    .limit(1);
-
-  if (existingAudit) {
-    throw new Error(
-      `Duplicate action: "${normalizedAction}" already triggered for employee ${employeeId} today. Skipped to prevent duplicate document generation.`,
-    );
-  }
-
   const auditId = crypto.randomUUID();
-
-  const actionRegistry = await import("../../config/action-registry.json");
-  const actionConfig = (actionRegistry.actions as Record<string, {
-    phase?: string;
-    recipients?: string[];
-    requiredEmployeeFields?: string[];
-    documents?: Array<{ id: string; template: string; order: number }>;
-  }>)[normalizedAction];
-  const docTemplates = actionConfig?.documents ?? [{ id: "default", template: "default.html", order: 1 }];
+  const docTemplates = actionConfig?.documents ?? [
+    { id: "default", template: "default.html", order: 1 },
+  ];
   const phase = actionConfig?.phase ?? "unknown";
   const recipientRoles = actionConfig?.recipients ?? [];
   const requiredEmployeeFields = actionConfig?.requiredEmployeeFields ?? [];

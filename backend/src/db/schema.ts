@@ -86,9 +86,33 @@ export const actions = sqliteTable(
     id: text("id").primaryKey(),
     name: text("name").notNull().unique(),
     phase: text("phase").notNull(),
+    triggerCondition: text("trigger_condition"),
     triggerFields: text("trigger_fields").notNull(),
+    requiredEmployeeFields: text("required_employee_fields")
+      .notNull()
+      .default("[]"),
+    recipients: text("recipients").notNull().default("[]"),
+    documents: text("documents").notNull().default("[]"),
   },
   (table) => [index("actions_name_idx").on(table.name)],
+);
+
+export const processedEvents = sqliteTable(
+  "processed_events",
+  {
+    eventId: text("event_id").primaryKey(),
+    eventType: text("event_type").notNull(),
+    employeeId: text("employee_id").notNull(),
+    action: text("action"),
+    status: text("status").notNull(),
+    payload: text("payload").notNull(),
+    lastError: text("last_error"),
+    processedAt: text("processed_at").notNull(),
+  },
+  (table) => [
+    index("processed_events_employee_id_idx").on(table.employeeId),
+    index("processed_events_status_idx").on(table.status),
+  ],
 );
 
 export const otpCodes = sqliteTable(
@@ -145,6 +169,7 @@ export const schema = {
   auditLog,
   recipients,
   actions,
+  processedEvents,
   otpCodes,
   authSessions,
   leaveRequests,
@@ -160,6 +185,8 @@ export type Recipient = typeof recipients.$inferSelect;
 export type NewRecipient = typeof recipients.$inferInsert;
 export type ActionConfig = typeof actions.$inferSelect;
 export type NewActionConfig = typeof actions.$inferInsert;
+export type ProcessedEvent = typeof processedEvents.$inferSelect;
+export type NewProcessedEvent = typeof processedEvents.$inferInsert;
 export type OtpCode = typeof otpCodes.$inferSelect;
 export type NewOtpCode = typeof otpCodes.$inferInsert;
 export type AuthSession = typeof authSessions.$inferSelect;

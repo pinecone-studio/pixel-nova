@@ -1,8 +1,10 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { gql } from "@apollo/client";
+import { useMutation, useQuery } from "@apollo/client/react";
+import { useMemo, useState } from "react";
 
-import { fetchEmployees, upsertEmployee } from "@/lib/api";
+import { buildGraphQLHeaders } from "@/lib/apollo-client";
 import type { Employee, UpsertEmployeeInput } from "@/lib/types";
 import {
   AbsentIcon,
@@ -33,8 +35,69 @@ type EmployeeFormState = {
   status: string;
 };
 
+const GET_EMPLOYEES = gql`
+  query GetEmployees($search: String, $status: String, $department: String) {
+    employees(search: $search, status: $status, department: $department) {
+      id
+      employeeCode
+      firstName
+      lastName
+      firstNameEng
+      lastNameEng
+      entraId
+      email
+      imageUrl
+      github
+      department
+      branch
+      jobTitle
+      level
+      hireDate
+      terminationDate
+      status
+      numberOfVacationDays
+      isSalaryCompany
+      isKpi
+      birthDayAndMonth
+      birthdayPoster
+    }
+  }
+`;
+
+const UPSERT_EMPLOYEE = gql`
+  mutation UpsertEmployee($input: UpsertEmployeeInput!) {
+    upsertEmployee(input: $input) {
+      employee {
+        id
+        employeeCode
+        firstName
+        lastName
+        firstNameEng
+        lastNameEng
+        entraId
+        email
+        imageUrl
+        github
+        department
+        branch
+        jobTitle
+        level
+        hireDate
+        terminationDate
+        status
+        numberOfVacationDays
+        isSalaryCompany
+        isKpi
+        birthDayAndMonth
+        birthdayPoster
+      }
+      resolvedAction
+    }
+  }
+`;
+
 const DEPARTMENTS = ["Engineering", "HR", "Sales", "Finance", "Marketing", "Design"];
-const STATUSES = ["Ирсэн", "Тасалсан", "Чөлөөтэй"];
+const STATUSES = ["Ð˜Ñ€ÑÑÐ½", "Ð¢Ð°ÑÐ°Ð»ÑÐ°Ð½", "Ð§Ó©Ð»Ó©Ó©Ñ‚ÑÐ¹"];
 const LEVELS = ["Junior", "Mid", "Senior", "Lead"];
 const BRANCHES = ["Ulaanbaatar", "Darkhan", "Erdenet", "Remote"];
 
@@ -61,11 +124,11 @@ function avatarColor(seed: string) {
 }
 
 function statusStyle(status: string) {
-  if (status === "Ирсэн") {
+  if (status === "Ð˜Ñ€ÑÑÐ½") {
     return "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30";
   }
 
-  if (status === "Тасалсан") {
+  if (status === "Ð¢Ð°ÑÐ°Ð»ÑÐ°Ð½") {
     return "bg-red-500/20 text-red-400 border border-red-500/30";
   }
 
@@ -121,13 +184,13 @@ function EmployeeModal({
       >
         <div className="flex items-center justify-between">
           <h2 className="text-white font-bold text-lg">
-            {mode === "add" ? "Шинэ ажилтан нэмэх" : "Ажилтны мэдээлэл засах"}
+            {mode === "add" ? "Ð¨Ð¸Ð½Ñ Ð°Ð¶Ð¸Ð»Ñ‚Ð°Ð½ Ð½ÑÐ¼ÑÑ…" : "ÐÐ¶Ð¸Ð»Ñ‚Ð½Ñ‹ Ð¼ÑÐ´ÑÑÐ»ÑÐ» Ð·Ð°ÑÐ°Ñ…"}
           </h2>
           <button
             onClick={onClose}
             className="text-slate-400 hover:text-white transition-colors"
           >
-            ✕
+            âœ•
           </button>
         </div>
 
@@ -136,13 +199,13 @@ function EmployeeModal({
             value={form.lastName}
             onChange={(event) => updateField("lastName", event.target.value)}
             className="bg-transparent border border-slate-700/60 rounded-xl px-3 py-2.5 text-slate-200 text-sm outline-none"
-            placeholder="Овог"
+            placeholder="ÐžÐ²Ð¾Ð³"
           />
           <input
             value={form.firstName}
             onChange={(event) => updateField("firstName", event.target.value)}
             className="bg-transparent border border-slate-700/60 rounded-xl px-3 py-2.5 text-slate-200 text-sm outline-none"
-            placeholder="Нэр"
+            placeholder="ÐÑÑ€"
           />
           <input
             value={form.employeeCode}
@@ -156,7 +219,7 @@ function EmployeeModal({
             value={form.email}
             onChange={(event) => updateField("email", event.target.value)}
             className="bg-transparent border border-slate-700/60 rounded-xl px-3 py-2.5 text-slate-200 text-sm outline-none"
-            placeholder="Имэйл"
+            placeholder="Ð˜Ð¼ÑÐ¹Ð»"
           />
           <select
             value={form.department}
@@ -173,7 +236,7 @@ function EmployeeModal({
             value={form.jobTitle}
             onChange={(event) => updateField("jobTitle", event.target.value)}
             className="bg-transparent border border-slate-700/60 rounded-xl px-3 py-2.5 text-slate-200 text-sm outline-none"
-            placeholder="Албан тушаал"
+            placeholder="ÐÐ»Ð±Ð°Ð½ Ñ‚ÑƒÑˆÐ°Ð°Ð»"
           />
         </div>
 
@@ -182,14 +245,14 @@ function EmployeeModal({
             onClick={onClose}
             className="px-5 py-2.5 rounded-xl border border-slate-600/50 text-slate-300 text-sm hover:bg-slate-800/50 transition-colors"
           >
-            Татгалзах
+            Ð¢Ð°Ñ‚Ð³Ð°Ð»Ð·Ð°Ñ…
           </button>
           <button
             onClick={() => void onSave(form)}
             disabled={saving}
             className="px-5 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 disabled:opacity-60 text-black text-sm font-semibold transition-colors"
           >
-            {saving ? "Хадгалж байна..." : mode === "add" ? "Нэмэх" : "Хадгалах"}
+            {saving ? "Ð¥Ð°Ð´Ð³Ð°Ð»Ð¶ Ð±Ð°Ð¹Ð½Ð°..." : mode === "add" ? "ÐÑÐ¼ÑÑ…" : "Ð¥Ð°Ð´Ð³Ð°Ð»Ð°Ñ…"}
           </button>
         </div>
       </div>
@@ -232,7 +295,7 @@ function EmployeeCard({
         <div className="flex items-center gap-2">
           <MailIcon />
           <span className="text-slate-400 text-xs">
-            {employee.email || "Имэйл байхгүй"}
+            {employee.email || "Ð˜Ð¼ÑÐ¹Ð» Ð±Ð°Ð¹Ñ…Ð³Ò¯Ð¹"}
           </span>
         </div>
         <div className="flex items-center gap-2">
@@ -253,14 +316,14 @@ function EmployeeCard({
         <div className="flex items-center gap-1.5">
           <CalIcon />
           <span className="text-slate-500 text-xs">
-            Орсон: {employee.hireDate}
+            ÐžÑ€ÑÐ¾Ð½: {employee.hireDate}
           </span>
         </div>
         <button
           onClick={() => onEdit(employee)}
           className="h-7 px-3 rounded-lg border border-slate-700/50 text-slate-400 text-xs hover:text-white hover:border-slate-500 transition-colors"
         >
-          Засах
+          Ð—Ð°ÑÐ°Ñ…
         </button>
       </div>
     </div>
@@ -268,42 +331,42 @@ function EmployeeCard({
 }
 
 export function WorkersComponent() {
-  const [employees, setEmployees] = useState<Employee[]>([]);
   const [search, setSearch] = useState("");
   const [showAdd, setShowAdd] = useState(false);
   const [editEmp, setEditEmp] = useState<Employee | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    let cancelled = false;
+  const queryContext = useMemo(
+    () => ({
+      headers: buildGraphQLHeaders({ actorRole: "hr" }),
+    }),
+    [],
+  );
 
-    async function load() {
-      setLoading(true);
-      setError(null);
+  const { data, loading } = useQuery<{ employees: Employee[] }>(GET_EMPLOYEES, {
+    variables: { search: null, status: null, department: null },
+    context: queryContext,
+    fetchPolicy: "cache-and-network",
+  });
 
-      try {
-        const data = await fetchEmployees();
-        if (!cancelled) {
-          setEmployees(data);
-        }
-      } catch (err) {
-        if (!cancelled) {
-          setError(
-            err instanceof Error ? err.message : "Ажилтнуудын жагсаалт ачаалж чадсангүй.",
-          );
-        }
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    }
-
-    void load();
-    return () => {
-      cancelled = true;
+  const [saveEmployee, { loading: saving }] = useMutation<{
+    upsertEmployee: {
+      employee: Employee;
+      resolvedAction?: string | null;
     };
-  }, []);
+  }>(UPSERT_EMPLOYEE, {
+    context: queryContext,
+    refetchQueries: [
+      {
+        query: GET_EMPLOYEES,
+        variables: { search: null, status: null, department: null },
+        context: queryContext,
+      },
+    ],
+    awaitRefetchQueries: true,
+  });
+
+  const employees = data?.employees ?? [];
 
   const filtered = useMemo(
     () =>
@@ -320,8 +383,8 @@ export function WorkersComponent() {
     [employees, search],
   );
 
-  const totalActive = employees.filter((employee) => employee.status === "Ирсэн").length;
-  const totalOnLeave = employees.filter((employee) => employee.status === "Чөлөөтэй").length;
+  const totalActive = employees.filter((employee) => employee.status === "Ð˜Ñ€ÑÑÐ½").length;
+  const totalOnLeave = employees.filter((employee) => employee.status === "Ð§Ó©Ð»Ó©Ó©Ñ‚ÑÐ¹").length;
   const totalNewThisMonth = employees.filter((employee) => {
     const hireDate = new Date(employee.hireDate);
     const now = new Date();
@@ -332,7 +395,6 @@ export function WorkersComponent() {
   }).length;
 
   async function handleSave(form: EmployeeFormState) {
-    setSaving(true);
     setError(null);
 
     try {
@@ -361,22 +423,14 @@ export function WorkersComponent() {
         birthdayPoster: null,
       };
 
-      const result = await upsertEmployee(payload);
-
-      setEmployees((prev) => {
-        const exists = prev.some((employee) => employee.id === result.employee.id);
-        return exists
-          ? prev.map((employee) =>
-              employee.id === result.employee.id ? result.employee : employee,
-            )
-          : [result.employee, ...prev];
+      await saveEmployee({
+        variables: { input: payload },
       });
+
       setShowAdd(false);
       setEditEmp(null);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Хадгалж чадсангүй.");
-    } finally {
-      setSaving(false);
+      setError(err instanceof Error ? err.message : "Ð¥Ð°Ð´Ð³Ð°Ð»Ð¶ Ñ‡Ð°Ð´ÑÐ°Ð½Ð³Ò¯Ð¹.");
     }
   }
 
@@ -403,7 +457,7 @@ export function WorkersComponent() {
       <div className="grid gap-4" style={{ gridTemplateColumns: "1.4fr 1fr 1fr" }}>
         <div className="rounded-2xl border border-slate-700/40 bg-gradient-to-br from-green-700/30 to-black p-5">
           <p className="text-slate-500 text-xs font-semibold uppercase tracking-widest mb-3">
-            Нийт ажилчид
+            ÐÐ¸Ð¹Ñ‚ Ð°Ð¶Ð¸Ð»Ñ‡Ð¸Ð´
           </p>
           <div className="flex items-end justify-between">
             <div>
@@ -413,7 +467,7 @@ export function WorkersComponent() {
                   Real data
                 </span>
               </div>
-              <p className="text-slate-500 text-sm mt-1">Backend employee жагсаалт</p>
+              <p className="text-slate-500 text-sm mt-1">Backend employee Ð¶Ð°Ð³ÑÐ°Ð°Ð»Ñ‚</p>
             </div>
             <div className="w-12 h-12 rounded-xl bg-emerald-500/20 flex items-center justify-center">
               <HiredIcon />
@@ -424,7 +478,7 @@ export function WorkersComponent() {
         <div className="rounded-2xl border border-cyan-600/30 bg-gradient-to-br from-cyan-600/15 to-transparent p-5">
           <div className="flex items-start justify-between mb-3">
             <p className="text-slate-500 text-xs font-semibold uppercase tracking-widest">
-              Идэвхтэй
+              Ð˜Ð´ÑÐ²Ñ…Ñ‚ÑÐ¹
             </p>
           </div>
           <div className="w-10 h-10 rounded-xl bg-cyan-500/20 flex items-center justify-center mb-3">
@@ -436,7 +490,7 @@ export function WorkersComponent() {
         <div className="flex flex-col gap-4">
           <div className="rounded-2xl border border-emerald-600/30 bg-gradient-to-br from-emerald-600/15 to-transparent p-4 flex-1">
             <p className="text-slate-500 text-xs uppercase tracking-widest mb-2">
-              Энэ сар
+              Ð­Ð½Ñ ÑÐ°Ñ€
             </p>
             <div className="w-9 h-9 rounded-xl bg-emerald-500/20 flex items-center justify-center mb-2">
               <HiredIcon />
@@ -445,7 +499,7 @@ export function WorkersComponent() {
           </div>
           <div className="rounded-2xl border border-purple-600/30 bg-gradient-to-br from-purple-600/15 to-transparent p-4 flex-1">
             <p className="text-slate-500 text-xs uppercase tracking-widest mb-2">
-              Чөлөөтэй
+              Ð§Ó©Ð»Ó©Ó©Ñ‚ÑÐ¹
             </p>
             <div className="w-9 h-9 rounded-xl bg-purple-500/20 flex items-center justify-center mb-2">
               <AbsentIcon />
@@ -462,15 +516,15 @@ export function WorkersComponent() {
             value={search}
             onChange={(event) => setSearch(event.target.value)}
             className="bg-transparent text-slate-300 text-sm outline-none placeholder:text-slate-600 w-full"
-            placeholder="Нэр, имэйл, код..."
+            placeholder="ÐÑÑ€, Ð¸Ð¼ÑÐ¹Ð», ÐºÐ¾Ð´..."
           />
         </div>
         <div className="flex items-center gap-2 ml-auto">
           <button className="flex items-center gap-2 px-3 py-2 rounded-xl bg-[#0d1117] border border-slate-700/50 text-slate-300 text-sm">
-            <FilterIcon /> Бүгд
+            <FilterIcon /> Ð‘Ò¯Ð³Ð´
           </button>
           <button className="flex items-center gap-2 px-3 py-2 rounded-xl bg-[#0d1117] border border-slate-700/50 text-slate-300 text-sm">
-            <LockIcon /> Бүгд
+            <LockIcon /> Ð‘Ò¯Ð³Ð´
           </button>
         </div>
       </div>
@@ -481,12 +535,12 @@ export function WorkersComponent() {
         </div>
       ) : null}
 
-      <p className="text-slate-500 text-sm">Нийт {filtered.length} ажилтан</p>
+      <p className="text-slate-500 text-sm">ÐÐ¸Ð¹Ñ‚ {filtered.length} Ð°Ð¶Ð¸Ð»Ñ‚Ð°Ð½</p>
 
       {loading ? (
         <div className="py-12 flex items-center justify-center gap-3 text-slate-500 text-sm">
           <span className="w-4 h-4 border-2 border-slate-700 border-t-slate-400 rounded-full animate-spin" />
-          Ажилтнуудыг уншиж байна...
+          ÐÐ¶Ð¸Ð»Ñ‚Ð½ÑƒÑƒÐ´Ñ‹Ð³ ÑƒÐ½ÑˆÐ¸Ð¶ Ð±Ð°Ð¹Ð½Ð°...
         </div>
       ) : (
         <div className="grid grid-cols-2 gap-4">
@@ -506,7 +560,7 @@ export function WorkersComponent() {
           className="flex items-center cursor-pointer gap-2 px-5 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black font-semibold text-sm transition-colors shadow-lg shadow-emerald-500/20"
         >
           <PlusIcon />
-          Ажилтан нэмэх
+          ÐÐ¶Ð¸Ð»Ñ‚Ð°Ð½ Ð½ÑÐ¼ÑÑ…
         </button>
       </div>
     </div>

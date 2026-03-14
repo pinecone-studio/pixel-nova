@@ -1,45 +1,80 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { gql } from "@apollo/client";
+import { useMutation } from "@apollo/client/react";
 import Link from "next/link";
-import { loginWithCode } from "@/lib/api";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { BiArrowBack, BiUser } from "react-icons/bi";
 
+import type { AuthSession } from "@/lib/types";
+
 const TOKEN_STORAGE_KEY = "epas_auth_token";
+
+const LOGIN_WITH_CODE = gql`
+  mutation LoginWithCode($employeeCode: String!) {
+    loginWithCode(employeeCode: $employeeCode) {
+      token
+      expiresAt
+      employee {
+        id
+        employeeCode
+        firstName
+        lastName
+        department
+        branch
+        jobTitle
+        level
+        email
+        status
+        hireDate
+      }
+    }
+  }
+`;
 
 export default function EmployeeAuthPage() {
   const router = useRouter();
   const [employeeCode, setEmployeeCode] = useState("");
-  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [loginWithCode, { loading }] = useMutation<{
+    loginWithCode: AuthSession;
+  }>(LOGIN_WITH_CODE);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     const code = employeeCode.trim().toUpperCase();
     if (!code) return;
 
-    setLoading(true);
     setError(null);
 
     try {
-      const session = await loginWithCode(code);
+      const result = await loginWithCode({
+        variables: { employeeCode: code },
+      });
+
+      const session = result.data?.loginWithCode;
+      if (!session) {
+        throw new Error("Нэвтрэх мэдээлэл ирсэнгүй.");
+      }
+
       localStorage.setItem(TOKEN_STORAGE_KEY, session.token);
       localStorage.setItem("epas_employee_code", code);
       router.push("/employee");
     } catch (err) {
-      const msg = err instanceof Error ? err.message : "Нэвтрэхэд алдаа гарлаа.";
+      const msg =
+        err instanceof Error ? err.message : "Нэвтрэхэд алдаа гарлаа.";
       if (
         msg.toLowerCase().includes("fetch") ||
         msg.toLowerCase().includes("network") ||
         msg.toLowerCase().includes("failed")
       ) {
-        setError("Backend-т холбогдож чадсангүй. API ажиллаж байгаа эсэхийг шалгана уу.");
+        setError(
+          "Backend-т холбогдож чадсангүй. API ажиллаж байгаа эсэхийг шалгана уу.",
+        );
       } else {
         setError(msg);
       }
-    } finally {
-      setLoading(false);
     }
   }
 

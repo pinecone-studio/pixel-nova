@@ -12,5 +12,13 @@ export interface RequestContext {
 export interface ActionRegistryInput {
   name: string;
   phase: string;
+  triggerCondition?: string | null;
   triggerFields: string[];
+  requiredEmployeeFields?: string[];
+  recipients?: string[];
+  documents?: Array<{
+    id: string;
+    template: string;
+    order: number;
+  }>;
 }

@@ -1,86 +1,118 @@
 "use client";
 
-import { useEffect, useEffectEvent, useState } from "react";
+import { gql } from "@apollo/client";
+import { useQuery } from "@apollo/client/react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
-import { fetchDocuments, fetchMe } from "@/lib/api";
+import { buildGraphQLHeaders } from "@/lib/apollo-client";
 import type { Document, Employee } from "@/lib/types";
 
 import { ContractPreview } from "../components/contractPreview";
-import { FooterSection } from "../components/footerSection";
 import { FactIcon } from "../components/icons";
 import { Request } from "../components/request";
 
 const TOKEN_STORAGE_KEY = "epas_auth_token";
 
-const fallbackDocuments = [
-  {
-    title: "Хөдөлмөрийн гэрээ",
-    fileName: "01_employment_contract.pdf",
-    date: "2024-02-24",
-  },
-  {
-    title: "Туршилтын хугацааны тушаал",
-    fileName: "02_probation_order.pdf",
-    date: "2024-02-24",
-  },
-  {
-    title: "Ажлын байрны тодорхойлолт",
-    fileName: "03_job_description.pdf",
-    date: "2024-02-24",
-  },
-];
+const GET_ME = gql`
+  query GetMe {
+    me {
+      id
+      employeeCode
+      firstName
+      lastName
+      firstNameEng
+      lastNameEng
+      department
+      branch
+      jobTitle
+      level
+      email
+      status
+      hireDate
+      imageUrl
+      github
+      entraId
+      birthDayAndMonth
+      isKpi
+      isSalaryCompany
+    }
+  }
+`;
+
+const GET_DOCUMENTS = gql`
+  query GetDocuments($employeeId: ID!) {
+    documents(employeeId: $employeeId) {
+      id
+      employeeId
+      action
+      documentName
+      storageUrl
+      createdAt
+    }
+  }
+`;
 
 export default function EmployeePage() {
   const router = useRouter();
   const [authToken, setAuthToken] = useState("");
-  const [employee, setEmployee] = useState<Employee | null>(null);
-  const [documents, setDocuments] = useState<Document[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  const hydrateSession = useEffectEvent(async (token: string) => {
-    setLoading(true);
-    setError(null);
-
-    try {
-      const me = await fetchMe(token);
-      if (!me) {
-        window.localStorage.removeItem(TOKEN_STORAGE_KEY);
-        router.replace("/auth/employee");
-        return;
-      }
-
-      const docs = await fetchDocuments(me.id, token);
-
-      setAuthToken(token);
-      setEmployee(me);
-      setDocuments(docs);
-    } catch (authError) {
-      window.localStorage.removeItem(TOKEN_STORAGE_KEY);
-      setAuthToken("");
-      setEmployee(null);
-      setDocuments([]);
-      setError(
-        authError instanceof Error
-          ? authError.message
-          : "Ажилтны session ачаалж чадсангүй.",
-      );
-      router.replace("/auth/employee");
-    } finally {
-      setLoading(false);
-    }
-  });
+  const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {
-    const storedToken = window.localStorage.getItem(TOKEN_STORAGE_KEY);
-    if (!storedToken) {
+    const token = window.localStorage.getItem(TOKEN_STORAGE_KEY) ?? "";
+    if (!token) {
       router.replace("/auth/employee");
+      setHydrated(true);
       return;
     }
 
-    void hydrateSession(storedToken);
+    setAuthToken(token);
+    setHydrated(true);
   }, [router]);
+
+  const {
+    data: meData,
+    loading: meLoading,
+    error: meError,
+  } = useQuery<{ me: Employee | null }>(GET_ME, {
+    skip: !hydrated || !authToken,
+    context: {
+      headers: buildGraphQLHeaders({ authToken }),
+    },
+    fetchPolicy: "network-only",
+  });
+
+  const employee = meData?.me ?? null;
+
+  const {
+    data: documentsData,
+    loading: documentsLoading,
+    error: documentsError,
+  } = useQuery<{ documents: Document[] }>(GET_DOCUMENTS, {
+    skip: !hydrated || !authToken || !employee?.id,
+    variables: {
+      employeeId: employee?.id ?? "",
+    },
+    context: {
+      headers: buildGraphQLHeaders({ authToken }),
+    },
+    fetchPolicy: "network-only",
+  });
+
+  useEffect(() => {
+    if (hydrated && !meLoading && !employee) {
+      window.localStorage.removeItem(TOKEN_STORAGE_KEY);
+      router.replace("/auth/employee");
+    }
+  }, [employee, hydrated, meLoading, router]);
+
+  if (!hydrated || !authToken) {
+    return null;
+  }
+
+  const documents = documentsData?.documents ?? [];
+  const loading = meLoading || Boolean(employee?.id && documentsLoading);
+  const error = meError?.message ?? documentsError?.message ?? null;
 
   const leaveUsed = 4;
   const leaveTotal = 14;
@@ -115,8 +147,8 @@ export default function EmployeePage() {
               {displayName}
             </h1>
             <p className="text-[#4A4A6A] text-sm leading-relaxed max-w-lg">
-              Та хөдөлмөрийн баримт бичиг болон ажлын түүхээ авах боломжтой.
-              Бүх баримтууд аюулгүй хадгалагдсан болно.
+              Та хөдөлмөрийн баримт бичиг болон ажлын түүхээ нэг дороос
+              харах боломжтой. Бүх мэдээлэл backend-аас бодитоор ачааллагдана.
             </p>
             <div className="flex gap-2 mt-1 flex-wrap">
               {employee?.department ? (
@@ -146,7 +178,9 @@ export default function EmployeePage() {
             <div className="flex items-center justify-between gap-6">
               <div>
                 <p className="text-white text-2xl font-bold">4d 1h</p>
-                <p className="text-[#4A4A6A] text-xs mt-0.5">Чөлөөний боломж</p>
+                <p className="text-[#4A4A6A] text-xs mt-0.5">
+                  Чөлөөний боломж
+                </p>
               </div>
 
               <div className="relative w-16 h-16">
@@ -174,7 +208,9 @@ export default function EmployeePage() {
                 <div className="absolute inset-0 flex items-center justify-center">
                   <span className="text-white text-xs font-semibold">
                     {leaveUsed}
-                    <span className="text-[#4A4A6A] text-[10px]">/{leaveTotal}</span>
+                    <span className="text-[#4A4A6A] text-[10px]">
+                      /{leaveTotal}
+                    </span>
                   </span>
                 </div>
               </div>
@@ -193,43 +229,39 @@ export default function EmployeePage() {
               Бүртгэл
             </h2>
             <span className="rounded-full border border-[#233246] bg-[#162130] px-4 py-1 text-[14px] font-medium text-[#94A3B8]">
-              {(documents.length > 0 ? documents.length : fallbackDocuments.length)} баримт
+              {documents.length} баримт
             </span>
           </div>
 
           <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
-            {documents.length > 0
-              ? documents.map((document) => (
-                  <ContractPreview
-                    key={document.id}
-                    document={document}
-                    authToken={authToken}
-                  />
-                ))
-              : fallbackDocuments.map((document) => (
-                  <article
-                    key={document.fileName}
-                    className="flex h-45 w-full max-w-80.75 flex-col items-center rounded-[28px] border border-[#0E2741] bg-[linear-gradient(180deg,#03101d_0%,#041424_100%)] p-7 text-center shadow-[0_0_0_1px_rgba(255,255,255,0.03)_inset]"
-                  >
-                    <div className="flex flex-col items-center gap-5">
-                      <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-[18px] border border-[#24374F] bg-[#132131]">
-                        <FactIcon />
-                      </div>
-                      <div className="flex min-w-0 flex-1 flex-col items-center gap-1 pt-1">
-                        <h3 className="max-w-54.25 text-[17px] font-semibold leading-5 text-[#E7EDF5]">
-                          {document.title}
-                        </h3>
-                        <p className="max-w-full break-all text-[13px] text-[#6E7D90]">
-                          {document.fileName}
-                        </p>
-                        <p className="text-[13px] text-[#8D9AAC]">{document.date}</p>
-                      </div>
-                    </div>
-                  </article>
-                ))}
+            {documents.length > 0 ? (
+              documents.map((document) => (
+                <ContractPreview
+                  key={document.id}
+                  document={document}
+                  authToken={authToken}
+                />
+              ))
+            ) : (
+              <article className="flex h-45 w-full max-w-80.75 flex-col items-center justify-center rounded-[28px] border border-[#0E2741] bg-[linear-gradient(180deg,#03101d_0%,#041424_100%)] p-7 text-center shadow-[0_0_0_1px_rgba(255,255,255,0.03)_inset]">
+                <div className="flex flex-col items-center gap-5">
+                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-[18px] border border-[#24374F] bg-[#132131]">
+                    <FactIcon />
+                  </div>
+                  <div className="flex min-w-0 flex-1 flex-col items-center gap-1 pt-1">
+                    <h3 className="max-w-54.25 text-[17px] font-semibold leading-5 text-[#E7EDF5]">
+                      Баримт одоогоор олдсонгүй
+                    </h3>
+                    <p className="max-w-full text-[13px] text-[#6E7D90]">
+                      Энэ хэсэг зөвхөн backend-аас ирсэн бодит баримтуудыг
+                      харуулна.
+                    </p>
+                  </div>
+                </div>
+              </article>
+            )}
           </div>
         </section>
-
       </div>
     </div>
   );

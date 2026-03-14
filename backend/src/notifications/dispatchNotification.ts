@@ -4,7 +4,6 @@ import { buildEmailTemplate } from "./buildEmailTemplate";
 import { buildDocumentDeliveryUrl } from "./documentLinks";
 import { getAllRecipientEmails, resolveRecipients } from "./resolveRecipients";
 import { sendEmailWithRetry } from "./sendEmailWithRetry";
-import actionRegistry from "../config/action-registry.json";
 
 export interface DispatchNotificationInput {
   db: DbClient;
@@ -15,6 +14,7 @@ export interface DispatchNotificationInput {
   publicOrigin?: string | null;
   documentLinkSecret?: string | null;
   overrideRecipients?: string[];
+  recipientRoles?: string[];
 }
 
 export interface DispatchNotificationResult {
@@ -23,11 +23,6 @@ export interface DispatchNotificationResult {
   recipientCount: number;
   recipientEmails: string[];
   error?: string;
-}
-
-function getRecipientsForAction(action: string): string[] {
-  const config = (actionRegistry.actions as Record<string, { recipients?: string[] }>)[action];
-  return config?.recipients ?? [];
 }
 
 function normalizeEmails(emails: string[]) {
@@ -46,7 +41,7 @@ export async function dispatchNotification(
   if (input.overrideRecipients && input.overrideRecipients.length > 0) {
     emails = normalizeEmails(input.overrideRecipients);
   } else {
-    const roles = getRecipientsForAction(input.action);
+    const roles = input.recipientRoles ?? [];
     const resolvedEmails = roles.length > 0
       ? await resolveRecipients(input.db, roles)
       : await getAllRecipientEmails(input.db);

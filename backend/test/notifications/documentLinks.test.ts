@@ -3,7 +3,7 @@ import { expect, test } from "@jest/globals";
 import {
   buildDocumentDeliveryUrl,
   validateDocumentAccess,
-} from "./documentLinks.js";
+} from "../../src/notifications/documentLinks.js";
 
 test("builds signed backend document endpoint when origin and secret are available", async () => {
   const url = await buildDocumentDeliveryUrl({

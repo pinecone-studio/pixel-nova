@@ -63,7 +63,17 @@ export const typeDefs = /* GraphQL */ `
     id: ID!
     name: String!
     phase: String!
+    triggerCondition: String
     triggerFields: [String!]!
+    requiredEmployeeFields: [String!]!
+    recipients: [String!]!
+    documents: [ActionDocumentConfig!]!
+  }
+
+  type ActionDocumentConfig {
+    id: String!
+    template: String!
+    order: Int!
   }
 
   type TriggerActionResult {
@@ -123,7 +133,17 @@ export const typeDefs = /* GraphQL */ `
   input UpdateActionRegistryInput {
     name: String!
     phase: String!
+    triggerCondition: String
     triggerFields: [String!]!
+    requiredEmployeeFields: [String!]
+    recipients: [String!]
+    documents: [UpdateActionRegistryDocumentInput!]
+  }
+
+  input UpdateActionRegistryDocumentInput {
+    id: String!
+    template: String!
+    order: Int!
   }
 
   input ResolveEmployeeActionInput {

@@ -54,7 +54,15 @@ export interface ActionConfig {
   id: string;
   name: string;
   phase: string;
+  triggerCondition?: string | null;
   triggerFields: string[];
+  requiredEmployeeFields: string[];
+  recipients: string[];
+  documents: Array<{
+    id: string;
+    template: string;
+    order: number;
+  }>;
 }
 
 export interface DocumentContent {

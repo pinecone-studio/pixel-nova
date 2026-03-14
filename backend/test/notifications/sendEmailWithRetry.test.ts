@@ -1,11 +1,7 @@
-import { jest, expect, test, beforeEach, afterEach } from "@jest/globals";
+import { afterEach, beforeEach, expect, jest, test } from "@jest/globals";
 
-jest.mock("./sendEmail.js");
-
-import { sendEmail } from "./sendEmail.js";
-import { sendEmailWithRetry } from "./sendEmailWithRetry.js";
-
-const mockSendEmail = sendEmail as jest.MockedFunction<typeof sendEmail>;
+import type { SendEmailInput } from "../../src/notifications/sendEmail.js";
+import { sendEmailWithRetry } from "../../src/notifications/sendEmailWithRetry.js";
 
 const input = {
   to: ["hr@example.com"],
@@ -14,9 +10,11 @@ const input = {
   apiKey: "test-key",
 };
 
+let send: jest.MockedFunction<(input: SendEmailInput) => Promise<void>>;
+
 beforeEach(() => {
   jest.useFakeTimers();
-  mockSendEmail.mockReset();
+  send = jest.fn();
 });
 
 afterEach(() => {
@@ -24,60 +22,60 @@ afterEach(() => {
 });
 
 test("succeeds on the first attempt without retrying", async () => {
-  mockSendEmail.mockResolvedValueOnce(undefined);
+  send.mockResolvedValueOnce(undefined);
 
-  await sendEmailWithRetry(input);
+  await sendEmailWithRetry(input, { send });
 
-  expect(mockSendEmail).toHaveBeenCalledTimes(1);
+  expect(send).toHaveBeenCalledTimes(1);
 });
 
 test("retries and succeeds on the second attempt", async () => {
-  mockSendEmail
+  send
     .mockRejectedValueOnce(new Error("network error"))
     .mockResolvedValueOnce(undefined);
 
-  const promise = sendEmailWithRetry(input);
+  const promise = sendEmailWithRetry(input, { send });
   await jest.runAllTimersAsync();
   await promise;
 
-  expect(mockSendEmail).toHaveBeenCalledTimes(2);
+  expect(send).toHaveBeenCalledTimes(2);
 });
 
 test("retries and succeeds on the third attempt", async () => {
-  mockSendEmail
+  send
     .mockRejectedValueOnce(new Error("fail 1"))
     .mockRejectedValueOnce(new Error("fail 2"))
     .mockResolvedValueOnce(undefined);
 
-  const promise = sendEmailWithRetry(input);
+  const promise = sendEmailWithRetry(input, { send });
   await jest.runAllTimersAsync();
   await promise;
 
-  expect(mockSendEmail).toHaveBeenCalledTimes(3);
+  expect(send).toHaveBeenCalledTimes(3);
 });
 
 test("throws the last error after 3 failed attempts", async () => {
   const lastError = new Error("permanent failure");
-  mockSendEmail
+  send
     .mockRejectedValueOnce(new Error("fail 1"))
     .mockRejectedValueOnce(new Error("fail 2"))
     .mockRejectedValueOnce(lastError);
 
-  const promise = sendEmailWithRetry(input);
+  const promise = sendEmailWithRetry(input, { send });
   const assertion = expect(promise).rejects.toThrow("permanent failure");
   await jest.runAllTimersAsync();
   await assertion;
 
-  expect(mockSendEmail).toHaveBeenCalledTimes(3);
+  expect(send).toHaveBeenCalledTimes(3);
 });
 
 test("does not make more than 3 attempts total", async () => {
-  mockSendEmail.mockRejectedValue(new Error("always fails"));
+  send.mockRejectedValue(new Error("always fails"));
 
-  const promise = sendEmailWithRetry(input);
+  const promise = sendEmailWithRetry(input, { send });
   const caught = promise.catch(() => {});
   await jest.runAllTimersAsync();
   await caught;
 
-  expect(mockSendEmail).toHaveBeenCalledTimes(3);
+  expect(send).toHaveBeenCalledTimes(3);
 });
