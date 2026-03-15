@@ -1,8 +1,14 @@
 "use client";
 
-import { useEffect, useEffectEvent, useState } from "react";
+import { gql } from "@apollo/client";
+import { useQuery } from "@apollo/client/react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+
+import { buildGraphQLHeaders } from "@/lib/apollo-client";
+import type { Employee } from "@/lib/types";
+
 import {
   AjildOrson,
   Ajillasan,
@@ -20,10 +26,34 @@ import {
   Senior,
   TursunUdur,
 } from "../components/icons";
-import { fetchMe } from "@/lib/api";
-import type { Employee } from "@/lib/types";
 
 const TOKEN_STORAGE_KEY = "epas_auth_token";
+
+const GET_ME = gql`
+  query GetProfileMe {
+    me {
+      id
+      employeeCode
+      firstName
+      lastName
+      firstNameEng
+      lastNameEng
+      department
+      branch
+      jobTitle
+      level
+      email
+      status
+      hireDate
+      imageUrl
+      github
+      entraId
+      birthDayAndMonth
+      isKpi
+      isSalaryCompany
+    }
+  }
+`;
 
 function formatHireDate(value?: string | null) {
   if (!value) return "Мэдээлэлгүй";
@@ -54,48 +84,55 @@ function getTenure(hireDate?: string | null) {
   return `${years} жил ${remainingMonths} сар`;
 }
 
+function getInitials(employee: Employee | null) {
+  if (!employee) {
+    return "EP";
+  }
+
+  return (
+    `${employee.lastName?.charAt(0) ?? ""}${employee.firstName?.charAt(0) ?? ""}`.toUpperCase() ||
+    "EP"
+  );
+}
+
 export default function Profile() {
   const router = useRouter();
-  const [employee, setEmployee] = useState<Employee | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [hrMessage, setHrMessage] = useState(false);
-
-  const hydrateProfile = useEffectEvent(async (token: string) => {
-    setLoading(true);
-    setError(null);
-
-    try {
-      const me = await fetchMe(token);
-      if (!me) {
-        window.localStorage.removeItem(TOKEN_STORAGE_KEY);
-        router.replace("/auth/employee");
-        return;
-      }
-
-      setEmployee(me);
-    } catch (profileError) {
-      window.localStorage.removeItem(TOKEN_STORAGE_KEY);
-      setError(
-        profileError instanceof Error
-          ? profileError.message
-          : "Профайл ачаалж чадсангүй.",
-      );
-      router.replace("/auth/employee");
-    } finally {
-      setLoading(false);
-    }
-  });
+  const [authToken, setAuthToken] = useState("");
+  const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {
-    const storedToken = window.localStorage.getItem(TOKEN_STORAGE_KEY);
-    if (!storedToken) {
+    const token = window.localStorage.getItem(TOKEN_STORAGE_KEY) ?? "";
+    if (!token) {
       router.replace("/auth/employee");
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setHydrated(true);
       return;
     }
 
-    void hydrateProfile(storedToken);
-  }, [hydrateProfile, router]);
+    setAuthToken(token);
+    setHydrated(true);
+  }, [router]);
+
+  const { data, loading, error } = useQuery<{ me: Employee | null }>(GET_ME, {
+    skip: !hydrated || !authToken,
+    context: {
+      headers: buildGraphQLHeaders({ authToken }),
+    },
+    fetchPolicy: "network-only",
+  });
+
+  const employee = data?.me ?? null;
+
+  useEffect(() => {
+    if (hydrated && !loading && !employee) {
+      window.localStorage.removeItem(TOKEN_STORAGE_KEY);
+      router.replace("/auth/employee");
+    }
+  }, [employee, hydrated, loading, router]);
+
+  if (!hydrated || !authToken) {
+    return null;
+  }
 
   if (loading) {
     return (
@@ -177,7 +214,9 @@ export default function Profile() {
       <div className="mx-auto w-full max-w-[1056px]">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-white">Профайл</h1>
-          <p className="text-gray-400 mt-1">Таны хувийн болон ажлын мэдээлэл.</p>
+          <p className="text-gray-400 mt-1">
+            Таны хувийн болон ажлын мэдээлэл.
+          </p>
         </div>
 
         <div className="bg-linear-to-r from-gray-900 to-teal-950 rounded-2xl p-6 mb-8 border border-gray-800">
@@ -210,29 +249,21 @@ export default function Profile() {
                   <Idevhtei /> {employee?.status ?? "Мэдээлэлгүй"}
                 </span>
               </div>
-              {error ? <p className="mt-3 text-sm text-red-400">{error}</p> : null}
+              {error ? (
+                <p className="mt-3 text-sm text-red-400">{error.message}</p>
+              ) : null}
             </div>
           </div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-14 mb-8 min-h-[479px]">
           <div className="bg-gray-900 rounded-2xl p-6 border border-gray-800 h-full">
-            <h3 className="text-white font-semibold text-lg mb-5">Ажлын мэдээлэл</h3>
+            <h3 className="text-white font-semibold text-lg mb-5">
+              Ажлын мэдээлэл
+            </h3>
             <div className="border border-gray-800" />
             <div className="mt-5">
-              {[
-                {
-                  icon: <AlbanTushaal />,
-                  label: "Албан тушаал",
-                  value: employee?.jobTitle ?? "Мэдээлэлгүй",
-                },
-                ...employmentInfo.slice(1),
-                {
-                  icon: <Ajillasan />,
-                  label: "Ажилласан хугацаа",
-                  value: getTenure(employee?.hireDate),
-                },
-              ].map((item) => (
+              {workInfo.map((item) => (
                 <div
                   key={item.label}
                   className="flex items-center gap-3 h-[68px]">
@@ -241,7 +272,9 @@ export default function Profile() {
                   </div>
                   <div>
                     <p className="text-gray-500 text-xs">{item.label}</p>
-                    <p className="text-white font-medium text-sm">{item.value}</p>
+                    <p className="text-white font-medium text-sm">
+                      {item.value}
+                    </p>
                   </div>
                 </div>
               ))}
@@ -249,7 +282,9 @@ export default function Profile() {
           </div>
 
           <div className="bg-gray-900 rounded-2xl p-6 border border-gray-800 relative h-full">
-            <h3 className="text-white font-semibold text-lg mb-5">Хувийн мэдээлэл</h3>
+            <h3 className="text-white font-semibold text-lg mb-5">
+              Хувийн мэдээлэл
+            </h3>
             <div className="border border-gray-800" />
             <div className="mt-5">
               {personalInfo.map((item) => (
@@ -261,35 +296,21 @@ export default function Profile() {
                   </div>
                   <div>
                     <p className="text-gray-500 text-xs">{item.label}</p>
-                    <p className="text-white font-medium text-sm">{item.value}</p>
+                    <p className="text-white font-medium text-sm">
+                      {item.value}
+                    </p>
                   </div>
                 </div>
               ))}
-            </div>
-
-            <div className="absolute bottom-5 right-5 flex items-center gap-2">
-              <span className="text-xs text-gray-400 flex items-center gap-1">
-                <span className="text-base">HR</span> Мессеж
-              </span>
-              <button
-                onClick={() => setHrMessage(!hrMessage)}
-                className={`w-10 h-5 rounded-full transition-colors duration-200 relative ${
-                  hrMessage ? "bg-teal-500" : "bg-gray-600"
-                }`}
-              >
-                <span
-                  className={`absolute top-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform duration-200 ${
-                    hrMessage ? "translate-x-5" : "translate-x-0.5"
-                  }`}
-                />
-              </button>
             </div>
           </div>
         </div>
 
         <div className="bg-gray-900 rounded-2xl border border-gray-800 overflow-hidden">
           <div className="h-[83px] flex flex-col pt-[17px] px-[25px]">
-            <h3 className="text-white font-semibold text-lg h-[28px]">Нэмэлт мэдээлэл</h3>
+            <h3 className="text-white font-semibold text-lg h-[28px]">
+              Нэмэлт мэдээлэл
+            </h3>
             <p className="text-gray-500 text-sm h-[28px] flex items-center">
               Таны гэрээний болон бусад мэдээлэл
             </p>
@@ -341,12 +362,6 @@ export default function Profile() {
             </div>
           </div>
         </div>
-
-        {error ? (
-          <div className="mt-6 rounded-xl border border-red-500/20 bg-red-500/5 px-4 py-3 text-sm text-red-400">
-            {error}
-          </div>
-        ) : null}
       </div>
     </div>
   );

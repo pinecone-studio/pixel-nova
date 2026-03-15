@@ -1,6 +1,6 @@
 import { expect, test } from "@jest/globals";
 
-import { normalizeAuditLog } from "./auditLog.js";
+import { normalizeAuditLog } from "../../../src/db/queries/auditLog.js";
 
 test("normalizeAuditLog parses JSON list fields into arrays", () => {
   const normalized = normalizeAuditLog({

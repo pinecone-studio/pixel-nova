@@ -1,6 +1,6 @@
 import { expect, test } from "@jest/globals";
 
-import { generateOtpCode, maskEmail } from "./otp.js";
+import { generateOtpCode, maskEmail } from "../../src/auth/otp.js";
 
 test("generateOtpCode returns 6 digit code", () => {
   const code = generateOtpCode();

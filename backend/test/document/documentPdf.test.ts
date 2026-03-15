@@ -1,8 +1,8 @@
 import { expect, test } from "@jest/globals";
 
-import { generateEmployeeDocument } from "./generator.js";
+import { generateEmployeeDocument } from "../../src/document/generator.js";
 
-import type { Employee } from "../db/schema.js";
+import type { Employee } from "../../src/db/schema.js";
 
 const mockEmployee: Employee = {
   id: "emp-001",

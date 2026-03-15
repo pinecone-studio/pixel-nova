@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { Navbar } from "./components/navbarSection";
 import { FooterSection } from "./components/footerSection";
+import { ApolloAppProvider } from "@/lib/apollo-provider";
 
 export const metadata: Metadata = {
   title: "EPAS - Employee Paperwork Automation System",
@@ -16,11 +17,13 @@ export default function RootLayout({
   return (
     <html lang="mn">
       <body>
-        <div className="min-h-screen bg-[#0A0A0F]">
-          <Navbar />
-          {children}
-          <FooterSection/>
-        </div>
+        <ApolloAppProvider>
+          <div className="min-h-screen bg-[#0A0A0F]">
+            <Navbar />
+            {children}
+            <FooterSection />
+          </div>
+        </ApolloAppProvider>
       </body>
     </html>
   );

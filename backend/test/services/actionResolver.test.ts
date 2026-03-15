@@ -5,7 +5,7 @@ import {
   DEFAULT_LIFECYCLE_ACTION_CONFIGS,
   resolveEmployeeLifecycleAction,
   type ResolveEmployeeActionInput,
-} from "./actionResolver.js";
+} from "../../src/services/actionResolver.js";
 
 function resolve(input: Partial<ResolveEmployeeActionInput>) {
   return resolveEmployeeLifecycleAction(

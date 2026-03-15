@@ -1,8 +1,11 @@
 import { expect, test } from "@jest/globals";
 
-import { buildTemplateData, validateRequiredFields } from "./templateData.js";
+import {
+  buildTemplateData,
+  validateRequiredFields,
+} from "../../src/document/templateData.js";
 
-import type { Employee } from "../db/schema.js";
+import type { Employee } from "../../src/db/schema.js";
 
 const mockEmployee: Employee = {
   id: "emp-001",

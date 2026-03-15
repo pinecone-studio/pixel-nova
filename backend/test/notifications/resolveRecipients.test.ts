@@ -1,7 +1,10 @@
 import { expect, test } from "@jest/globals";
 
-import { resolveRecipients, getAllRecipientEmails } from "./resolveRecipients.js";
-import type { DbClient } from "../db/client.js";
+import {
+  resolveRecipients,
+  getAllRecipientEmails,
+} from "../../src/notifications/resolveRecipients.js";
+import type { DbClient } from "../../src/db/client.js";
 
 function makeMockDb(rows: { email: string }[]): DbClient {
   return {

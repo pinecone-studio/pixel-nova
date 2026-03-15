@@ -1,6 +1,6 @@
 import { expect, test } from "@jest/globals";
 
-import { buildEmployeeDocumentObjectKey } from "./r2.js";
+import { buildEmployeeDocumentObjectKey } from "../../src/storage/r2.js";
 
 test("builds TDD-compliant path: employeeCode_name/phase/date_action/order_template", () => {
   const key = buildEmployeeDocumentObjectKey({

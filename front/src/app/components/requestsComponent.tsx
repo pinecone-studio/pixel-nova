@@ -1,5 +1,8 @@
 "use client";
-import { useEffect, useState } from "react";
+
+import { gql } from "@apollo/client";
+import { useMutation, useQuery } from "@apollo/client/react";
+import { useMemo, useState } from "react";
 import {
   AcepptedIcon,
   DownloadIcon,
@@ -10,14 +13,87 @@ import {
   ScrollIcon,
   SearchIcon,
 } from "./icons";
-import {
-  fetchLeaveRequests,
-  approveLeaveRequest,
-  rejectLeaveRequest,
-} from "@/lib/api";
+import { buildGraphQLHeaders } from "@/lib/apollo-client";
 import type { LeaveRequest } from "@/lib/types";
 
-// ── Status Badge ───────────────────────────────────────
+const GET_LEAVE_REQUESTS = gql`
+  query GetLeaveRequests($status: String) {
+    leaveRequests(status: $status) {
+      id
+      employeeId
+      employee {
+        id
+        employeeCode
+        firstName
+        lastName
+        department
+        jobTitle
+        level
+      }
+      type
+      startTime
+      endTime
+      reason
+      status
+      note
+      createdAt
+      updatedAt
+    }
+  }
+`;
+
+const APPROVE_LEAVE_REQUEST = gql`
+  mutation ApproveLeaveRequest($id: ID!, $note: String) {
+    approveLeaveRequest(id: $id, note: $note) {
+      id
+      employeeId
+      employee {
+        id
+        employeeCode
+        firstName
+        lastName
+        department
+        jobTitle
+        level
+      }
+      type
+      startTime
+      endTime
+      reason
+      status
+      note
+      createdAt
+      updatedAt
+    }
+  }
+`;
+
+const REJECT_LEAVE_REQUEST = gql`
+  mutation RejectLeaveRequest($id: ID!, $note: String) {
+    rejectLeaveRequest(id: $id, note: $note) {
+      id
+      employeeId
+      employee {
+        id
+        employeeCode
+        firstName
+        lastName
+        department
+        jobTitle
+        level
+      }
+      type
+      startTime
+      endTime
+      reason
+      status
+      note
+      createdAt
+      updatedAt
+    }
+  }
+`;
+
 const StatusBadge = ({ status }: { status: string }) => {
   const styles: Record<string, string> = {
     pending: "bg-yellow-600/30 text-yellow-400 border border-yellow-600/40",
@@ -25,9 +101,9 @@ const StatusBadge = ({ status }: { status: string }) => {
     rejected: "bg-red-600/30 text-red-400 border border-red-600/40",
   };
   const labels: Record<string, string> = {
-    pending: "Хүлээгдэж буй",
-    approved: "Батласан",
-    rejected: "Татгалзсан",
+    pending: "Ð¥Ò¯Ð»ÑÑÐ³Ð´ÑÐ¶ Ð±ÑƒÐ¹",
+    approved: "Ð‘Ð°Ñ‚Ð»Ð°ÑÐ°Ð½",
+    rejected: "Ð¢Ð°Ñ‚Ð³Ð°Ð»Ð·ÑÐ°Ð½",
   };
   return (
     <span
@@ -63,7 +139,6 @@ function avatarColor(str: string) {
   return avatarColors[Math.abs(h) % avatarColors.length];
 }
 
-// ── Preview Modal ──────────────────────────────────────
 const PreviewModal = ({
   row,
   onClose,
@@ -102,7 +177,6 @@ const PreviewModal = ({
       <div
         className="relative w-[420px] max-w-[95vw] bg-[#0f1520] rounded-3xl border border-slate-700/60 shadow-2xl p-6 flex flex-col gap-5"
         onClick={(e) => e.stopPropagation()}>
-        {/* Header */}
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-3">
             <div className="w-14 h-14 rounded-full overflow-hidden shrink-0">
@@ -119,86 +193,82 @@ const PreviewModal = ({
                 <StatusBadge status={row.status} />
               </div>
               <p className="text-slate-400 text-sm mt-0.5">
-                {row.employee.employeeCode} • {row.employee.department}
+                {row.employee.employeeCode} â€¢ {row.employee.department}
               </p>
             </div>
           </div>
           <button
             onClick={onClose}
             className="text-slate-400 hover:text-white transition-colors text-xl leading-none mt-1">
-            ✕
+            âœ•
           </button>
         </div>
 
         <div className="h-px bg-slate-700/50" />
 
-        {/* Request details */}
         <div className="bg-[#161d2b] rounded-2xl p-4 flex flex-col gap-4">
           <p className="text-white font-semibold text-base">{row.type}</p>
           <div className="grid grid-cols-2 gap-y-4">
             <div>
-              <p className="text-slate-500 text-xs mb-1">Эхлэх цаг</p>
+              <p className="text-slate-500 text-xs mb-1">Ð­Ñ…Ð»ÑÑ… Ñ†Ð°Ð³</p>
               <p className="text-white text-sm font-medium">{row.startTime}</p>
             </div>
             <div>
-              <p className="text-slate-500 text-xs mb-1">Дуусах цаг</p>
+              <p className="text-slate-500 text-xs mb-1">Ð”ÑƒÑƒÑÐ°Ñ… Ñ†Ð°Ð³</p>
               <p className="text-white text-sm font-medium">{row.endTime}</p>
             </div>
             <div>
-              <p className="text-slate-500 text-xs mb-1">Илгээсэн огноо</p>
+              <p className="text-slate-500 text-xs mb-1">Ð˜Ð»Ð³ÑÑÑÑÐ½ Ð¾Ð³Ð½Ð¾Ð¾</p>
               <p className="text-[#0ad4b1] text-sm font-semibold">
                 {new Date(row.createdAt).toLocaleDateString("mn-MN")}
               </p>
             </div>
             <div>
-              <p className="text-slate-500 text-xs mb-1">Албан тушаал</p>
+              <p className="text-slate-500 text-xs mb-1">ÐÐ»Ð±Ð°Ð½ Ñ‚ÑƒÑˆÐ°Ð°Ð»</p>
               <p className="text-white text-sm font-medium">
                 {row.employee.jobTitle}
               </p>
             </div>
             {row.reason && (
               <div className="col-span-2">
-                <p className="text-slate-500 text-xs mb-1">Шалтгаан</p>
+                <p className="text-slate-500 text-xs mb-1">Ð¨Ð°Ð»Ñ‚Ð³Ð°Ð°Ð½</p>
                 <p className="text-white text-sm font-medium">{row.reason}</p>
               </div>
             )}
           </div>
         </div>
 
-        {/* Note textarea */}
         <div className="flex flex-col gap-2">
           <p className="text-white font-semibold text-base">
-            Тайлбар{" "}
-            <span className="text-slate-500 font-normal">(Заавал биш)</span>
+            Ð¢Ð°Ð¹Ð»Ð±Ð°Ñ€ <span className="text-slate-500 font-normal">(Ð—Ð°Ð°Ð²Ð°Ð» Ð±Ð¸Ñˆ)</span>
           </p>
           <textarea
             value={note}
             onChange={(e) => setNote(e.target.value)}
-            placeholder="Энд бичнэ үү..."
+            placeholder="Ð­Ð½Ð´ Ð±Ð¸Ñ‡Ð½Ñ Ò¯Ò¯..."
             rows={3}
             className="w-full bg-[#161d2b] border border-slate-700/50 rounded-2xl px-4 py-3 text-slate-300 text-sm placeholder:text-slate-600 outline-none resize-none focus:border-blue-500/50 transition-colors"
           />
         </div>
 
-        {/* Action buttons — only show for pending */}
         {row.status === "pending" ? (
           <div className="flex items-center justify-end gap-3 mt-1">
             <button
               onClick={handleReject}
               disabled={acting}
               className="flex items-center gap-2 px-5 py-2.5 rounded-xl border border-red-500/50 text-red-400 text-sm font-medium hover:bg-red-500/10 disabled:opacity-50 transition-colors">
-              <span>✕</span> Татгалзах
+              <span>âœ•</span> Ð¢Ð°Ñ‚Ð³Ð°Ð»Ð·Ð°Ñ…
             </button>
             <button
               onClick={handleApprove}
               disabled={acting}
               className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#0ad4b1] text-black text-sm font-medium hover:bg-[#08bfa0] disabled:opacity-50 transition-colors">
-              <span>✓</span> {acting ? "Түр хүлээнэ үү..." : "Батлах"}
+              <span>âœ“</span> {acting ? "Ð¢Ò¯Ñ€ Ñ…Ò¯Ð»ÑÑÐ½Ñ Ò¯Ò¯..." : "Ð‘Ð°Ñ‚Ð»Ð°Ñ…"}
             </button>
           </div>
         ) : (
           <p className="text-center text-slate-500 text-sm">
-            Энэ хүсэлт аль хэдийн <StatusBadge status={row.status} />
+            Ð­Ð½Ñ Ñ…Ò¯ÑÑÐ»Ñ‚ Ð°Ð»ÑŒ Ñ…ÑÐ´Ð¸Ð¹Ð½ <StatusBadge status={row.status} />
           </p>
         )}
       </div>
@@ -206,7 +276,6 @@ const PreviewModal = ({
   );
 };
 
-// ── Request Row ────────────────────────────────────────
 const RequestRow = ({
   row,
   onPreview,
@@ -232,7 +301,7 @@ const RequestRow = ({
               {row.employee.lastName} {row.employee.firstName}
             </p>
             <p className="text-slate-500 text-xs">
-              {row.employee.employeeCode} • {row.employee.department}
+              {row.employee.employeeCode} â€¢ {row.employee.department}
             </p>
           </div>
         </div>
@@ -253,25 +322,52 @@ const RequestRow = ({
   );
 };
 
-// ── Main Component ─────────────────────────────────────
 export const RequestsComponent = () => {
-  const [activeTab, setActiveTab] = useState("Бүгд");
+  const [activeTab, setActiveTab] = useState("Ð‘Ò¯Ð³Ð´");
   const [search, setSearch] = useState("");
   const [previewRow, setPreviewRow] = useState<LeaveRequest | null>(null);
-  const [requests, setRequests] = useState<LeaveRequest[]>([]);
-  const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    fetchLeaveRequests()
-      .then(setRequests)
-      .catch(console.error)
-      .finally(() => setLoading(false));
-  }, []);
+  const queryContext = useMemo(
+    () => ({
+      headers: buildGraphQLHeaders({ actorRole: "hr" }),
+    }),
+    [],
+  );
+
+  const { data, loading } = useQuery<{ leaveRequests: LeaveRequest[] }>(
+    GET_LEAVE_REQUESTS,
+    {
+      variables: { status: null },
+      context: queryContext,
+      fetchPolicy: "cache-and-network",
+    },
+  );
+
+  const [approveMutation] = useMutation<{ approveLeaveRequest: LeaveRequest }>(
+    APPROVE_LEAVE_REQUEST,
+    {
+      context: queryContext,
+      refetchQueries: [{ query: GET_LEAVE_REQUESTS, variables: { status: null }, context: queryContext }],
+      awaitRefetchQueries: true,
+    },
+  );
+
+  const [rejectMutation] = useMutation<{ rejectLeaveRequest: LeaveRequest }>(
+    REJECT_LEAVE_REQUEST,
+    {
+      context: queryContext,
+      refetchQueries: [{ query: GET_LEAVE_REQUESTS, variables: { status: null }, context: queryContext }],
+      awaitRefetchQueries: true,
+    },
+  );
+
+  const requests = data?.leaveRequests ?? [];
+  const approvedCount = requests.filter((r) => r.status === "approved").length;
+  const rejectedCount = requests.filter((r) => r.status === "rejected").length;
 
   async function handleApprove(id: string, note: string) {
     try {
-      const updated = await approveLeaveRequest(id, note);
-      setRequests((prev) => prev.map((r) => (r.id === id ? updated : r)));
+      await approveMutation({ variables: { id, note: note || null } });
     } catch (e) {
       console.error(e);
     }
@@ -279,27 +375,21 @@ export const RequestsComponent = () => {
 
   async function handleReject(id: string, note: string) {
     try {
-      const updated = await rejectLeaveRequest(id, note);
-      setRequests((prev) => prev.map((r) => (r.id === id ? updated : r)));
+      await rejectMutation({ variables: { id, note: note || null } });
     } catch (e) {
       console.error(e);
     }
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const pendingCount = requests.filter((r) => r.status === "pending").length;
-  const approvedCount = requests.filter((r) => r.status === "approved").length;
-  const rejectedCount = requests.filter((r) => r.status === "rejected").length;
-
   const filtered = requests.filter((r) => {
     const matchTab =
-      activeTab === "Бүгд"
+      activeTab === "Ð‘Ò¯Ð³Ð´"
         ? true
-        : activeTab === "Чөлөө"
-          ? true // all types for now
-          : activeTab === "Батласан"
+        : activeTab === "Ð§Ó©Ð»Ó©Ó©"
+          ? true
+          : activeTab === "Ð‘Ð°Ñ‚Ð»Ð°ÑÐ°Ð½"
             ? r.status === "approved"
-            : activeTab === "Татгалзсан"
+            : activeTab === "Ð¢Ð°Ñ‚Ð³Ð°Ð»Ð·ÑÐ°Ð½"
               ? r.status === "rejected"
               : true;
     const matchSearch =
@@ -311,10 +401,10 @@ export const RequestsComponent = () => {
   });
 
   const tabs = [
-    { label: "Бүгд", count: requests.length },
-    { label: "Чөлөө", count: requests.length },
-    { label: "Батласан", count: approvedCount },
-    { label: "Татгалзсан", count: rejectedCount },
+    { label: "Ð‘Ò¯Ð³Ð´", count: requests.length },
+    { label: "Ð§Ó©Ð»Ó©Ó©", count: requests.length },
+    { label: "Ð‘Ð°Ñ‚Ð»Ð°ÑÐ°Ð½", count: approvedCount },
+    { label: "Ð¢Ð°Ñ‚Ð³Ð°Ð»Ð·ÑÐ°Ð½", count: rejectedCount },
   ];
 
   return (
@@ -328,7 +418,6 @@ export const RequestsComponent = () => {
         />
       )}
 
-      {/* Summary Cards */}
       <div className="grid grid-cols-3 gap-4">
         <div className="rounded-2xl border border-blue-500/50 bg-linear-to-br from-blue-600/25 to-transparent p-5 flex items-center justify-between">
           <div className="flex items-center gap-4">
@@ -337,9 +426,9 @@ export const RequestsComponent = () => {
             </div>
             <div className="flex items-baseline gap-2">
               <span className="text-5xl font-bold">
-                {loading ? "—" : requests.length}
+                {loading ? "â€”" : requests.length}
               </span>
-              <span className="text-slate-400 text-lg">Хүсэлтүүд</span>
+              <span className="text-slate-400 text-lg">Ð¥Ò¯ÑÑÐ»Ñ‚Ò¯Ò¯Ð´</span>
             </div>
           </div>
         </div>
@@ -351,9 +440,9 @@ export const RequestsComponent = () => {
             </div>
             <div className="flex items-baseline gap-2">
               <span className="text-5xl font-bold">
-                {loading ? "—" : approvedCount}
+                {loading ? "â€”" : approvedCount}
               </span>
-              <span className="text-slate-400 text-lg">Батласан</span>
+              <span className="text-slate-400 text-lg">Ð‘Ð°Ñ‚Ð»Ð°ÑÐ°Ð½</span>
             </div>
           </div>
           <ScrollIcon />
@@ -366,24 +455,22 @@ export const RequestsComponent = () => {
             </div>
             <div className="flex items-baseline gap-2">
               <span className="text-5xl font-bold">
-                {loading ? "—" : rejectedCount}
+                {loading ? "â€”" : rejectedCount}
               </span>
-              <span className="text-slate-400 text-lg">Татгалзсан</span>
+              <span className="text-slate-400 text-lg">Ð¢Ð°Ñ‚Ð³Ð°Ð»Ð·ÑÐ°Ð½</span>
             </div>
           </div>
           <ScrollIcon />
         </div>
       </div>
 
-      {/* List Container */}
       <div className="rounded-2xl border border-blue-500/50 bg-[#0b0f18] overflow-hidden">
-        {/* Filter Bar */}
         <div className="flex items-center gap-3 px-5 py-4 flex-wrap">
           <div className="flex items-center gap-2 bg-[#0d1117] border border-slate-700/50 rounded-xl px-3 py-2 min-w-[230px]">
             <SearchIcon />
             <input
               className="bg-transparent text-slate-400 text-sm outline-none placeholder:text-slate-600 w-full"
-              placeholder="Ажилтаны нэр эсвэл кодоор хайх"
+              placeholder="ÐÐ¶Ð¸Ð»Ñ‚Ð°Ð½Ñ‹ Ð½ÑÑ€ ÑÑÐ²ÑÐ» ÐºÐ¾Ð´Ð¾Ð¾Ñ€ Ñ…Ð°Ð¹Ñ…"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />
@@ -407,11 +494,11 @@ export const RequestsComponent = () => {
           <div className="flex items-center gap-2 ml-auto">
             <button className="flex items-center gap-2 px-3 py-2 rounded-xl bg-[#0d1117] border border-slate-700/50 text-slate-300 text-sm hover:bg-slate-800 transition-colors">
               <FilterIcon />
-              Шүүлтүүр
+              Ð¨Ò¯Ò¯Ð»Ñ‚Ò¯Ò¯Ñ€
             </button>
             <button className="flex items-center gap-2 px-3 py-2 rounded-xl bg-[#0d1117] border border-slate-700/50 text-slate-300 text-sm hover:bg-slate-800 transition-colors">
               <DownloadIcon />
-              Татах
+              Ð¢Ð°Ñ‚Ð°Ñ…
             </button>
           </div>
         </div>
@@ -422,11 +509,11 @@ export const RequestsComponent = () => {
           {loading ? (
             <div className="py-12 flex items-center justify-center gap-3 text-slate-500 text-sm">
               <span className="w-4 h-4 border-2 border-slate-700 border-t-slate-400 rounded-full animate-spin" />
-              Уншиж байна...
+              Ð£Ð½ÑˆÐ¸Ð¶ Ð±Ð°Ð¹Ð½Ð°...
             </div>
           ) : filtered.length === 0 ? (
             <div className="py-12 text-center text-slate-500 text-sm">
-              Хүсэлт олдсонгүй
+              Ð¥Ò¯ÑÑÐ»Ñ‚ Ð¾Ð»Ð´ÑÐ¾Ð½Ð³Ò¯Ð¹
             </div>
           ) : (
             filtered.map((row, i) => (

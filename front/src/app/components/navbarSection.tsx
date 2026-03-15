@@ -1,17 +1,29 @@
 "use client";
 
-import { useEffect, useEffectEvent, useState } from "react";
+import { gql } from "@apollo/client";
+import { useQuery } from "@apollo/client/react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { BiHome } from "react-icons/bi";
 import { GrNotification } from "react-icons/gr";
 import { RxAvatar } from "react-icons/rx";
-import { fetchMe } from "@/lib/api";
+
+import { buildGraphQLHeaders } from "@/lib/apollo-client";
 import type { Employee } from "@/lib/types";
+
+import { DocumentIcon, DownIcon, FactIcon } from "./icons";
 
 const TOKEN_STORAGE_KEY = "epas_auth_token";
 
-import { DocumentIcon, DownIcon, FactIcon } from "./icons";
+const GET_ME = gql`
+  query GetNavbarMe {
+    me {
+      id
+      firstName
+      lastName
+    }
+  }
+`;
 
 const navItems = [
   { icon: <BiHome className="w-4 h-4" />, label: "Нүүр", href: "/employee" },
@@ -29,32 +41,22 @@ function isActivePath(pathname: string, href: string) {
 
 export function Navbar() {
   const pathname = usePathname();
-  const [employee, setEmployee] = useState<Employee | null>(null);
+  const authToken =
+    typeof window === "undefined"
+      ? ""
+      : window.localStorage.getItem(TOKEN_STORAGE_KEY) ?? "";
 
-  const hydrateNavbar = useEffectEvent(async (token: string) => {
-    try {
-      const me = await fetchMe(token);
-      setEmployee(me);
-    } catch {
-      setEmployee(null);
-    }
+  const { data } = useQuery<{ me: Employee | null }>(GET_ME, {
+    skip: !authToken || pathname === "/" || pathname.startsWith("/auth"),
+    context: {
+      headers: buildGraphQLHeaders({ authToken }),
+    },
+    fetchPolicy: "cache-first",
   });
-
-  useEffect(() => {
-    if (pathname === "/" || pathname.startsWith("/auth")) {
-      return;
-    }
-
-    const storedToken = window.localStorage.getItem(TOKEN_STORAGE_KEY);
-    if (!storedToken) {
-      return;
-    }
-
-    void hydrateNavbar(storedToken);
-  }, [pathname]);
 
   if (pathname === "/" || pathname.startsWith("/auth")) return null;
 
+  const employee = data?.me ?? null;
   const displayName = employee
     ? `${employee.lastName} ${employee.firstName}`
     : "Employee";

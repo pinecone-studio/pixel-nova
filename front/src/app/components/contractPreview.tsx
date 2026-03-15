@@ -1,10 +1,12 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { gql } from "@apollo/client";
+import { useLazyQuery } from "@apollo/client/react";
+import { useMemo, useState } from "react";
 import { VscPreview } from "react-icons/vsc";
 import { BiDownload, BiX } from "react-icons/bi";
 
-import { fetchDocumentContent } from "@/lib/api";
+import { buildGraphQLHeaders } from "@/lib/apollo-client";
 import type { Document, DocumentContent } from "@/lib/types";
 
 import { DocumentIcon } from "./icons";
@@ -13,6 +15,17 @@ type ContractPreviewProps = {
   document: Document;
   authToken: string;
 };
+
+const GET_DOCUMENT_CONTENT = gql`
+  query GetContractPreviewDocumentContent($documentId: ID!) {
+    documentContent(documentId: $documentId) {
+      id
+      documentName
+      contentType
+      content
+    }
+  }
+`;
 
 function formatDate(value: string) {
   return new Date(value).toLocaleDateString("mn-MN", {
@@ -39,55 +52,53 @@ export const ContractPreview = ({
   authToken,
 }: ContractPreviewProps) => {
   const [previewOpen, setPreviewOpen] = useState(false);
-  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [content, setContent] = useState<DocumentContent | null>(null);
 
+  const [loadContent, { data, loading }] = useLazyQuery<{
+    documentContent: DocumentContent | null;
+  }>(GET_DOCUMENT_CONTENT, {
+    fetchPolicy: "network-only",
+  });
+
+  const content = data?.documentContent ?? null;
   const previewUrl = useMemo(() => {
     if (!content) return null;
     return buildDataUrl(content);
   }, [content]);
 
-  useEffect(() => {
-    return () => {
-      if (previewUrl?.startsWith("blob:")) {
-        URL.revokeObjectURL(previewUrl);
-      }
-    };
-  }, [previewUrl]);
+  async function ensureContent() {
+    if (content) return content;
 
-  async function loadContent() {
-    if (content || loading) return;
+    const result = await loadContent({
+      variables: { documentId: document.id },
+      context: {
+        headers: buildGraphQLHeaders({ authToken }),
+      },
+    });
 
-    setLoading(true);
-    setError(null);
-
-    try {
-      const result = await fetchDocumentContent(document.id, authToken);
-      if (!result) {
-        throw new Error("Баримтын агуулга олдсонгүй.");
-      }
-      setContent(result);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Баримтыг нээж чадсангүй.");
-    } finally {
-      setLoading(false);
+    const nextContent = result.data?.documentContent ?? null;
+    if (!nextContent) {
+      throw new Error("Баримтын агуулга олдсонгүй.");
     }
+    return nextContent;
   }
 
   async function handlePreview() {
     setPreviewOpen(true);
-    await loadContent();
+    setError(null);
+
+    try {
+      await ensureContent();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Баримтыг нээж чадсангүй.");
+    }
   }
 
   async function handleDownload() {
-    try {
-      await loadContent();
-      const currentContent = content ?? (await fetchDocumentContent(document.id, authToken));
-      if (!currentContent) {
-        throw new Error("Татах файл олдсонгүй.");
-      }
+    setError(null);
 
+    try {
+      const currentContent = await ensureContent();
       const href = buildDataUrl(currentContent);
       const link = window.document.createElement("a");
       link.href = href;
@@ -140,9 +151,7 @@ export const ContractPreview = ({
           </button>
         </div>
 
-        {error ? (
-          <p className="mt-3 text-xs text-red-400">{error}</p>
-        ) : null}
+        {error ? <p className="mt-3 text-xs text-red-400">{error}</p> : null}
       </div>
 
       {previewOpen && (
