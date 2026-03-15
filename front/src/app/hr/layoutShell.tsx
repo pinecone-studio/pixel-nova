@@ -1,7 +1,7 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import { Navbar } from "../components/navbarSection";
+import { Navbar } from "@/components/navbarSection";
 
 export default function LayoutShell({
   children,

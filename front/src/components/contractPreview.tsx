@@ -1,12 +1,12 @@
 "use client";
 
-import { gql } from "@apollo/client";
 import { useLazyQuery } from "@apollo/client/react";
 import { useMemo, useState } from "react";
 import { VscPreview } from "react-icons/vsc";
 import { BiDownload, BiX } from "react-icons/bi";
 
 import { buildGraphQLHeaders } from "@/lib/apollo-client";
+import { GET_DOCUMENT_CONTENT } from "@/graphql/queries";
 import type { Document, DocumentContent } from "@/lib/types";
 
 import { DocumentIcon } from "./icons";
@@ -16,16 +16,6 @@ type ContractPreviewProps = {
   authToken: string;
 };
 
-const GET_DOCUMENT_CONTENT = gql`
-  query GetContractPreviewDocumentContent($documentId: ID!) {
-    documentContent(documentId: $documentId) {
-      id
-      documentName
-      contentType
-      content
-    }
-  }
-`;
 
 function formatDate(value: string) {
   return new Date(value).toLocaleDateString("mn-MN", {

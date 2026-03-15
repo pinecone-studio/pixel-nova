@@ -1,39 +1,13 @@
-import { gql } from "@apollo/client";
 import { useMutation } from "@apollo/client/react";
 import { useState } from "react";
 import { BiCalendar, BiChevronDown, BiChevronRight, BiFile, BiPlus } from "react-icons/bi";
+import { FiCheck, FiSend, FiUploadCloud, FiX } from "react-icons/fi";
 
 import { buildGraphQLHeaders } from "@/lib/apollo-client";
+import { SUBMIT_LEAVE_REQUEST } from "@/graphql/mutations";
 import type { LeaveRequest } from "@/lib/types";
 
 const TOKEN_KEY = "epas_auth_token";
-
-const SUBMIT_LEAVE_REQUEST = gql`
-  mutation SubmitLeaveRequest(
-    $type: String!
-    $startTime: String!
-    $endTime: String!
-    $reason: String!
-  ) {
-    submitLeaveRequest(
-      type: $type
-      startTime: $startTime
-      endTime: $endTime
-      reason: $reason
-    ) {
-      id
-      employeeId
-      type
-      startTime
-      endTime
-      reason
-      status
-      note
-      createdAt
-      updatedAt
-    }
-  }
-`;
 
 const DIALOG_BG = "bg-[#030810]";
 const DIALOG_BORDER = "border-[#1a2035]";
@@ -43,10 +17,7 @@ const TEXTAREA_CLASS = `w-full bg-[#040d18] border border-[#1a2035] rounded-lg p
 function CloseBtn({ onClick }: { onClick: () => void }) {
   return (
     <button onClick={onClick} className="text-gray-500 hover:text-white transition-colors">
-      <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-        <line x1="18" y1="6" x2="6" y2="18" />
-        <line x1="6" y1="6" x2="18" y2="18" />
-      </svg>
+      <FiX className="w-5 h-5" />
     </button>
   );
 }
@@ -58,10 +29,7 @@ function SendBtn({ onClick, disabled }: { onClick?: () => void; disabled?: boole
       disabled={disabled}
       className="bg-[#00CC99] hover:bg-[#00b388] disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-medium px-5 py-2.5 rounded-lg flex items-center gap-2 transition-colors"
     >
-      <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-        <line x1="22" y1="2" x2="11" y2="13" />
-        <polygon points="22 2 15 22 11 13 2 9 22 2" />
-      </svg>
+      <FiSend className="w-4 h-4" />
       {disabled ? "Илгээж байна..." : "Илгээх"}
     </button>
   );
@@ -118,11 +86,7 @@ function UploadArea({ label, subtitle }: { label: string; subtitle?: string }) {
     <div className="flex flex-col gap-1.5">
       <span className="text-sm font-medium text-white">{label}</span>
       <div className="border border-dashed border-[#1a2035] rounded-xl p-7 flex flex-col items-center gap-2 hover:border-[#00CC99]/30 transition-colors cursor-pointer">
-        <svg xmlns="http://www.w3.org/2000/svg" className="w-8 h-8 text-gray-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-          <polyline points="16 16 12 12 8 16" />
-          <line x1="12" y1="12" x2="12" y2="21" />
-          <path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3" />
-        </svg>
+        <FiUploadCloud className="w-8 h-8 text-gray-500" />
         <p className="text-sm font-medium text-white">
           {subtitle ?? "Файл хавсаргах (заавал биш)"}
         </p>
@@ -296,9 +260,7 @@ export const Request = () => {
         <div className="fixed inset-0 flex items-center justify-center bg-black/60 backdrop-blur-sm z-50">
           <div className={`w-[360px] rounded-2xl ${DIALOG_BG} text-white p-8 border ${DIALOG_BORDER} shadow-2xl flex flex-col items-center gap-4`}>
             <div className="w-14 h-14 rounded-full bg-[#00CC99]/15 border border-[#00CC99]/30 flex items-center justify-center">
-              <svg xmlns="http://www.w3.org/2000/svg" className="w-7 h-7 text-[#00CC99]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                <polyline points="20 6 9 17 4 12" />
-              </svg>
+              <FiCheck className="w-7 h-7 text-[#00CC99]" />
             </div>
             <div className="text-center">
               <p className="text-white font-semibold text-lg">Хүсэлт амжилттай илгээгдлээ</p>

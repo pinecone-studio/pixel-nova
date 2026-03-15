@@ -1,6 +1,5 @@
 "use client";
 
-import { gql } from "@apollo/client";
 import { useQuery } from "@apollo/client/react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -9,21 +8,12 @@ import { GrNotification } from "react-icons/gr";
 import { RxAvatar } from "react-icons/rx";
 
 import { buildGraphQLHeaders } from "@/lib/apollo-client";
+import { GET_ME } from "@/graphql/queries";
 import type { Employee } from "@/lib/types";
 
 import { DocumentIcon, DownIcon, FactIcon } from "./icons";
 
 const TOKEN_STORAGE_KEY = "epas_auth_token";
-
-const GET_ME = gql`
-  query GetNavbarMe {
-    me {
-      id
-      firstName
-      lastName
-    }
-  }
-`;
 
 const navItems = [
   { icon: <BiHome className="w-4 h-4" />, label: "Нүүр", href: "/employee" },
@@ -47,14 +37,20 @@ export function Navbar() {
       : window.localStorage.getItem(TOKEN_STORAGE_KEY) ?? "";
 
   const { data } = useQuery<{ me: Employee | null }>(GET_ME, {
-    skip: !authToken || pathname === "/" || pathname.startsWith("/auth"),
+    skip:
+      !authToken ||
+      pathname === "/" ||
+      pathname.startsWith("/auth") ||
+      pathname.startsWith("/hr"),
     context: {
       headers: buildGraphQLHeaders({ authToken }),
     },
     fetchPolicy: "cache-first",
   });
 
-  if (pathname === "/" || pathname.startsWith("/auth")) return null;
+  if (pathname === "/" || pathname.startsWith("/auth") || pathname.startsWith("/hr")) {
+    return null;
+  }
 
   const employee = data?.me ?? null;
   const displayName = employee

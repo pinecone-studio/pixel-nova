@@ -1,10 +1,11 @@
 "use client";
 
-import { gql } from "@apollo/client";
 import { useMutation, useQuery } from "@apollo/client/react";
 import { useMemo, useState } from "react";
 
 import { buildGraphQLHeaders } from "@/lib/apollo-client";
+import { UPSERT_EMPLOYEE } from "@/graphql/mutations";
+import { GET_EMPLOYEES } from "@/graphql/queries";
 import type { Employee, UpsertEmployeeInput } from "@/lib/types";
 import {
   AbsentIcon,
@@ -35,68 +36,14 @@ type EmployeeFormState = {
   status: string;
 };
 
-const GET_EMPLOYEES = gql`
-  query GetEmployees($search: String, $status: String, $department: String) {
-    employees(search: $search, status: $status, department: $department) {
-      id
-      employeeCode
-      firstName
-      lastName
-      firstNameEng
-      lastNameEng
-      entraId
-      email
-      imageUrl
-      github
-      department
-      branch
-      jobTitle
-      level
-      hireDate
-      terminationDate
-      status
-      numberOfVacationDays
-      isSalaryCompany
-      isKpi
-      birthDayAndMonth
-      birthdayPoster
-    }
-  }
-`;
-
-const UPSERT_EMPLOYEE = gql`
-  mutation UpsertEmployee($input: UpsertEmployeeInput!) {
-    upsertEmployee(input: $input) {
-      employee {
-        id
-        employeeCode
-        firstName
-        lastName
-        firstNameEng
-        lastNameEng
-        entraId
-        email
-        imageUrl
-        github
-        department
-        branch
-        jobTitle
-        level
-        hireDate
-        terminationDate
-        status
-        numberOfVacationDays
-        isSalaryCompany
-        isKpi
-        birthDayAndMonth
-        birthdayPoster
-      }
-      resolvedAction
-    }
-  }
-`;
-
-const DEPARTMENTS = ["Engineering", "HR", "Sales", "Finance", "Marketing", "Design"];
+const DEPARTMENTS = [
+  "Engineering",
+  "HR",
+  "Sales",
+  "Finance",
+  "Marketing",
+  "Design",
+];
 const STATUSES = ["Ð˜Ñ€ÑÑÐ½", "Ð¢Ð°ÑÐ°Ð»ÑÐ°Ð½", "Ð§Ó©Ð»Ó©Ó©Ñ‚ÑÐ¹"];
 const LEVELS = ["Junior", "Mid", "Senior", "Lead"];
 const BRANCHES = ["Ulaanbaatar", "Darkhan", "Erdenet", "Remote"];
@@ -146,7 +93,8 @@ function employeeToForm(employee?: Employee | null): EmployeeFormState {
     branch: employee?.branch ?? BRANCHES[0],
     jobTitle: employee?.jobTitle ?? "",
     level: employee?.level ?? LEVELS[0],
-    hireDate: employee?.hireDate?.slice(0, 10) ?? new Date().toISOString().slice(0, 10),
+    hireDate:
+      employee?.hireDate?.slice(0, 10) ?? new Date().toISOString().slice(0, 10),
     status: employee?.status ?? STATUSES[0],
   };
 }
@@ -164,7 +112,9 @@ function EmployeeModal({
   onClose: () => void;
   onSave: (value: EmployeeFormState) => Promise<void>;
 }) {
-  const [form, setForm] = useState<EmployeeFormState>(() => employeeToForm(employee));
+  const [form, setForm] = useState<EmployeeFormState>(() =>
+    employeeToForm(employee),
+  );
 
   function updateField<Key extends keyof EmployeeFormState>(
     key: Key,
@@ -176,20 +126,19 @@ function EmployeeModal({
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
-      onClick={onClose}
-    >
+      onClick={onClose}>
       <div
         className="w-[560px] max-w-[95vw] rounded-2xl bg-[#0f1520] p-6 flex flex-col gap-5 border border-slate-700/50"
-        onClick={(event) => event.stopPropagation()}
-      >
+        onClick={(event) => event.stopPropagation()}>
         <div className="flex items-center justify-between">
           <h2 className="text-white font-bold text-lg">
-            {mode === "add" ? "Ð¨Ð¸Ð½Ñ Ð°Ð¶Ð¸Ð»Ñ‚Ð°Ð½ Ð½ÑÐ¼ÑÑ…" : "ÐÐ¶Ð¸Ð»Ñ‚Ð½Ñ‹ Ð¼ÑÐ´ÑÑÐ»ÑÐ» Ð·Ð°ÑÐ°Ñ…"}
+            {mode === "add"
+              ? "Ð¨Ð¸Ð½Ñ Ð°Ð¶Ð¸Ð»Ñ‚Ð°Ð½ Ð½ÑÐ¼ÑÑ…"
+              : "ÐÐ¶Ð¸Ð»Ñ‚Ð½Ñ‹ Ð¼ÑÐ´ÑÑÐ»ÑÐ» Ð·Ð°ÑÐ°Ñ…"}
           </h2>
           <button
             onClick={onClose}
-            className="text-slate-400 hover:text-white transition-colors"
-          >
+            className="text-slate-400 hover:text-white transition-colors">
             âœ•
           </button>
         </div>
@@ -224,8 +173,7 @@ function EmployeeModal({
           <select
             value={form.department}
             onChange={(event) => updateField("department", event.target.value)}
-            className="bg-[#0f1520] border border-slate-700/60 rounded-xl px-3 py-2.5 text-slate-200 text-sm outline-none"
-          >
+            className="bg-[#0f1520] border border-slate-700/60 rounded-xl px-3 py-2.5 text-slate-200 text-sm outline-none">
             {DEPARTMENTS.map((department) => (
               <option key={department} value={department}>
                 {department}
@@ -243,16 +191,18 @@ function EmployeeModal({
         <div className="flex items-center justify-end gap-3">
           <button
             onClick={onClose}
-            className="px-5 py-2.5 rounded-xl border border-slate-600/50 text-slate-300 text-sm hover:bg-slate-800/50 transition-colors"
-          >
+            className="px-5 py-2.5 rounded-xl border border-slate-600/50 text-slate-300 text-sm hover:bg-slate-800/50 transition-colors">
             Ð¢Ð°Ñ‚Ð³Ð°Ð»Ð·Ð°Ñ…
           </button>
           <button
             onClick={() => void onSave(form)}
             disabled={saving}
-            className="px-5 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 disabled:opacity-60 text-black text-sm font-semibold transition-colors"
-          >
-            {saving ? "Ð¥Ð°Ð´Ð³Ð°Ð»Ð¶ Ð±Ð°Ð¹Ð½Ð°..." : mode === "add" ? "ÐÑÐ¼ÑÑ…" : "Ð¥Ð°Ð´Ð³Ð°Ð»Ð°Ñ…"}
+            className="px-5 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 disabled:opacity-60 text-black text-sm font-semibold transition-colors">
+            {saving
+              ? "Ð¥Ð°Ð´Ð³Ð°Ð»Ð¶ Ð±Ð°Ð¹Ð½Ð°..."
+              : mode === "add"
+                ? "ÐÑÐ¼ÑÑ…"
+                : "Ð¥Ð°Ð´Ð³Ð°Ð»Ð°Ñ…"}
           </button>
         </div>
       </div>
@@ -272,21 +222,21 @@ function EmployeeCard({
       <div className="flex items-start justify-between">
         <div className="flex items-center gap-3">
           <div
-            className={`w-11 h-11 rounded-xl ${avatarColor(employee.id)} flex items-center justify-center text-white font-bold text-sm flex-shrink-0`}
-          >
+            className={`w-11 h-11 rounded-xl ${avatarColor(employee.id)} flex items-center justify-center text-white font-bold text-sm shrink-0`}>
             {getInitials(employee)}
           </div>
           <div>
             <p className="text-white font-semibold text-sm">
               {employee.lastName} {employee.firstName}
             </p>
-            <p className="text-slate-500 text-xs">{employee.jobTitle || employee.level}</p>
+            <p className="text-slate-500 text-xs">
+              {employee.jobTitle || employee.level}
+            </p>
             <p className="text-slate-600 text-xs">{employee.employeeCode}</p>
           </div>
         </div>
         <span
-          className={`text-xs px-2.5 py-1 rounded-full font-medium ${statusStyle(employee.status)}`}
-        >
+          className={`text-xs px-2.5 py-1 rounded-full font-medium ${statusStyle(employee.status)}`}>
           {employee.status}
         </span>
       </div>
@@ -321,8 +271,7 @@ function EmployeeCard({
         </div>
         <button
           onClick={() => onEdit(employee)}
-          className="h-7 px-3 rounded-lg border border-slate-700/50 text-slate-400 text-xs hover:text-white hover:border-slate-500 transition-colors"
-        >
+          className="h-7 px-3 rounded-lg border border-slate-700/50 text-slate-400 text-xs hover:text-white hover:border-slate-500 transition-colors">
           Ð—Ð°ÑÐ°Ñ…
         </button>
       </div>
@@ -366,7 +315,7 @@ export function WorkersComponent() {
     awaitRefetchQueries: true,
   });
 
-  const employees = data?.employees ?? [];
+  const employees = useMemo(() => data?.employees ?? [], [data]);
 
   const filtered = useMemo(
     () =>
@@ -383,8 +332,12 @@ export function WorkersComponent() {
     [employees, search],
   );
 
-  const totalActive = employees.filter((employee) => employee.status === "Ð˜Ñ€ÑÑÐ½").length;
-  const totalOnLeave = employees.filter((employee) => employee.status === "Ð§Ó©Ð»Ó©Ó©Ñ‚ÑÐ¹").length;
+  const totalActive = employees.filter(
+    (employee) => employee.status === "Ð˜Ñ€ÑÑÐ½",
+  ).length;
+  const totalOnLeave = employees.filter(
+    (employee) => employee.status === "Ð§Ó©Ð»Ó©Ó©Ñ‚ÑÐ¹",
+  ).length;
   const totalNewThisMonth = employees.filter((employee) => {
     const hireDate = new Date(employee.hireDate);
     const now = new Date();
@@ -430,7 +383,11 @@ export function WorkersComponent() {
       setShowAdd(false);
       setEditEmp(null);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Ð¥Ð°Ð´Ð³Ð°Ð»Ð¶ Ñ‡Ð°Ð´ÑÐ°Ð½Ð³Ò¯Ð¹.");
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Ð¥Ð°Ð´Ð³Ð°Ð»Ð¶ Ñ‡Ð°Ð´ÑÐ°Ð½Ð³Ò¯Ð¹.",
+      );
     }
   }
 
@@ -454,20 +411,26 @@ export function WorkersComponent() {
         />
       ) : null}
 
-      <div className="grid gap-4" style={{ gridTemplateColumns: "1.4fr 1fr 1fr" }}>
-        <div className="rounded-2xl border border-slate-700/40 bg-gradient-to-br from-green-700/30 to-black p-5">
+      <div
+        className="grid gap-4"
+        style={{ gridTemplateColumns: "1.4fr 1fr 1fr" }}>
+        <div className="rounded-2xl border border-slate-700/40 bg-linear-to-br from-green-700/30 to-black p-5">
           <p className="text-slate-500 text-xs font-semibold uppercase tracking-widest mb-3">
             ÐÐ¸Ð¹Ñ‚ Ð°Ð¶Ð¸Ð»Ñ‡Ð¸Ð´
           </p>
           <div className="flex items-end justify-between">
             <div>
               <div className="flex items-center gap-3">
-                <p className="text-6xl font-bold text-white">{employees.length}</p>
+                <p className="text-6xl font-bold text-white">
+                  {employees.length}
+                </p>
                 <span className="px-2 py-1 rounded-lg bg-emerald-500/15 text-emerald-400 text-xs font-semibold">
                   Real data
                 </span>
               </div>
-              <p className="text-slate-500 text-sm mt-1">Backend employee Ð¶Ð°Ð³ÑÐ°Ð°Ð»Ñ‚</p>
+              <p className="text-slate-500 text-sm mt-1">
+                Backend employee Ð¶Ð°Ð³ÑÐ°Ð°Ð»Ñ‚
+              </p>
             </div>
             <div className="w-12 h-12 rounded-xl bg-emerald-500/20 flex items-center justify-center">
               <HiredIcon />
@@ -475,7 +438,7 @@ export function WorkersComponent() {
           </div>
         </div>
 
-        <div className="rounded-2xl border border-cyan-600/30 bg-gradient-to-br from-cyan-600/15 to-transparent p-5">
+        <div className="rounded-2xl border border-cyan-600/30 bg-linear-to-br from-cyan-600/15 to-transparent p-5">
           <div className="flex items-start justify-between mb-3">
             <p className="text-slate-500 text-xs font-semibold uppercase tracking-widest">
               Ð˜Ð´ÑÐ²Ñ…Ñ‚ÑÐ¹
@@ -488,7 +451,7 @@ export function WorkersComponent() {
         </div>
 
         <div className="flex flex-col gap-4">
-          <div className="rounded-2xl border border-emerald-600/30 bg-gradient-to-br from-emerald-600/15 to-transparent p-4 flex-1">
+          <div className="rounded-2xl border border-emerald-600/30 bg-linear-to-br from-emerald-600/15 to-transparent p-4 flex-1">
             <p className="text-slate-500 text-xs uppercase tracking-widest mb-2">
               Ð­Ð½Ñ ÑÐ°Ñ€
             </p>
@@ -497,7 +460,7 @@ export function WorkersComponent() {
             </div>
             <p className="text-4xl font-bold text-white">{totalNewThisMonth}</p>
           </div>
-          <div className="rounded-2xl border border-purple-600/30 bg-gradient-to-br from-purple-600/15 to-transparent p-4 flex-1">
+          <div className="rounded-2xl border border-purple-600/30 bg-linear-to-br from-purple-600/15 to-transparent p-4 flex-1">
             <p className="text-slate-500 text-xs uppercase tracking-widest mb-2">
               Ð§Ó©Ð»Ó©Ó©Ñ‚ÑÐ¹
             </p>
@@ -535,7 +498,9 @@ export function WorkersComponent() {
         </div>
       ) : null}
 
-      <p className="text-slate-500 text-sm">ÐÐ¸Ð¹Ñ‚ {filtered.length} Ð°Ð¶Ð¸Ð»Ñ‚Ð°Ð½</p>
+      <p className="text-slate-500 text-sm">
+        ÐÐ¸Ð¹Ñ‚ {filtered.length} Ð°Ð¶Ð¸Ð»Ñ‚Ð°Ð½
+      </p>
 
       {loading ? (
         <div className="py-12 flex items-center justify-center gap-3 text-slate-500 text-sm">
@@ -557,8 +522,7 @@ export function WorkersComponent() {
       <div className="flex justify-end mt-2">
         <button
           onClick={() => setShowAdd(true)}
-          className="flex items-center cursor-pointer gap-2 px-5 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black font-semibold text-sm transition-colors shadow-lg shadow-emerald-500/20"
-        >
+          className="flex items-center cursor-pointer gap-2 px-5 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black font-semibold text-sm transition-colors shadow-lg shadow-emerald-500/20">
           <PlusIcon />
           ÐÐ¶Ð¸Ð»Ñ‚Ð°Ð½ Ð½ÑÐ¼ÑÑ…
         </button>

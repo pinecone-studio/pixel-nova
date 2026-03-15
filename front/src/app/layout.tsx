@@ -1,8 +1,12 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import { Navbar } from "./components/navbarSection";
-import { FooterSection } from "./components/footerSection";
+import { Navbar } from "@/components/navbarSection";
+import { FooterSection } from "@/components/footerSection";
 import { ApolloAppProvider } from "@/lib/apollo-provider";
+import { Geist } from "next/font/google";
+import { cn } from "@/lib/utils";
+
+const geist = Geist({subsets:['latin'],variable:'--font-sans'});
 
 export const metadata: Metadata = {
   title: "EPAS - Employee Paperwork Automation System",
@@ -15,7 +19,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="mn">
+    <html lang="mn" className={cn("font-sans", geist.variable)}>
       <body>
         <ApolloAppProvider>
           <div className="min-h-screen bg-[#0A0A0F]">

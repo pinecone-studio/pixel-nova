@@ -1,12 +1,12 @@
 "use client";
 
-import { gql } from "@apollo/client";
 import { useQuery } from "@apollo/client/react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 import { buildGraphQLHeaders } from "@/lib/apollo-client";
+import { GET_ME } from "@/graphql/queries";
 import type { Employee } from "@/lib/types";
 
 import {
@@ -25,35 +25,9 @@ import {
   Salbar,
   Senior,
   TursunUdur,
-} from "../components/icons";
+} from "@/components/icons";
 
 const TOKEN_STORAGE_KEY = "epas_auth_token";
-
-const GET_ME = gql`
-  query GetProfileMe {
-    me {
-      id
-      employeeCode
-      firstName
-      lastName
-      firstNameEng
-      lastNameEng
-      department
-      branch
-      jobTitle
-      level
-      email
-      status
-      hireDate
-      imageUrl
-      github
-      entraId
-      birthDayAndMonth
-      isKpi
-      isSalaryCompany
-    }
-  }
-`;
 
 function formatHireDate(value?: string | null) {
   if (!value) return "Мэдээлэлгүй";

@@ -1,10 +1,15 @@
 "use client";
 
-import { gql } from "@apollo/client";
 import { useApolloClient, useLazyQuery, useQuery } from "@apollo/client/react";
 import { useEffect, useMemo, useState } from "react";
+import { FiDownload, FiEye, FiFileText, FiX } from "react-icons/fi";
 
 import { buildGraphQLHeaders } from "@/lib/apollo-client";
+import {
+  GET_AUDIT_LOGS,
+  GET_DOCUMENT_CONTENT,
+  GET_DOCUMENTS,
+} from "@/graphql/queries";
 import type { AuditLog, Document, DocumentContent } from "@/lib/types";
 import {
   CheckCircle,
@@ -25,51 +30,6 @@ type LogEntry = {
   docs: LogDocument[];
 };
 
-const GET_AUDIT_LOGS = gql`
-  query GetAuditLogsForComponent {
-    auditLogs {
-      id
-      employeeId
-      action
-      phase
-      actorId
-      actorRole
-      documentIds
-      recipientRoles
-      recipientEmails
-      incompleteFields
-      documentsGenerated
-      notificationAttempted
-      recipientsNotified
-      notificationError
-      timestamp
-    }
-  }
-`;
-
-const GET_DOCUMENTS = gql`
-  query GetAuditDocuments($employeeId: ID!) {
-    documents(employeeId: $employeeId) {
-      id
-      employeeId
-      action
-      documentName
-      storageUrl
-      createdAt
-    }
-  }
-`;
-
-const GET_DOCUMENT_CONTENT = gql`
-  query GetAuditDocumentContent($documentId: ID!) {
-    documentContent(documentId: $documentId) {
-      id
-      documentName
-      contentType
-      content
-    }
-  }
-`;
 
 function buildDataUrl(content: DocumentContent) {
   if (content.contentType === "application/pdf") {
@@ -111,59 +71,13 @@ function statusLabel(entry: AuditLog) {
   return "Хэсэгчлэн";
 }
 
-const EyeIcon = () => (
-  <svg width="14" height="14" fill="none" viewBox="0 0 24 24">
-    <path
-      d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"
-      stroke="currentColor"
-      strokeWidth="1.6"
-    />
-    <circle cx="12" cy="12" r="3" stroke="currentColor" strokeWidth="1.6" />
-  </svg>
-);
+const EyeIcon = () => <FiEye className="h-3.5 w-3.5" />;
 
-const DownloadIcon = () => (
-  <svg width="14" height="14" fill="none" viewBox="0 0 24 24">
-    <path
-      d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"
-      stroke="currentColor"
-      strokeWidth="1.6"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-  </svg>
-);
+const DownloadIcon = () => <FiDownload className="h-3.5 w-3.5" />;
 
-const CloseIcon = () => (
-  <svg width="18" height="18" fill="none" viewBox="0 0 24 24">
-    <path
-      d="M18 6L6 18M6 6l12 12"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-    />
-  </svg>
-);
+const CloseIcon = () => <FiX className="h-[18px] w-[18px]" />;
 
-const DocBigIcon = () => (
-  <svg width="48" height="48" fill="none" viewBox="0 0 24 24">
-    <rect
-      x="4"
-      y="3"
-      width="16"
-      height="18"
-      rx="2"
-      stroke="#60a5fa"
-      strokeWidth="1.4"
-    />
-    <path
-      d="M8 8h8M8 12h8M8 16h5"
-      stroke="#60a5fa"
-      strokeWidth="1.4"
-      strokeLinecap="round"
-    />
-  </svg>
-);
+const DocBigIcon = () => <FiFileText className="h-12 w-12 text-blue-400" />;
 
 function DocumentModal({
   doc,

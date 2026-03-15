@@ -1,10 +1,15 @@
 "use client";
 
-import { gql } from "@apollo/client";
 import { useApolloClient, useMutation, useQuery } from "@apollo/client/react";
-import { useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { buildGraphQLHeaders } from "@/lib/apollo-client";
+import { UPLOAD_HR_DOCUMENT } from "@/graphql/mutations";
+import {
+  GET_DOCUMENT_CONTENT,
+  GET_DOCUMENTS,
+  GET_EMPLOYEES,
+} from "@/graphql/queries";
 import type { Document, DocumentContent, Employee } from "@/lib/types";
 import {
   ActiveIcon,
@@ -17,72 +22,6 @@ import {
   ReqIcon,
   SearchIcon,
 } from "./icons";
-
-const GET_EMPLOYEES = gql`
-  query GetEmployees($search: String, $status: String, $department: String) {
-    employees(search: $search, status: $status, department: $department) {
-      id
-      employeeCode
-      firstName
-      lastName
-      firstNameEng
-      lastNameEng
-      entraId
-      email
-      imageUrl
-      github
-      department
-      branch
-      jobTitle
-      level
-      hireDate
-      terminationDate
-      status
-      numberOfVacationDays
-      isSalaryCompany
-      isKpi
-      birthDayAndMonth
-      birthdayPoster
-    }
-  }
-`;
-
-const GET_DOCUMENTS = gql`
-  query GetDocuments($employeeId: ID!) {
-    documents(employeeId: $employeeId) {
-      id
-      employeeId
-      action
-      documentName
-      storageUrl
-      createdAt
-    }
-  }
-`;
-
-const GET_DOCUMENT_CONTENT = gql`
-  query GetDocumentContent($documentId: ID!) {
-    documentContent(documentId: $documentId) {
-      id
-      documentName
-      contentType
-      content
-    }
-  }
-`;
-
-const UPLOAD_HR_DOCUMENT = gql`
-  mutation UploadHrDocument($input: UploadHrDocumentInput!) {
-    uploadHrDocument(input: $input) {
-      id
-      employeeId
-      action
-      documentName
-      storageUrl
-      createdAt
-    }
-  }
-`;
 
 type FileRow = {
   document: Document;
@@ -128,7 +67,10 @@ function fileToBase64(file: File) {
       const base64 = result.split(",", 2)[1] ?? "";
       resolve(base64);
     };
-    reader.onerror = () => reject(reader.error ?? new Error("Ð¤Ð°Ð¹Ð» ÑƒÐ½ÑˆÐ¸Ð¶ Ñ‡Ð°Ð´ÑÐ°Ð½Ð³Ò¯Ð¹."));
+    reader.onerror = () =>
+      reject(
+        reader.error ?? new Error("Ð¤Ð°Ð¹Ð» ÑƒÐ½ÑˆÐ¸Ð¶ Ñ‡Ð°Ð´ÑÐ°Ð½Ð³Ò¯Ð¹."),
+      );
     reader.readAsDataURL(file);
   });
 }
@@ -149,14 +91,13 @@ function FilePreviewModal({
     [],
   );
 
-  const { data, loading, error } = useQuery<{ documentContent: DocumentContent | null }>(
-    GET_DOCUMENT_CONTENT,
-    {
-      variables: { documentId: row.document.id },
-      context: queryContext,
-      fetchPolicy: "network-only",
-    },
-  );
+  const { data, loading, error } = useQuery<{
+    documentContent: DocumentContent | null;
+  }>(GET_DOCUMENT_CONTENT, {
+    variables: { documentId: row.document.id },
+    context: queryContext,
+    fetchPolicy: "network-only",
+  });
 
   const content = data?.documentContent ?? null;
 
@@ -174,12 +115,10 @@ function FilePreviewModal({
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/65 backdrop-blur-sm"
-      onClick={onClose}
-    >
+      onClick={onClose}>
       <div
         className="relative w-[760px] max-w-[95vw] bg-[#0f1520] rounded-3xl border border-slate-700/50 shadow-2xl overflow-hidden"
-        onClick={(event) => event.stopPropagation()}
-      >
+        onClick={(event) => event.stopPropagation()}>
         <div className="flex items-center justify-between px-6 py-4 border-b border-slate-700/40">
           <div>
             <p className="text-white font-semibold text-base">
@@ -193,8 +132,7 @@ function FilePreviewModal({
           </div>
           <button
             onClick={onClose}
-            className="text-slate-400 hover:text-white transition-colors text-lg"
-          >
+            className="text-slate-400 hover:text-white transition-colors text-lg">
             âœ•
           </button>
         </div>
@@ -211,11 +149,12 @@ function FilePreviewModal({
           ) : mode === "download" ? (
             <div className="w-full h-full rounded-2xl border border-slate-700/40 flex flex-col items-center justify-center gap-4">
               <ReqIcon />
-              <p className="text-white text-sm font-medium">{row.document.documentName}</p>
+              <p className="text-white text-sm font-medium">
+                {row.document.documentName}
+              </p>
               <button
                 onClick={handleDownload}
-                className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black font-semibold text-sm transition-colors"
-              >
+                className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black font-semibold text-sm transition-colors">
                 <DownloadIcon />
                 Ð¢Ð°Ñ‚Ð°Ñ…
               </button>
@@ -303,7 +242,11 @@ function NewDocModal({
       await onUploaded();
       onClose();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Ð‘Ð°Ñ€Ð¸Ð¼Ñ‚ upload Ñ…Ð¸Ð¹Ð¶ Ñ‡Ð°Ð´ÑÐ°Ð½Ð³Ò¯Ð¹.");
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Ð‘Ð°Ñ€Ð¸Ð¼Ñ‚ upload Ñ…Ð¸Ð¹Ð¶ Ñ‡Ð°Ð´ÑÐ°Ð½Ð³Ò¯Ð¹.",
+      );
     } finally {
       setSaving(false);
     }
@@ -312,18 +255,15 @@ function NewDocModal({
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/65 backdrop-blur-sm"
-      onClick={onClose}
-    >
+      onClick={onClose}>
       <div
         className="relative w-[520px] max-w-[95vw] bg-[#0f1520] rounded-3xl border border-slate-700/50 shadow-2xl p-7 flex flex-col gap-4"
-        onClick={(event) => event.stopPropagation()}
-      >
+        onClick={(event) => event.stopPropagation()}>
         <div className="flex items-center justify-between">
           <h2 className="text-white text-xl font-bold">Ð¨Ð¸Ð½Ñ Ð±Ð°Ñ€Ð¸Ð¼Ñ‚</h2>
           <button
             onClick={onClose}
-            className="text-slate-400 hover:text-white transition-colors text-lg"
-          >
+            className="text-slate-400 hover:text-white transition-colors text-lg">
             âœ•
           </button>
         </div>
@@ -333,11 +273,11 @@ function NewDocModal({
           <select
             value={employeeId}
             onChange={(event) => setEmployeeId(event.target.value)}
-            className="h-11 rounded-xl border border-slate-700/50 bg-[#0d1117] px-3 text-sm text-white outline-none"
-          >
+            className="h-11 rounded-xl border border-slate-700/50 bg-[#0d1117] px-3 text-sm text-white outline-none">
             {employees.map((employee) => (
               <option key={employee.id} value={employee.id}>
-                {employee.lastName} {employee.firstName} ({employee.employeeCode})
+                {employee.lastName} {employee.firstName} (
+                {employee.employeeCode})
               </option>
             ))}
           </select>
@@ -377,15 +317,13 @@ function NewDocModal({
         <div className="flex justify-end gap-3 pt-2">
           <button
             onClick={onClose}
-            className="px-5 py-2.5 rounded-xl border border-slate-700/50 text-slate-300 text-sm"
-          >
+            className="px-5 py-2.5 rounded-xl border border-slate-700/50 text-slate-300 text-sm">
             Ð‘Ð¾Ð»Ð¸Ñ…
           </button>
           <button
             onClick={handleSubmit}
             disabled={saving}
-            className="px-5 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 disabled:opacity-60 text-black text-sm font-semibold transition-colors"
-          >
+            className="px-5 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 disabled:opacity-60 text-black text-sm font-semibold transition-colors">
             {saving ? "Ð˜Ð»Ð³ÑÑÐ¶ Ð±Ð°Ð¹Ð½Ð°..." : "Ð¥Ð°Ð´Ð³Ð°Ð»Ð°Ñ…"}
           </button>
         </div>
@@ -417,9 +355,9 @@ export function FilesComponent() {
     fetchPolicy: "cache-and-network",
   });
 
-  const employees = data?.employees ?? [];
+  const employees = useMemo(() => data?.employees ?? [], [data]);
 
-  async function loadRows() {
+  const loadRows = useCallback(async () => {
     setLoadingRows(true);
     setError(null);
 
@@ -456,21 +394,23 @@ export function FilesComponent() {
       setRows(nextRows);
     } catch (err) {
       setError(
-        err instanceof Error ? err.message : "Ð‘Ð°Ñ€Ð¸Ð¼Ñ‚ÑƒÑƒÐ´Ñ‹Ð³ Ð°Ñ‡Ð°Ð°Ð»Ð¶ Ñ‡Ð°Ð´ÑÐ°Ð½Ð³Ò¯Ð¹.",
+        err instanceof Error
+          ? err.message
+          : "Ð‘Ð°Ñ€Ð¸Ð¼Ñ‚ÑƒÑƒÐ´Ñ‹Ð³ Ð°Ñ‡Ð°Ð°Ð»Ð¶ Ñ‡Ð°Ð´ÑÐ°Ð½Ð³Ò¯Ð¹.",
       );
     } finally {
       setLoadingRows(false);
     }
-  }
+  }, [apolloClient, employees, queryContext]);
 
-  useMemo(() => {
+  useEffect(() => {
     if (employees.length === 0) {
       setRows([]);
       setLoadingRows(false);
       return;
     }
     void loadRows();
-  }, [employees]);
+  }, [employees, loadRows]);
 
   const filtered = useMemo(
     () =>
@@ -553,7 +493,7 @@ export function FilesComponent() {
         />
       ) : null}
 
-      <div className="w-[500px] flex-shrink-0 flex flex-col gap-5">
+      <div className="w-[500px] shrink-0 flex flex-col gap-5">
         <div>
           <p className="text-slate-400 text-lg font-semibold uppercase tracking-widest mb-3">
             ÐÐ¸Ð¹Ñ‚ Ð±Ð°Ñ€Ð¸Ð¼Ñ‚
@@ -566,7 +506,9 @@ export function FilesComponent() {
               <p className="text-6xl font-bold text-white">{filtered.length}</p>
               <div className="flex items-center justify-between mt-1">
                 <p className="text-slate-400 text-sm">ÐÐ¸Ð¹Ñ‚ Ð±Ð°Ñ€Ð¸Ð¼Ñ‚</p>
-                <p className="text-emerald-400 text-sm font-semibold">Live data</p>
+                <p className="text-emerald-400 text-sm font-semibold">
+                  Live data
+                </p>
               </div>
             </div>
           </div>
@@ -580,20 +522,22 @@ export function FilesComponent() {
             {stages.map((stage) => (
               <div
                 key={stage.label}
-                className={`rounded-2xl border w-[415px] h-[88px] ${stage.border} ${stage.bg} p-4 flex items-center justify-between`}
-              >
+                className={`rounded-2xl border w-[415px] h-[88px] ${stage.border} ${stage.bg} p-4 flex items-center justify-between`}>
                 <div className="flex items-center gap-3">
                   <div
-                    className={`w-9 h-9 rounded-xl ${stage.iconBg} flex items-center justify-center flex-shrink-0`}
-                  >
+                    className={`w-9 h-9 rounded-xl ${stage.iconBg} flex items-center justify-center shrink-0`}>
                     {stage.icon}
                   </div>
                   <div>
-                    <p className="text-white text-sm font-semibold">{stage.label}</p>
+                    <p className="text-white text-sm font-semibold">
+                      {stage.label}
+                    </p>
                     <p className="text-slate-500 text-xs">{stage.sub}</p>
                   </div>
                 </div>
-                <span className="text-white text-2xl font-bold">{stage.count}</span>
+                <span className="text-white text-2xl font-bold">
+                  {stage.count}
+                </span>
               </div>
             ))}
           </div>
@@ -616,9 +560,10 @@ export function FilesComponent() {
 
           <div
             className="grid items-center px-5 py-3.5 border-b border-slate-700/40 bg-slate-800/20"
-            style={{ gridTemplateColumns: "2fr 1.3fr 1fr 1fr 0.9fr" }}
-          >
-            <span className="text-slate-400 font-medium">Ð‘Ð°Ñ€Ð¸Ð¼Ñ‚ Ð±Ð¸Ñ‡Ð¸Ð³</span>
+            style={{ gridTemplateColumns: "2fr 1.3fr 1fr 1fr 0.9fr" }}>
+            <span className="text-slate-400 font-medium">
+              Ð‘Ð°Ñ€Ð¸Ð¼Ñ‚ Ð±Ð¸Ñ‡Ð¸Ð³
+            </span>
             <span className="text-slate-400 font-medium">ÐÐ¶Ð¸Ð»Ñ‚Ð°Ð½</span>
             <span className="text-slate-400 font-medium">ÐžÐ³Ð½Ð¾Ð¾</span>
             <span className="text-slate-400 font-medium">Ð¢Ó©Ð»Ó©Ð²</span>
@@ -631,7 +576,9 @@ export function FilesComponent() {
               Ð£Ð½ÑˆÐ¸Ð¶ Ð±Ð°Ð¹Ð½Ð°...
             </div>
           ) : error ? (
-            <div className="py-12 text-center text-red-400 text-sm">{error}</div>
+            <div className="py-12 text-center text-red-400 text-sm">
+              {error}
+            </div>
           ) : filtered.length === 0 ? (
             <div className="py-12 text-center text-slate-500 text-sm">
               Ð‘Ð°Ñ€Ð¸Ð¼Ñ‚ Ð¾Ð»Ð´ÑÐ¾Ð½Ð³Ò¯Ð¹
@@ -641,13 +588,16 @@ export function FilesComponent() {
               <div
                 key={row.document.id}
                 className="grid items-center px-5 py-3.5 border-b border-slate-800/50 hover:bg-slate-800/20 transition-colors"
-                style={{ gridTemplateColumns: "2fr 1.3fr 1fr 1fr 0.9fr" }}
-              >
+                style={{ gridTemplateColumns: "2fr 1.3fr 1fr 1fr 0.9fr" }}>
                 <div className="flex items-center gap-2.5">
                   <ReqIcon />
                   <div>
-                    <p className="text-slate-200 text-sm">{row.document.documentName}</p>
-                    <p className="text-slate-500 text-xs">{row.document.action}</p>
+                    <p className="text-slate-200 text-sm">
+                      {row.document.documentName}
+                    </p>
+                    <p className="text-slate-500 text-xs">
+                      {row.document.action}
+                    </p>
                   </div>
                 </div>
                 <div>
@@ -674,14 +624,12 @@ export function FilesComponent() {
                 <div className="flex items-center gap-2">
                   <button
                     onClick={() => setPreviewRow(row)}
-                    className="w-7 h-7 flex items-center justify-center rounded-lg text-slate-400 hover:text-white hover:bg-slate-700/50 transition-colors"
-                  >
+                    className="w-7 h-7 flex items-center justify-center rounded-lg text-slate-400 hover:text-white hover:bg-slate-700/50 transition-colors">
                     <EyeIcon />
                   </button>
                   <button
                     onClick={() => setDownloadRow(row)}
-                    className="w-7 h-7 flex items-center justify-center rounded-lg text-slate-400 hover:text-white hover:bg-slate-700/50 transition-colors"
-                  >
+                    className="w-7 h-7 flex items-center justify-center rounded-lg text-slate-400 hover:text-white hover:bg-slate-700/50 transition-colors">
                     <DownloadIcon />
                   </button>
                 </div>
@@ -690,15 +638,16 @@ export function FilesComponent() {
           )}
 
           <div className="px-5 py-3.5">
-            <span className="text-slate-500 text-sm">ÐÐ¸Ð¹Ñ‚ {filtered.length} Ð±Ð°Ñ€Ð¸Ð¼Ñ‚</span>
+            <span className="text-slate-500 text-sm">
+              ÐÐ¸Ð¹Ñ‚ {filtered.length} Ð±Ð°Ñ€Ð¸Ð¼Ñ‚
+            </span>
           </div>
         </div>
 
         <div className="flex justify-end mt-4">
           <button
             onClick={() => setShowModal(true)}
-            className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black font-semibold text-sm transition-colors shadow-lg shadow-emerald-500/20"
-          >
+            className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black font-semibold text-sm transition-colors shadow-lg shadow-emerald-500/20">
             <PlusIcon />
             Ð¨Ð¸Ð½Ñ Ð±Ð°Ñ€Ð¸Ð¼Ñ‚
           </button>
