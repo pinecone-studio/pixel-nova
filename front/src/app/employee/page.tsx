@@ -1,81 +1,33 @@
 "use client";
 
-import { gql } from "@apollo/client";
 import { useQuery } from "@apollo/client/react";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { buildGraphQLHeaders } from "@/lib/apollo-client";
+import { GET_DOCUMENTS, GET_ME } from "@/graphql/queries";
 import type { Document, Employee } from "@/lib/types";
 
-import { ContractPreview } from "../components/contractPreview";
-import { FactIcon } from "../components/icons";
-import { Request } from "../components/request";
+import { ContractPreview } from "@/components/contractPreview";
+import { FactIcon } from "@/components/icons";
+import { Request } from "@/components/request";
 
 const TOKEN_STORAGE_KEY = "epas_auth_token";
 
-const GET_ME = gql`
-  query GetMe {
-    me {
-      id
-      employeeCode
-      firstName
-      lastName
-      firstNameEng
-      lastNameEng
-      department
-      branch
-      jobTitle
-      level
-      email
-      status
-      hireDate
-      imageUrl
-      github
-      entraId
-      birthDayAndMonth
-      isKpi
-      isSalaryCompany
-    }
-  }
-`;
-
-const GET_DOCUMENTS = gql`
-  query GetDocuments($employeeId: ID!) {
-    documents(employeeId: $employeeId) {
-      id
-      employeeId
-      action
-      documentName
-      storageUrl
-      createdAt
-    }
-  }
-`;
-
 export default function EmployeePage() {
   const router = useRouter();
-  const [authToken, setAuthToken] = useState("");
-  const [hydrated, setHydrated] = useState(false);
-
-  useEffect(() => {
-    const token = window.localStorage.getItem(TOKEN_STORAGE_KEY) ?? "";
-    if (!token) {
-      router.replace("/auth/employee");
-      setHydrated(true);
-      return;
-    }
-
-    setAuthToken(token);
-    setHydrated(true);
-  }, [router]);
+  const [authToken] = useState(() =>
+    typeof window === "undefined"
+      ? ""
+      : window.localStorage.getItem(TOKEN_STORAGE_KEY) ?? "",
+  );
 
   const {
     data: meData,
     loading: meLoading,
     error: meError,
   } = useQuery<{ me: Employee | null }>(GET_ME, {
-    skip: !hydrated || !authToken,
+    skip: !authToken,
     context: {
       headers: buildGraphQLHeaders({ authToken }),
     },
@@ -89,7 +41,7 @@ export default function EmployeePage() {
     loading: documentsLoading,
     error: documentsError,
   } = useQuery<{ documents: Document[] }>(GET_DOCUMENTS, {
-    skip: !hydrated || !authToken || !employee?.id,
+    skip: !authToken || !employee?.id,
     variables: {
       employeeId: employee?.id ?? "",
     },
@@ -100,17 +52,22 @@ export default function EmployeePage() {
   });
 
   useEffect(() => {
-    if (hydrated && !meLoading && !employee) {
+    if (!authToken) {
+      router.replace("/auth/employee");
+      return;
+    }
+
+    if (!meLoading && !employee) {
       window.localStorage.removeItem(TOKEN_STORAGE_KEY);
       router.replace("/auth/employee");
     }
-  }, [employee, hydrated, meLoading, router]);
+  }, [authToken, employee, meLoading, router]);
 
-  if (!hydrated || !authToken) {
+  const documents = useMemo(() => documentsData?.documents ?? [], [documentsData]);
+
+  if (!authToken) {
     return null;
   }
-
-  const documents = documentsData?.documents ?? [];
   const loading = meLoading || Boolean(employee?.id && documentsLoading);
   const error = meError?.message ?? documentsError?.message ?? null;
 

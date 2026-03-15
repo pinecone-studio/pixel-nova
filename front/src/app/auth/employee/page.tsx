@@ -1,37 +1,15 @@
 "use client";
 
-import { gql } from "@apollo/client";
 import { useMutation } from "@apollo/client/react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { BiArrowBack, BiUser } from "react-icons/bi";
 
+import { LOGIN_WITH_CODE } from "@/graphql/mutations";
 import type { AuthSession } from "@/lib/types";
 
 const TOKEN_STORAGE_KEY = "epas_auth_token";
-
-const LOGIN_WITH_CODE = gql`
-  mutation LoginWithCode($employeeCode: String!) {
-    loginWithCode(employeeCode: $employeeCode) {
-      token
-      expiresAt
-      employee {
-        id
-        employeeCode
-        firstName
-        lastName
-        department
-        branch
-        jobTitle
-        level
-        email
-        status
-        hireDate
-      }
-    }
-  }
-`;
 
 export default function EmployeeAuthPage() {
   const router = useRouter();
