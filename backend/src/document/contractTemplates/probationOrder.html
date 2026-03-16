@@ -24,7 +24,7 @@
         min-height: 29.7cm;
         background: #fff;
         margin: 0 auto 28px auto;
-        padding: 1.8cm 2cm 2cm 2.5cm;
+        padding: 2cm 2cm 2cm 2.5cm;
         box-shadow: 0 3px 18px rgba(0, 0, 0, 0.18);
         position: relative;
       }
@@ -131,7 +131,7 @@
           page-break-after: always;
           width: 21cm;
           min-height: 29.7cm;
-          padding: 1.8cm 2cm 2cm 2.5cm;
+          padding: 2cm 2cm 2cm 2.5cm;
         }
       }
     </style>
@@ -142,7 +142,9 @@
       <div class="page-num">1</div>
       <div class="doc-title">Туршилтаар ажиллуулах хөдөлмөрийн гэрээ</div>
       <div class="doc-meta">
-        <span>2023 оны ....сарын.....-ны өдөр</span>
+        <span>20<span class="d dxs">{{order_date_year_short}}</span> оны
+          <span class="d dxs">{{order_date_month}}</span> сарын
+          <span class="d dxs">{{order_date_day}}</span>-ны өдөр</span>
         <span>№<span class="d dsm">{{order_number}}</span></span>
         <span>Улаанбаатар хот</span>
       </div>
