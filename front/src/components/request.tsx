@@ -1,6 +1,12 @@
 import { useMutation } from "@apollo/client/react";
 import { useState } from "react";
-import { BiCalendar, BiChevronDown, BiChevronRight, BiFile, BiPlus } from "react-icons/bi";
+import {
+  BiCalendar,
+  BiChevronDown,
+  BiChevronRight,
+  BiFile,
+  BiPlus,
+} from "react-icons/bi";
 import { FiCheck, FiSend, FiUploadCloud, FiX } from "react-icons/fi";
 
 import { buildGraphQLHeaders } from "@/lib/apollo-client";
@@ -16,13 +22,22 @@ const TEXTAREA_CLASS = `w-full bg-[#040d18] border border-[#1a2035] rounded-lg p
 
 function CloseBtn({ onClick }: { onClick: () => void }) {
   return (
-    <button onClick={onClick} className="text-gray-500 hover:text-white transition-colors">
+    <button
+      onClick={onClick}
+      className="text-gray-500 hover:text-white transition-colors"
+    >
       <FiX className="w-5 h-5" />
     </button>
   );
 }
 
-function SendBtn({ onClick, disabled }: { onClick?: () => void; disabled?: boolean }) {
+function SendBtn({
+  onClick,
+  disabled,
+}: {
+  onClick?: () => void;
+  disabled?: boolean;
+}) {
   return (
     <button
       onClick={onClick}
@@ -67,7 +82,12 @@ function SelectField({
         {label}
       </label>
       <div className="relative">
-        <select id={id} className={INPUT_CLASS} value={value} onChange={(e) => onChange?.(e.target.value)}>
+        <select
+          id={id}
+          className={INPUT_CLASS}
+          value={value}
+          onChange={(e) => onChange?.(e.target.value)}
+        >
           <option value="">{placeholder}</option>
           {options.map((opt) => (
             <option key={opt} value={opt}>
@@ -139,14 +159,7 @@ export const Request = () => {
     setSendError(null);
 
     try {
-      if (activeTab === "Чөлөө авах") {
-        await sendRequest({
-          type: leaveType || "Ээлжийн амралт",
-          startTime: leaveStart || new Date().toISOString(),
-          endTime: leaveEnd || new Date().toISOString(),
-          reason: leaveReason,
-        });
-      } else if (activeTab === "Тойрох хуудас") {
+      if (activeTab === "Тойрох хуудас") {
         await sendRequest({
           type: `Тойрох хуудас${clearanceType ? ` - ${clearanceType}` : ""}`,
           startTime: new Date().toISOString(),
@@ -174,7 +187,9 @@ export const Request = () => {
         setClearanceReason("");
       }, 2000);
     } catch (err) {
-      setSendError(err instanceof Error ? err.message : "Алдаа гарлаа. Дахин оролдоно уу.");
+      setSendError(
+        err instanceof Error ? err.message : "Алдаа гарлаа. Дахин оролдоно уу.",
+      );
     }
   }
 
@@ -186,61 +201,58 @@ export const Request = () => {
 
   const quickActions = [
     {
-      icon: <BiCalendar className="w-5 h-5 text-[#00CC99]" />,
-      title: "Чөлөө авах",
-      desc: "Ээлжийн амралт, өвчний чөлөө",
-      bg: "border-[#123C77] bg-[radial-gradient(circle_at_top_left,_rgba(22,95,210,0.30),_transparent_38%),linear-gradient(180deg,#031224_0%,#03070d_100%)]",
-      iconBg: "border-[#0C3F61] bg-[linear-gradient(180deg,rgba(7,43,62,0.95)_0%,rgba(6,24,35,0.95)_100%)]",
+      icon: <BiFile className="w-5 h-5 text-[#2A8CFF]" />,
+      title: "Томилолт",
+      desc: "Томилолт авах хүсэлт",
+      bg: "border-[#0E6A3F] bg-[radial-gradient(circle_at_top_left,_rgba(12,137,74,0.30),_transparent_38%),linear-gradient(180deg,#05160e_0%,#04070c_100%)]",
+      iconBg:
+        "border-[#0E4360] bg-[linear-gradient(180deg,rgba(7,37,58,0.95)_0%,rgba(8,24,34,0.95)_100%)]",
     },
     {
       icon: <BiCalendar className="w-5 h-5 text-[#00CC99]" />,
       title: "Тойрох хуудас",
       desc: "Тойрох хуудас авах хүсэлт",
       bg: "border-[#5B269D] bg-[radial-gradient(circle_at_top_left,_rgba(129,81,244,0.30),_transparent_38%),linear-gradient(180deg,#180e2a_0%,#04070d_100%)]",
-      iconBg: "border-[#29397A] bg-[linear-gradient(180deg,rgba(27,29,75,0.95)_0%,rgba(16,18,38,0.95)_100%)]",
-    },
-    {
-      icon: <BiFile className="w-5 h-5 text-[#2A8CFF]" />,
-      title: "Томилолт",
-      desc: "Томилолт авах хүсэлт",
-      bg: "border-[#0E6A3F] bg-[radial-gradient(circle_at_top_left,_rgba(12,137,74,0.30),_transparent_38%),linear-gradient(180deg,#05160e_0%,#04070c_100%)]",
-      iconBg: "border-[#0E4360] bg-[linear-gradient(180deg,rgba(7,37,58,0.95)_0%,rgba(8,24,34,0.95)_100%)]",
+      iconBg:
+        "border-[#29397A] bg-[linear-gradient(180deg,rgba(27,29,75,0.95)_0%,rgba(16,18,38,0.95)_100%)]",
     },
   ];
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex items-baseline justify-between">
+      <div className="flex h-[50px] items-center justify-between">
         <div>
-          <h2 className="text-white text-xl font-semibold">Шуурхай үйлдлүүд</h2>
-          <p className="text-[#4A4A6A] text-sm mt-0.5">Хүсэлт илгээх</p>
+          <h2 className="text-white text-[19.5px] font-semibold">
+            Шуурхай үйлдлүүд
+          </h2>
+          <p className="text-[#4A4A6A] text-[14px] mt-0.5">Хүсэлт илгээх</p>
         </div>
         <a
           href="#"
-          className="flex items-center gap-1 text-[#00CC99] text-sm font-medium hover:underline"
+          className="flex items-center gap-1 text-[#00CC99] text-[14px] font-medium hover:underline"
         >
           Бүх хүсэлтүүд <BiChevronRight className="w-4 h-4" />
         </a>
       </div>
 
-      <div className="grid grid-cols-3 gap-6">
+      <div className="grid grid-cols-2 gap-4">
         {quickActions.map((action) => (
           <div
             key={action.title}
-            className={`${action.bg} flex min-h-[144px] items-center justify-between gap-4 rounded-[32px] border px-8 py-9 shadow-[0_0_0_1px_rgba(255,255,255,0.03)_inset]`}
+            className={`${action.bg} flex h-[136px] w-[520px] items-center justify-between gap-3 rounded-[16px] border px-6 py-6 shadow-[0_0_0_1px_rgba(255,255,255,0.03)_inset]`}
           >
             <div className="flex items-center gap-4">
               <div
-                className={`flex h-16 w-16 shrink-0 items-center justify-center rounded-[22px] border ${action.iconBg}`}
+                className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-[12px] border ${action.iconBg}`}
               >
                 {action.icon}
               </div>
 
-              <div className="max-w-[220px]">
-                <p className="text-[20px] font-semibold leading-7 text-white">
+              <div className="max-w-[260px]">
+                <p className="text-[16px] font-semibold leading-5 text-white">
                   {action.title}
                 </p>
-                <p className="mt-1 text-[16px] leading-6 text-[#7C8698]">
+                <p className="mt-1 text-[13px] leading-4 text-[#7C8698]">
                   {action.desc}
                 </p>
               </div>
@@ -248,9 +260,9 @@ export const Request = () => {
 
             <button
               onClick={() => setActiveTab(action.title)}
-              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-[#8B96A8] transition-colors hover:bg-white/5 hover:text-white"
+              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-[#8B96A8] transition-colors hover:bg-white/5 hover:text-white"
             >
-              <BiPlus className="h-8 w-8" />
+              <BiPlus className="h-5 w-5" />
             </button>
           </div>
         ))}
@@ -258,73 +270,19 @@ export const Request = () => {
 
       {submitted && activeTab && (
         <div className="fixed inset-0 flex items-center justify-center bg-black/60 backdrop-blur-sm z-50">
-          <div className={`w-[360px] rounded-2xl ${DIALOG_BG} text-white p-8 border ${DIALOG_BORDER} shadow-2xl flex flex-col items-center gap-4`}>
+          <div
+            className={`w-[360px] rounded-2xl ${DIALOG_BG} text-white p-8 border ${DIALOG_BORDER} shadow-2xl flex flex-col items-center gap-4`}
+          >
             <div className="w-14 h-14 rounded-full bg-[#00CC99]/15 border border-[#00CC99]/30 flex items-center justify-center">
               <FiCheck className="w-7 h-7 text-[#00CC99]" />
             </div>
             <div className="text-center">
-              <p className="text-white font-semibold text-lg">Хүсэлт амжилттай илгээгдлээ</p>
-              <p className="text-gray-500 text-sm mt-1">Таны хүсэлтийг хянаж үзнэ</p>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {activeTab === "Чөлөө авах" && !submitted && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black/60 backdrop-blur-sm z-50">
-          <div className={`w-[460px] rounded-2xl ${DIALOG_BG} text-white p-7 border ${DIALOG_BORDER} shadow-2xl flex flex-col gap-5`}>
-            <div className="flex justify-between items-start">
-              <div>
-                <h2 className="text-xl font-semibold">Чөлөөний хүсэлт</h2>
-                <p className="text-sm text-gray-500 mt-1">
-                  Таны чөлөө авах боломжит үлдэгдэл <span className="text-white font-medium">4 цаг.</span>
-                </p>
-              </div>
-              <CloseBtn onClick={closeDialog} />
-            </div>
-
-            <SelectField
-              label="Чөлөөний төрөл"
-              id="leave-type"
-              options={["Ээлжийн амралт", "Өвчний чөлөө", "Гэр бүлийн үндэслэлтэй", "Цалингүй чөлөө"]}
-              value={leaveType}
-              onChange={setLeaveType}
-            />
-
-            <div className="flex gap-4">
-              {[
-                { label: "Эхлэх цаг", id: "start-time", val: leaveStart, set: setLeaveStart },
-                { label: "Дуусах цаг", id: "end-time", val: leaveEnd, set: setLeaveEnd },
-              ].map(({ label, id, val, set }) => (
-                <div key={id} className="flex flex-col gap-1.5 flex-1">
-                  <label htmlFor={id} className="text-sm font-medium text-white">
-                    {label}
-                  </label>
-                  <div className="relative">
-                    <select id={id} className={INPUT_CLASS} value={val} onChange={(e) => set(e.target.value)}>
-                      <option value="">Сонгох</option>
-                      {["08:00","09:00","10:00","11:00","12:00","13:00","14:00","15:00","16:00","17:00","18:00"].map((t) => (
-                        <option key={t} value={t}>{t}</option>
-                      ))}
-                    </select>
-                    <BiChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 pointer-events-none" />
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            <div className="flex flex-col gap-1.5">
-              <label className="text-sm font-medium text-white">Шалтгаан</label>
-              <textarea rows={3} placeholder="Чөлөө авах шалтгаанаа бичнэ үү..." className={TEXTAREA_CLASS} value={leaveReason} onChange={(e) => setLeaveReason(e.target.value)} />
-            </div>
-
-            {sendError && (
-              <p className="text-red-400 text-xs bg-red-500/10 border border-red-500/20 rounded-lg px-3 py-2">{sendError}</p>
-            )}
-
-            <div className="flex justify-end gap-3">
-              <BackBtn onClick={closeDialog} />
-              <SendBtn onClick={handleSend} disabled={sending} />
+              <p className="text-white font-semibold text-lg">
+                Хүсэлт амжилттай илгээгдлээ
+              </p>
+              <p className="text-gray-500 text-sm mt-1">
+                Таны хүсэлтийг хянаж үзнэ
+              </p>
             </div>
           </div>
         </div>
@@ -332,10 +290,14 @@ export const Request = () => {
 
       {activeTab === "Тойрох хуудас" && !submitted && (
         <div className="fixed inset-0 flex items-center justify-center bg-black/60 backdrop-blur-sm z-50">
-          <div className={`w-[460px] rounded-2xl ${DIALOG_BG} text-white p-7 border ${DIALOG_BORDER} shadow-2xl flex flex-col gap-5`}>
+          <div
+            className={`w-[460px] rounded-2xl ${DIALOG_BG} text-white p-7 border ${DIALOG_BORDER} shadow-2xl flex flex-col gap-5`}
+          >
             <div className="flex justify-between items-start">
               <div>
-                <h2 className="text-xl font-semibold">Тойрох хуудас авах хүсэлт</h2>
+                <h2 className="text-xl font-semibold">
+                  Тойрох хуудас авах хүсэлт
+                </h2>
                 <p className="text-sm text-gray-500 mt-1">
                   Тойрох хуудас авах шалтгаан болон файл оруулна уу
                 </p>
@@ -346,7 +308,12 @@ export const Request = () => {
             <SelectField
               label="Төрөл"
               id="clearance-type"
-              options={["Ажлаас гарах", "Дотоод шилжилт", "Гадаад томилолт", "Бусад"]}
+              options={[
+                "Ажлаас гарах",
+                "Дотоод шилжилт",
+                "Гадаад томилолт",
+                "Бусад",
+              ]}
               value={clearanceType}
               onChange={setClearanceType}
             />
@@ -355,11 +322,19 @@ export const Request = () => {
 
             <div className="flex flex-col gap-1.5">
               <label className="text-sm font-medium text-white">Шалтгаан</label>
-              <textarea rows={3} placeholder="Шалтгаанаа бичнэ үү..." className={TEXTAREA_CLASS} value={clearanceReason} onChange={(e) => setClearanceReason(e.target.value)} />
+              <textarea
+                rows={3}
+                placeholder="Шалтгаанаа бичнэ үү..."
+                className={TEXTAREA_CLASS}
+                value={clearanceReason}
+                onChange={(e) => setClearanceReason(e.target.value)}
+              />
             </div>
 
             {sendError && (
-              <p className="text-red-400 text-xs bg-red-500/10 border border-red-500/20 rounded-lg px-3 py-2">{sendError}</p>
+              <p className="text-red-400 text-xs bg-red-500/10 border border-red-500/20 rounded-lg px-3 py-2">
+                {sendError}
+              </p>
             )}
 
             <div className="flex justify-end gap-3">
@@ -372,7 +347,9 @@ export const Request = () => {
 
       {activeTab === "Томилолт" && !submitted && (
         <div className="fixed inset-0 flex items-center justify-center bg-black/60 backdrop-blur-sm z-50">
-          <div className={`w-[460px] rounded-2xl ${DIALOG_BG} text-white p-7 border ${DIALOG_BORDER} shadow-2xl flex flex-col gap-5`}>
+          <div
+            className={`w-[460px] rounded-2xl ${DIALOG_BG} text-white p-7 border ${DIALOG_BORDER} shadow-2xl flex flex-col gap-5`}
+          >
             <div className="flex justify-between items-start">
               <div>
                 <h2 className="text-xl font-semibold">Томилолтын мэдээлэл</h2>
@@ -387,11 +364,19 @@ export const Request = () => {
 
             <div className="flex flex-col gap-1.5">
               <label className="text-sm font-medium text-white">Шалтгаан</label>
-              <textarea rows={3} placeholder="Томилолтын шалтгаанаа бичнэ үү..." className={TEXTAREA_CLASS} value={clearanceReason} onChange={(e) => setClearanceReason(e.target.value)} />
+              <textarea
+                rows={3}
+                placeholder="Томилолтын шалтгаанаа бичнэ үү..."
+                className={TEXTAREA_CLASS}
+                value={clearanceReason}
+                onChange={(e) => setClearanceReason(e.target.value)}
+              />
             </div>
 
             {sendError && (
-              <p className="text-red-400 text-xs bg-red-500/10 border border-red-500/20 rounded-lg px-3 py-2">{sendError}</p>
+              <p className="text-red-400 text-xs bg-red-500/10 border border-red-500/20 rounded-lg px-3 py-2">
+                {sendError}
+              </p>
             )}
 
             <div className="flex justify-end gap-3">

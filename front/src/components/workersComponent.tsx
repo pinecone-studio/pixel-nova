@@ -6,7 +6,11 @@ import { useMemo, useRef, useState } from "react";
 import { buildGraphQLHeaders } from "@/lib/apollo-client";
 import { UPSERT_EMPLOYEE } from "@/graphql/mutations";
 import { GET_EMPLOYEES } from "@/graphql/queries";
-import type { Employee, UpsertEmployeeInput } from "@/lib/types";
+import type {
+  Employee,
+  EmployeeDocumentProfile,
+  UpsertEmployeeInput,
+} from "@/lib/types";
 import { formatBranch, formatDepartment, formatLevel } from "@/lib/labels";
 import {
   AbsentIcon,
@@ -60,9 +64,91 @@ type EmployeeFormState = {
   level: string;
   hireDate: string;
   status: string;
+  documentProfile: EmployeeDocumentProfile;
 };
 
-// ── Helpers ────────────────────────────────────────────
+const DOCUMENT_PROFILE_SECTIONS: Array<{
+  title: string;
+  description: string;
+  fields: Array<{
+    key: keyof EmployeeDocumentProfile;
+    label: string;
+    placeholder: string;
+  }>;
+}> = [
+  {
+    title: "Company Details",
+    description: "Employment contract deer garah baiguullagiin undsen medeelel.",
+    fields: [
+      { key: "company_name", label: "Company Name", placeholder: "Pinecone Academy LLC" },
+      { key: "company_address", label: "Company Address", placeholder: "Office address" },
+      { key: "company_register_no", label: "Company Register No", placeholder: "Register number" },
+      {
+        key: "employer_representative",
+        label: "Employer Representative",
+        placeholder: "Representative full name",
+      },
+      { key: "company_legal_address", label: "Company Legal Address", placeholder: "Legal address" },
+      { key: "company_legal_phone", label: "Company Legal Phone", placeholder: "Phone number" },
+      { key: "company_legal_fax", label: "Company Legal Fax", placeholder: "Fax number" },
+    ],
+  },
+  {
+    title: "Employee Details",
+    description: "Ajiltnii gereen deer oroh hayg, register, holboo barih medeelel.",
+    fields: [
+      { key: "employee_address", label: "Employee Address", placeholder: "Home address" },
+      { key: "employee_register_no", label: "Employee Register No", placeholder: "Register number" },
+      { key: "employee_legal_address", label: "Employee Legal Address", placeholder: "Legal address" },
+      { key: "employee_legal_phone", label: "Employee Legal Phone", placeholder: "Phone number" },
+      { key: "employee_legal_fax", label: "Employee Legal Fax", placeholder: "Fax number" },
+    ],
+  },
+  {
+    title: "Contract Terms",
+    description: "Tsalin, ajliin nohtsol, tsagiin huvaariin medeelluud.",
+    fields: [
+      { key: "contract_term", label: "Contract Term", placeholder: "1 year / indefinite" },
+      { key: "workplace_location", label: "Workplace Location", placeholder: "Office or branch" },
+      { key: "work_conditions", label: "Work Conditions", placeholder: "Hybrid / on-site / remote" },
+      { key: "work_schedule_type", label: "Work Schedule Type", placeholder: "Full-time" },
+      { key: "workday_from", label: "Workday From", placeholder: "Monday" },
+      { key: "workday_to", label: "Workday To", placeholder: "Friday" },
+      { key: "workdays_count", label: "Workdays Count", placeholder: "5" },
+      { key: "daily_work_hours", label: "Daily Work Hours", placeholder: "8" },
+      { key: "weekly_work_hours", label: "Weekly Work Hours", placeholder: "40" },
+      { key: "work_start_time", label: "Work Start Time", placeholder: "09:00" },
+      { key: "work_end_time", label: "Work End Time", placeholder: "18:00" },
+      { key: "break_start_time", label: "Break Start Time", placeholder: "13:00" },
+      { key: "break_end_time", label: "Break End Time", placeholder: "14:00" },
+      {
+        key: "monthly_base_salary_amount",
+        label: "Monthly Base Salary Amount",
+        placeholder: "2500000",
+      },
+      {
+        key: "monthly_base_salary_words",
+        label: "Monthly Base Salary In Words",
+        placeholder: "Two million five hundred thousand tugriks",
+      },
+      { key: "salary_pay_day_1", label: "Salary Pay Day 1", placeholder: "15" },
+      { key: "salary_pay_day_2", label: "Salary Pay Day 2", placeholder: "30" },
+    ],
+  },
+];
+
+const DEPARTMENTS = [
+  "Engineering",
+  "HR",
+  "Sales",
+  "Finance",
+  "Marketing",
+  "Design",
+];
+const STATUSES = ["Ирсэн", "Тасалсан", "Чөлөөтэй"];
+const LEVELS = ["Junior", "Mid", "Senior", "Lead"];
+const BRANCHES = ["Ulaanbaatar", "Darkhan", "Erdenet", "Remote"];
+
 function getInitials(employee: Employee) {
   return `${employee.lastName.charAt(0)}${employee.firstName.charAt(0)}`;
 }
@@ -105,6 +191,7 @@ function employeeToForm(employee?: Employee | null): EmployeeFormState {
     hireDate:
       employee?.hireDate?.slice(0, 10) ?? new Date().toISOString().slice(0, 10),
     status: employee?.status ?? STATUSES[0],
+    documentProfile: employee?.documentProfile ?? {},
   };
 }
 
@@ -162,6 +249,19 @@ function EmployeeModal({
     value: EmployeeFormState[K],
   ) {
     setForm((prev) => ({ ...prev, [key]: value }));
+  }
+
+  function updateDocumentProfileField(
+    key: keyof EmployeeDocumentProfile,
+    value: string,
+  ) {
+    setForm((prev) => ({
+      ...prev,
+      documentProfile: {
+        ...prev.documentProfile,
+        [key]: value,
+      },
+    }));
   }
 
   return (
@@ -322,10 +422,46 @@ function EmployeeModal({
           </div>
         </div>
 
-        {/* Actions */}
-        <div className="flex items-center justify-end gap-3 shrink-0">
-          <Button
-            variant="outline"
+        <div className="rounded-2xl border border-slate-700/50 bg-[#0b1018] p-5 flex flex-col gap-5">
+          <div>
+            <h3 className="text-white font-semibold text-sm">
+              Contract / Document Details
+            </h3>
+            <p className="text-slate-400 text-xs mt-1">
+              Ene hesgiin medeelel ni ajliin geree bolon PDF template deer
+              shuud ashiglagdana.
+            </p>
+          </div>
+
+          {DOCUMENT_PROFILE_SECTIONS.map((section) => (
+            <div key={section.title} className="flex flex-col gap-3">
+              <div>
+                <p className="text-sm font-medium text-slate-200">
+                  {section.title}
+                </p>
+                <p className="text-xs text-slate-500">{section.description}</p>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                {section.fields.map((field) => (
+                  <label key={field.key} className="flex flex-col gap-1.5">
+                    <span className="text-xs text-slate-400">{field.label}</span>
+                    <input
+                      value={form.documentProfile[field.key] ?? ""}
+                      onChange={(event) =>
+                        updateDocumentProfileField(field.key, event.target.value)
+                      }
+                      className="bg-transparent border border-slate-700/60 rounded-xl px-3 py-2.5 text-slate-200 text-sm outline-none"
+                      placeholder={field.placeholder}
+                    />
+                  </label>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <div className="flex items-center justify-end gap-3">
+          <button
             onClick={onClose}
             className="px-6 py-2.5 h-auto rounded-2xl border-slate-600/50 bg-transparent cursor-pointer text-slate-300 hover:bg-slate-800/40 hover:text-white hover:border-slate-500"
           >
@@ -517,6 +653,7 @@ export function WorkersComponent() {
         isKpi: null,
         birthDayAndMonth: null,
         birthdayPoster: null,
+        documentProfile: form.documentProfile,
       };
       await saveEmployee({ variables: { input: payload } });
       setShowAdd(false);
