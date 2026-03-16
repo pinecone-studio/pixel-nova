@@ -43,7 +43,8 @@ export function HrDashboardOverview({
                 {loading ? "..." : stats.totalEmployees}
               </p>
               <span className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-[#0ad4b1]/15 text-[#0ad4b1] text-xs font-semibold">
-                <ArrowUpRightIcon className="w-3.5 h-3.5" /> {stats.monthlyGrowth >= 0 ? "+" : ""}
+                <ArrowUpRightIcon className="w-3.5 h-3.5" />{" "}
+                {stats.monthlyGrowth >= 0 ? "+" : ""}
                 {stats.monthlyGrowth}%
               </span>
             </div>
@@ -112,7 +113,7 @@ export function HrDashboardOverview({
         </div>
       </div>
 
-      <div className="grid grid-cols-4 gap-4">
+      <div className="grid grid-cols-3 gap-4">
         {[
           {
             icon: <BriefcaseIcon />,
@@ -131,12 +132,6 @@ export function HrDashboardOverview({
             value: loading ? "..." : String(stats.employeesOnLeave),
             label: "Чөлөөтэй",
             color: "bg-pink-500/20 text-pink-400",
-          },
-          {
-            icon: <TrendIcon />,
-            value: loading ? "..." : `${stats.approvalRate}%`,
-            label: "Үр дүн",
-            color: "bg-[#0ad4b1]/20 text-[#0ad4b1]",
           },
         ].map((stat) => (
           <div
@@ -161,7 +156,9 @@ export function HrDashboardOverview({
       <div className="rounded-2xl border border-[#0ad4b1]/40 bg-[#0a0f0e] overflow-hidden">
         <div className="flex items-center justify-between px-6 py-5 border-b border-dashed border-[#0ad4b1]/30">
           <div>
-            <p className="text-white text-xl font-bold">Хүлээгдэж буй хүсэлтүүд</p>
+            <p className="text-white text-xl font-bold">
+              Хүлээгдэж буй хүсэлтүүд
+            </p>
             <p className="text-slate-500 text-sm mt-0.5">
               Сүүлийн хүлээгдэж буй чөлөөний хүсэлтүүд
             </p>
@@ -180,7 +177,9 @@ export function HrDashboardOverview({
         </div>
         <div className="flex flex-col">
           {loading ? (
-            <div className="px-6 py-8 text-sm text-slate-500">Уншиж байна...</div>
+            <div className="px-6 py-8 text-sm text-slate-500">
+              Уншиж байна...
+            </div>
           ) : dashboardRequests.length === 0 ? (
             <div className="px-6 py-8 text-sm text-slate-500">
               Хүлээгдэж буй хүсэлт олдсонгүй
@@ -209,7 +208,9 @@ export function HrDashboardOverview({
                       </span>
                     ) : null}
                   </div>
-                  <p className="text-slate-500 text-xs mt-0.5">{request.type}</p>
+                  <p className="text-slate-500 text-xs mt-0.5">
+                    {request.type}
+                  </p>
                 </div>
                 <span className="text-slate-600 text-sm shrink-0">
                   {request.elapsedLabel}
