@@ -16,13 +16,13 @@ type ContractPreviewProps = {
   authToken: string;
 };
 
-
 function formatDate(value: string) {
-  return new Date(value).toLocaleDateString("mn-MN", {
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-  });
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value;
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}/${month}/${day}`;
 }
 
 function buildDataUrl(content: DocumentContent) {
@@ -68,7 +68,7 @@ export const ContractPreview = ({
 
     const nextContent = result.data?.documentContent ?? null;
     if (!nextContent) {
-      throw new Error("Баримтын агуулга олдсонгүй.");
+      throw new Error("???????? ??????? ?????????.");
     }
     return nextContent;
   }
@@ -80,7 +80,7 @@ export const ContractPreview = ({
     try {
       await ensureContent();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Баримтыг нээж чадсангүй.");
+      setError(err instanceof Error ? err.message : "???????? ???? ?????????.");
     }
   }
 
@@ -97,52 +97,56 @@ export const ContractPreview = ({
       link.click();
       link.remove();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Файл татаж чадсангүй.");
+      setError(err instanceof Error ? err.message : "???? ????? ?????????.");
     }
   }
 
   return (
     <>
-      <div className="w-80 bg-[#111318] rounded-xl border border-white/10 p-4 shadow-xl shadow-black/40">
-        <div className="flex gap-3 mb-4">
-          <div className="shrink-0 w-11 h-11 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-slate-400">
+      <div className="flex h-[89px] w-full items-center justify-between px-4">
+        <div className="flex min-w-0 items-center gap-3">
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-white/10 bg-white/5 text-slate-400">
             <DocumentIcon />
           </div>
 
-          <div className="flex flex-col justify-center min-w-0">
-            <p className="text-white text-sm font-semibold leading-tight truncate">
+          <div className="min-w-0">
+            <p className="truncate text-[16px] font-semibold text-white">
               {document.action}
             </p>
-            <p className="text-slate-500 text-xs mt-0.5 truncate">
+            <p className="truncate text-[13px] text-slate-500">
               {document.documentName}
-            </p>
-            <p className="text-slate-600 text-xs mt-0.5">
-              {formatDate(document.createdAt)}
             </p>
           </div>
         </div>
 
-        <div className="flex gap-2">
+        <div className="flex items-center gap-4 text-[13px] text-slate-500">
           <button
             type="button"
             onClick={() => void handlePreview()}
-            className="flex-1 flex items-center justify-center gap-1.5 h-8 rounded-lg text-xs font-medium text-slate-300 bg-white/5 border border-white/10 hover:bg-white/10 hover:text-white hover:border-white/20 transition-all duration-150 cursor-pointer"
+            className="flex h-8 w-8 items-center justify-center rounded-full border border-white/10 bg-white/5 text-slate-300 transition-colors hover:border-white/20 hover:bg-white/10 hover:text-white"
+            aria-label="Preview"
           >
             <VscPreview className="text-sm" />
-            Харах
           </button>
 
           <button
             type="button"
             onClick={() => void handleDownload()}
-            className="w-8 h-8 rounded-lg flex items-center justify-center text-slate-300 bg-white/5 border border-white/10 hover:bg-white/10 hover:text-white hover:border-white/20 transition-all duration-150 cursor-pointer"
+            className="flex h-8 w-8 items-center justify-center rounded-full border border-white/10 bg-white/5 text-slate-300 transition-colors hover:border-white/20 hover:bg-white/10 hover:text-white"
+            aria-label="Download"
           >
             <BiDownload className="text-sm" />
           </button>
-        </div>
 
-        {error ? <p className="mt-3 text-xs text-red-400">{error}</p> : null}
+          <span className="text-slate-500">
+            {formatDate(document.createdAt)}
+          </span>
+        </div>
       </div>
+
+      {error ? (
+        <p className="px-4 pb-3 text-[12px] text-red-400">{error}</p>
+      ) : null}
 
       {previewOpen && (
         <div className="fixed inset-0 z-60 flex items-center justify-center">
@@ -173,7 +177,7 @@ export const ContractPreview = ({
             <div className="h-full bg-[#0a0b0f] p-6">
               {loading ? (
                 <div className="w-full h-full rounded-xl border border-white/10 flex items-center justify-center text-sm text-slate-400">
-                  Баримт ачаалж байна...
+                  Уншиж байна...
                 </div>
               ) : error ? (
                 <div className="w-full h-full rounded-xl border border-red-500/20 bg-red-500/5 flex items-center justify-center text-sm text-red-400">
@@ -193,7 +197,7 @@ export const ContractPreview = ({
                 />
               ) : (
                 <div className="w-full h-full rounded-xl border border-white/10 flex items-center justify-center text-sm text-slate-400">
-                  Preview бэлэн биш байна.
+                  Preview ????? ??? ?????.
                 </div>
               )}
             </div>

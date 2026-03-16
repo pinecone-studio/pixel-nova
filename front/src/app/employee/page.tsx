@@ -29,33 +29,12 @@ function buildDataUrl(content: DocumentContent) {
   return `data:${content.contentType};base64,${content.content}`;
 }
 
-// ─── ActionBtn ───────────────────────────────────────────────────────────────
-
-function ActionBtn({
-  children,
-  title,
-  onClick,
-}: {
-  children: React.ReactNode;
-  title?: string;
-  onClick?: () => void;
-}) {
-  const [hovered, setHovered] = useState(false);
-  return (
-    <span
-      title={title}
-      onClick={onClick}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-      style={{
-        color: hovered ? "rgba(148,163,184,0.85)" : "rgba(148,163,184,0.4)",
-        cursor: "pointer",
-        transition: "color 0.12s",
-        display: "flex",
-      }}
-    >
-      {children}
-    </span>
+export default function EmployeePage() {
+  const router = useRouter();
+  const [authToken] = useState(() =>
+    typeof window === "undefined"
+      ? ""
+      : (window.localStorage.getItem(TOKEN_STORAGE_KEY) ?? ""),
   );
 }
 
@@ -66,12 +45,10 @@ type ContractPreviewProps = {
   authToken: string;
 };
 
-export const ContractPreview = ({
-  document,
-  authToken,
-}: ContractPreviewProps) => {
-  const [previewOpen, setPreviewOpen] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const documents = useMemo(
+    () => documentsData?.documents ?? [],
+    [documentsData],
+  );
 
   const [loadContent, { data, loading }] = useLazyQuery<{
     documentContent: DocumentContent | null;
@@ -93,198 +70,60 @@ export const ContractPreview = ({
     if (!next) throw new Error("Баримтын агуулга олдсонгүй.");
     return next;
   }
+  const loading = meLoading || Boolean(employee?.id && documentsLoading);
+  const error = meError?.message ?? documentsError?.message ?? null;
 
-  async function handlePreview() {
-    setPreviewOpen(true);
-    setError(null);
-    try {
-      await ensureContent();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Баримтыг нээж чадсангүй.");
-    }
-  }
+  const displayName = employee
+    ? `${employee.lastName} ${employee.firstName}`
+    : "???????";
 
-  async function handleDownload() {
-    setError(null);
-    try {
-      const c = await ensureContent();
-      const link = window.document.createElement("a");
-      link.href = buildDataUrl(c);
-      link.download = c.documentName;
-      window.document.body.appendChild(link);
-      link.click();
-      link.remove();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Файл татаж чадсангүй.");
-    }
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#0A0A0F] flex items-center justify-center">
+        <div className="flex items-center gap-3 text-white/70 text-sm">
+          <span className="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin" />
+          Уншиж байна.....
+        </div>
+      </div>
+    );
   }
 
   return (
-    <>
-      {/* Inline actions: eye + download + date */}
-      <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
-        <ActionBtn title="Харах" onClick={() => void handlePreview()}>
-          <svg
-            width="15"
-            height="15"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.5"
-            viewBox="0 0 24 24"
-          >
-            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-            <circle cx="12" cy="12" r="3" />
-          </svg>
-        </ActionBtn>
-        <ActionBtn title="Татах" onClick={() => void handleDownload()}>
-          <svg
-            width="15"
-            height="15"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.5"
-            viewBox="0 0 24 24"
-          >
-            <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3" />
-          </svg>
-        </ActionBtn>
-        <span
-          style={{
-            color: "rgba(148,163,184,0.35)",
-            fontSize: 12,
-            minWidth: 80,
-            textAlign: "right",
-          }}
-        >
-          {document.createdAt ? formatDate(document.createdAt) : "—"}
-        </span>
-      </div>
-
-      {/* Preview modal */}
-      {previewOpen && (
-        <div
-          style={{
-            position: "fixed",
-            inset: 0,
-            zIndex: 60,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          <button
-            type="button"
-            aria-label="Preview close overlay"
-            style={{
-              position: "absolute",
-              inset: 0,
-              background: "rgba(0,0,0,0.70)",
-              border: "none",
-              cursor: "pointer",
-            }}
-            onClick={() => setPreviewOpen(false)}
-          />
-          <div
-            style={{
-              position: "relative",
-              width: 900,
-              maxWidth: "92vw",
-              height: "82vh",
-              background: "#111318",
-              border: "1px solid rgba(255,255,255,0.10)",
-              borderRadius: 16,
-              overflow: "hidden",
-              boxShadow: "0 25px 60px rgba(0,0,0,0.6)",
-            }}
-          >
-            {/* Modal header */}
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
-                padding: "16px 20px",
-                borderBottom: "1px solid rgba(255,255,255,0.10)",
-              }}
-            >
-              <div>
-                <p
-                  style={{
-                    color: "#fff",
-                    fontSize: 14,
-                    fontWeight: 600,
-                    margin: 0,
-                  }}
-                >
-                  {document.action}
-                </p>
-                <p
-                  style={{
-                    color: "rgba(148,163,184,0.5)",
-                    fontSize: 12,
-                    margin: "2px 0 0",
-                  }}
-                >
-                  {document.documentName}
-                </p>
-              </div>
-              <button
-                type="button"
-                onClick={() => setPreviewOpen(false)}
-                style={{
-                  width: 32,
-                  height: 32,
-                  borderRadius: 8,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  color: "rgba(148,163,184,0.6)",
-                  background: "transparent",
-                  border: "none",
-                  cursor: "pointer",
-                  fontSize: 18,
-                }}
-              >
-                ✕
-              </button>
-            </div>
-
-            {/* Modal body */}
-            <div
-              style={{
-                height: "calc(100% - 65px)",
-                background: "#0a0b0f",
-                padding: 24,
-              }}
-            >
-              {loading ? (
-                <div style={iframeWrapStyle}>Баримт ачаалж байна...</div>
-              ) : error ? (
-                <div
-                  style={{
-                    ...iframeWrapStyle,
-                    border: "1px solid rgba(239,68,68,0.2)",
-                    background: "rgba(239,68,68,0.05)",
-                    color: "#f87171",
-                  }}
-                >
+    <div className="min-h-screen bg-[#0A0A0F]">
+      <div className="mx-auto flex w-full max-w-[1200px] flex-col gap-10 px-6 py-10">
+        <div className="mx-auto flex h-[264px] w-full max-w-[1056px] items-center rounded-2xl bg-[linear-gradient(135deg,#0a0f15_0%,#0b1018_45%,#0a0d12_100%)] p-10 shadow-[0_0_0_1px_rgba(0,153,255,0.2),0_20px_60px_rgba(0,0,0,0.45)]">
+          <div className="flex max-w-[640px] flex-col gap-3">
+            <p className="text-[#00CC99] text-sm font-medium tracking-widest uppercase">
+              Сайн байна уу?
+            </p>
+            <h1 className="text-white text-[36px] font-semibold leading-[1.1] tracking-[-0.02em]">
+              {displayName}
+            </h1>
+            <p className="text-[#4A4A6A] text-sm leading-relaxed max-w-lg">
+              Та хөдөлмөрийн баримт бичиг болон ажлын түүхээ нэг дороос харах
+              боломжтой. Бүх мэдээлэл backend-аас бодитоор ачааллагдана.
+            </p>
+            <div className="flex gap-2 mt-1 flex-wrap">
+              {employee?.department ? (
+                <span className="flex items-center gap-1.5 rounded-lg border border-[#00CC99]/30 bg-[#00CC99]/15 px-3 py-1.5 text-[13px] font-semibold text-[#00CC99]">
+                  {employee.department}
+                </span>
+              ) : null}
+              {employee?.jobTitle ? (
+                <span className="flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-[13px] font-semibold text-[#94A3B8]">
+                  {employee.jobTitle}
+                </span>
+              ) : null}
+              {employee?.employeeCode ? (
+                <span className="flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-[13px] font-semibold text-[#94A3B8]">
+                  {employee.employeeCode}
+                </span>
+              ) : null}
+              {error ? (
+                <span className="rounded-lg border border-red-500/20 bg-red-500/10 px-3 py-1.5 text-[13px] font-semibold text-red-400">
                   {error}
-                </div>
-              ) : content?.contentType === "text/html" ? (
-                <iframe
-                  title={document.documentName}
-                  style={iframeStyle}
-                  srcDoc={content.content}
-                />
-              ) : previewUrl ? (
-                <iframe
-                  title={document.documentName}
-                  style={iframeStyle}
-                  src={previewUrl}
-                />
-              ) : (
-                <div style={iframeWrapStyle}>Preview бэлэн биш байна.</div>
-              )}
+                </span>
+              ) : null}
             </div>
           </div>
         </div>
@@ -293,22 +132,44 @@ export const ContractPreview = ({
   );
 };
 
-const iframeStyle: React.CSSProperties = {
-  width: "100%",
-  height: "100%",
-  borderRadius: 10,
-  border: "1px solid rgba(255,255,255,0.10)",
-  background: "#fff",
-};
+        <div className="mx-auto w-full max-w-[1056px]">
+          <Request />
+        </div>
 
-const iframeWrapStyle: React.CSSProperties = {
-  width: "100%",
-  height: "100%",
-  borderRadius: 10,
-  border: "1px solid rgba(255,255,255,0.10)",
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-  color: "rgba(148,163,184,0.5)",
-  fontSize: 14,
-};
+        <section className="mx-auto flex w-full max-w-[1056px] flex-col gap-6">
+          <div className="flex items-center gap-4">
+            <h2 className="text-[24px] font-semibold tracking-[-0.02em] text-white">
+              Бичиг Баримтууд
+            </h2>
+            <span className="rounded-full border border-[#233246] bg-[#162130] px-4 py-1 text-[14px] font-medium text-[#94A3B8]">
+              {documents.length} баримт
+            </span>
+          </div>
+
+          <div className="flex flex-col divide-y divide-white/10 rounded-xl border border-white/5 bg-[#0B0E14]/40">
+            {documents.length > 0 ? (
+              documents.map((document) => (
+                <ContractPreview
+                  key={document.id}
+                  document={document}
+                  authToken={authToken}
+                />
+              ))
+            ) : (
+              <div className="flex flex-col items-center justify-center gap-3 py-10 text-center">
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-[18px] border border-[#24374F] bg-[#132131]">
+                  <FactIcon />
+                </div>
+                <div className="flex flex-col items-center gap-1">
+                  <h3 className="text-[13px] font-semibold text-[#E7EDF5]">
+                    Баримт олдсонгүй
+                  </h3>
+                </div>
+              </div>
+            )}
+          </div>
+        </section>
+      </div>
+    </div>
+  );
+}
