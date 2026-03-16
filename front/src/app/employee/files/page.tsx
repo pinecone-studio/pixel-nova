@@ -133,7 +133,7 @@ function CustomDropdown({
                   filter === value ? "rgba(255,255,255,0.07)" : "transparent",
                 border: "none",
                 borderBottom: "1px solid rgba(255,255,255,0.05)",
-                color: filter === value ? "#e2e8f0" : "rgba(148,163,184,0.7)",
+                color: filter === value ? "#e2e8f0" : "#f4f4f7",
                 fontSize: 13,
                 textAlign: "left",
                 cursor: "pointer",
