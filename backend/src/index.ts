@@ -22,7 +22,8 @@ app.use(
         origin.startsWith("https://localhost") ||
         origin.includes("pixel-nova") ||
         origin.includes("pages.dev") ||
-        origin.includes("vercel.app")
+        origin.includes("vercel.app") ||
+        origin.includes("trycloudflare.com")
       ) {
         return origin;
       }

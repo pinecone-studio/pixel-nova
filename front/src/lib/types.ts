@@ -1,3 +1,35 @@
+export interface EmployeeDocumentProfile {
+  company_address?: string;
+  company_register_no?: string;
+  company_name?: string;
+  employer_representative?: string;
+  employee_address?: string;
+  employee_register_no?: string;
+  company_legal_address?: string;
+  company_legal_phone?: string;
+  company_legal_fax?: string;
+  employee_legal_address?: string;
+  employee_legal_phone?: string;
+  employee_legal_fax?: string;
+  contract_term?: string;
+  workplace_location?: string;
+  work_conditions?: string;
+  work_schedule_type?: string;
+  workday_from?: string;
+  workday_to?: string;
+  workdays_count?: string;
+  daily_work_hours?: string;
+  weekly_work_hours?: string;
+  work_start_time?: string;
+  work_end_time?: string;
+  break_start_time?: string;
+  break_end_time?: string;
+  monthly_base_salary_amount?: string;
+  monthly_base_salary_words?: string;
+  salary_pay_day_1?: string;
+  salary_pay_day_2?: string;
+}
+
 export interface Employee {
   id: string;
   employeeCode: string;
@@ -21,6 +53,7 @@ export interface Employee {
   isKpi?: boolean | null;
   birthDayAndMonth?: string | null;
   birthdayPoster?: string | null;
+  documentProfile?: EmployeeDocumentProfile | null;
 }
 
 export interface Document {
@@ -115,6 +148,7 @@ export interface UpsertEmployeeInput {
   isKpi?: boolean | null;
   birthDayAndMonth?: string | null;
   birthdayPoster?: string | null;
+  documentProfile?: EmployeeDocumentProfile | null;
 }
 
 export interface RequestOtpResult {

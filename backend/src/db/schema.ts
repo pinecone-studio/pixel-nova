@@ -25,6 +25,7 @@ export const employees = sqliteTable(
     isKpi: integer("is_kpi", { mode: "boolean" }),
     birthDayAndMonth: text("birth_day_and_month"),
     birthdayPoster: text("birthday_poster"),
+    documentProfile: text("document_profile").notNull().default("{}"),
   },
   (table) => [index("employees_employee_code_idx").on(table.employeeCode)],
 );

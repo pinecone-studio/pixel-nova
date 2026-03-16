@@ -30,6 +30,7 @@ const mockEmployee: Employee = {
   isKpi: true,
   birthDayAndMonth: "03-15",
   birthdayPoster: null,
+  documentProfile: "{}",
 };
 
 const generatedAt = "2024-02-24T10:00:00.000Z";
