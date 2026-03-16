@@ -11,7 +11,6 @@ import type { Document, Employee } from "@/lib/types";
 import { ContractPreview } from "@/components/contractPreview";
 import { FactIcon } from "@/components/icons";
 import { Request } from "@/components/request";
-import { formatDepartment } from "@/lib/labels";
 
 const TOKEN_STORAGE_KEY = "epas_auth_token";
 
@@ -20,7 +19,7 @@ export default function EmployeePage() {
   const [authToken] = useState(() =>
     typeof window === "undefined"
       ? ""
-      : window.localStorage.getItem(TOKEN_STORAGE_KEY) ?? "",
+      : (window.localStorage.getItem(TOKEN_STORAGE_KEY) ?? ""),
   );
 
   const {
@@ -64,7 +63,10 @@ export default function EmployeePage() {
     }
   }, [authToken, employee, meLoading, router]);
 
-  const documents = useMemo(() => documentsData?.documents ?? [], [documentsData]);
+  const documents = useMemo(
+    () => documentsData?.documents ?? [],
+    [documentsData],
+  );
 
   if (!authToken) {
     return null;
@@ -72,22 +74,16 @@ export default function EmployeePage() {
   const loading = meLoading || Boolean(employee?.id && documentsLoading);
   const error = meError?.message ?? documentsError?.message ?? null;
 
-  const leaveUsed = 4;
-  const leaveTotal = 14;
-  const leavePercent = (leaveUsed / leaveTotal) * 100;
-  const radius = 28;
-  const circumference = 2 * Math.PI * radius;
-  const dashOffset = circumference - (leavePercent / 100) * circumference;
   const displayName = employee
     ? `${employee.lastName} ${employee.firstName}`
-    : "Ажилтан";
+    : "???????";
 
   if (loading) {
     return (
       <div className="min-h-screen bg-[#0A0A0F] flex items-center justify-center">
         <div className="flex items-center gap-3 text-white/70 text-sm">
           <span className="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin" />
-          Уншиж байна...
+          Уншиж байна.....
         </div>
       </div>
     );
@@ -95,103 +91,59 @@ export default function EmployeePage() {
 
   return (
     <div className="min-h-screen bg-[#0A0A0F]">
-      <div className="max-w-6xl mx-auto px-6 py-8 flex flex-col gap-8">
-        <div className="w-full rounded-2xl border border-[#1a1a30] bg-[#0d0d1a] p-8 flex items-center justify-between gap-6">
-          <div className="flex flex-col gap-3">
+      <div className="mx-auto flex w-full max-w-[1200px] flex-col gap-10 px-6 py-10">
+        <div className="mx-auto flex h-[264px] w-full max-w-[1056px] items-center rounded-2xl bg-[linear-gradient(135deg,#0a0f15_0%,#0b1018_45%,#0a0d12_100%)] p-10 shadow-[0_0_0_1px_rgba(0,153,255,0.2),0_20px_60px_rgba(0,0,0,0.45)]">
+          <div className="flex max-w-[640px] flex-col gap-3">
             <p className="text-[#00CC99] text-sm font-medium tracking-widest uppercase">
               Сайн байна уу?
             </p>
-            <h1 className="text-white text-4xl font-bold tracking-tight">
+            <h1 className="text-white text-[36px] font-semibold leading-[1.1] tracking-[-0.02em]">
               {displayName}
             </h1>
             <p className="text-[#4A4A6A] text-sm leading-relaxed max-w-lg">
-              Та хөдөлмөрийн баримт бичиг болон ажлын түүхээ нэг дороос
-              харах боломжтой. Бүх мэдээлэл backend-аас бодитоор ачааллагдана.
+              Та хөдөлмөрийн баримт бичиг болон ажлын түүхээ нэг дороос харах
+              боломжтой. Бүх мэдээлэл backend-аас бодитоор ачааллагдана.
             </p>
             <div className="flex gap-2 mt-1 flex-wrap">
               {employee?.department ? (
-                <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#00CC99]/15 text-[#00CC99] text-xs font-semibold border border-[#00CC99]/20">
-                  {formatDepartment(employee.department)}
+                <span className="flex items-center gap-1.5 rounded-lg border border-[#00CC99]/30 bg-[#00CC99]/15 px-3 py-1.5 text-[13px] font-semibold text-[#00CC99]">
+                  {employee.department}
                 </span>
               ) : null}
               {employee?.jobTitle ? (
-                <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/5 text-[#94A3B8] text-xs font-semibold border border-white/10">
+                <span className="flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-[13px] font-semibold text-[#94A3B8]">
                   {employee.jobTitle}
                 </span>
               ) : null}
               {employee?.employeeCode ? (
-                <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/5 text-[#94A3B8] text-xs font-semibold border border-white/10">
+                <span className="flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-[13px] font-semibold text-[#94A3B8]">
                   {employee.employeeCode}
                 </span>
               ) : null}
               {error ? (
-                <span className="px-3 py-1.5 rounded-lg bg-red-500/10 text-red-400 text-xs font-semibold border border-red-500/20">
+                <span className="rounded-lg border border-red-500/20 bg-red-500/10 px-3 py-1.5 text-[13px] font-semibold text-red-400">
                   {error}
                 </span>
               ) : null}
             </div>
           </div>
-
-          <div className="shrink-0 rounded-xl border border-[#1a1a30] bg-[#0a0a14] p-5 flex flex-col gap-3 min-w-45">
-            <div className="flex items-center justify-between gap-6">
-              <div>
-                <p className="text-white text-2xl font-bold">4 өдөр 1 цаг</p>
-                <p className="text-[#4A4A6A] text-xs mt-0.5">
-                  Чөлөөний боломж
-                </p>
-              </div>
-
-              <div className="relative w-16 h-16">
-                <svg viewBox="0 0 72 72" className="w-full h-full -rotate-90">
-                  <circle
-                    cx="36"
-                    cy="36"
-                    r={radius}
-                    fill="none"
-                    stroke="#1a1a30"
-                    strokeWidth="6"
-                  />
-                  <circle
-                    cx="36"
-                    cy="36"
-                    r={radius}
-                    fill="none"
-                    stroke="#00CC99"
-                    strokeWidth="6"
-                    strokeLinecap="round"
-                    strokeDasharray={circumference}
-                    strokeDashoffset={dashOffset}
-                  />
-                </svg>
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <span className="text-white text-xs font-semibold">
-                    {leaveUsed}
-                    <span className="text-[#4A4A6A] text-[10px]">
-                      /{leaveTotal}
-                    </span>
-                  </span>
-                </div>
-              </div>
-            </div>
-            <button className="w-full text-center text-xs text-[#8888AA] border border-[#2A2A40] rounded-lg py-1.5 hover:border-[#00CC99]/40 hover:text-white transition-colors">
-              Дэлгэрэнгүй
-            </button>
-          </div>
         </div>
 
-        <Request />
+        <div className="mx-auto w-full max-w-[1056px]">
+          <Request />
+        </div>
 
-        <section className="flex flex-col gap-6">
+        <section className="mx-auto flex w-full max-w-[1056px] flex-col gap-6">
           <div className="flex items-center gap-4">
             <h2 className="text-[24px] font-semibold tracking-[-0.02em] text-white">
-              Бүртгэл
+              Бичиг Баримтууд
             </h2>
             <span className="rounded-full border border-[#233246] bg-[#162130] px-4 py-1 text-[14px] font-medium text-[#94A3B8]">
               {documents.length} баримт
             </span>
           </div>
 
-          <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
+          <div className="flex flex-col divide-y divide-white/10 rounded-xl border border-white/5 bg-[#0B0E14]/40">
             {documents.length > 0 ? (
               documents.map((document) => (
                 <ContractPreview
@@ -201,22 +153,16 @@ export default function EmployeePage() {
                 />
               ))
             ) : (
-              <article className="flex h-45 w-full max-w-80.75 flex-col items-center justify-center rounded-[28px] border border-[#0E2741] bg-[linear-gradient(180deg,#03101d_0%,#041424_100%)] p-7 text-center shadow-[0_0_0_1px_rgba(255,255,255,0.03)_inset]">
-                <div className="flex flex-col items-center gap-5">
-                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-[18px] border border-[#24374F] bg-[#132131]">
-                    <FactIcon />
-                  </div>
-                  <div className="flex min-w-0 flex-1 flex-col items-center gap-1 pt-1">
-                    <h3 className="max-w-54.25 text-[17px] font-semibold leading-5 text-[#E7EDF5]">
-                      Баримт одоогоор олдсонгүй
-                    </h3>
-                    <p className="max-w-full text-[13px] text-[#6E7D90]">
-                      Энэ хэсэг зөвхөн backend-аас ирсэн бодит баримтуудыг
-                      харуулна.
-                    </p>
-                  </div>
+              <div className="flex flex-col items-center justify-center gap-3 py-10 text-center">
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-[18px] border border-[#24374F] bg-[#132131]">
+                  <FactIcon />
                 </div>
-              </article>
+                <div className="flex flex-col items-center gap-1">
+                  <h3 className="text-[13px] font-semibold text-[#E7EDF5]">
+                    Баримт олдсонгүй
+                  </h3>
+                </div>
+              </div>
             )}
           </div>
         </section>

@@ -1,7 +1,7 @@
 "use client";
 
 import { useApolloClient, useMutation, useQuery } from "@apollo/client/react";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { buildGraphQLHeaders } from "@/lib/apollo-client";
 import { UPLOAD_HR_DOCUMENT } from "@/graphql/mutations";
@@ -23,20 +23,22 @@ import {
   SearchIcon,
 } from "./icons";
 
+// ── Types ──────────────────────────────────────────────
 type FileRow = {
   document: Document;
   employee?: Employee;
 };
 
+const ALL_RECIPIENTS = ["hr_team", "department_chief", "branch_manager", "CEO"];
+
+// ── Helpers ────────────────────────────────────────────
 function buildDataUrl(content: DocumentContent) {
   if (content.contentType === "application/pdf") {
     return `data:${content.contentType};base64,${content.content}`;
   }
-
   if (content.contentType.startsWith("text/")) {
     return `data:${content.contentType};charset=utf-8,${encodeURIComponent(content.content)}`;
   }
-
   return `data:${content.contentType};base64,${content.content}`;
 }
 
@@ -68,13 +70,40 @@ function fileToBase64(file: File) {
       resolve(base64);
     };
     reader.onerror = () =>
-      reject(
-        reader.error ?? new Error("Файл уншиж чадсангүй."),
-      );
+      reject(reader.error ?? new Error("Файл уншиж чадсангүй."));
     reader.readAsDataURL(file);
   });
 }
 
+// ── Upload icon ────────────────────────────────────────
+function UploadCloudIcon() {
+  return (
+    <svg
+      width="36"
+      height="36"
+      fill="none"
+      viewBox="0 0 24 24"
+      className="text-slate-400"
+    >
+      <path
+        d="M12 16V8M12 8l-3 3M12 8l3 3"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M20.39 18.39A5 5 0 0018 9h-1.26A8 8 0 103 16.3"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+// ── FilePreviewModal ───────────────────────────────────
 function FilePreviewModal({
   row,
   mode,
@@ -85,9 +114,7 @@ function FilePreviewModal({
   onClose: () => void;
 }) {
   const queryContext = useMemo(
-    () => ({
-      headers: buildGraphQLHeaders({ actorRole: "hr" }),
-    }),
+    () => ({ headers: buildGraphQLHeaders({ actorRole: "hr" }) }),
     [],
   );
 
@@ -115,10 +142,12 @@ function FilePreviewModal({
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/65 backdrop-blur-sm"
-      onClick={onClose}>
+      onClick={onClose}
+    >
       <div
         className="relative w-[760px] max-w-[95vw] bg-[#0f1520] rounded-3xl border border-slate-700/50 shadow-2xl overflow-hidden"
-        onClick={(event) => event.stopPropagation()}>
+        onClick={(e) => e.stopPropagation()}
+      >
         <div className="flex items-center justify-between px-6 py-4 border-b border-slate-700/40">
           <div>
             <p className="text-white font-semibold text-base">
@@ -132,7 +161,8 @@ function FilePreviewModal({
           </div>
           <button
             onClick={onClose}
-            className="text-slate-400 hover:text-white transition-colors text-lg">
+            className="text-slate-400 hover:text-white transition-colors text-lg cursor-pointer"
+          >
             ✕
           </button>
         </div>
@@ -154,7 +184,8 @@ function FilePreviewModal({
               </p>
               <button
                 onClick={handleDownload}
-                className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black font-semibold text-sm transition-colors">
+                className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black font-semibold text-sm transition-colors"
+              >
                 <DownloadIcon />
                 Татах
               </button>
@@ -182,6 +213,7 @@ function FilePreviewModal({
   );
 }
 
+// ── NewDocModal ────────────────────────────────────────
 function NewDocModal({
   employees,
   onClose,
@@ -191,17 +223,16 @@ function NewDocModal({
   onClose: () => void;
   onUploaded: () => Promise<void>;
 }) {
-  const [employeeId, setEmployeeId] = useState(employees[0]?.id ?? "");
-  const [action, setAction] = useState("hr-upload");
+  const fileRef = useRef<HTMLInputElement>(null);
   const [documentName, setDocumentName] = useState("");
+  const [recipients, setRecipients] = useState<string[]>([...ALL_RECIPIENTS]);
   const [file, setFile] = useState<File | null>(null);
+  const [dragging, setDragging] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const queryContext = useMemo(
-    () => ({
-      headers: buildGraphQLHeaders({ actorRole: "hr" }),
-    }),
+    () => ({ headers: buildGraphQLHeaders({ actorRole: "hr" }) }),
     [],
   );
 
@@ -209,11 +240,10 @@ function NewDocModal({
     context: queryContext,
   });
 
+  const removeRecipient = (r: string) =>
+    setRecipients((prev) => prev.filter((x) => x !== r));
+
   async function handleSubmit() {
-    if (!employeeId) {
-      setError("Ажилтан сонгоно уу.");
-      return;
-    }
     if (!documentName.trim()) {
       setError("Баримтын нэр оруулна уу.");
       return;
@@ -231,8 +261,8 @@ function NewDocModal({
       await uploadDocument({
         variables: {
           input: {
-            employeeId,
-            action: action.trim() || "hr-upload",
+            employeeId: employees[0]?.id ?? "",
+            action: "hr-upload",
             documentName: documentName.trim(),
             contentType: file.type || "application/octet-stream",
             contentBase64,
@@ -242,11 +272,7 @@ function NewDocModal({
       await onUploaded();
       onClose();
     } catch (err) {
-      setError(
-        err instanceof Error
-          ? err.message
-          : "Баримт оруулж чадсангүй.",
-      );
+      setError(err instanceof Error ? err.message : "Баримт оруулж чадсангүй.");
     } finally {
       setSaving(false);
     }
@@ -255,76 +281,148 @@ function NewDocModal({
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/65 backdrop-blur-sm"
-      onClick={onClose}>
+      onClick={onClose}
+    >
       <div
-        className="relative w-[520px] max-w-[95vw] bg-[#0f1520] rounded-3xl border border-slate-700/50 shadow-2xl p-7 flex flex-col gap-4"
-        onClick={(event) => event.stopPropagation()}>
+        className="relative bg-[#0d1117] rounded-3xl border border-slate-700/50 shadow-2xl flex flex-col gap-5 overflow-hidden"
+        style={{ width: 560, padding: "36px 36px 32px" }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Header */}
         <div className="flex items-center justify-between">
-          <h2 className="text-white text-xl font-bold">Шинэ баримт</h2>
+          <h2 className="text-white text-2xl font-bold">
+            Шинэ баримтын мэдээлэл
+          </h2>
           <button
             onClick={onClose}
-            className="text-slate-400 hover:text-white transition-colors text-lg">
-            ✕
+            className="text-slate-400 hover:text-white transition-colors cursor-pointer"
+          >
+            <svg width="22" height="22" fill="none" viewBox="0 0 24 24">
+              <path
+                d="M18 6L6 18M6 6l12 12"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+              />
+            </svg>
           </button>
         </div>
 
-        <label className="flex flex-col gap-2">
-          <span className="text-sm text-slate-300">Ажилтан</span>
-          <select
-            value={employeeId}
-            onChange={(event) => setEmployeeId(event.target.value)}
-            className="h-11 rounded-xl border border-slate-700/50 bg-[#0d1117] px-3 text-sm text-white outline-none">
-            {employees.map((employee) => (
-              <option key={employee.id} value={employee.id}>
-                {employee.lastName} {employee.firstName} (
-                {employee.employeeCode})
-              </option>
-            ))}
-          </select>
-        </label>
-
-        <label className="flex flex-col gap-2">
-          <span className="text-sm text-slate-300">Үйлдэл</span>
-          <input
-            value={action}
-            onChange={(event) => setAction(event.target.value)}
-            className="h-11 rounded-xl border border-slate-700/50 bg-[#0d1117] px-3 text-sm text-white outline-none"
-            placeholder="hr-upload"
-          />
-        </label>
-
-        <label className="flex flex-col gap-2">
-          <span className="text-sm text-slate-300">Баримтын нэр</span>
+        {/* Баримтын нэр */}
+        <div className="flex flex-col gap-2">
+          <label className="text-white text-sm font-medium">Баримтын нэр</label>
           <input
             value={documentName}
-            onChange={(event) => setDocumentName(event.target.value)}
-            className="h-11 rounded-xl border border-slate-700/50 bg-[#0d1117] px-3 text-sm text-white outline-none"
-            placeholder="Жишээ: Нэмэлт гэрээ"
+            onChange={(e) => setDocumentName(e.target.value)}
+            placeholder="Баримтын нэр"
+            className="w-full bg-transparent border border-slate-700/60 rounded-2xl px-4 py-3.5 text-slate-300 text-base placeholder:text-slate-600 outline-none focus:border-slate-500 transition-colors"
           />
-        </label>
+        </div>
 
-        <label className="flex flex-col gap-2">
-          <span className="text-sm text-slate-300">Файл</span>
+        {/* Хүлээн авагчид */}
+        <div className="flex flex-col gap-2">
+          <label className="text-white text-sm font-medium">
+            Хүлээн авагчид
+          </label>
+          <div className="flex flex-wrap gap-2">
+            {recipients.map((r) => (
+              <span
+                key={r}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-600/50 text-slate-300 text-sm"
+              >
+                {r}
+                <button
+                  onClick={() => removeRecipient(r)}
+                  className="text-slate-500 hover:text-white transition-colors leading-none ml-0.5 cursor-poinetr"
+                >
+                  ×
+                </button>
+              </span>
+            ))}
+          </div>
+        </div>
+
+        {/* Файл хавсаргах */}
+        <div className="flex flex-col gap-2">
+          <label className="text-white text-sm font-medium">
+            Файл хавсаргах
+          </label>
           <input
+            ref={fileRef}
             type="file"
-            onChange={(event) => setFile(event.target.files?.[0] ?? null)}
-            className="rounded-xl border border-slate-700/50 bg-[#0d1117] px-3 py-3 text-sm text-slate-300 outline-none file:mr-3 file:rounded-lg file:border-0 file:bg-emerald-500 file:px-3 file:py-1.5 file:text-sm file:font-semibold file:text-black"
+            className="hidden"
+            onChange={(e) => setFile(e.target.files?.[0] ?? null)}
           />
-        </label>
+          <div
+            onDragOver={(e) => {
+              e.preventDefault();
+              setDragging(true);
+            }}
+            onDragLeave={() => setDragging(false)}
+            onDrop={(e) => {
+              e.preventDefault();
+              setDragging(false);
+              const f = e.dataTransfer.files?.[0];
+              if (f) setFile(f);
+            }}
+            onClick={() => fileRef.current?.click()}
+            className={`rounded-2xl border-2 border-dashed p-8 flex flex-col items-center gap-3 cursor-pointer transition-colors ${
+              dragging
+                ? "border-emerald-500/60 bg-emerald-500/5"
+                : "border-slate-700/50 hover:border-slate-600/60"
+            }`}
+          >
+            <UploadCloudIcon />
+            {file ? (
+              <p className="text-emerald-400 text-sm font-semibold text-center">
+                {file.name}
+              </p>
+            ) : (
+              <>
+                <p className="text-white text-base font-bold">
+                  Файл хавсаргах(Заавал)
+                </p>
+                <p className="text-slate-500 text-xs">
+                  JPEG, PNG, PDG, and MP4 formats, up to 50MB
+                </p>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    fileRef.current?.click();
+                  }}
+                  className="mt-1 px-6 py-2 rounded-xl border border-slate-600/60 text-slate-300 text-sm hover:border-slate-400 transition-colors bg-transparent cursor-pointer"
+                >
+                  Оруулах
+                </button>
+              </>
+            )}
+          </div>
+        </div>
 
-        {error ? <p className="text-sm text-red-400">{error}</p> : null}
+        {error && <p className="text-sm text-red-400">{error}</p>}
 
-        <div className="flex justify-end gap-3 pt-2">
+        {/* Actions */}
+        <div className="flex items-center justify-end gap-3 pt-1">
           <button
             onClick={onClose}
-            className="px-5 py-2.5 rounded-xl border border-slate-700/50 text-slate-300 text-sm">
-            Болих
+            className="px-6 py-3 rounded-2xl border border-slate-600/50 text-slate-300 text-sm font-medium hover:bg-slate-800/40 transition-colors cursor-pointer"
+          >
+            Татгалзах
           </button>
           <button
             onClick={handleSubmit}
             disabled={saving}
-            className="px-5 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 disabled:opacity-60 text-black text-sm font-semibold transition-colors">
-            {saving ? "Илгээж байна..." : "Хадгалах"}
+            className="flex items-center gap-2 px-7 py-3 rounded-2xl bg-emerald-500 hover:bg-emerald-400 disabled:opacity-60 text-black text-sm font-bold transition-colors shadow-lg cursor-pointer shadow-emerald-500/20"
+          >
+            <svg width="16" height="16" fill="none" viewBox="0 0 24 24">
+              <path
+                d="M12 5v14M5 12h14"
+                stroke="currentColor"
+                strokeWidth="2.4"
+                strokeLinecap="round"
+              />
+            </svg>
+            {saving ? "Илгээж байна..." : "Нэмэх"}
           </button>
         </div>
       </div>
@@ -332,6 +430,7 @@ function NewDocModal({
   );
 }
 
+// ── Main Component ─────────────────────────────────────
 export function FilesComponent() {
   const apolloClient = useApolloClient();
   const [search, setSearch] = useState("");
@@ -343,9 +442,7 @@ export function FilesComponent() {
   const [error, setError] = useState<string | null>(null);
 
   const queryContext = useMemo(
-    () => ({
-      headers: buildGraphQLHeaders({ actorRole: "hr" }),
-    }),
+    () => ({ headers: buildGraphQLHeaders({ actorRole: "hr" }) }),
     [],
   );
 
@@ -360,7 +457,6 @@ export function FilesComponent() {
   const loadRows = useCallback(async () => {
     setLoadingRows(true);
     setError(null);
-
     try {
       const documentLists = await Promise.all(
         employees.map(async (employee) => {
@@ -370,33 +466,24 @@ export function FilesComponent() {
             context: queryContext,
             fetchPolicy: "network-only",
           });
-
-          return {
-            employee,
-            docs: result.data?.documents ?? [],
-          };
+          return { employee, docs: result.data?.documents ?? [] };
         }),
       );
 
       const nextRows = documentLists
         .flatMap(({ employee, docs }) =>
-          docs.map((document) => ({
-            document,
-            employee,
-          })),
+          docs.map((document) => ({ document, employee })),
         )
         .sort(
-          (left, right) =>
-            new Date(right.document.createdAt).getTime() -
-            new Date(left.document.createdAt).getTime(),
+          (l, r) =>
+            new Date(r.document.createdAt).getTime() -
+            new Date(l.document.createdAt).getTime(),
         );
 
       setRows(nextRows);
     } catch (err) {
       setError(
-        err instanceof Error
-          ? err.message
-          : "Баримтуудыг ачаалж чадсангүй.",
+        err instanceof Error ? err.message : "Баримтуудыг ачаалж чадсангүй.",
       );
     } finally {
       setLoadingRows(false);
@@ -421,7 +508,7 @@ export function FilesComponent() {
           row.employee?.firstName ?? "",
           row.employee?.lastName ?? "",
           row.employee?.employeeCode ?? "",
-        ].some((value) => value.toLowerCase().includes(search.toLowerCase())),
+        ].some((v) => v.toLowerCase().includes(search.toLowerCase())),
       ),
     [rows, search],
   );
@@ -471,28 +558,29 @@ export function FilesComponent() {
 
   return (
     <div className="flex gap-5 min-h-screen bg-[#080c12] text-white font-sans p-0">
-      {showModal ? (
+      {showModal && (
         <NewDocModal
           employees={employees}
           onClose={() => setShowModal(false)}
           onUploaded={loadRows}
         />
-      ) : null}
-      {previewRow ? (
+      )}
+      {previewRow && (
         <FilePreviewModal
           row={previewRow}
           mode="preview"
           onClose={() => setPreviewRow(null)}
         />
-      ) : null}
-      {downloadRow ? (
+      )}
+      {downloadRow && (
         <FilePreviewModal
           row={downloadRow}
           mode="download"
           onClose={() => setDownloadRow(null)}
         />
-      ) : null}
+      )}
 
+      {/* Left panel */}
       <div className="w-[500px] shrink-0 flex flex-col gap-5">
         <div>
           <p className="text-slate-400 text-lg font-semibold uppercase tracking-widest mb-3">
@@ -516,16 +604,18 @@ export function FilesComponent() {
 
         <div>
           <p className="text-slate-400 text-lg font-semibold uppercase tracking-widest mb-3">
-            Үе шат
+            Үе шатaap
           </p>
           <div className="flex flex-col gap-8">
             {stages.map((stage) => (
               <div
                 key={stage.label}
-                className={`rounded-2xl border w-[415px] h-[88px] ${stage.border} ${stage.bg} p-4 flex items-center justify-between`}>
+                className={`rounded-2xl border w-[415px] h-[88px] ${stage.border} ${stage.bg} p-4 flex items-center justify-between`}
+              >
                 <div className="flex items-center gap-3">
                   <div
-                    className={`w-9 h-9 rounded-xl ${stage.iconBg} flex items-center justify-center shrink-0`}>
+                    className={`w-9 h-9 rounded-xl ${stage.iconBg} flex items-center justify-center shrink-0`}
+                  >
                     {stage.icon}
                   </div>
                   <div>
@@ -544,26 +634,26 @@ export function FilesComponent() {
         </div>
       </div>
 
+      {/* Right panel */}
       <div className="flex-1 flex flex-col">
         <div className="rounded-2xl border border-slate-700/40 bg-[#0a0f18] overflow-hidden flex-1">
           <div className="flex items-center gap-3 px-5 py-4 border-b border-slate-700/40 bg-slate-800/20">
             <div className="flex items-center gap-2 bg-[#0d1117] border border-slate-700/50 rounded-xl px-3 py-2 min-w-[260px]">
               <SearchIcon />
               <input
-                className="bg-transparent text-slate-400 text-sm outline-none placeholder:text-slate-600 w-full"
+                className="bg-transparent text-slate-400 text-sm outline-none placeholder:text-slate-600 w-[250px]"
                 placeholder="Баримт, үйлдэл, ажилтнаар хайх"
                 value={search}
-                onChange={(event) => setSearch(event.target.value)}
+                onChange={(e) => setSearch(e.target.value)}
               />
             </div>
           </div>
 
           <div
             className="grid items-center px-5 py-3.5 border-b border-slate-700/40 bg-slate-800/20"
-            style={{ gridTemplateColumns: "2fr 1.3fr 1fr 1fr 0.9fr" }}>
-            <span className="text-slate-400 font-medium">
-              Баримт бичиг
-            </span>
+            style={{ gridTemplateColumns: "2fr 1.3fr 1fr 1fr 0.9fr" }}
+          >
+            <span className="text-slate-400 font-medium">Баримт бичиг</span>
             <span className="text-slate-400 font-medium">Ажилтан</span>
             <span className="text-slate-400 font-medium">Огноо</span>
             <span className="text-slate-400 font-medium">Төлөв</span>
@@ -588,7 +678,8 @@ export function FilesComponent() {
               <div
                 key={row.document.id}
                 className="grid items-center px-5 py-3.5 border-b border-slate-800/50 hover:bg-slate-800/20 transition-colors"
-                style={{ gridTemplateColumns: "2fr 1.3fr 1fr 1fr 0.9fr" }}>
+                style={{ gridTemplateColumns: "2fr 1.3fr 1fr 1fr 0.9fr" }}
+              >
                 <div className="flex items-center gap-2.5">
                   <ReqIcon />
                   <div>
@@ -624,12 +715,14 @@ export function FilesComponent() {
                 <div className="flex items-center gap-2">
                   <button
                     onClick={() => setPreviewRow(row)}
-                    className="w-7 h-7 flex items-center justify-center rounded-lg text-slate-400 hover:text-white hover:bg-slate-700/50 transition-colors">
+                    className="w-7 h-7 flex items-center justify-center rounded-lg text-slate-400 hover:text-white hover:bg-slate-700/50 transition-colors"
+                  >
                     <EyeIcon />
                   </button>
                   <button
                     onClick={() => setDownloadRow(row)}
-                    className="w-7 h-7 flex items-center justify-center rounded-lg text-slate-400 hover:text-white hover:bg-slate-700/50 transition-colors">
+                    className="w-7 h-7 flex items-center justify-center rounded-lg text-slate-400 hover:text-white hover:bg-slate-700/50 transition-colors"
+                  >
                     <DownloadIcon />
                   </button>
                 </div>
@@ -647,7 +740,8 @@ export function FilesComponent() {
         <div className="flex justify-end mt-4">
           <button
             onClick={() => setShowModal(true)}
-            className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black font-semibold text-sm transition-colors shadow-lg shadow-emerald-500/20">
+            className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black font-semibold text-sm transition-colors shadow-lg shadow-emerald-500/20"
+          >
             <PlusIcon />
             Шинэ баримт
           </button>

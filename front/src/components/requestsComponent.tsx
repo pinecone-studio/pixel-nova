@@ -13,7 +13,10 @@ import {
   SearchIcon,
 } from "./icons";
 import { buildGraphQLHeaders } from "@/lib/apollo-client";
-import { APPROVE_LEAVE_REQUEST, REJECT_LEAVE_REQUEST } from "@/graphql/mutations";
+import {
+  APPROVE_LEAVE_REQUEST,
+  REJECT_LEAVE_REQUEST,
+} from "@/graphql/mutations";
 import { GET_LEAVE_REQUESTS } from "@/graphql/queries";
 import type { LeaveRequest } from "@/lib/types";
 import { formatDepartment, formatLeaveRequestStatus } from "@/lib/labels";
@@ -26,7 +29,8 @@ const StatusBadge = ({ status }: { status: string }) => {
   };
   return (
     <span
-      className={`text-xs px-3 py-1 rounded-full font-medium whitespace-nowrap ${styles[status] ?? "bg-slate-600/30 text-slate-400"}`}>
+      className={`text-xs px-3 py-1 rounded-full font-medium whitespace-nowrap ${styles[status] ?? "bg-slate-600/30 text-slate-400"}`}
+    >
       {formatLeaveRequestStatus(status) || status}
     </span>
   );
@@ -92,15 +96,18 @@ const PreviewModal = ({
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
-      onClick={onClose}>
+      onClick={onClose}
+    >
       <div
         className="relative w-[420px] max-w-[95vw] bg-[#0f1520] rounded-3xl border border-slate-700/60 shadow-2xl p-6 flex flex-col gap-5"
-        onClick={(e) => e.stopPropagation()}>
+        onClick={(e) => e.stopPropagation()}
+      >
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-3">
             <div className="w-14 h-14 rounded-full overflow-hidden shrink-0">
               <div
-                className={`w-full h-full ${color} flex items-center justify-center text-white font-bold text-lg`}>
+                className={`w-full h-full ${color} flex items-center justify-center text-white font-bold text-lg`}
+              >
                 {initials}
               </div>
             </div>
@@ -112,13 +119,15 @@ const PreviewModal = ({
                 <StatusBadge status={row.status} />
               </div>
               <p className="text-slate-400 text-sm mt-0.5">
-                {row.employee.employeeCode} • {formatDepartment(row.employee.department)}
+                {row.employee.employeeCode} •{" "}
+                {formatDepartment(row.employee.department)}
               </p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="text-slate-400 hover:text-white transition-colors text-xl leading-none mt-1">
+            className="text-slate-400 hover:text-white transition-colors text-xl leading-none mt-1"
+          >
             ✕
           </button>
         </div>
@@ -159,7 +168,8 @@ const PreviewModal = ({
 
         <div className="flex flex-col gap-2">
           <p className="text-white font-semibold text-base">
-            Тайлбар <span className="text-slate-500 font-normal">(Заавал биш)</span>
+            Тайлбар{" "}
+            <span className="text-slate-500 font-normal">(Заавал биш)</span>
           </p>
           <textarea
             value={note}
@@ -175,13 +185,15 @@ const PreviewModal = ({
             <button
               onClick={handleReject}
               disabled={acting}
-              className="flex items-center gap-2 px-5 py-2.5 rounded-xl border border-red-500/50 text-red-400 text-sm font-medium hover:bg-red-500/10 disabled:opacity-50 transition-colors">
+              className="flex items-center gap-2 px-5 py-2.5 rounded-xl border border-red-500/50 text-red-400 text-sm font-medium hover:bg-red-500/10 disabled:opacity-50 transition-colors"
+            >
               <span>✕</span> Татгалзах
             </button>
             <button
               onClick={handleApprove}
               disabled={acting}
-              className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#0ad4b1] text-black text-sm font-medium hover:bg-[#08bfa0] disabled:opacity-50 transition-colors">
+              className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#0ad4b1] text-black text-sm font-medium hover:bg-[#08bfa0] disabled:opacity-50 transition-colors"
+            >
               <span>✓</span> {acting ? "Түр хүлээнэ үү..." : "Батлах"}
             </button>
           </div>
@@ -212,7 +224,8 @@ const RequestRow = ({
       <div className="flex items-center justify-between px-5 py-3.5 hover:bg-slate-800/30 transition-colors cursor-pointer">
         <div className="flex items-center gap-3">
           <div
-            className={`w-11 h-11 rounded-xl ${color} flex items-center justify-center font-bold text-white text-sm shrink-0`}>
+            className={`w-11 h-11 rounded-xl ${color} flex items-center justify-center font-bold text-white text-sm shrink-0`}
+          >
             {initials}
           </div>
           <div>
@@ -220,7 +233,8 @@ const RequestRow = ({
               {row.employee.lastName} {row.employee.firstName}
             </p>
             <p className="text-slate-500 text-xs">
-              {row.employee.employeeCode} • {formatDepartment(row.employee.department)}
+              {row.employee.employeeCode} •{" "}
+              {formatDepartment(row.employee.department)}
             </p>
           </div>
         </div>
@@ -231,7 +245,8 @@ const RequestRow = ({
           <StatusBadge status={row.status} />
           <button
             onClick={() => onPreview(row)}
-            className={`w-9 h-9 flex items-center justify-center rounded-xl border transition-colors ${eyeStyleMap[row.status] ?? "border-slate-700 text-slate-400"}`}>
+            className={`w-9 h-9 flex items-center justify-center rounded-xl border transition-colors ${eyeStyleMap[row.status] ?? "border-slate-700 text-slate-400"}`}
+          >
             <PreviewIcon />
           </button>
         </div>
@@ -266,7 +281,13 @@ export const RequestsComponent = () => {
     APPROVE_LEAVE_REQUEST,
     {
       context: queryContext,
-      refetchQueries: [{ query: GET_LEAVE_REQUESTS, variables: { status: null }, context: queryContext }],
+      refetchQueries: [
+        {
+          query: GET_LEAVE_REQUESTS,
+          variables: { status: null },
+          context: queryContext,
+        },
+      ],
       awaitRefetchQueries: true,
     },
   );
@@ -275,7 +296,13 @@ export const RequestsComponent = () => {
     REJECT_LEAVE_REQUEST,
     {
       context: queryContext,
-      refetchQueries: [{ query: GET_LEAVE_REQUESTS, variables: { status: null }, context: queryContext }],
+      refetchQueries: [
+        {
+          query: GET_LEAVE_REQUESTS,
+          variables: { status: null },
+          context: queryContext,
+        },
+      ],
       awaitRefetchQueries: true,
     },
   );
@@ -339,7 +366,7 @@ export const RequestsComponent = () => {
       )}
 
       <div className="grid grid-cols-3 gap-4">
-        <div className="rounded-2xl border border-blue-500/50 bg-linear-to-br from-blue-600/25 to-transparent p-5 flex items-center justify-between">
+        <div className="rounded-2xl border border-blue-500/50 bg-linear-to-br from-blue-600/45 to-black p-5 flex items-center justify-between">
           <div className="flex items-center gap-4">
             <div className="w-12 h-12 rounded-xl bg-blue-500/30 flex items-center justify-center shrink-0">
               <ReqIcon />
@@ -353,7 +380,7 @@ export const RequestsComponent = () => {
           </div>
         </div>
 
-        <div className="rounded-2xl border border-green-500/50 bg-linear-to-br from-green-600/25 to-transparent p-5 flex items-center justify-between">
+        <div className="rounded-2xl border border-green-500/50 bg-linear-to-br from-green-600/45 to-black p-5 flex items-center justify-between">
           <div className="flex items-center gap-4">
             <div className="w-12 h-12 rounded-full bg-green-500/30 flex items-center justify-center shrink-0">
               <AcepptedIcon />
@@ -368,7 +395,7 @@ export const RequestsComponent = () => {
           <ScrollIcon />
         </div>
 
-        <div className="rounded-2xl border border-red-500/50 bg-linear-to-br from-red-600/25 to-transparent p-5 flex items-center justify-between">
+        <div className="rounded-2xl border border-red-500/50 bg-linear-to-br from-red-600/45 to-black p-5 flex items-center justify-between">
           <div className="flex items-center gap-4">
             <div className="w-12 h-12 rounded-full bg-red-500/30 flex items-center justify-center shrink-0">
               <RejectedIcon />
@@ -385,12 +412,12 @@ export const RequestsComponent = () => {
       </div>
 
       <div className="rounded-2xl border border-blue-500/50 bg-[#0b0f18] overflow-hidden">
-        <div className="flex items-center gap-3 px-5 py-4 flex-wrap">
+        <div className="flex items-center gap-52 px-5 py-4 flex-wrap">
           <div className="flex items-center gap-2 bg-[#0d1117] border border-slate-700/50 rounded-xl px-3 py-2 min-w-[230px]">
             <SearchIcon />
             <input
               className="bg-transparent text-slate-400 text-sm outline-none placeholder:text-slate-600 w-full"
-              placeholder="Ажилтны нэр эсвэл кодоор хайх"
+              placeholder="Ажилтaны кодоор хайх"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />
@@ -401,11 +428,12 @@ export const RequestsComponent = () => {
               <button
                 key={tab.label}
                 onClick={() => setActiveTab(tab.label)}
-                className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${
+                className={`px-4 py-2 rounded-xl text-sm font-medium transition-all cursor-pointer ${
                   activeTab === tab.label
-                    ? "bg-[#0ad4b1] text-black"
+                    ? "bg-linear-to-br from-[#00C0A8] to-black/10 text-black"
                     : "bg-[#0d1117] border border-slate-700/50 text-slate-400 hover:text-slate-200"
-                }`}>
+                }`}
+              >
                 {tab.label} ({tab.count})
               </button>
             ))}

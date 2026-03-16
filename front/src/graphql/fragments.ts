@@ -24,6 +24,7 @@ export const EMPLOYEE_FULL_FIELDS = gql`
     isKpi
     birthDayAndMonth
     birthdayPoster
+    documentProfile
   }
 `;
 

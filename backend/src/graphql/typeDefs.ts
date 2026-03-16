@@ -24,6 +24,7 @@ export const typeDefs = /* GraphQL */ `
     isKpi: Boolean
     birthDayAndMonth: String
     birthdayPoster: String
+    documentProfile: JSON
   }
 
   type Document {
@@ -128,6 +129,7 @@ export const typeDefs = /* GraphQL */ `
     isKpi: Boolean
     birthDayAndMonth: String
     birthdayPoster: String
+    documentProfile: JSON
   }
 
   input UpdateActionRegistryInput {

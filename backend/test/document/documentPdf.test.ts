@@ -27,6 +27,7 @@ const mockEmployee: Employee = {
   isKpi: true,
   birthDayAndMonth: "03-15",
   birthdayPoster: null,
+  documentProfile: "{}",
 };
 
 test("generateEmployeeDocument returns rendered html for a known template", () => {
