@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { BiUser, BiBriefcase } from "react-icons/bi";
+import { EpasLogo } from "@/components/icons";
 
 export default function RoleSelectPage() {
   return (
@@ -9,9 +10,7 @@ export default function RoleSelectPage() {
       <div className="w-full max-w-lg flex flex-col items-center gap-10">
         {/* Logo / Branding */}
         <div className="flex flex-col items-center gap-3">
-          <div className="w-16 h-16 rounded-2xl bg-[#00CC99]/15 border border-[#00CC99]/30 flex items-center justify-center">
-            <span className="text-[#00CC99] text-2xl font-bold">E</span>
-          </div>
+          <EpasLogo className="w-16 h-16 rounded-2xl" />
           <h1 className="text-white text-3xl font-bold tracking-tight">EPAS</h1>
           <p className="text-[#4A4A6A] text-sm text-center max-w-xs">
             Ажилтны баримт бичгийн автоматжуулалтын систем

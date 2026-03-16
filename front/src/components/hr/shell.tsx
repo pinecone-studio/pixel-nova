@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-import { DocIcon, NotifIcon } from "@/components/icons";
+import { EpasLogo, NotifIcon } from "@/components/icons";
 
 import { getActiveHrNavItem, HR_NAV_ITEMS } from "./navigation";
 
@@ -16,9 +16,7 @@ export function HrShell({ children }: { children: React.ReactNode }) {
       <div className="flex min-h-screen">
         <aside className="group w-16 hover:w-60 transition-[width] duration-300 border-r border-white/8 bg-[#060d0c] flex flex-col py-4 px-2 shrink-0">
           <div className="mb-8 flex justify-center">
-            <div className="w-9 h-9 rounded-xl bg-[#0ad4b1]/15 border border-[#0ad4b1]/30 flex items-center justify-center">
-              <DocIcon />
-            </div>
+            <EpasLogo className="w-9 h-9 rounded-xl" />
           </div>
 
           <div className="flex flex-col gap-1 flex-1">

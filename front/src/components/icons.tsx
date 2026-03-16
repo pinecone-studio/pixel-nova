@@ -188,6 +188,53 @@ export function ChevronDown({
   );
 }
 
+export function EpasLogo({ className = "h-9 w-9" }: { className?: string }) {
+  return (
+    <svg
+      className={className}
+      viewBox="0 0 512 512"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      {/* Circular background */}
+      <circle cx="256" cy="256" r="248" fill="#060610" stroke="#10B981" strokeWidth="4" opacity="1" />
+      <circle cx="256" cy="256" r="236" fill="none" stroke="#10B981" strokeWidth="1.5" opacity="0.15" strokeDasharray="6 4" />
+      {/* Shield - glow layer */}
+      <path d="M256 80 L400 150 C400 150 408 310 256 430 C104 310 112 150 112 150 Z" fill="#10B981" opacity="0.06" />
+      {/* Shield - main outline */}
+      <path d="M256 80 L400 150 C400 150 408 310 256 430 C104 310 112 150 112 150 Z" fill="none" stroke="#10B981" strokeWidth="5" />
+      {/* Shield - inner dashed */}
+      <path d="M256 120 L372 176 C372 176 378 300 256 398 C134 300 140 176 140 176 Z" fill="none" stroke="#10B981" strokeWidth="1.5" opacity="0.25" strokeDasharray="8 6" />
+      {/* Person head */}
+      <circle cx="256" cy="196" r="44" fill="#10B981" opacity="0.1" />
+      <circle cx="256" cy="196" r="44" fill="none" stroke="#34D399" strokeWidth="5" />
+      {/* Person body */}
+      <path d="M184 328 C184 284 216 256 256 256 C296 256 328 284 328 328" fill="none" stroke="#34D399" strokeWidth="5" strokeLinecap="round" />
+      {/* Particles left */}
+      <circle cx="176" cy="360" r="4" fill="#6EE7B7" opacity="0.9" />
+      <circle cx="188" cy="332" r="3" fill="#34D399" opacity="0.7" />
+      <circle cx="172" cy="304" r="2.5" fill="#10B981" opacity="0.5" />
+      <circle cx="180" cy="276" r="2" fill="#059669" opacity="0.3" />
+      {/* Particles right */}
+      <circle cx="336" cy="360" r="4" fill="#6EE7B7" opacity="0.9" />
+      <circle cx="324" cy="332" r="3" fill="#34D399" opacity="0.7" />
+      <circle cx="340" cy="304" r="2.5" fill="#10B981" opacity="0.5" />
+      <circle cx="332" cy="276" r="2" fill="#059669" opacity="0.3" />
+      {/* Bottom convergence */}
+      <circle cx="256" cy="390" r="5" fill="#6EE7B7" opacity="0.9" />
+      <circle cx="256" cy="390" r="12" fill="#6EE7B7" opacity="0.15" />
+      {/* Constellation dots */}
+      <circle cx="150" cy="130" r="2.5" fill="#6EE7B7" opacity="0.6" />
+      <circle cx="362" cy="120" r="2" fill="#34D399" opacity="0.5" />
+      <circle cx="420" cy="220" r="3" fill="#6EE7B7" opacity="0.4" />
+      <circle cx="92" cy="240" r="2" fill="#34D399" opacity="0.5" />
+      {/* Connecting lines */}
+      <line x1="150" y1="130" x2="256" y2="80" stroke="#10B981" strokeWidth="0.8" opacity="0.15" />
+      <line x1="362" y1="120" x2="256" y2="80" stroke="#10B981" strokeWidth="0.8" opacity="0.15" />
+    </svg>
+  );
+}
+
 export const BellIcon = () => {
   return (
     <svg width="22" height="22" fill="none" viewBox="0 0 24 24">
