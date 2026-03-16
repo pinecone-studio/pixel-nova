@@ -128,7 +128,6 @@ export const Request = () => {
   const [leaveStart, setLeaveStart] = useState("");
   const [leaveEnd, setLeaveEnd] = useState("");
   const [leaveReason, setLeaveReason] = useState("");
-
   const [clearanceType, setClearanceType] = useState("");
   const [clearanceReason, setClearanceReason] = useState("");
 
@@ -197,6 +196,12 @@ export const Request = () => {
     setSubmitted(false);
     setSendError(null);
     setActiveTab(null);
+    setLeaveType("");
+    setLeaveStart("");
+    setLeaveEnd("");
+    setLeaveReason("");
+    setClearanceType("");
+    setClearanceReason("");
   }
 
   const quickActions = [

@@ -11,13 +11,14 @@ import { buildGraphQLHeaders } from "@/lib/apollo-client";
 import { GET_ME } from "@/graphql/queries";
 import type { Employee } from "@/lib/types";
 
-import { DocumentIcon, DownIcon, FactIcon } from "./icons";
+import { AuditLog, DocumentIcon, DownIcon, FactIcon } from "./icons";
 
 const TOKEN_STORAGE_KEY = "epas_auth_token";
 
 const navItems = [
   { icon: <BiHome className="w-4 h-4" />, label: "Нүүр", href: "/employee" },
   { icon: <FactIcon />, label: "Баримтууд", href: "/employee/files" },
+  { icon: <AuditLog />, label: "Аудит", href: "/employee/audit" },
   { icon: <RxAvatar className="w-4 h-4" />, label: "Профайл", href: "/profile" },
 ];
 
