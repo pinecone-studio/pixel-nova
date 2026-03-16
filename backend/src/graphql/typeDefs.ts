@@ -184,6 +184,25 @@ export const typeDefs = /* GraphQL */ `
     updatedAt: String!
   }
 
+  type ContractRequest {
+    id: ID!
+    employeeId: ID!
+    employee: Employee!
+    templateIds: [String!]!
+    status: String!
+    note: String
+    signatureMode: String!
+    createdAt: String!
+    updatedAt: String!
+    decidedAt: String
+  }
+
+  type EmployeeSignatureStatus {
+    hasSignature: Boolean!
+    hasPasscode: Boolean!
+    updatedAt: String
+  }
+
   type Query {
     me: Employee
     employees(search: String, status: String, department: String): [Employee!]!
@@ -193,6 +212,9 @@ export const typeDefs = /* GraphQL */ `
     documentContent(documentId: ID!): DocumentContent
     leaveRequests(status: String): [LeaveRequest!]!
     myLeaveRequests: [LeaveRequest!]!
+    contractRequests(status: String): [ContractRequest!]!
+    myContractRequests: [ContractRequest!]!
+    mySignatureStatus: EmployeeSignatureStatus!
   }
 
   type Mutation {
@@ -207,6 +229,15 @@ export const typeDefs = /* GraphQL */ `
     submitLeaveRequest(type: String!, startTime: String!, endTime: String!, reason: String!): LeaveRequest!
     approveLeaveRequest(id: ID!, note: String): LeaveRequest!
     rejectLeaveRequest(id: ID!, note: String): LeaveRequest!
+    updateMyDocumentProfile(input: JSON!): Employee!
+    submitContractRequest(
+      templateIds: [String!]!
+      signatureMode: String
+      passcode: String
+      signatureData: String
+    ): ContractRequest!
+    approveContractRequest(id: ID!, note: String): ContractRequest!
+    rejectContractRequest(id: ID!, note: String): ContractRequest!
     uploadHrDocument(input: UploadHrDocumentInput!): Document!
   }
 `;

@@ -13,6 +13,7 @@ export {
   listEmployees,
   insertEmployee,
   updateEmployee,
+  updateEmployeeDocumentProfile,
   upsertEmployeeRecord,
 } from "./employee";
 export { getDocuments, getDocumentById, insertDocument } from "./document";
@@ -48,3 +49,15 @@ export {
   getLeaveRequestById,
   updateLeaveRequestStatus,
 } from "./leaveRequest";
+export {
+  insertContractRequest,
+  getContractRequests,
+  getContractRequestById,
+  updateContractRequestStatus,
+} from "./contractRequest";
+export {
+  getEmployeeSignatureByEmployeeId,
+  upsertEmployeeSignature,
+  verifyEmployeeSignaturePasscode,
+  getEmployeeSignatureStatus,
+} from "./employeeSignature";

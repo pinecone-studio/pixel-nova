@@ -4,6 +4,8 @@ import {
   getDocuments,
   getAuditLogs,
   getLeaveRequests,
+  getContractRequests,
+  getEmployeeSignatureStatus,
   listEmployees,
   listActionConfigs,
 } from "../db/queries";
@@ -88,6 +90,27 @@ export const queryResolvers = {
       throw new Error("Unauthorized");
     }
     return getLeaveRequests(ctx.db, { employeeId: ctx.actor.id });
+  },
+
+  contractRequests: (_: unknown, args: { status?: string | null }, ctx: Ctx) => {
+    if (ctx.actor.role !== "hr" && ctx.actor.role !== "admin") {
+      throw new Error("Unauthorized");
+    }
+    return getContractRequests(ctx.db, { status: args.status ?? undefined });
+  },
+
+  myContractRequests: (_: unknown, __: unknown, ctx: Ctx) => {
+    if (ctx.actor.role !== "employee" || !ctx.actor.id) {
+      throw new Error("Unauthorized");
+    }
+    return getContractRequests(ctx.db, { employeeId: ctx.actor.id });
+  },
+
+  mySignatureStatus: (_: unknown, __: unknown, ctx: Ctx) => {
+    if (ctx.actor.role !== "employee" || !ctx.actor.id) {
+      throw new Error("Unauthorized");
+    }
+    return getEmployeeSignatureStatus(ctx.db, ctx.actor.id);
   },
 
   documentContent: async (

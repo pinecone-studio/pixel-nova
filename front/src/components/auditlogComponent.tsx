@@ -832,7 +832,7 @@ export function AuditlogComponent() {
   ).length;
 
   return (
-    <div className="min-h-screen bg-[#080c12] text-white font-sans flex flex-col gap-4 p-0">
+    <div className="min-h-screen bg-[#080c12] text-white font-sans flex flex-col gap-4 p-0 animate-fade-up">
       {sendRequestEntry && (
         <SendRequestModal
           entry={sendRequestEntry}
@@ -888,9 +888,10 @@ export function AuditlogComponent() {
 
       {/* Content */}
       {loading || documentsLoading ? (
-        <div className="py-12 flex items-center justify-center gap-3 text-slate-500 text-sm">
-          <span className="w-4 h-4 border-2 border-slate-700 border-t-slate-400 rounded-full animate-spin" />
-          Уншиж байна...
+        <div className="py-8 px-4 flex flex-col gap-3">
+          <div className="h-4 w-64 rounded-full skeleton" />
+          <div className="h-3 w-80 rounded-full skeleton" />
+          <div className="h-3 w-72 rounded-full skeleton" />
         </div>
       ) : filtered.length === 0 ? (
         <div className="py-12 text-center text-slate-500 text-sm">

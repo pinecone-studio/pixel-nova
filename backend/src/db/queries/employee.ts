@@ -108,6 +108,19 @@ export async function updateEmployee(
   return getEmployeeById(db, employeeId);
 }
 
+export async function updateEmployeeDocumentProfile(
+  db: DbClient,
+  employeeId: string,
+  documentProfile: string,
+) {
+  await db
+    .update(employees)
+    .set({ documentProfile })
+    .where(eq(employees.id, employeeId));
+
+  return getEmployeeById(db, employeeId);
+}
+
 export async function upsertEmployeeRecord(
   db: DbClient,
   employee: typeof employees.$inferInsert,

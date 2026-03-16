@@ -11,6 +11,7 @@ import type { Document, Employee } from "@/lib/types";
 import { ContractPreview } from "@/components/contractPreview";
 import { FactIcon } from "@/components/icons";
 import { Request } from "@/components/request";
+import { MyContractRequests } from "@/components/myContractRequests";
 
 const TOKEN_STORAGE_KEY = "epas_auth_token";
 
@@ -140,10 +141,12 @@ export default function EmployeePage() {
         </div>
 
         <div className="mx-auto w-full max-w-[1056px]">
-          <Request />
+          <Request employee={employee ?? undefined} />
         </div>
 
-        <section className="mx-auto flex w-full max-w-[1056px] flex-col gap-6">
+        <MyContractRequests />
+
+        <section className="mx-auto flex w-full max-w-[1056px] flex-col gap-6 animate-fade-up">
           <div className="flex items-center gap-4">
             <h2 className="text-[24px] font-semibold tracking-[-0.02em] text-white">
               Бичиг Баримтууд

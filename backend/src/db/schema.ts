@@ -164,6 +164,41 @@ export const leaveRequests = sqliteTable(
   (table) => [index("leave_requests_employee_id_idx").on(table.employeeId)],
 );
 
+export const contractRequests = sqliteTable(
+  "contract_requests",
+  {
+    id: text("id").primaryKey(),
+    employeeId: text("employee_id")
+      .notNull()
+      .references(() => employees.id, { onDelete: "cascade" }),
+    templateIds: text("template_ids").notNull().default("[]"),
+    status: text("status").notNull().default("pending"),
+    note: text("note"),
+    signatureMode: text("signature_mode").notNull().default("none"),
+    createdAt: text("created_at").notNull(),
+    updatedAt: text("updated_at").notNull(),
+    decidedAt: text("decided_at"),
+  },
+  (table) => [index("contract_requests_employee_id_idx").on(table.employeeId)],
+);
+
+export const employeeSignatures = sqliteTable(
+  "employee_signatures",
+  {
+    id: text("id").primaryKey(),
+    employeeId: text("employee_id")
+      .notNull()
+      .references(() => employees.id, { onDelete: "cascade" })
+      .unique(),
+    signatureData: text("signature_data").notNull(),
+    passcodeSalt: text("passcode_salt"),
+    passcodeHash: text("passcode_hash"),
+    createdAt: text("created_at").notNull(),
+    updatedAt: text("updated_at").notNull(),
+  },
+  (table) => [index("employee_signatures_employee_id_idx").on(table.employeeId)],
+);
+
 export const schema = {
   employees,
   documents,
@@ -174,6 +209,8 @@ export const schema = {
   otpCodes,
   authSessions,
   leaveRequests,
+  contractRequests,
+  employeeSignatures,
 };
 
 export type Employee = typeof employees.$inferSelect;
@@ -194,3 +231,7 @@ export type AuthSession = typeof authSessions.$inferSelect;
 export type NewAuthSession = typeof authSessions.$inferInsert;
 export type LeaveRequest = typeof leaveRequests.$inferSelect;
 export type NewLeaveRequest = typeof leaveRequests.$inferInsert;
+export type ContractRequest = typeof contractRequests.$inferSelect;
+export type NewContractRequest = typeof contractRequests.$inferInsert;
+export type EmployeeSignature = typeof employeeSignatures.$inferSelect;
+export type NewEmployeeSignature = typeof employeeSignatures.$inferInsert;

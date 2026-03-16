@@ -3,14 +3,21 @@ import {
   deleteSessionByToken,
   ensureDefaultActionConfigs,
   getEmployeeById,
+  getEmployeeSignatureByEmployeeId,
   getLeaveRequestById,
+  getContractRequestById,
   insertDocument,
+  insertContractRequest,
   insertLeaveRequest,
   listActionConfigs,
   requestEmployeeOtp,
+  updateContractRequestStatus,
+  updateEmployeeDocumentProfile,
   upsertActionConfig,
   upsertEmployeeRecord,
+  upsertEmployeeSignature,
   updateLeaveRequestStatus,
+  verifyEmployeeSignaturePasscode,
   verifyEmployeeOtp,
 } from "../db/queries";
 import {
@@ -20,6 +27,11 @@ import {
 import { uploadEmployeeDocumentToR2 } from "../storage/r2";
 import type { GraphQLContext } from "./schema";
 import { executeTriggeredAction } from "./helpers";
+import { buildTemplateData, validateRequiredFields } from "../document/templateData";
+import {
+  buildContractActionConfig,
+  normalizeContractTemplateIds,
+} from "../services/contractTemplates";
 
 type Ctx = GraphQLContext;
 
@@ -244,6 +256,200 @@ export const mutationResolvers = {
     const row = await updateLeaveRequestStatus(ctx.db, args.id, "rejected", args.note);
     if (!row) throw new Error("Leave request not found");
     return row;
+  },
+
+  updateMyDocumentProfile: async (
+    _: unknown,
+    args: { input: Record<string, unknown> },
+    ctx: Ctx,
+  ) => {
+    if (ctx.actor.role !== "employee" || !ctx.actor.id) {
+      throw new Error("Unauthorized");
+    }
+
+    const updated = await updateEmployeeDocumentProfile(
+      ctx.db,
+      ctx.actor.id,
+      JSON.stringify(args.input ?? {}),
+    );
+
+    if (!updated) {
+      throw new Error("Failed to update document profile");
+    }
+
+    return updated;
+  },
+
+  submitContractRequest: async (
+    _: unknown,
+    args: {
+      templateIds: string[];
+      signatureMode?: string | null;
+      passcode?: string | null;
+      signatureData?: string | null;
+    },
+    ctx: Ctx,
+  ) => {
+    if (ctx.actor.role !== "employee" || !ctx.actor.id) {
+      throw new Error("Unauthorized");
+    }
+
+    const normalized = normalizeContractTemplateIds(args.templateIds ?? []);
+    if (normalized.length === 0) {
+      throw new Error("Гэрээний загвар сонгоогүй байна.");
+    }
+    if (normalized.length > 3) {
+      throw new Error("Нэг дор 3 хүртэл гэрээ сонгох боломжтой.");
+    }
+
+    const signature = await getEmployeeSignatureByEmployeeId(ctx.db, ctx.actor.id);
+    const signatureMode = (args.signatureMode ?? "").toLowerCase().trim();
+    const signatureData = args.signatureData?.trim() ?? "";
+    const passcode = args.passcode?.trim() ?? "";
+
+    const wantsRedraw = signatureMode === "redraw" || (!signatureMode && Boolean(signatureData));
+    const wantsReuse = signatureMode === "reuse" || (!signatureMode && !wantsRedraw);
+
+    if (wantsReuse) {
+      if (!signature?.signatureData) {
+        throw new Error("Гарын үсэг олдсонгүй. Эхлээд гарын үсгээ зурна уу.");
+      }
+
+      if (signature.passcodeHash) {
+        if (!passcode) {
+          throw new Error("4 оронтой кодоо оруулна уу.");
+        }
+
+        const verification = await verifyEmployeeSignaturePasscode(
+          ctx.db,
+          ctx.actor.id,
+          passcode,
+        );
+        if (!verification.ok) {
+          throw new Error("Код буруу байна. Дахин оролдоно уу.");
+        }
+      }
+    }
+
+    if (wantsRedraw) {
+      if (!signatureData) {
+        throw new Error("Гарын үсгээ зурна уу.");
+      }
+
+      if (passcode && !/^[0-9]{4}$/.test(passcode)) {
+        throw new Error("4 оронтой код шаардлагатай.");
+      }
+
+      await upsertEmployeeSignature(ctx.db, {
+        employeeId: ctx.actor.id,
+        signatureData,
+        passcode: passcode || undefined,
+      });
+    }
+
+    const inserted = await insertContractRequest(ctx.db, {
+      employeeId: ctx.actor.id,
+      templateIds: normalized,
+      signatureMode: wantsRedraw ? "redraw" : "reuse",
+    });
+
+    if (!inserted) {
+      throw new Error("Failed to create contract request");
+    }
+
+    const full = await getContractRequestById(ctx.db, inserted.id);
+    if (!full) throw new Error("Failed to load contract request");
+    return full;
+  },
+
+  approveContractRequest: async (
+    _: unknown,
+    args: { id: string; note?: string | null },
+    ctx: Ctx,
+  ) => {
+    if (ctx.actor.role !== "hr" && ctx.actor.role !== "admin") {
+      throw new Error("Unauthorized");
+    }
+
+    const request = await getContractRequestById(ctx.db, args.id);
+    if (!request) {
+      throw new Error("Contract request not found");
+    }
+    if (request.status !== "pending") {
+      throw new Error("Энэ хүсэлт аль хэдийн шийдвэрлэгдсэн байна.");
+    }
+
+    const normalized = normalizeContractTemplateIds(request.templateIds ?? []);
+    if (normalized.length === 0) {
+      throw new Error("Гэрээний загвар сонгоогүй байна.");
+    }
+    if (normalized.length > 3) {
+      throw new Error("Нэг дор 3 хүртэл гэрээ сонгох боломжтой.");
+    }
+
+    const actionConfig = buildContractActionConfig(normalized);
+    const nowIso = new Date().toISOString();
+    const templateData = buildTemplateData(request.employee, nowIso);
+    const { incompleteFields } = validateRequiredFields(
+      templateData,
+      actionConfig.requiredEmployeeFields,
+    );
+
+    if (incompleteFields.length > 0) {
+      console.warn(
+        "Contract request approved with incomplete fields:",
+        incompleteFields,
+      );
+    }
+
+    const signature = await getEmployeeSignatureByEmployeeId(
+      ctx.db,
+      request.employeeId,
+    );
+    if (!signature?.signatureData) {
+      throw new Error("Ажилтны гарын үсэг олдсонгүй.");
+    }
+
+    const signatureHtml = `<img src="${signature.signatureData}" style="height:40px; filter: brightness(0) saturate(100%);" />`;
+    const signDate = nowIso.slice(0, 10);
+
+    await executeTriggeredAction(ctx, request.employeeId, "contract_request", {
+      actionConfig,
+      templateDataOverrides: signatureHtml
+        ? {
+            employee_signature: signatureHtml,
+            employee_sign_line: signatureHtml,
+            employee_sign_date: signDate,
+          }
+        : { employee_sign_date: signDate },
+    });
+
+    const updated = await updateContractRequestStatus(
+      ctx.db,
+      args.id,
+      "approved",
+      args.note,
+    );
+    if (!updated) throw new Error("Failed to update contract request");
+    return updated;
+  },
+
+  rejectContractRequest: async (
+    _: unknown,
+    args: { id: string; note?: string | null },
+    ctx: Ctx,
+  ) => {
+    if (ctx.actor.role !== "hr" && ctx.actor.role !== "admin") {
+      throw new Error("Unauthorized");
+    }
+    const updated = await updateContractRequestStatus(
+      ctx.db,
+      args.id,
+      "rejected",
+      args.note,
+    );
+    if (!updated) throw new Error("Contract request not found");
+    return updated;
   },
 
   uploadHrDocument: async (
