@@ -11,7 +11,7 @@ import { buildGraphQLHeaders } from "@/lib/apollo-client";
 import { GET_ME } from "@/graphql/queries";
 import type { Employee } from "@/lib/types";
 
-import { AuditLog, DocumentIcon, DownIcon, FactIcon } from "./icons";
+import { AuditLog, DownIcon, EpasLogo, FactIcon } from "./icons";
 
 const TOKEN_STORAGE_KEY = "epas_auth_token";
 
@@ -65,9 +65,7 @@ export function Navbar() {
   return (
     <nav className="flex h-16 w-full items-center justify-between border-b border-[#1A1A2E] bg-[#0A0A0F] px-6 py-0 shadow-lg shadow-black/40">
       <Link href="/employee" className="flex shrink-0 items-center gap-3">
-        <div className="flex h-9 w-9 items-center justify-center rounded-full border border-[#00CC99] shadow-md shadow-[#00CC99]/20">
-          <DocumentIcon />
-        </div>
+        <EpasLogo className="h-9 w-9 rounded-xl" />
         <div className="flex items-baseline gap-1.5">
           <span className="text-lg font-bold tracking-wide text-white">EPAS</span>
           <span className="text-sm font-medium text-[#4A4A6A]">
