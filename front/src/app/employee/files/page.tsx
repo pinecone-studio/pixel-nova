@@ -1,7 +1,7 @@
 "use client";
 
 import { useLazyQuery, useQuery } from "@apollo/client/react";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { useRouter } from "next/navigation";
 
 import { buildGraphQLHeaders } from "@/lib/apollo-client";
@@ -528,10 +528,10 @@ export default function FilesPage() {
   const router = useRouter();
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<FilterValue>("all");
-  const [authToken] = useState(() =>
-    typeof window === "undefined"
-      ? ""
-      : (window.localStorage.getItem(TOKEN_STORAGE_KEY) ?? ""),
+  const authToken = useSyncExternalStore(
+    () => () => {},
+    () => window.localStorage.getItem(TOKEN_STORAGE_KEY) ?? "",
+    () => "",
   );
 
   const {

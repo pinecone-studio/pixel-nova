@@ -1,7 +1,7 @@
 "use client";
 
 import { useQuery } from "@apollo/client/react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useSyncExternalStore } from "react";
 import { useRouter } from "next/navigation";
 
 import { buildGraphQLHeaders } from "@/lib/apollo-client";
@@ -16,10 +16,10 @@ const TOKEN_STORAGE_KEY = "epas_auth_token";
 
 export default function EmployeePage() {
   const router = useRouter();
-  const [authToken] = useState(() =>
-    typeof window === "undefined"
-      ? ""
-      : (window.localStorage.getItem(TOKEN_STORAGE_KEY) ?? ""),
+  const authToken = useSyncExternalStore(
+    () => () => {},
+    () => window.localStorage.getItem(TOKEN_STORAGE_KEY) ?? "",
+    () => "",
   );
 
   const {

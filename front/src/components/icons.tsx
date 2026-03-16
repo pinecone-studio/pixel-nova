@@ -196,41 +196,53 @@ export function EpasLogo({ className = "h-9 w-9" }: { className?: string }) {
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
     >
-      {/* Circular background */}
-      <circle cx="256" cy="256" r="248" fill="#060610" stroke="#10B981" strokeWidth="4" opacity="1" />
-      <circle cx="256" cy="256" r="236" fill="none" stroke="#10B981" strokeWidth="1.5" opacity="0.15" strokeDasharray="6 4" />
-      {/* Shield - glow layer */}
-      <path d="M256 80 L400 150 C400 150 408 310 256 430 C104 310 112 150 112 150 Z" fill="#10B981" opacity="0.06" />
-      {/* Shield - main outline */}
-      <path d="M256 80 L400 150 C400 150 408 310 256 430 C104 310 112 150 112 150 Z" fill="none" stroke="#10B981" strokeWidth="5" />
-      {/* Shield - inner dashed */}
-      <path d="M256 120 L372 176 C372 176 378 300 256 398 C134 300 140 176 140 176 Z" fill="none" stroke="#10B981" strokeWidth="1.5" opacity="0.25" strokeDasharray="8 6" />
-      {/* Person head */}
-      <circle cx="256" cy="196" r="44" fill="#10B981" opacity="0.1" />
-      <circle cx="256" cy="196" r="44" fill="none" stroke="#34D399" strokeWidth="5" />
-      {/* Person body */}
-      <path d="M184 328 C184 284 216 256 256 256 C296 256 328 284 328 328" fill="none" stroke="#34D399" strokeWidth="5" strokeLinecap="round" />
-      {/* Particles left */}
-      <circle cx="176" cy="360" r="4" fill="#6EE7B7" opacity="0.9" />
-      <circle cx="188" cy="332" r="3" fill="#34D399" opacity="0.7" />
-      <circle cx="172" cy="304" r="2.5" fill="#10B981" opacity="0.5" />
-      <circle cx="180" cy="276" r="2" fill="#059669" opacity="0.3" />
-      {/* Particles right */}
-      <circle cx="336" cy="360" r="4" fill="#6EE7B7" opacity="0.9" />
-      <circle cx="324" cy="332" r="3" fill="#34D399" opacity="0.7" />
-      <circle cx="340" cy="304" r="2.5" fill="#10B981" opacity="0.5" />
-      <circle cx="332" cy="276" r="2" fill="#059669" opacity="0.3" />
-      {/* Bottom convergence */}
-      <circle cx="256" cy="390" r="5" fill="#6EE7B7" opacity="0.9" />
-      <circle cx="256" cy="390" r="12" fill="#6EE7B7" opacity="0.15" />
-      {/* Constellation dots */}
-      <circle cx="150" cy="130" r="2.5" fill="#6EE7B7" opacity="0.6" />
-      <circle cx="362" cy="120" r="2" fill="#34D399" opacity="0.5" />
-      <circle cx="420" cy="220" r="3" fill="#6EE7B7" opacity="0.4" />
-      <circle cx="92" cy="240" r="2" fill="#34D399" opacity="0.5" />
-      {/* Connecting lines */}
-      <line x1="150" y1="130" x2="256" y2="80" stroke="#10B981" strokeWidth="0.8" opacity="0.15" />
-      <line x1="362" y1="120" x2="256" y2="80" stroke="#10B981" strokeWidth="0.8" opacity="0.15" />
+      {/* Outer circle */}
+      <circle cx="256" cy="256" r="246" fill="#060610" stroke="#10B981" strokeWidth="10" />
+      {/* Inner dashed orbit */}
+      <circle cx="256" cy="256" r="226" fill="none" stroke="#10B981" strokeWidth="2" opacity="0.15" strokeDasharray="4 6" />
+
+      {/* Hexagonal shield */}
+      <path d="M256 60 L420 140 L420 340 L256 440 L92 340 L92 140 Z" fill="#10B981" opacity="0.04" />
+      <path d="M256 60 L420 140 L420 340 L256 440 L92 340 L92 140 Z" fill="none" stroke="#10B981" strokeWidth="4" />
+      {/* Inner hex dashed */}
+      <path d="M256 100 L388 164 L388 316 L256 396 L124 316 L124 164 Z" fill="none" stroke="#10B981" strokeWidth="1.5" opacity="0.2" strokeDasharray="6 5" />
+
+      {/* Person head - filled */}
+      <circle cx="256" cy="190" r="46" fill="#34D399" />
+      {/* Person shoulders - filled arc */}
+      <path d="M172 340 C172 288 210 254 256 254 C302 254 340 288 340 340 L172 340 Z" fill="#34D399" opacity="0.25" />
+      <path d="M172 340 C172 288 210 254 256 254 C302 254 340 288 340 340" fill="none" stroke="#34D399" strokeWidth="5" strokeLinecap="round" />
+
+      {/* Document floating left */}
+      <rect x="108" cy="220" y="200" width="44" height="56" rx="6" fill="none" stroke="#6EE7B7" strokeWidth="2.5" opacity="0.6" transform="rotate(-12 130 228)" />
+      <line x1="118" y1="218" x2="142" y2="214" stroke="#6EE7B7" strokeWidth="2" opacity="0.4" transform="rotate(-12 130 228)" />
+      <line x1="118" y1="228" x2="138" y2="225" stroke="#6EE7B7" strokeWidth="2" opacity="0.3" transform="rotate(-12 130 228)" />
+
+      {/* Document floating right */}
+      <rect x="360" y="200" width="44" height="56" rx="6" fill="none" stroke="#6EE7B7" strokeWidth="2.5" opacity="0.6" transform="rotate(12 382 228)" />
+      <line x1="370" y1="218" x2="394" y2="222" stroke="#6EE7B7" strokeWidth="2" opacity="0.4" transform="rotate(12 382 228)" />
+      <line x1="370" y1="228" x2="390" y2="231" stroke="#6EE7B7" strokeWidth="2" opacity="0.3" transform="rotate(12 382 228)" />
+
+      {/* Checkmark badge bottom */}
+      <circle cx="256" cy="400" r="22" fill="#059669" />
+      <path d="M244 400 L252 408 L268 392" fill="none" stroke="white" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" />
+
+      {/* Energy particles spiraling */}
+      <circle cx="148" cy="360" r="4" fill="#6EE7B7" opacity="0.8" />
+      <circle cx="132" cy="320" r="3" fill="#34D399" opacity="0.6" />
+      <circle cx="124" cy="280" r="2.5" fill="#10B981" opacity="0.4" />
+      <circle cx="364" cy="360" r="4" fill="#6EE7B7" opacity="0.8" />
+      <circle cx="380" cy="320" r="3" fill="#34D399" opacity="0.6" />
+      <circle cx="388" cy="280" r="2.5" fill="#10B981" opacity="0.4" />
+
+      {/* Top accent nodes */}
+      <circle cx="196" cy="90" r="3" fill="#6EE7B7" opacity="0.7" />
+      <circle cx="316" cy="90" r="3" fill="#6EE7B7" opacity="0.7" />
+      <circle cx="256" cy="52" r="2.5" fill="#34D399" opacity="0.5" />
+
+      {/* Connecting lines from nodes to hex */}
+      <line x1="196" y1="90" x2="174" y2="120" stroke="#10B981" strokeWidth="1" opacity="0.15" />
+      <line x1="316" y1="90" x2="338" y2="120" stroke="#10B981" strokeWidth="1" opacity="0.15" />
     </svg>
   );
 }
