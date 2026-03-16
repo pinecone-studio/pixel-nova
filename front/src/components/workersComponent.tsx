@@ -8,7 +8,6 @@ import { UPSERT_EMPLOYEE } from "@/graphql/mutations";
 import { GET_EMPLOYEES } from "@/graphql/queries";
 import type {
   Employee,
-  EmployeeDocumentProfile,
   UpsertEmployeeInput,
 } from "@/lib/types";
 import { formatBranch, formatDepartment, formatLevel } from "@/lib/labels";
@@ -35,6 +34,7 @@ import {
 } from "./ui/select";
 import { Input } from "./ui/input";
 import { Label } from "@/components/ui/label";
+import { Upload } from "lucide-react";
 
 // ── Types ──────────────────────────────────────────────
 type ModalMode = "add" | "edit";
@@ -51,152 +51,7 @@ type EmployeeFormState = {
   level: string;
   hireDate: string;
   status: string;
-  documentProfile: EmployeeDocumentProfile;
 };
-
-const DOCUMENT_PROFILE_SECTIONS: Array<{
-  title: string;
-  description: string;
-  fields: Array<{
-    key: keyof EmployeeDocumentProfile;
-    label: string;
-    placeholder: string;
-  }>;
-}> = [
-  {
-    title: "Company Details",
-    description:
-      "Employment contract deer garah baiguullagiin undsen medeelel.",
-    fields: [
-      {
-        key: "company_name",
-        label: "Company Name",
-        placeholder: "Pinecone Academy LLC",
-      },
-      {
-        key: "company_address",
-        label: "Company Address",
-        placeholder: "Office address",
-      },
-      {
-        key: "company_register_no",
-        label: "Company Register No",
-        placeholder: "Register number",
-      },
-      {
-        key: "employer_representative",
-        label: "Employer Representative",
-        placeholder: "Representative full name",
-      },
-      {
-        key: "company_legal_address",
-        label: "Company Legal Address",
-        placeholder: "Legal address",
-      },
-      {
-        key: "company_legal_phone",
-        label: "Company Legal Phone",
-        placeholder: "Phone number",
-      },
-      {
-        key: "company_legal_fax",
-        label: "Company Legal Fax",
-        placeholder: "Fax number",
-      },
-    ],
-  },
-  {
-    title: "Employee Details",
-    description:
-      "Ajiltnii gereen deer oroh hayg, register, holboo barih medeelel.",
-    fields: [
-      {
-        key: "employee_address",
-        label: "Employee Address",
-        placeholder: "Home address",
-      },
-      {
-        key: "employee_register_no",
-        label: "Employee Register No",
-        placeholder: "Register number",
-      },
-      {
-        key: "employee_legal_address",
-        label: "Employee Legal Address",
-        placeholder: "Legal address",
-      },
-      {
-        key: "employee_legal_phone",
-        label: "Employee Legal Phone",
-        placeholder: "Phone number",
-      },
-      {
-        key: "employee_legal_fax",
-        label: "Employee Legal Fax",
-        placeholder: "Fax number",
-      },
-    ],
-  },
-  {
-    title: "Contract Terms",
-    description: "Tsalin, ajliin nohtsol, tsagiin huvaariin medeelluud.",
-    fields: [
-      {
-        key: "contract_term",
-        label: "Contract Term",
-        placeholder: "1 year / indefinite",
-      },
-      {
-        key: "workplace_location",
-        label: "Workplace Location",
-        placeholder: "Office or branch",
-      },
-      {
-        key: "work_conditions",
-        label: "Work Conditions",
-        placeholder: "Hybrid / on-site / remote",
-      },
-      {
-        key: "work_schedule_type",
-        label: "Work Schedule Type",
-        placeholder: "Full-time",
-      },
-      { key: "workday_from", label: "Workday From", placeholder: "Monday" },
-      { key: "workday_to", label: "Workday To", placeholder: "Friday" },
-      { key: "workdays_count", label: "Workdays Count", placeholder: "5" },
-      { key: "daily_work_hours", label: "Daily Work Hours", placeholder: "8" },
-      {
-        key: "weekly_work_hours",
-        label: "Weekly Work Hours",
-        placeholder: "40",
-      },
-      {
-        key: "work_start_time",
-        label: "Work Start Time",
-        placeholder: "09:00",
-      },
-      { key: "work_end_time", label: "Work End Time", placeholder: "18:00" },
-      {
-        key: "break_start_time",
-        label: "Break Start Time",
-        placeholder: "13:00",
-      },
-      { key: "break_end_time", label: "Break End Time", placeholder: "14:00" },
-      {
-        key: "monthly_base_salary_amount",
-        label: "Monthly Base Salary Amount",
-        placeholder: "2500000",
-      },
-      {
-        key: "monthly_base_salary_words",
-        label: "Monthly Base Salary In Words",
-        placeholder: "Two million five hundred thousand tugriks",
-      },
-      { key: "salary_pay_day_1", label: "Salary Pay Day 1", placeholder: "15" },
-      { key: "salary_pay_day_2", label: "Salary Pay Day 2", placeholder: "30" },
-    ],
-  },
-];
 
 const DEPARTMENTS = [
   "Engineering",
@@ -252,38 +107,8 @@ function employeeToForm(employee?: Employee | null): EmployeeFormState {
     hireDate:
       employee?.hireDate?.slice(0, 10) ?? new Date().toISOString().slice(0, 10),
     status: employee?.status ?? STATUSES[0],
-    documentProfile: employee?.documentProfile ?? {},
   };
 }
-
-// ── Upload Cloud Icon ──────────────────────────────────
-function UploadCloudIcon() {
-  return (
-    <svg
-      width="32"
-      height="32"
-      fill="none"
-      viewBox="0 0 24 24"
-      className="text-muted-foreground"
-    >
-      <path
-        d="M12 16V8M12 8l-3 3M12 8l3 3"
-        stroke="currentColor"
-        strokeWidth="1.6"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <path
-        d="M20.39 18.39A5 5 0 0018 9h-1.26A8 8 0 103 16.3"
-        stroke="currentColor"
-        strokeWidth="1.6"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-}
-
 // ── Employee Modal ─────────────────────────────────────
 function EmployeeModal({
   mode,
@@ -312,26 +137,12 @@ function EmployeeModal({
     setForm((prev) => ({ ...prev, [key]: value }));
   }
 
-  function updateDocumentProfileField(
-    key: keyof EmployeeDocumentProfile,
-    value: string,
-  ) {
-    setForm((prev) => ({
-      ...prev,
-      documentProfile: {
-        ...prev.documentProfile,
-        [key]: value,
-      },
-    }));
-  }
-
   return (
     <Dialog
       open
       onOpenChange={(open) => {
         if (!open) onClose();
-      }}
-    >
+      }}>
       <DialogContent
         style={{ width: 500, height: 601, maxWidth: 500 }}
         className="
@@ -344,8 +155,7 @@ function EmployeeModal({
           [&>button]:text-slate-400
           [&>button]:hover:text-white
           [&>button]:transition-colors
-        "
-      >
+        ">
         {/* Header */}
         <DialogHeader className="shrink-0">
           <DialogTitle className="text-white text-xl font-bold">
@@ -392,8 +202,7 @@ function EmployeeModal({
             <Label className="text-white text-sm font-medium">Хэлтэс</Label>
             <Select
               value={form.department}
-              onValueChange={(v) => updateField("department", v)}
-            >
+              onValueChange={(v) => updateField("department", v)}>
               <SelectTrigger className="bg-transparent cursor-pointer border-slate-700/60 rounded-2xl px-4 py-3 h-auto text-slate-300 text-sm focus:ring-0 focus:border-slate-500  [&>svg]:text-slate-400">
                 <SelectValue placeholder="Хэлтэс сонгох" />
               </SelectTrigger>
@@ -402,8 +211,7 @@ function EmployeeModal({
                   <SelectItem
                     key={d}
                     value={d}
-                    className="text-slate-300 focus:bg-slate-800 focus:text-white cursor-pointer rounded-lg"
-                  >
+                    className="text-slate-300 focus:bg-slate-800 focus:text-white cursor-pointer rounded-lg">
                     {d}
                   </SelectItem>
                 ))}
@@ -452,9 +260,8 @@ function EmployeeModal({
               dragging
                 ? "border-emerald-500/60 bg-emerald-500/5"
                 : "border-slate-700/50 hover:border-slate-600/60"
-            }`}
-          >
-            <UploadCloudIcon />
+            }`}>
+            <Upload />
             {file ? (
               <p className="text-emerald-400 text-sm font-semibold px-4 text-center">
                 {file.name}
@@ -474,8 +281,7 @@ function EmployeeModal({
                     e.stopPropagation();
                     fileRef.current?.click();
                   }}
-                  className="mt-1 cursor-pointer rounded-xl border-slate-600/60 bg-transparent text-slate-300 hover:bg-slate-800/50 hover:text-white hover:border-slate-500"
-                >
+                  className="mt-1 cursor-pointer rounded-xl border-slate-600/60 bg-transparent text-slate-300 hover:bg-slate-800/50 hover:text-white hover:border-slate-500">
                   Оруулах
                 </Button>
               </>
@@ -483,61 +289,16 @@ function EmployeeModal({
           </div>
         </div>
 
-        <div className="rounded-2xl border border-slate-700/50 bg-[#0b1018] p-5 flex flex-col gap-5">
-          <div>
-            <h3 className="text-white font-semibold text-sm">
-              Contract / Document Details
-            </h3>
-            <p className="text-slate-400 text-xs mt-1">
-              Ene hesgiin medeelel ni ajliin geree bolon PDF template deer shuud
-              ashiglagdana.
-            </p>
-          </div>
-
-          {DOCUMENT_PROFILE_SECTIONS.map((section) => (
-            <div key={section.title} className="flex flex-col gap-3">
-              <div>
-                <p className="text-sm font-medium text-slate-200">
-                  {section.title}
-                </p>
-                <p className="text-xs text-slate-500">{section.description}</p>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                {section.fields.map((field) => (
-                  <label key={field.key} className="flex flex-col gap-1.5">
-                    <span className="text-xs text-slate-400">
-                      {field.label}
-                    </span>
-                    <input
-                      value={form.documentProfile[field.key] ?? ""}
-                      onChange={(event) =>
-                        updateDocumentProfileField(
-                          field.key,
-                          event.target.value,
-                        )
-                      }
-                      className="bg-transparent border border-slate-700/60 rounded-xl px-3 py-2.5 text-slate-200 text-sm outline-none"
-                      placeholder={field.placeholder}
-                    />
-                  </label>
-                ))}
-              </div>
-            </div>
-          ))}
-        </div>
-
         <div className="flex items-center justify-end gap-3">
           <Button
             onClick={onClose}
-            className="px-6 py-2.5 h-auto rounded-2xl border-slate-600/50 bg-transparent cursor-pointer text-slate-300 hover:bg-slate-800/40 hover:text-white hover:border-slate-500"
-          >
+            className="px-6 py-2.5 h-auto rounded-2xl border-slate-600/50 bg-transparent cursor-pointer text-slate-300 hover:bg-slate-800/40 hover:text-white hover:border-slate-500">
             Татгалзах
           </Button>
           <Button
             onClick={() => void onSave(form)}
             disabled={saving}
-            className="flex items-center gap-2 px-6 py-2.5 cursor-pointer h-auto rounded-2xl bg-emerald-500 hover:bg-emerald-400 disabled:opacity-60 text-black font-bold shadow-lg shadow-emerald-500/20"
-          >
+            className="flex items-center gap-2 px-6 py-2.5 cursor-pointer h-auto rounded-2xl bg-emerald-500 hover:bg-emerald-400 disabled:opacity-60 text-black font-bold shadow-lg shadow-emerald-500/20">
             <svg width="14" height="14" fill="none" viewBox="0 0 24 24">
               <path
                 d="M12 5v14M5 12h14"
@@ -571,8 +332,7 @@ function EmployeeCard({
       <div className="flex items-start justify-between">
         <div className="flex items-center gap-3">
           <div
-            className={`w-11 h-11 rounded-xl ${avatarColor(employee.id)} flex items-center justify-center text-white font-bold text-sm shrink-0`}
-          >
+            className={`w-11 h-11 rounded-xl ${avatarColor(employee.id)} flex items-center justify-center text-white font-bold text-sm shrink-0`}>
             {getInitials(employee)}
           </div>
           <div>
@@ -586,8 +346,7 @@ function EmployeeCard({
           </div>
         </div>
         <span
-          className={`text-xs px-2.5 py-1 rounded-full font-medium ${statusStyle(employee.status)}`}
-        >
+          className={`text-xs px-2.5 py-1 rounded-full font-medium ${statusStyle(employee.status)}`}>
           {employee.status}
         </span>
       </div>
@@ -624,8 +383,7 @@ function EmployeeCard({
         </div>
         <button
           onClick={() => onEdit(employee)}
-          className="h-7 px-3 rounded-lg border border-slate-700/50 text-slate-400 text-xs hover:text-white hover:border-slate-500 transition-colors"
-        >
+          className="h-7 px-3 rounded-lg border border-slate-700/50 text-slate-400 text-xs hover:text-white hover:border-slate-500 transition-colors">
           Засах
         </button>
       </div>
@@ -719,7 +477,6 @@ export function WorkersComponent() {
         isKpi: null,
         birthDayAndMonth: null,
         birthdayPoster: null,
-        documentProfile: form.documentProfile,
       };
       await saveEmployee({ variables: { input: payload } });
       setShowAdd(false);
@@ -752,8 +509,7 @@ export function WorkersComponent() {
       {/* Stats */}
       <div
         className="grid gap-4"
-        style={{ gridTemplateColumns: "1.4fr 1fr 1fr" }}
-      >
+        style={{ gridTemplateColumns: "1.4fr 1fr 1fr" }}>
         <div className="rounded-2xl border border-slate-700/40 bg-linear-to-br from-green-700/30 to-black p-5">
           <p className="text-slate-500 text-xs font-semibold uppercase tracking-widest mb-3">
             Нийт ажилчид
@@ -859,8 +615,7 @@ export function WorkersComponent() {
       <div className="flex justify-end mt-2">
         <button
           onClick={() => setShowAdd(true)}
-          className="flex items-center cursor-pointer gap-2 px-5 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black font-semibold text-sm transition-colors shadow-lg shadow-emerald-500/20"
-        >
+          className="flex items-center cursor-pointer gap-2 px-5 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black font-semibold text-sm transition-colors shadow-lg shadow-emerald-500/20">
           <PlusIcon />
           Ажилтан нэмэх
         </button>

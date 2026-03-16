@@ -24,8 +24,7 @@ function CloseBtn({ onClick }: { onClick: () => void }) {
   return (
     <button
       onClick={onClick}
-      className="text-gray-500 hover:text-white transition-colors"
-    >
+      className="text-gray-500 hover:text-white transition-colors">
       <FiX className="w-5 h-5" />
     </button>
   );
@@ -42,8 +41,7 @@ function SendBtn({
     <button
       onClick={onClick}
       disabled={disabled}
-      className="bg-[#00CC99] hover:bg-[#00b388] disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-medium px-5 py-2.5 rounded-lg flex items-center gap-2 transition-colors"
-    >
+      className="bg-[#00CC99] hover:bg-[#00b388] disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-medium px-5 py-2.5 rounded-lg flex items-center gap-2 transition-colors">
       <FiSend className="w-4 h-4" />
       {disabled ? "Илгээж байна..." : "Илгээх"}
     </button>
@@ -54,8 +52,7 @@ function BackBtn({ onClick }: { onClick: () => void }) {
   return (
     <button
       onClick={onClick}
-      className="border border-[#1a2035] px-5 py-2.5 rounded-lg text-sm text-gray-400 hover:bg-white/5 hover:text-white transition-colors"
-    >
+      className="border border-[#1a2035] px-5 py-2.5 rounded-lg text-sm text-gray-400 hover:bg-white/5 hover:text-white transition-colors">
       Буцах
     </button>
   );
@@ -86,8 +83,7 @@ function SelectField({
           id={id}
           className={INPUT_CLASS}
           value={value}
-          onChange={(e) => onChange?.(e.target.value)}
-        >
+          onChange={(e) => onChange?.(e.target.value)}>
           <option value="">{placeholder}</option>
           {options.map((opt) => (
             <option key={opt} value={opt}>
@@ -110,7 +106,9 @@ function UploadArea({ label, subtitle }: { label: string; subtitle?: string }) {
         <p className="text-sm font-medium text-white">
           {subtitle ?? "Файл хавсаргах (заавал биш)"}
         </p>
-        <p className="text-xs text-gray-500">JPEG, PNG, PDF, MP4 төрлүүд — 50MB хүртэл</p>
+        <p className="text-xs text-gray-500">
+          JPEG, PNG, PDF, MP4 төрлүүд — 50MB хүртэл
+        </p>
         <button className="mt-1 border border-[#1a2035] text-xs text-gray-300 px-4 py-1.5 rounded-lg hover:bg-white/5 transition-colors">
           Оруулах
         </button>
@@ -124,10 +122,11 @@ export const Request = () => {
   const [submitted, setSubmitted] = useState(false);
   const [sendError, setSendError] = useState<string | null>(null);
 
-  const [leaveType, setLeaveType] = useState("");
-  const [leaveStart, setLeaveStart] = useState("");
-  const [leaveEnd, setLeaveEnd] = useState("");
-  const [leaveReason, setLeaveReason] = useState("");
+  const [, setLeaveType] = useState("");
+  const [, setLeaveStart] = useState("");
+  const [, setLeaveEnd] = useState("");
+  const [, setLeaveReason] = useState("");
+
   const [clearanceType, setClearanceType] = useState("");
   const [clearanceReason, setClearanceReason] = useState("");
 
@@ -234,8 +233,7 @@ export const Request = () => {
         </div>
         <a
           href="#"
-          className="flex items-center gap-1 text-[#00CC99] text-[14px] font-medium hover:underline"
-        >
+          className="flex items-center gap-1 text-[#00CC99] text-[14px] font-medium hover:underline">
           Бүх хүсэлтүүд <BiChevronRight className="w-4 h-4" />
         </a>
       </div>
@@ -244,12 +242,10 @@ export const Request = () => {
         {quickActions.map((action) => (
           <div
             key={action.title}
-            className={`${action.bg} flex h-[136px] w-[520px] items-center justify-between gap-3 rounded-[16px] border px-6 py-6 shadow-[0_0_0_1px_rgba(255,255,255,0.03)_inset]`}
-          >
+            className={`${action.bg} flex h-[136px] w-[520px] items-center justify-between gap-3 rounded-[16px] border px-6 py-6 shadow-[0_0_0_1px_rgba(255,255,255,0.03)_inset]`}>
             <div className="flex items-center gap-4">
               <div
-                className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-[12px] border ${action.iconBg}`}
-              >
+                className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-[12px] border ${action.iconBg}`}>
                 {action.icon}
               </div>
 
@@ -265,8 +261,7 @@ export const Request = () => {
 
             <button
               onClick={() => setActiveTab(action.title)}
-              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-[#8B96A8] transition-colors hover:bg-white/5 hover:text-white"
-            >
+              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-[#8B96A8] transition-colors hover:bg-white/5 hover:text-white">
               <BiPlus className="h-5 w-5" />
             </button>
           </div>
@@ -276,8 +271,7 @@ export const Request = () => {
       {submitted && activeTab && (
         <div className="fixed inset-0 flex items-center justify-center bg-black/60 backdrop-blur-sm z-50">
           <div
-            className={`w-[360px] rounded-2xl ${DIALOG_BG} text-white p-8 border ${DIALOG_BORDER} shadow-2xl flex flex-col items-center gap-4`}
-          >
+            className={`w-[360px] rounded-2xl ${DIALOG_BG} text-white p-8 border ${DIALOG_BORDER} shadow-2xl flex flex-col items-center gap-4`}>
             <div className="w-14 h-14 rounded-full bg-[#00CC99]/15 border border-[#00CC99]/30 flex items-center justify-center">
               <FiCheck className="w-7 h-7 text-[#00CC99]" />
             </div>
@@ -296,8 +290,7 @@ export const Request = () => {
       {activeTab === "Тойрох хуудас" && !submitted && (
         <div className="fixed inset-0 flex items-center justify-center bg-black/60 backdrop-blur-sm z-50">
           <div
-            className={`w-[460px] rounded-2xl ${DIALOG_BG} text-white p-7 border ${DIALOG_BORDER} shadow-2xl flex flex-col gap-5`}
-          >
+            className={`w-[460px] rounded-2xl ${DIALOG_BG} text-white p-7 border ${DIALOG_BORDER} shadow-2xl flex flex-col gap-5`}>
             <div className="flex justify-between items-start">
               <div>
                 <h2 className="text-xl font-semibold">
@@ -353,8 +346,7 @@ export const Request = () => {
       {activeTab === "Томилолт" && !submitted && (
         <div className="fixed inset-0 flex items-center justify-center bg-black/60 backdrop-blur-sm z-50">
           <div
-            className={`w-[460px] rounded-2xl ${DIALOG_BG} text-white p-7 border ${DIALOG_BORDER} shadow-2xl flex flex-col gap-5`}
-          >
+            className={`w-[460px] rounded-2xl ${DIALOG_BG} text-white p-7 border ${DIALOG_BORDER} shadow-2xl flex flex-col gap-5`}>
             <div className="flex justify-between items-start">
               <div>
                 <h2 className="text-xl font-semibold">Томилолтын мэдээлэл</h2>
