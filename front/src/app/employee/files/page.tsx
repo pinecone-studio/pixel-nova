@@ -1,7 +1,7 @@
 "use client";
 
 import { useLazyQuery, useQuery } from "@apollo/client/react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { buildGraphQLHeaders } from "@/lib/apollo-client";
@@ -9,6 +9,15 @@ import { GET_DOCUMENTS, GET_ME, GET_DOCUMENT_CONTENT } from "@/graphql/queries";
 import type { Document, DocumentContent, Employee } from "@/lib/types";
 
 const TOKEN_STORAGE_KEY = "epas_auth_token";
+
+const FILTER_OPTIONS = [
+  { value: "all", label: "Бүгд" },
+  { value: "Баримт бичиг", label: "Баримт бичиг" },
+  { value: "Тодорхойлолт", label: "Тодорхойлолт" },
+  { value: "Бүх үе шат", label: "Бүх үе шат" },
+] as const;
+
+type FilterValue = (typeof FILTER_OPTIONS)[number]["value"];
 
 // ─── helpers ────────────────────────────────────────────────────────────────
 
@@ -30,6 +39,114 @@ function buildDataUrl(content: DocumentContent) {
     return `data:${content.contentType};charset=utf-8,${encodeURIComponent(content.content)}`;
   }
   return `data:${content.contentType};base64,${content.content}`;
+}
+
+// ─── CustomDropdown ──────────────────────────────────────────────────────────
+
+function CustomDropdown({
+  filter,
+  setFilter,
+}: {
+  filter: string;
+  setFilter: (v: FilterValue) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  const selectedLabel =
+    FILTER_OPTIONS.find((o) => o.value === filter)?.label ?? "Бүгд";
+
+  useEffect(() => {
+    function handleClick(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, []);
+
+  return (
+    <div ref={ref} style={{ position: "relative" }}>
+      <button
+        type="button"
+        onClick={() => setOpen((o) => !o)}
+        style={{
+          height: 38,
+          padding: "0 14px",
+          background: "rgba(255,255,255,0.05)",
+          border: "1px solid rgba(255,255,255,0.1)",
+          borderRadius: 10,
+          color: "rgba(148,163,184,0.7)",
+          fontSize: 13,
+          cursor: "pointer",
+          fontFamily: "inherit",
+          display: "flex",
+          alignItems: "center",
+          gap: 8,
+          whiteSpace: "nowrap",
+        }}
+      >
+        {selectedLabel}
+        <svg
+          width="12"
+          height="12"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          viewBox="0 0 24 24"
+          style={{
+            transform: open ? "rotate(180deg)" : "rotate(0deg)",
+            transition: "transform 0.15s",
+          }}
+        >
+          <path d="M6 9l6 6 6-6" />
+        </svg>
+      </button>
+
+      {open && (
+        <div
+          style={{
+            position: "absolute",
+            top: "calc(100% + 6px)",
+            right: 0,
+            minWidth: 160,
+            background: "#1a1d24",
+            border: "1px solid rgba(255,255,255,0.1)",
+            borderRadius: 10,
+            overflow: "hidden",
+            zIndex: 50,
+          }}
+        >
+          {FILTER_OPTIONS.map(({ value, label }) => (
+            <button
+              key={value}
+              type="button"
+              onClick={() => {
+                setFilter(value);
+                setOpen(false);
+              }}
+              style={{
+                width: "100%",
+                padding: "10px 14px",
+                background:
+                  filter === value ? "rgba(255,255,255,0.07)" : "transparent",
+                border: "none",
+                borderBottom: "1px solid rgba(255,255,255,0.05)",
+                color: filter === value ? "#e2e8f0" : "rgba(148,163,184,0.7)",
+                fontSize: 13,
+                textAlign: "left",
+                cursor: "pointer",
+                fontFamily: "inherit",
+              }}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
 }
 
 // ─── ActionBtn (hover color only) ───────────────────────────────────────────
@@ -62,7 +179,7 @@ function ActionBtn({
   );
 }
 
-// ─── DocRow — preview / download logic from ContractPreview ─────────────────
+// ─── DocRow ──────────────────────────────────────────────────────────────────
 
 function DocRow({
   document,
@@ -139,7 +256,6 @@ function DocRow({
           cursor: "default",
         }}
       >
-        {/* File icon */}
         <div
           style={{
             width: 36,
@@ -164,7 +280,6 @@ function DocRow({
           </svg>
         </div>
 
-        {/* Name + filename */}
         <div style={{ flex: 1 }}>
           <div style={{ color: "#e2e8f0", fontSize: 14, fontWeight: 500 }}>
             {document.documentName}
@@ -180,7 +295,6 @@ function DocRow({
           </div>
         </div>
 
-        {/* Actions */}
         <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
           <ActionBtn title="Харах" onClick={() => void handlePreview()}>
             <svg
@@ -220,7 +334,6 @@ function DocRow({
         </div>
       </div>
 
-      {/* Preview modal — from ContractPreview */}
       {previewOpen && (
         <div
           style={{
@@ -257,7 +370,6 @@ function DocRow({
               boxShadow: "0 25px 60px rgba(0,0,0,0.6)",
             }}
           >
-            {/* Modal header */}
             <div
               style={{
                 display: "flex",
@@ -309,7 +421,6 @@ function DocRow({
               </button>
             </div>
 
-            {/* Modal body */}
             <div
               style={{
                 height: "calc(100% - 65px)",
@@ -416,7 +527,7 @@ const emptyBoxStyle: React.CSSProperties = {
 export default function FilesPage() {
   const router = useRouter();
   const [search, setSearch] = useState("");
-  const [filter, setFilter] = useState("all");
+  const [filter, setFilter] = useState<FilterValue>("all");
   const [authToken] = useState(() =>
     typeof window === "undefined"
       ? ""
@@ -485,10 +596,14 @@ export default function FilesPage() {
   return (
     <div
       style={{
-        minHeight: "100vh",
+        width: 1056,
+        height: 724,
         background: "#0a0b0f",
         padding: "32px 40px",
         fontFamily: "inherit",
+        boxSizing: "border-box",
+        overflow: "hidden",
+        margin: "0 auto",
       }}
     >
       {/* Page Header */}
@@ -562,26 +677,7 @@ export default function FilesPage() {
             }}
           />
         </div>
-        <select
-          value={filter}
-          onChange={(e) => setFilter(e.target.value)}
-          style={{
-            height: 38,
-            padding: "0 14px",
-            background: "#000",
-            border: "1px solid rgba(255,255,255,0.1)",
-            borderRadius: 10,
-            color: "rgba(148,163,184,0.7)",
-            fontSize: 13,
-            outline: "none",
-            cursor: "pointer",
-          }}
-        >
-          <option value="all">Бүх төрөл</option>
-          <option value="pdf">PDF</option>
-          <option value="html">HTML</option>
-          <option value="txt">TXT</option>
-        </select>
+        <CustomDropdown filter={filter} setFilter={setFilter} />
       </div>
 
       {/* Section Label */}
