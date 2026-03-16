@@ -18,6 +18,7 @@ export async function createTriggeredActionRecords(
   actor?: Actor,
   pdfRenderer?: { serviceUrl?: string | null; secret?: string | null },
   actionConfig?: NormalizedActionConfig | null,
+  templateDataOverrides?: Record<string, string>,
 ) {
   const employee = await getEmployeeById(db, employeeId);
 
@@ -40,7 +41,10 @@ export async function createTriggeredActionRecords(
   const recipientRoles = actionConfig?.recipients ?? [];
   const requiredEmployeeFields = actionConfig?.requiredEmployeeFields ?? [];
 
-  const templateData = buildTemplateData(employee, now);
+  const templateData = {
+    ...buildTemplateData(employee, now),
+    ...(templateDataOverrides ?? {}),
+  };
   const {
     data: patchedTemplateData,
     incompleteFields,

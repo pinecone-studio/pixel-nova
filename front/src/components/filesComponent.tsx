@@ -557,7 +557,7 @@ export function FilesComponent() {
   const isLoading = loading || loadingRows;
 
   return (
-    <div className="flex gap-5 min-h-screen bg-[#080c12] text-white font-sans p-0">
+    <div className="flex gap-5 min-h-screen bg-[#080c12] text-white font-sans p-0 animate-fade-up">
       {showModal && (
         <NewDocModal
           employees={employees}
@@ -661,9 +661,10 @@ export function FilesComponent() {
           </div>
 
           {isLoading ? (
-            <div className="py-12 flex items-center justify-center gap-3 text-slate-500 text-sm">
-              <span className="w-4 h-4 border-2 border-slate-700 border-t-slate-400 rounded-full animate-spin" />
-              Уншиж байна...
+            <div className="py-8 px-5 flex flex-col gap-3">
+              <div className="h-4 w-56 rounded-full skeleton" />
+              <div className="h-3 w-80 rounded-full skeleton" />
+              <div className="h-3 w-72 rounded-full skeleton" />
             </div>
           ) : error ? (
             <div className="py-12 text-center text-red-400 text-sm">

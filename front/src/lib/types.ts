@@ -176,3 +176,22 @@ export interface LeaveRequest {
   createdAt: string;
   updatedAt: string;
 }
+
+export interface ContractRequest {
+  id: string;
+  employeeId: string;
+  employee: Employee;
+  templateIds: string[];
+  status: "pending" | "approved" | "rejected";
+  note?: string | null;
+  signatureMode: string;
+  createdAt: string;
+  updatedAt: string;
+  decidedAt?: string | null;
+}
+
+export interface EmployeeSignatureStatus {
+  hasSignature: boolean;
+  hasPasscode: boolean;
+  updatedAt?: string | null;
+}
