@@ -53,10 +53,10 @@ export function HrShell({ children }: { children: React.ReactNode }) {
 
           <div className="flex items-center gap-3 rounded-xl px-2 py-2">
             <span className="flex h-9 w-9 items-center justify-center rounded-full bg-linear-to-br from-purple-500 to-pink-500 text-white text-xs font-bold shrink-0">
-              ХН
+              HR
             </span>
             <span className="whitespace-nowrap text-sm text-slate-400 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-              ХН баг
+              HR баг
             </span>
           </div>
         </aside>
@@ -64,9 +64,11 @@ export function HrShell({ children }: { children: React.ReactNode }) {
         <main className="flex-1 overflow-y-auto flex flex-col">
           <header className="h-14 border-b border-white/8 flex items-center justify-between px-6 shrink-0 bg-[#060d0c]">
             <div className="flex items-center gap-2 text-sm">
-              <span className="text-slate-500">ХН</span>
+              <span className="text-slate-500">HR</span>
               <span className="text-slate-600">›</span>
-              <span className="text-[#0ad4b1] font-semibold">{activeItem.label}</span>
+              <span className="text-[#0ad4b1] font-semibold">
+                {activeItem.label}
+              </span>
             </div>
 
             <div className="flex items-center gap-3">
