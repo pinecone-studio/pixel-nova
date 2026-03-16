@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useQuery } from "@apollo/client/react";
 import Image from "next/image";
@@ -12,6 +12,7 @@ import {
   AlbanTushaal,
   CompanyTsalin,
   Email,
+  EmployeeCode,
   Engineering,
   EntraID,
   Github,
@@ -20,6 +21,7 @@ import {
   KPI,
   Salbar,
   Senior,
+  Signature,
   TursunUdur,
 } from "@/components/icons";
 import { GET_ME } from "@/graphql/queries";
@@ -86,7 +88,7 @@ export default function Profile() {
   });
 
   const employee = data?.me ?? null;
-
+  console;
   useEffect(() => {
     if (!authToken) {
       router.replace("/auth/employee");
@@ -124,14 +126,44 @@ export default function Profile() {
 
   const workInfo = [
     {
-      icon: <AlbanTushaal />,
-      label: "Албан тушаал",
+      icon: <EmployeeCode />,
+      label: "Ажилтны код",
+      value: employee?.employeeCode ?? "Мэдээлэлгүй",
+    },
+
+    {
+      icon: <Signature />,
+      label: "Гарын үсэг харах",
       value: employee?.jobTitle ?? "Мэдээлэлгүй",
     },
     {
-      icon: <Senior />,
-      label: "Зэрэглэл",
-      value: employee?.level ? formatLevel(employee.level) : "Мэдээлэлгүй",
+      icon: <Email />,
+      label: "Имэйл",
+      value: employee?.email ?? "Мэдээлэлгүй",
+    },
+    {
+      icon: <TursunUdur />,
+      label: "Төрсөн өдөр",
+      value: employee?.birthDayAndMonth ?? "Мэдээлэлгүй",
+    },
+    {
+      icon: <Github />,
+      label: "GitHub",
+      value: employee?.github ?? "Мэдээлэлгүй",
+    },
+
+    // {
+    //   icon: <Senior />,
+    //   label: "Зэрэглэл",
+    //   value: employee?.level ? formatLevel(employee.level) : "Мэдээлэлгүй",
+    // },
+  ];
+
+  const personalInfo = [
+    {
+      icon: <AlbanTushaal />,
+      label: "Албан тушаал",
+      value: employee?.department ?? "Мэдээлэлгүй",
     },
     {
       icon: <Heltes />,
@@ -157,35 +189,14 @@ export default function Profile() {
     },
   ];
 
-  const personalInfo = [
-    {
-      icon: <AjiltniiCode />,
-      label: "Ажилтны код",
-      value: employee?.employeeCode ?? "Мэдээлэлгүй",
-    },
-    {
-      icon: <Email />,
-      label: "Имэйл",
-      value: employee?.email ?? "Мэдээлэлгүй",
-    },
-    {
-      icon: <TursunUdur />,
-      label: "Төрсөн өдөр",
-      value: employee?.birthDayAndMonth ?? "Мэдээлэлгүй",
-    },
-    {
-      icon: <Github />,
-      label: "GitHub",
-      value: employee?.github ?? "Мэдээлэлгүй",
-    },
-  ];
-
   return (
     <div className="min-h-screen bg-black pb-[199px] pt-[33px] font-sans text-white">
       <div className="mx-auto w-full max-w-[1056px]">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-white">Профайл</h1>
-          <p className="mt-1 text-gray-400">Таны хувийн болон ажлын мэдээлэл.</p>
+          <p className="mt-1 text-gray-400">
+            Таны хувийн болон ажлын мэдээлэл.
+          </p>
         </div>
 
         <div className="mb-8 rounded-2xl border border-gray-800 bg-linear-to-r from-gray-900 to-teal-950 p-6">
@@ -210,7 +221,9 @@ export default function Profile() {
               <div className="flex flex-wrap gap-2">
                 <span className="flex items-center gap-1 rounded-full border border-teal-600 px-3 py-1 text-xs text-teal-400">
                   <Senior />
-                  {employee?.level ? formatLevel(employee.level) : "Мэдээлэлгүй"}
+                  {employee?.level
+                    ? formatLevel(employee.level)
+                    : "Мэдээлэлгүй"}
                 </span>
                 <span className="flex items-center gap-1 rounded-full border border-gray-700 px-3 py-1 text-xs text-white">
                   <Engineering />
@@ -223,24 +236,33 @@ export default function Profile() {
                   {employee?.status ?? "Мэдээлэлгүй"}
                 </span>
               </div>
-              {error ? <p className="mt-3 text-sm text-red-400">{error.message}</p> : null}
+              {error ? (
+                <p className="mt-3 text-sm text-red-400">{error.message}</p>
+              ) : null}
             </div>
           </div>
         </div>
 
         <div className="mb-8 grid min-h-[479px] grid-cols-1 gap-14 md:grid-cols-2">
           <div className="h-full rounded-2xl border border-gray-800 bg-gray-900 p-6">
-            <h3 className="mb-5 text-lg font-semibold text-white">Ажлын мэдээлэл</h3>
+            <h3 className="mb-5 text-lg font-semibold text-white">
+              Ажлын мэдээлэл
+            </h3>
             <div className="border border-gray-800" />
             <div className="mt-5">
               {workInfo.map((item) => (
-                <div key={item.label} className="flex h-[68px] items-center gap-3">
+                <div
+                  key={item.label}
+                  className="flex h-[68px] items-center gap-3"
+                >
                   <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-teal-900/50 text-sm">
                     {item.icon}
                   </div>
                   <div>
                     <p className="text-xs text-gray-500">{item.label}</p>
-                    <p className="text-sm font-medium text-white">{item.value}</p>
+                    <p className="text-sm font-medium text-white">
+                      {item.value}
+                    </p>
                   </div>
                 </div>
               ))}
@@ -254,73 +276,21 @@ export default function Profile() {
             <div className="border border-gray-800" />
             <div className="mt-5">
               {personalInfo.map((item) => (
-                <div key={item.label} className="flex h-[68px] items-center gap-3">
+                <div
+                  key={item.label}
+                  className="flex h-[68px] items-center gap-3"
+                >
                   <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-teal-900/50 text-sm">
                     {item.icon}
                   </div>
                   <div>
                     <p className="text-xs text-gray-500">{item.label}</p>
-                    <p className="text-sm font-medium text-white">{item.value}</p>
+                    <p className="text-sm font-medium text-white">
+                      {item.value}
+                    </p>
                   </div>
                 </div>
               ))}
-            </div>
-          </div>
-        </div>
-
-        <div className="overflow-hidden rounded-2xl border border-gray-800 bg-gray-900">
-          <div className="flex h-[83px] flex-col px-[25px] pt-[17px]">
-            <h3 className="h-[28px] text-lg font-semibold text-white">
-              Нэмэлт мэдээлэл
-            </h3>
-            <p className="flex h-[28px] items-center text-sm text-gray-500">
-              Таны гэрээний болон бусад мэдээлэл
-            </p>
-          </div>
-          <div className="border-t border-gray-800" />
-          <div className="px-[25px] pb-[23px] pt-[25px]">
-            <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
-              <div className="flex h-[107px] flex-col rounded-xl border border-gray-700 bg-gray-800 p-4">
-                <div className="flex h-[36px] items-center gap-2">
-                  <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-teal-900/50 text-sm">
-                    <KPI />
-                  </div>
-                  <span className="text-xs font-semibold uppercase tracking-wider text-gray-300">
-                    KPI тооцоо
-                  </span>
-                </div>
-                <span className="mt-auto w-fit rounded-full bg-teal-900 px-2 py-0.5 text-xs text-teal-400">
-                  {employee?.isKpi ? "Тийм" : "Үгүй"}
-                </span>
-              </div>
-
-              <div className="flex h-[107px] flex-col rounded-xl border border-gray-700 bg-gray-800 p-4">
-                <div className="flex h-[36px] items-center gap-2">
-                  <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-teal-900/50 text-sm">
-                    <CompanyTsalin />
-                  </div>
-                  <span className="text-xs font-semibold uppercase tracking-wider text-gray-300">
-                    Компанийн цалин
-                  </span>
-                </div>
-                <span className="mt-auto w-fit rounded-full bg-teal-900 px-2 py-0.5 text-xs text-teal-400">
-                  {employee?.isSalaryCompany ? "Тийм" : "Үгүй"}
-                </span>
-              </div>
-
-              <div className="flex h-[107px] flex-col rounded-xl border border-gray-700 bg-gray-800 p-4">
-                <div className="flex h-[36px] items-center gap-2">
-                  <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-teal-900/50 text-sm">
-                    <EntraID />
-                  </div>
-                  <span className="text-xs font-semibold uppercase tracking-wider text-gray-300">
-                    Entra ID
-                  </span>
-                </div>
-                <span className="mt-4 text-xs text-gray-500">
-                  {employee?.entraId ?? "Мэдээлэлгүй"}
-                </span>
-              </div>
             </div>
           </div>
         </div>
