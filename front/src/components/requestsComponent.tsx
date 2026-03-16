@@ -1,6 +1,5 @@
 "use client";
 
-import { gql } from "@apollo/client";
 import { useMutation, useQuery } from "@apollo/client/react";
 import { useMemo, useState } from "react";
 import {
@@ -14,85 +13,9 @@ import {
   SearchIcon,
 } from "./icons";
 import { buildGraphQLHeaders } from "@/lib/apollo-client";
+import { APPROVE_LEAVE_REQUEST, REJECT_LEAVE_REQUEST } from "@/graphql/mutations";
+import { GET_LEAVE_REQUESTS } from "@/graphql/queries";
 import type { LeaveRequest } from "@/lib/types";
-
-const GET_LEAVE_REQUESTS = gql`
-  query GetLeaveRequests($status: String) {
-    leaveRequests(status: $status) {
-      id
-      employeeId
-      employee {
-        id
-        employeeCode
-        firstName
-        lastName
-        department
-        jobTitle
-        level
-      }
-      type
-      startTime
-      endTime
-      reason
-      status
-      note
-      createdAt
-      updatedAt
-    }
-  }
-`;
-
-const APPROVE_LEAVE_REQUEST = gql`
-  mutation ApproveLeaveRequest($id: ID!, $note: String) {
-    approveLeaveRequest(id: $id, note: $note) {
-      id
-      employeeId
-      employee {
-        id
-        employeeCode
-        firstName
-        lastName
-        department
-        jobTitle
-        level
-      }
-      type
-      startTime
-      endTime
-      reason
-      status
-      note
-      createdAt
-      updatedAt
-    }
-  }
-`;
-
-const REJECT_LEAVE_REQUEST = gql`
-  mutation RejectLeaveRequest($id: ID!, $note: String) {
-    rejectLeaveRequest(id: $id, note: $note) {
-      id
-      employeeId
-      employee {
-        id
-        employeeCode
-        firstName
-        lastName
-        department
-        jobTitle
-        level
-      }
-      type
-      startTime
-      endTime
-      reason
-      status
-      note
-      createdAt
-      updatedAt
-    }
-  }
-`;
 
 const StatusBadge = ({ status }: { status: string }) => {
   const styles: Record<string, string> = {
