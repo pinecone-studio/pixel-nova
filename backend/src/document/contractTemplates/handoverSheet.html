@@ -2,9 +2,167 @@
 <html lang="mn">
   <head>
     <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Тойрох хуудас</title>
-
     <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        background: #d0d0d0;
+        font-family: "Times New Roman", Times, serif;
+        font-size: 12pt;
+        color: #000;
+        padding: 30px 16px;
+      }
+
+      .page {
+        width: 21cm;
+        min-height: 29.7cm;
+        background: #fff;
+        margin: 0 auto 28px auto;
+        padding: 2cm 2cm 2cm 2.5cm;
+        box-shadow: 0 3px 18px rgba(0, 0, 0, 0.2);
+        position: relative;
+      }
+
+      .page-num {
+        text-align: center;
+        font-size: 11pt;
+        margin-bottom: 16px;
+      }
+
+      .doc-title {
+        text-align: center;
+        font-size: 14pt;
+        font-weight: bold;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        margin-bottom: 24px;
+      }
+
+      .info-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 11.5pt;
+        margin-bottom: 20px;
+      }
+
+      .info-table td {
+        padding: 6px 10px;
+        border: 1px solid #000;
+        line-height: 1.75;
+        vertical-align: middle;
+      }
+
+      .info-table td.lbl {
+        width: 40%;
+        font-weight: bold;
+        background: #f5f5f5;
+      }
+
+      .handover-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 11pt;
+        margin: 12px 0 16px;
+      }
+
+      .handover-table th {
+        border: 1px solid #000;
+        padding: 6px 8px;
+        background: #f0f0f0;
+        font-weight: bold;
+        text-align: center;
+        font-size: 11pt;
+      }
+
+      .handover-table td {
+        border: 1px solid #000;
+        padding: 7px 8px;
+        vertical-align: top;
+        line-height: 1.85;
+        font-size: 11pt;
+        min-height: 28px;
+      }
+
+      p {
+        text-align: justify;
+        line-height: 1.85;
+        margin-bottom: 8px;
+        font-size: 11.5pt;
+      }
+
+      .d {
+        display: inline-block;
+        vertical-align: bottom;
+        overflow: hidden;
+        white-space: nowrap;
+        letter-spacing: 0;
+        font-size: 11pt;
+      }
+
+      .dsm {
+        width: 80px;
+      }
+
+      .dmd {
+        width: 140px;
+      }
+
+      .dlg {
+        width: 200px;
+      }
+
+      .dxl {
+        width: 270px;
+      }
+
+      .dxs {
+        width: 32px;
+      }
+
+      .cb {
+        display: inline-block;
+        width: 11px;
+        height: 11px;
+        border: 1px solid #000;
+        vertical-align: middle;
+        margin-right: 4px;
+      }
+
+      .check-item {
+        margin-bottom: 4px;
+        line-height: 1.85;
+      }
+
+      .sec-title {
+        text-align: center;
+        font-size: 12pt;
+        font-weight: bold;
+        text-transform: uppercase;
+        margin: 20px 0 12px;
+        letter-spacing: 0.5px;
+      }
+
+      .sig-section {
+        margin-top: 30px;
+      }
+
+      .sig-line {
+        border-bottom: 1px solid #000;
+        width: 200px;
+        margin: 40px 0 6px;
+      }
+
+      .sig-hint {
+        font-size: 10pt;
+        font-style: italic;
+      }
+
       @page {
         size: A4;
         margin: 0;
@@ -12,220 +170,238 @@
 
       @media print {
         body {
-          background: white;
+          background: none;
+          padding: 0;
         }
 
         .page {
-          margin: 0;
           box-shadow: none;
+          margin: 0;
           page-break-after: always;
+          width: 21cm;
+          min-height: 29.7cm;
+          padding: 2cm 2cm 2cm 2.5cm;
         }
-      }
-      body {
-        font-family: "Times New Roman", serif;
-        background: #ccc;
-      }
-
-      .page {
-        width: 794px;
-        min-height: 1123px;
-        background: white;
-        margin: 40px auto;
-        padding: 60px;
-      }
-
-      h1 {
-        text-align: center;
-        font-size: 28px;
-        margin-bottom: 40px;
-      }
-
-      .info {
-        margin-bottom: 20px;
-        font-size: 18px;
-      }
-
-      table {
-        width: 100%;
-        border-collapse: collapse;
-        font-size: 16px;
-      }
-
-      td,
-      th {
-        border: 1px solid black;
-        padding: 8px;
-        vertical-align: top;
-      }
-
-      th {
-        text-align: center;
-      }
-
-      .checkbox {
-        margin-right: 8px;
-      }
-
-      .signature {
-        height: 80px;
-      }
-
-      .date {
-        width: 160px;
       }
     </style>
   </head>
-
   <body>
+    <!-- ══════════════════════ ХУУДАС 1 ══════════════════════ -->
     <div class="page">
-      <h1>ТОЙРОХ ХУУДАС</h1>
+      <div class="page-num">1</div>
 
-      <div class="info">
-        Ажилтны овог нэр: {{employee_full_name}}<br /><br />
-        Албан тушаал: {{employee_position}}<br /><br />
-        Ажил хүлээлгэн өгөх эцсийн хугацаа: 20.... /.... /....
-      </div>
+      <div class="doc-title">Тойрох хуудас</div>
 
-      <table>
+      <!-- Ажилтны мэдээлэл -->
+      <table class="info-table">
         <tr>
-          <th>ТОЙРОХ ХУУДАС ЗУРАХ АЖИЛТАН /ТООЦОО НИЙЛЭХ АГУУЛГА</th>
-          <th>ГАРЫН ҮСЭГ</th>
-          <th>ОГНОО</th>
+          <td class="lbl">Ажилтны овог, нэр:</td>
+          <td><span class="d dxl">{{employee_full_name}}</span></td>
+        </tr>
+        <tr>
+          <td class="lbl">Албан тушаал:</td>
+          <td><span class="d dxl">{{employee_position}}</span></td>
+        </tr>
+        <tr>
+          <td class="lbl">Нэгж / Хэлтэс:</td>
+          <td><span class="d dxl">{{employee_department}}</span></td>
+        </tr>
+        <tr>
+          <td class="lbl">Ажил хүлээлгэн өгөх эцсийн хугацаа:</td>
+          <td>
+            20<span class="d dxs">{{handover_deadline_year_short}}</span> оны
+            <span class="d dxs">{{handover_deadline_month}}</span> сарын
+            <span class="d dxs">{{handover_deadline_day}}</span>-ны өдөр
+          </td>
+        </tr>
+      </table>
+
+      <!-- Тойрох хүснэгт -->
+      <table class="handover-table">
+        <tr>
+          <th style="width: 55%">Тойрох хуудас зурах ажилтан / Тооцоо нийлэх агуулга</th>
+          <th style="width: 20%">Гарын үсэг</th>
+          <th style="width: 25%">Огноо</th>
         </tr>
 
+        <!-- 1. Хариуцсан газар -->
         <tr>
           <td>
-            <b>Хариуцсан газар, хэлтсийн захирал, менежер:</b><br /><br />
-
-            [ ] Ажлыг нь хүлээж авах ажилтныг шийдвэрлэх<br />
-            [ ] Шинээр ажилтан авах бол ЗХНГ-т захиалгын хуудас өгөх<br />
-            [ ] Ажил хүлээлцэх акт үйлдэх<br />
-            [ ] Харилцагч байгууллагын жагсаалт хүлээн авах<br />
-            [ ] Дуусаагүй ажлын статус жагсаалт авах
+            <p style="font-weight: bold; margin-bottom: 6px">
+              Хариуцсан газар, хэлтсийн захирал, менежер:
+            </p>
+            <div class="check-item"><span class="cb"></span> Ажлыг нь хүлээж авах ажилтныг шийдвэрлэх</div>
+            <div class="check-item"><span class="cb"></span> Шинээр ажилтан авах бол ЗХНГ-т захиалгын хуудас өгөх</div>
+            <div class="check-item"><span class="cb"></span> Ажил хүлээлцэх акт үйлдэх</div>
+            <div class="check-item"><span class="cb"></span> Харилцагч байгууллагын жагсаалт хүлээн авах</div>
+            <div class="check-item"><span class="cb"></span> Дуусаагүй ажлын статус жагсаалт авах</div>
           </td>
-
-          <td class="signature"></td>
-
-          <td class="date">20... оны ... сарын ...</td>
+          <td><span class="d" style="width: 90%">{{dept_manager_signature}}</span></td>
+          <td>
+            20<span class="d dxs">{{dept_date_year_short}}</span> оны
+            <span class="d dxs">{{dept_date_month}}</span> сарын
+            <span class="d dxs">{{dept_date_day}}</span>
+          </td>
         </tr>
 
+        <!-- 2. МТГ -->
         <tr>
           <td>
-            <b>Мэдээлэл технологийн газар:</b><br /><br />
-
-            [ ] Ажилтны и-мэйл эрх хаах<br />
-            [ ] Автомат хариу тохируулах<br />
-            [ ] Компьютер хураан авах<br />
-            [ ] Файлууд хуулах<br />
-            [ ] Компьютер update хийх
+            <p style="font-weight: bold; margin-bottom: 6px">
+              Мэдээлэл технологийн газар:
+            </p>
+            <div class="check-item"><span class="cb"></span> Ажилтны и-мэйл эрх хаах</div>
+            <div class="check-item"><span class="cb"></span> Автомат хариу тохируулах</div>
+            <div class="check-item"><span class="cb"></span> Компьютер хураан авах</div>
+            <div class="check-item"><span class="cb"></span> Файлууд хуулах</div>
+            <div class="check-item"><span class="cb"></span> Компьютер update хийх</div>
           </td>
-
-          <td class="signature"></td>
-
-          <td>20... оны ... сарын ...</td>
+          <td><span class="d" style="width: 90%">{{it_signature}}</span></td>
+          <td>
+            20<span class="d dxs">{{it_date_year_short}}</span> оны
+            <span class="d dxs">{{it_date_month}}</span> сарын
+            <span class="d dxs">{{it_date_day}}</span>
+          </td>
         </tr>
 
+        <!-- 3. Архив -->
         <tr>
           <td>
-            <b>Архив, бичиг хэрэг:</b><br /><br />
-
-            [ ] Архивт баримт хүлээлгэн өгөх
+            <p style="font-weight: bold; margin-bottom: 6px">
+              Архив, бичиг хэрэг:
+            </p>
+            <div class="check-item"><span class="cb"></span> Архивт баримт хүлээлгэн өгөх</div>
           </td>
-
-          <td class="signature"></td>
-
-          <td>20... оны ... сарын ...</td>
+          <td><span class="d" style="width: 90%">{{archive_signature}}</span></td>
+          <td>
+            20<span class="d dxs">{{archive_date_year_short}}</span> оны
+            <span class="d dxs">{{archive_date_month}}</span> сарын
+            <span class="d dxs">{{archive_date_day}}</span>
+          </td>
         </tr>
 
+        <!-- 4. Нярав -->
         <tr>
           <td>
-            <b>Хариуцсан нярав:</b><br /><br />
-
-            [ ] Хариуцсан эд хөрөнгө хүлээн авах<br />
-            [ ] Хариуцлага үүссэн эсэхийг шалгах
+            <p style="font-weight: bold; margin-bottom: 6px">
+              Хариуцсан нярав:
+            </p>
+            <div class="check-item"><span class="cb"></span> Хариуцсан эд хөрөнгө хүлээн авах</div>
+            <div class="check-item"><span class="cb"></span> Хариуцлага үүссэн эсэхийг шалгах</div>
           </td>
-
-          <td class="signature"></td>
-
-          <td>20... оны ... сарын ...</td>
+          <td><span class="d" style="width: 90%">{{warehouse_signature}}</span></td>
+          <td>
+            20<span class="d dxs">{{warehouse_date_year_short}}</span> оны
+            <span class="d dxs">{{warehouse_date_month}}</span> сарын
+            <span class="d dxs">{{warehouse_date_day}}</span>
+          </td>
         </tr>
 
+        <!-- 5. Нягтлан бодогч -->
         <tr>
           <td>
-            <b>Хариуцсан нягтлан бодогч:</b><br /><br />
-
-            [ ] Санхүүгийн тооцоо хийх
+            <p style="font-weight: bold; margin-bottom: 6px">
+              Хариуцсан нягтлан бодогч:
+            </p>
+            <div class="check-item"><span class="cb"></span> Санхүүгийн тооцоо хийх</div>
           </td>
-
-          <td class="signature"></td>
-
-          <td>20... оны ... сарын ...</td>
+          <td><span class="d" style="width: 90%">{{accountant_signature}}</span></td>
+          <td>
+            20<span class="d dxs">{{accountant_date_year_short}}</span> оны
+            <span class="d dxs">{{accountant_date_month}}</span> сарын
+            <span class="d dxs">{{accountant_date_day}}</span>
+          </td>
         </tr>
       </table>
     </div>
+
+    <!-- ══════════════════════ ХУУДАС 2 ══════════════════════ -->
     <div class="page">
-      <table>
+      <div class="page-num">2</div>
+
+      <table class="handover-table">
+        <!-- 6. Санхүүгийн тооцоо -->
         <tr>
-          <td style="width: 65%">
-            [ ] Ажилласан хугацаанд ногдох ээлжийн амралтын тооцоо хийх<br />
-            [ ] Нийгмийн даатгалын бичилт хийх<br />
-            [ ] Банкны зээл<br />
-            [ ] Бусад
+          <td style="width: 55%">
+            <p style="font-weight: bold; margin-bottom: 6px">
+              Санхүүгийн тооцоо:
+            </p>
+            <div class="check-item"><span class="cb"></span> Ажилласан хугацаанд ногдох ээлжийн амралтын тооцоо хийх</div>
+            <div class="check-item"><span class="cb"></span> Нийгмийн даатгалын бичилт хийх</div>
+            <div class="check-item"><span class="cb"></span> Банкны зээл</div>
+            <div class="check-item"><span class="cb"></span> Бусад</div>
           </td>
-
           <td style="width: 20%; text-align: center">
-            {{finance_total_amount}}
+            <span class="d dmd">{{finance_total_amount}}</span>
           </td>
-
-          <td style="width: 15%; text-align: center">
-            202... оны ...<br />
-            сарын ....-д
+          <td style="width: 25%">
+            20<span class="d dxs">{{finance_date_year_short}}</span> оны
+            <span class="d dxs">{{finance_date_month}}</span> сарын
+            <span class="d dxs">{{finance_date_day}}</span>
           </td>
         </tr>
 
+        <!-- 7. Хүний нөөцийн менежер -->
         <tr>
           <td>
-            <b>Хүний нөөцийн менежер:</b><br /><br />
-
-            [ ] Ажилтны өргөдлийг удирдлагын цохолттойгоор хүлээн авах<br />
-
-            [ ] Хөдөлмөрийн гэрээ дуусгавар болох тушаал гаргах<br />
-
-            [ ] Ажилтанд тойрох хуудас, ажил хүлээлцэх актыг маягт өгөх<br />
-
-            [ ] Өөрийн хүсэлтээр гарч буй ажилтанд “Ажлаас гарах үеийн
-            ярилцлага”-ын хуудас өгөх<br />
-
-            [ ] Ажлын үнэмлэх, нэрийн хуудас хураан авах<br />
-
-            [ ] Компанийн нэр дээрх дугаарыг хувь хүнд шилжүүлэх<br />
-
-            [ ] И-Оффис дээр update хийх<br />
-
-            [ ] Facebook group-ээс хасалт хийх
+            <p style="font-weight: bold; margin-bottom: 6px">
+              Хүний нөөцийн менежер:
+            </p>
+            <div class="check-item"><span class="cb"></span> Ажилтны өргөдлийг удирдлагын цохолттойгоор хүлээн авах</div>
+            <div class="check-item"><span class="cb"></span> Хөдөлмөрийн гэрээ дуусгавар болох тушаал гаргах</div>
+            <div class="check-item"><span class="cb"></span> Ажилтанд тойрох хуудас, ажил хүлээлцэх актыг маягт өгөх</div>
+            <div class="check-item"><span class="cb"></span> Өөрийн хүсэлтээр гарч буй ажилтанд "Ажлаас гарах үеийн ярилцлага"-ын хуудас өгөх</div>
+            <div class="check-item"><span class="cb"></span> Ажлын үнэмлэх, нэрийн хуудас хураан авах</div>
+            <div class="check-item"><span class="cb"></span> Компанийн нэр дээрх дугаарыг хувь хүнд шилжүүлэх</div>
+            <div class="check-item"><span class="cb"></span> И-Оффис дээр update хийх</div>
+            <div class="check-item"><span class="cb"></span> Facebook group-ээс хасалт хийх</div>
           </td>
-
-          <td style="text-align: center">{{hr_manager_signature}}</td>
-
           <td style="text-align: center">
-            2020 оны ...<br />
-            сарын ....-д
+            <span class="d" style="width: 90%">{{hr_manager_signature}}</span>
+          </td>
+          <td>
+            20<span class="d dxs">{{hr_date_year_short}}</span> оны
+            <span class="d dxs">{{hr_date_month}}</span> сарын
+            <span class="d dxs">{{hr_date_day}}</span>
           </td>
         </tr>
       </table>
 
-      <br /><br />
+      <!-- Гарын үсгийн хэсэг -->
+      <div class="sig-section">
+        <table style="width: 100%; border-collapse: collapse; font-size: 11.5pt">
+          <tr>
+            <td style="width: 50%; vertical-align: top; padding-right: 20px">
+              <p style="font-weight: bold; margin-bottom: 6px">
+                Тойрох хуудас хүлээлгэн өгсөн ажилтан:
+              </p>
+              <div class="sig-line"></div>
+              <p class="sig-hint">(гарын үсэг)</p>
+              <p style="margin-top: 8px; line-height: 2">
+                Нэр: <span class="d dlg">{{handover_given_by}}</span><br />
+                Огноо: <span class="d dmd">{{handover_given_date}}</span>
+              </p>
+            </td>
+            <td style="width: 50%; vertical-align: top; padding-left: 20px">
+              <p style="font-weight: bold; margin-bottom: 6px">
+                Тойрох хуудас хүлээн авсан:
+              </p>
+              <div class="sig-line"></div>
+              <p class="sig-hint">(гарын үсэг)</p>
+              <p style="margin-top: 8px; line-height: 2">
+                Нэр: <span class="d dlg">{{handover_received_by}}</span><br />
+                Огноо: <span class="d dmd">{{handover_received_date}}</span>
+              </p>
+            </td>
+          </tr>
+        </table>
+      </div>
 
-      Тойрох хуудас хүлээлгэн өгсөн ажилтан: {{handover_given_by}} / /
-
-      <br /><br />
-
-      Тойрох хуудас хүлээн авсан: {{handover_received_by}} / /
-
-      <br /><br /><br />
-
-      <div style="text-align: center; font-weight: bold">
-        Тооцоог 202... оны __-р сарын __-ны өдөр дуусгавар болгов.
+      <!-- Дуусгавар болгосон -->
+      <div style="text-align: center; font-weight: bold; margin-top: 36px; font-size: 11.5pt">
+        Тооцоог 20<span class="d dxs">{{completion_date_year_short}}</span> оны
+        <span class="d dxs">{{completion_date_month}}</span>-р сарын
+        <span class="d dxs">{{completion_date_day}}</span>-ны өдөр дуусгавар болгов.
       </div>
     </div>
   </body>

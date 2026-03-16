@@ -84,6 +84,23 @@ export const AUDIT_LOG_FIELDS = gql`
   }
 `;
 
+export const ACTION_CONFIG_FIELDS = gql`
+  fragment ActionConfigFields on ActionConfig {
+    id
+    name
+    phase
+    triggerCondition
+    triggerFields
+    requiredEmployeeFields
+    recipients
+    documents {
+      id
+      template
+      order
+    }
+  }
+`;
+
 export const LEAVE_REQUEST_FIELDS = gql`
   fragment LeaveRequestFields on LeaveRequest {
     id

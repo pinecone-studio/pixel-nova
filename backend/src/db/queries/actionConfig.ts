@@ -89,8 +89,17 @@ export async function ensureDefaultActionConfigs(db: DbClient) {
         recipients: JSON.stringify(config.recipients ?? []),
         documents: JSON.stringify(config.documents ?? []),
       })
-      .onConflictDoNothing({
+      .onConflictDoUpdate({
         target: actions.name,
+        set: {
+          phase: config.phase,
+          triggerCondition:
+            "triggerCondition" in config ? (config.triggerCondition ?? null) : null,
+          triggerFields: JSON.stringify(config.triggerFields),
+          requiredEmployeeFields: JSON.stringify(config.requiredEmployeeFields ?? []),
+          recipients: JSON.stringify(config.recipients ?? []),
+          documents: JSON.stringify(config.documents ?? []),
+        },
       });
   }
 }

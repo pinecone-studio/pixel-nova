@@ -12,11 +12,14 @@ export function HrShell({ children }: { children: React.ReactNode }) {
   const activeItem = getActiveHrNavItem(pathname);
 
   return (
-    <div className="min-h-screen bg-[#060d0c]">
-      <div className="flex min-h-screen">
-        <aside className="group w-16 hover:w-60 transition-[width] duration-300 border-r border-white/8 bg-[#060d0c] flex flex-col py-4 px-2 shrink-0">
-          <div className="mb-8 flex justify-center">
-            <EpasLogo className="w-9 h-9 rounded-xl" />
+    <div className="h-screen overflow-hidden bg-[#060d0c]">
+      <div className="flex h-full overflow-hidden">
+        <aside className="scrollbar-hidden group sticky top-0 h-screen overflow-y-auto overflow-x-hidden w-17 hover:w-60 transition-[width] duration-300 border-r border-white/8 bg-[#060d0c] flex flex-col py-4 px-2 shrink-0">
+          <div className="mb-8 flex items-center gap-3 px-2">
+            <EpasLogo className="w-9 h-9 rounded-xl shrink-0" />
+            <span className="whitespace-nowrap text-sm font-bold text-white opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+              EPAS
+            </span>
           </div>
 
           <div className="flex flex-col gap-1 flex-1">
@@ -31,14 +34,12 @@ export function HrShell({ children }: { children: React.ReactNode }) {
                     active
                       ? "bg-[#0ad4b1]/10 text-[#0ad4b1] border border-[#0ad4b1]/25 shadow-[0_0_12px_rgba(10,212,177,0.15)]"
                       : "text-slate-500 hover:text-slate-200 hover:bg-white/5 border border-transparent"
-                  }`}
-                >
+                  }`}>
                   {active ? (
                     <span className="absolute left-0 top-1/2 -translate-y-1/2 w-0.75 h-5 rounded-r-full bg-[#0ad4b1] shadow-[0_0_8px_rgba(10,212,177,0.8)]" />
                   ) : null}
                   <span
-                    className={`flex h-9 w-9 items-center justify-center rounded-lg shrink-0 transition-all ${active ? "bg-[#0ad4b1]/15" : ""}`}
-                  >
+                    className={`flex h-9 w-9 items-center justify-center rounded-lg shrink-0 transition-all ${active ? "bg-[#0ad4b1]/15" : ""}`}>
                     {item.icon}
                   </span>
                   <span className="whitespace-nowrap text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-200">
@@ -59,7 +60,7 @@ export function HrShell({ children }: { children: React.ReactNode }) {
           </div>
         </aside>
 
-        <main className="flex-1 overflow-y-auto flex flex-col">
+        <main className="scrollbar-hidden flex-1 min-w-0 min-h-0 overflow-y-auto overflow-x-hidden flex flex-col">
           <header className="h-14 border-b border-white/8 flex items-center justify-between px-6 shrink-0 bg-[#060d0c]">
             <div className="flex items-center gap-2 text-sm">
               <span className="text-slate-500">HR</span>
@@ -72,8 +73,7 @@ export function HrShell({ children }: { children: React.ReactNode }) {
             <div className="flex items-center gap-3">
               <Link
                 href="/hr/employees"
-                className="flex items-center gap-2 h-9 px-4 rounded-lg border cursor-pointer border-[#0ad4b1]/40 bg-[#0b201d] text-[#d7fff8] text-sm font-medium hover:bg-[#0f2b27] hover:border-[#0ad4b1] shadow-[0_0_12px_rgba(10,212,177,0.2)] transition-colors"
-              >
+                className="flex items-center gap-2 h-9 px-4 rounded-lg border cursor-pointer border-[#0ad4b1]/50 bg-linear-to-br from-[#0a3b33] to-[#0ad4b1]/20 text-white text-sm font-medium hover:border-[#0ad4b1] transition-colors">
                 <span>＋</span> Ажилтан нэмэх
               </Link>
               <button className="h-9 w-9 rounded-lg border border-[#0ad4b1]/40 bg-[#0b201d] cursor-pointer text-[#d7fff8] flex items-center justify-center hover:border-[#0ad4b1] hover:bg-[#0f2b27] transition-colors">
@@ -82,7 +82,9 @@ export function HrShell({ children }: { children: React.ReactNode }) {
             </div>
           </header>
 
-          <div className="flex-1 px-6 py-6 flex flex-col gap-5">{children}</div>
+          <div className="flex-1 min-w-0 overflow-x-hidden px-6 py-6 flex flex-col gap-5">
+            {children}
+          </div>
         </main>
       </div>
     </div>

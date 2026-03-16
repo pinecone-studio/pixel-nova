@@ -35,6 +35,7 @@ import {
   FiTrendingUp,
   FiUploadCloud,
   FiUsers,
+  FiX,
   FiXCircle,
 } from "react-icons/fi";
 import {
@@ -253,6 +254,39 @@ export const PhoneIcon = withDefaults(
   "h-[13px] w-[13px] text-slate-500 flex-shrink-0",
 );
 export const DotsIcon = withDefaults(FiActivity, "h-4 w-4 text-slate-400");
+export const CloseIcon = withDefaults(FiX, "h-[18px] w-[18px]");
+export const DocBigIcon = withDefaults(FiFileText, "h-12 w-12 text-blue-400");
+
+export const TrashIcon = () => (
+  <svg width="14" height="14" fill="none" viewBox="0 0 24 24">
+    <path
+      d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"
+      stroke="currentColor"
+      strokeWidth="1.6"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </svg>
+);
+
+export const EditIcon = () => (
+  <svg width="14" height="14" fill="none" viewBox="0 0 24 24">
+    <path
+      d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"
+      stroke="currentColor"
+      strokeWidth="1.6"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+    <path
+      d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"
+      stroke="currentColor"
+      strokeWidth="1.6"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </svg>
+);
 
 export function ChevronDown({
   open,
