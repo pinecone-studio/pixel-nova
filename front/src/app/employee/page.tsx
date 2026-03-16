@@ -17,8 +17,18 @@ const TOKEN_STORAGE_KEY = "epas_auth_token";
 export default function EmployeePage() {
   const router = useRouter();
   const authToken = useSyncExternalStore(
-    () => () => {},
-    () => window.localStorage.getItem(TOKEN_STORAGE_KEY) ?? "",
+    (callback) => {
+      if (typeof window === "undefined") {
+        return () => {};
+      }
+      const handler = () => callback();
+      window.addEventListener("storage", handler);
+      return () => window.removeEventListener("storage", handler);
+    },
+    () =>
+      typeof window === "undefined"
+        ? ""
+        : (window.localStorage.getItem(TOKEN_STORAGE_KEY) ?? ""),
     () => "",
   );
 
