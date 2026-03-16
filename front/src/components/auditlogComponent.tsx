@@ -76,7 +76,7 @@ export function AuditlogComponent() {
       )}
 
       {/* Content */}
-      {loading || documentsLoading ? (
+      {loading ? (
         <div className="py-8 px-4 flex flex-col gap-3">
           <div className="h-4 w-64 rounded-full skeleton" />
           <div className="h-3 w-80 rounded-full skeleton" />
