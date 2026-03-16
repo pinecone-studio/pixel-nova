@@ -41,7 +41,7 @@ export const HR_NAV_ITEMS: HrNavItem[] = [
   },
   {
     key: "requests",
-    label: "Хүсэлтүүд",
+    label: "Гэрээний сан",
     href: "/hr/requests",
     icon: <AuditLogIcon />,
   },
