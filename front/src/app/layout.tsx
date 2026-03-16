@@ -9,8 +9,8 @@ import { cn } from "@/lib/utils";
 const geist = Geist({subsets:['latin'],variable:'--font-sans'});
 
 export const metadata: Metadata = {
-  title: "EPAS - Employee Paperwork Automation System",
-  description: "Employee paperwork automation system",
+  title: "EPAS - Ажилтны баримт бичгийн автоматжуулалтын систем",
+  description: "Ажилтны баримт бичгийн автоматжуулалтын систем",
 };
 
 export default function RootLayout({

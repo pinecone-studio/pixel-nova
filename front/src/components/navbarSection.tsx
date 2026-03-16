@@ -55,7 +55,7 @@ export function Navbar() {
   const employee = data?.me ?? null;
   const displayName = employee
     ? `${employee.lastName} ${employee.firstName}`
-    : "Employee";
+    : "Ажилтан";
   const avatarLetter =
     employee?.firstName?.trim().charAt(0).toUpperCase() ||
     employee?.lastName?.trim().charAt(0).toUpperCase() ||
@@ -70,7 +70,7 @@ export function Navbar() {
         <div className="flex items-baseline gap-1.5">
           <span className="text-lg font-bold tracking-wide text-white">EPAS</span>
           <span className="text-sm font-medium text-[#4A4A6A]">
-            Employee Portal
+            Ажилтны портал
           </span>
         </div>
       </Link>

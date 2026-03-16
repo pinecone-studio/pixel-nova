@@ -40,7 +40,7 @@ export default function HrAuthPage() {
           <div className="text-center">
             <h1 className="text-white text-2xl font-bold">HR нэвтрэх</h1>
             <p className="text-slate-500 text-sm mt-1">
-              HR-ийн нийтлэг нэвтрэх кодыг оруулна уу
+              ХН-ийн нийтлэг нэвтрэх кодыг оруулна уу
             </p>
           </div>
         </div>
@@ -48,9 +48,7 @@ export default function HrAuthPage() {
         {/* Form */}
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <div className="flex flex-col gap-1.5">
-            <label className="text-white/70 text-sm font-medium">
-              HR код
-            </label>
+            <label className="text-white/70 text-sm font-medium">HR код</label>
             <input
               type="password"
               value={code}

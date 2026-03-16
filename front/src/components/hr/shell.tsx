@@ -53,10 +53,10 @@ export function HrShell({ children }: { children: React.ReactNode }) {
 
           <div className="flex items-center gap-3 rounded-xl px-2 py-2">
             <span className="flex h-9 w-9 items-center justify-center rounded-full bg-linear-to-br from-purple-500 to-pink-500 text-white text-xs font-bold shrink-0">
-              HR
+              ХН
             </span>
             <span className="whitespace-nowrap text-sm text-slate-400 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-              HR Team
+              ХН баг
             </span>
           </div>
         </aside>
@@ -64,7 +64,7 @@ export function HrShell({ children }: { children: React.ReactNode }) {
         <main className="flex-1 overflow-y-auto flex flex-col">
           <header className="h-14 border-b border-white/8 flex items-center justify-between px-6 shrink-0 bg-[#060d0c]">
             <div className="flex items-center gap-2 text-sm">
-              <span className="text-slate-500">HR</span>
+              <span className="text-slate-500">ХН</span>
               <span className="text-slate-600">›</span>
               <span className="text-[#0ad4b1] font-semibold">{activeItem.label}</span>
             </div>
@@ -74,7 +74,7 @@ export function HrShell({ children }: { children: React.ReactNode }) {
                 href="/hr/employees"
                 className="flex items-center gap-2 h-9 px-4 rounded-lg border cursor-pointer border-[#0ad4b1]/50 bg-linear-to-br from-[#0a3b33] to-[#0ad4b1]/20 text-white text-sm font-medium hover:border-[#0ad4b1] transition-colors"
               >
-                <span>＋</span> Add Employee
+                <span>＋</span> Ажилтан нэмэх
               </Link>
               <button className="h-9 w-9 rounded-lg border border-[#0ad4b1] cursor-pointer text-slate-300 flex items-center justify-center hover:border-white/40 transition-colors">
                 <NotifIcon />
