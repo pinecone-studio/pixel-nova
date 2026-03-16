@@ -25,12 +25,12 @@ export type HrNavItem = {
 };
 
 export const HR_NAV_ITEMS: HrNavItem[] = [
-  { key: "dashboard", label: "Dashboard", href: "/hr", icon: <GrDocument /> },
-  { key: "employees", label: "Employees", href: "/hr/employees", icon: <UsersIcon /> },
-  { key: "requests", label: "Requests", href: "/hr/requests", icon: <AuditLogIcon /> },
-  { key: "documents", label: "Documents", href: "/hr/documents", icon: <CubaIcon /> },
-  { key: "audit-log", label: "Audit Log", href: "/hr/audit-log", icon: <InsightIcon /> },
-  { key: "settings", label: "Settings", href: "/hr/settings", icon: <SettingsIcon /> },
+  { key: "dashboard", label: "Хянах самбар", href: "/hr", icon: <GrDocument /> },
+  { key: "employees", label: "Ажилтнууд", href: "/hr/employees", icon: <UsersIcon /> },
+  { key: "requests", label: "Хүсэлтүүд", href: "/hr/requests", icon: <AuditLogIcon /> },
+  { key: "documents", label: "Баримтууд", href: "/hr/documents", icon: <CubaIcon /> },
+  { key: "audit-log", label: "Аудитын бүртгэл", href: "/hr/audit-log", icon: <InsightIcon /> },
+  { key: "settings", label: "Тохиргоо", href: "/hr/settings", icon: <SettingsIcon /> },
 ];
 
 export function getActiveHrNavItem(pathname: string) {

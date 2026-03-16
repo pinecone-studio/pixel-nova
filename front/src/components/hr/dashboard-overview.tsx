@@ -36,7 +36,7 @@ export function HrDashboardOverview({
         <div className="relative flex items-start justify-between">
           <div>
             <p className="text-xs uppercase tracking-[0.2em] text-white font-medium mb-3">
-              ÃÂÃÂ¸ÃÂ¹Ã‘â€š ÃÂ°ÃÂ¶ÃÂ¸ÃÂ»Ã‘â€¡ÃÂ¸ÃÂ´
+              Нийт ажилчид
             </p>
             <div className="flex items-center gap-3 mb-1">
               <p className="text-5xl font-bold text-[#0ad4b1]">
@@ -48,7 +48,7 @@ export function HrDashboardOverview({
               </span>
             </div>
             <p className="text-white text-sm">
-              Audit ÃÂ±Ã’Â¯Ã‘â‚¬Ã‘â€šÃÂ³Ã‘ÂÃÂ»: {loading ? "..." : auditCount}
+              Аудитын бүртгэл: {loading ? "..." : auditCount}
             </p>
           </div>
           <div className="w-14 h-14 rounded-2xl bg-[#0ad4b1] flex items-center justify-center shadow-[0_8px_24px_rgba(10,212,177,0.4)]">
@@ -78,13 +78,13 @@ export function HrDashboardOverview({
                 ...
               </button>
             </div>
-            <p className="text-slate-400 text-sm mb-3">ÃÂ¥Ã’Â¯ÃÂ»Ã‘ÂÃ‘ÂÃÂ³ÃÂ´Ã‘ÂÃÂ¶ ÃÂ±Ã‘Æ’ÃÂ¹</p>
+            <p className="text-slate-400 text-sm mb-3">Хүлээгдэж буй</p>
             <p className="text-4xl font-bold text-white mb-3">
               {loading ? "..." : stats.pendingRequests}
             </p>
             <div className="flex items-center gap-1.5 text-orange-400 text-xs">
               <ClockIcon className="w-3.5 h-3.5" />
-              <span>{loading ? "..." : stats.urgentCount} Ã‘ÂÃÂ°Ã‘â‚¬ÃÂ°ÃÂ»Ã‘â€šÃÂ°ÃÂ¹</span>
+              <span>{loading ? "..." : stats.urgentCount} яаралтай</span>
             </div>
           </div>
         </div>
@@ -100,13 +100,13 @@ export function HrDashboardOverview({
                 ...
               </button>
             </div>
-            <p className="text-slate-400 text-sm mb-3">Ãâ€˜ÃÂ°Ã‘â€šÃÂ°ÃÂ»Ã‘ÂÃÂ°ÃÂ½</p>
+            <p className="text-slate-400 text-sm mb-3">Баталсан</p>
             <p className="text-4xl font-bold text-white mb-3">
               {loading ? "..." : stats.approvedRequests}
             </p>
             <div className="flex items-center gap-1.5 text-[#0ad4b1] text-xs">
               <ArrowUpRightIcon className="w-3.5 h-3.5" />
-              <span>Ãâ€˜ÃÂ°Ã‘â€šÃÂ»ÃÂ°Ã‘â€¦ Ã‘â€¦Ã‘Æ’ÃÂ²Ã‘Å’ {stats.approvalRate}%</span>
+              <span>Батлах хувь {stats.approvalRate}%</span>
             </div>
           </div>
         </div>
@@ -117,25 +117,25 @@ export function HrDashboardOverview({
           {
             icon: <BriefcaseIcon />,
             value: loading ? "..." : String(stats.departmentCount),
-            label: "ÃÂ¥Ã‘ÂÃÂ»Ã‘â€šÃ‘ÂÃ‘Â",
+            label: "Хэлтэс",
             color: "bg-blue-500/20 text-blue-400",
           },
           {
             icon: <FileIcon />,
             value: loading ? "..." : String(stats.documentCount),
-            label: "Ãâ€˜ÃÂ°Ã‘â‚¬ÃÂ¸ÃÂ¼Ã‘â€š",
+            label: "Баримт",
             color: "bg-purple-500/20 text-purple-400",
           },
           {
             icon: <CalendarIcon />,
             value: loading ? "..." : String(stats.employeesOnLeave),
-            label: "ÃÂ§Ã“Â©ÃÂ»Ã“Â©Ã“Â©Ã‘â€šÃ‘ÂÃÂ¹",
+            label: "Чөлөөтэй",
             color: "bg-pink-500/20 text-pink-400",
           },
           {
             icon: <TrendIcon />,
             value: loading ? "..." : `${stats.approvalRate}%`,
-            label: "ÃÂ¨ÃÂ¸ÃÂ¹ÃÂ´ÃÂ²Ã‘ÂÃ‘â‚¬ÃÂ»Ã‘ÂÃÂ»Ã‘â€š",
+            label: "Үр дүн",
             color: "bg-[#0ad4b1]/20 text-[#0ad4b1]",
           },
         ].map((stat) => (
@@ -161,29 +161,29 @@ export function HrDashboardOverview({
       <div className="rounded-2xl border border-[#0ad4b1]/40 bg-[#0a0f0e] overflow-hidden">
         <div className="flex items-center justify-between px-6 py-5 border-b border-dashed border-[#0ad4b1]/30">
           <div>
-            <p className="text-white text-xl font-bold">ÃÂ¥Ã’Â¯ÃÂ»Ã‘ÂÃ‘ÂÃÂ³ÃÂ´Ã‘ÂÃÂ¶ ÃÂ±Ã‘Æ’ÃÂ¹ Ã‘â€¦Ã’Â¯Ã‘ÂÃ‘ÂÃÂ»Ã‘â€šÃ’Â¯Ã’Â¯ÃÂ´</p>
+            <p className="text-white text-xl font-bold">Хүлээгдэж буй хүсэлтүүд</p>
             <p className="text-slate-500 text-sm mt-0.5">
-              ÃÂ¡Ã’Â¯Ã’Â¯ÃÂ»ÃÂ¸ÃÂ¹ÃÂ½ pending leave request-Ã’Â¯Ã’Â¯ÃÂ´
+              Сүүлийн хүлээгдэж буй чөлөөний хүсэлтүүд
             </p>
           </div>
           <div className="flex items-center gap-3">
             <button className="flex items-center gap-2 h-9 px-4 rounded-lg border border-white/10 text-slate-300 text-sm hover:border-white/20 transition-colors">
-              <FiFilter /> ÃÂ¨Ã’Â¯Ã’Â¯Ã‘â€¦
+              <FiFilter /> Шүүх
             </button>
             <button
               onClick={onOpenRequests}
               className="flex items-center gap-2 h-9 px-4 rounded-lg bg-[#085044] text-[#0ad4b1] text-sm font-semibold hover:bg-[#0ad4b1]/20 transition-colors"
             >
-              Ãâ€˜Ã’Â¯ÃÂ³ÃÂ´ÃÂ¸ÃÂ¹ÃÂ³ Ã‘â€¦ÃÂ°Ã‘â‚¬ÃÂ°Ã‘â€¦ <ArrowUpRightIcon className="w-3.5 h-3.5" />
+              Бүгдийг харах <ArrowUpRightIcon className="w-3.5 h-3.5" />
             </button>
           </div>
         </div>
         <div className="flex flex-col">
           {loading ? (
-            <div className="px-6 py-8 text-sm text-slate-500">ÃÂ£ÃÂ½Ã‘Ë†ÃÂ¸ÃÂ¶ ÃÂ±ÃÂ°ÃÂ¹ÃÂ½ÃÂ°...</div>
+            <div className="px-6 py-8 text-sm text-slate-500">Уншиж байна...</div>
           ) : dashboardRequests.length === 0 ? (
             <div className="px-6 py-8 text-sm text-slate-500">
-              Pending Ã‘â€¦Ã’Â¯Ã‘ÂÃ‘ÂÃÂ»Ã‘â€š ÃÂ¾ÃÂ»ÃÂ´Ã‘ÂÃÂ¾ÃÂ½ÃÂ³Ã’Â¯ÃÂ¹
+              Хүлээгдэж буй хүсэлт олдсонгүй
             </div>
           ) : (
             dashboardRequests.map((request) => (
@@ -205,7 +205,7 @@ export function HrDashboardOverview({
                     </p>
                     {request.urgent ? (
                       <span className="px-2 py-0.5 rounded-full bg-red-500/20 text-red-400 text-xs font-medium border border-red-500/20">
-                        ÃÂ¯ÃÂ°Ã‘â‚¬ÃÂ°ÃÂ»Ã‘â€šÃÂ°ÃÂ¹
+                        Яаралтай
                       </span>
                     ) : null}
                   </div>

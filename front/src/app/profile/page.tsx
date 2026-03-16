@@ -8,6 +8,7 @@ import { useEffect, useState } from "react";
 import { buildGraphQLHeaders } from "@/lib/apollo-client";
 import { GET_ME } from "@/graphql/queries";
 import type { Employee } from "@/lib/types";
+import { formatBranch, formatDepartment, formatLevel } from "@/lib/labels";
 
 import {
   AjildOrson,
@@ -125,7 +126,7 @@ export default function Profile() {
   const displayNameEng =
     employee?.lastNameEng || employee?.firstNameEng
       ? `${employee.lastNameEng ?? ""} ${employee.firstNameEng ?? ""}`.trim()
-      : "Employee";
+      : "Ажилтан";
 
   const workInfo = [
     {
@@ -136,17 +137,17 @@ export default function Profile() {
     {
       icon: <Senior />,
       label: "Зэрэглэл",
-      value: employee?.level ?? "Мэдээлэлгүй",
+      value: employee?.level ? formatLevel(employee.level) : "Мэдээлэлгүй",
     },
     {
       icon: <Heltes />,
       label: "Хэлтэс",
-      value: employee?.department ?? "Мэдээлэлгүй",
+      value: employee?.department ? formatDepartment(employee.department) : "Мэдээлэлгүй",
     },
     {
       icon: <Salbar />,
       label: "Салбар",
-      value: employee?.branch ?? "Мэдээлэлгүй",
+      value: employee?.branch ? formatBranch(employee.branch) : "Мэдээлэлгүй",
     },
     {
       icon: <AjildOrson />,
@@ -198,7 +199,7 @@ export default function Profile() {
             {employee?.imageUrl ? (
               <Image
                 src={employee.imageUrl}
-                alt="Profile"
+                alt="Профайл"
                 width={112}
                 height={112}
                 className="w-20 h-20 rounded-full object-cover border-2 border-teal-500"
@@ -214,10 +215,11 @@ export default function Profile() {
               <p className="text-gray-400 text-sm mb-3">{displayNameEng}</p>
               <div className="flex gap-2 flex-wrap">
                 <span className="flex items-center gap-1 text-xs border border-teal-600 text-teal-400 px-3 py-1 rounded-full">
-                  <Senior /> {employee?.level ?? "Мэдээлэлгүй"}
+                  <Senior /> {employee?.level ? formatLevel(employee.level) : "Мэдээлэлгүй"}
                 </span>
                 <span className="flex items-center gap-1 text-xs border border-gray-700 text-white px-3 py-1 rounded-full">
-                  <Engineering /> {employee?.department ?? "Мэдээлэлгүй"}
+                  <Engineering />{" "}
+                  {employee?.department ? formatDepartment(employee.department) : "Мэдээлэлгүй"}
                 </span>
                 <span className="flex items-center gap-1 text-xs border border-teal-600 text-teal-400 px-3 py-1 rounded-full">
                   <Idevhtei /> {employee?.status ?? "Мэдээлэлгүй"}

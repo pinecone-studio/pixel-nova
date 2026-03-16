@@ -207,7 +207,9 @@ function DocumentModal({
               src={buildDataUrl(content)}
             />
           ) : (
-            <div className="text-slate-500 text-sm">Preview бэлэн биш байна.</div>
+            <div className="text-slate-500 text-sm">
+              Урьдчилан харах боломжгүй байна.
+            </div>
           )}
         </div>
 
@@ -286,7 +288,7 @@ function LogRow({ entry }: { entry: LogEntry }) {
           <div className="border-t border-slate-700/40 px-5 py-2 flex flex-col bg-[#0a0f18]">
             <div className="grid grid-cols-2 gap-3 px-1 py-3">
               <div className="rounded-xl bg-slate-800/30 px-3 py-2">
-                <p className="text-slate-500 text-[10px] mb-1">Phase</p>
+                <p className="text-slate-500 text-[10px] mb-1">Үе шат</p>
                 <p className="text-slate-200 text-sm">{audit.phase}</p>
               </div>
               <div className="rounded-xl bg-slate-800/30 px-3 py-2">
@@ -299,7 +301,7 @@ function LogRow({ entry }: { entry: LogEntry }) {
 
             {docs.length === 0 ? (
               <div className="px-1 pb-3 text-slate-500 text-sm">
-                Энэ audit мөр дээр document мэдээлэл олдсонгүй.
+                Энэ аудит бичлэг дээр баримтын мэдээлэл олдсонгүй.
               </div>
             ) : (
               docs.map((doc, index) => (
@@ -425,7 +427,7 @@ export function AuditlogComponent() {
           setDocumentsError(
             err instanceof Error
               ? err.message
-              : "Audit document-уудыг ачаалж чадсангүй.",
+              : "Аудитын баримтуудыг ачаалж чадсангүй.",
           );
         }
       } finally {
@@ -524,7 +526,7 @@ export function AuditlogComponent() {
           </div>
         ) : filtered.length === 0 ? (
           <div className="py-12 text-center text-slate-500 text-sm">
-            Audit log олдсонгүй
+            Аудитын бүртгэл олдсонгүй
           </div>
         ) : (
           filtered.map((entry) => (

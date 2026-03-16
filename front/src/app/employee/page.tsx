@@ -11,6 +11,7 @@ import type { Document, Employee } from "@/lib/types";
 import { ContractPreview } from "@/components/contractPreview";
 import { FactIcon } from "@/components/icons";
 import { Request } from "@/components/request";
+import { formatDepartment } from "@/lib/labels";
 
 const TOKEN_STORAGE_KEY = "epas_auth_token";
 
@@ -110,7 +111,7 @@ export default function EmployeePage() {
             <div className="flex gap-2 mt-1 flex-wrap">
               {employee?.department ? (
                 <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#00CC99]/15 text-[#00CC99] text-xs font-semibold border border-[#00CC99]/20">
-                  {employee.department}
+                  {formatDepartment(employee.department)}
                 </span>
               ) : null}
               {employee?.jobTitle ? (
@@ -134,7 +135,7 @@ export default function EmployeePage() {
           <div className="shrink-0 rounded-xl border border-[#1a1a30] bg-[#0a0a14] p-5 flex flex-col gap-3 min-w-45">
             <div className="flex items-center justify-between gap-6">
               <div>
-                <p className="text-white text-2xl font-bold">4d 1h</p>
+                <p className="text-white text-2xl font-bold">4 өдөр 1 цаг</p>
                 <p className="text-[#4A4A6A] text-xs mt-0.5">
                   Чөлөөний боломж
                 </p>

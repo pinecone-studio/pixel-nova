@@ -50,13 +50,13 @@ function formatDate(value: string) {
 
 function stageKeyForEmployee(employee?: Employee) {
   if (!employee) return "active";
-  if (employee.status === "Ð¢Ð°ÑÐ°Ð»ÑÐ°Ð½") return "offboarding";
-  if (employee.status === "Ð˜Ñ€ÑÑÐ½") return "active";
+  if (employee.status === "Тасалсан") return "offboarding";
+  if (employee.status === "Ирсэн") return "active";
   return "onboarding";
 }
 
 function statusLabel(document: Document) {
-  return document.storageUrl ? "Ð‘Ð°Ñ‚Ð°Ð»Ð³Ð°Ð°Ð¶ÑÐ°Ð½" : "Draft";
+  return document.storageUrl ? "Баталгаажсан" : "Ноорог";
 }
 
 function fileToBase64(file: File) {
@@ -69,7 +69,7 @@ function fileToBase64(file: File) {
     };
     reader.onerror = () =>
       reject(
-        reader.error ?? new Error("Ð¤Ð°Ð¹Ð» ÑƒÐ½ÑˆÐ¸Ð¶ Ñ‡Ð°Ð´ÑÐ°Ð½Ð³Ò¯Ð¹."),
+        reader.error ?? new Error("Файл уншиж чадсангүй."),
       );
     reader.readAsDataURL(file);
   });
@@ -126,21 +126,21 @@ function FilePreviewModal({
             </p>
             <p className="text-slate-500 text-xs mt-0.5">
               {row.employee
-                ? `${row.employee.lastName} ${row.employee.firstName} â€¢ ${row.employee.employeeCode}`
+                ? `${row.employee.lastName} ${row.employee.firstName} • ${row.employee.employeeCode}`
                 : row.document.employeeId}
             </p>
           </div>
           <button
             onClick={onClose}
             className="text-slate-400 hover:text-white transition-colors text-lg">
-            âœ•
+            ✕
           </button>
         </div>
 
         <div className="h-[70vh] bg-[#080c12] p-6">
           {loading ? (
             <div className="w-full h-full rounded-2xl border border-slate-700/40 flex items-center justify-center text-slate-400 text-sm">
-              Ð£Ð½ÑˆÐ¸Ð¶ Ð±Ð°Ð¹Ð½Ð°...
+              Уншиж байна...
             </div>
           ) : error ? (
             <div className="w-full h-full rounded-2xl border border-red-500/20 bg-red-500/5 flex items-center justify-center text-red-400 text-sm">
@@ -156,7 +156,7 @@ function FilePreviewModal({
                 onClick={handleDownload}
                 className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black font-semibold text-sm transition-colors">
                 <DownloadIcon />
-                Ð¢Ð°Ñ‚Ð°Ñ…
+                Татах
               </button>
             </div>
           ) : content?.contentType === "text/html" ? (
@@ -173,7 +173,7 @@ function FilePreviewModal({
             />
           ) : (
             <div className="w-full h-full rounded-2xl border border-slate-700/40 flex items-center justify-center text-slate-500 text-sm">
-              Preview Ð±ÑÐ»ÑÐ½ Ð±Ð¸Ñˆ Ð±Ð°Ð¹Ð½Ð°.
+              Урьдчилан харах боломжгүй байна.
             </div>
           )}
         </div>
@@ -211,15 +211,15 @@ function NewDocModal({
 
   async function handleSubmit() {
     if (!employeeId) {
-      setError("ÐÐ¶Ð¸Ð»Ñ‚Ð°Ð½ ÑÐ¾Ð½Ð³Ð¾Ð½Ð¾ ÑƒÑƒ.");
+      setError("Ажилтан сонгоно уу.");
       return;
     }
     if (!documentName.trim()) {
-      setError("Ð‘Ð°Ñ€Ð¸Ð¼Ñ‚Ñ‹Ð½ Ð½ÑÑ€ Ð¾Ñ€ÑƒÑƒÐ»Ð½Ð° ÑƒÑƒ.");
+      setError("Баримтын нэр оруулна уу.");
       return;
     }
     if (!file) {
-      setError("Ð¤Ð°Ð¹Ð» ÑÐ¾Ð½Ð³Ð¾Ð½Ð¾ ÑƒÑƒ.");
+      setError("Файл сонгоно уу.");
       return;
     }
 
@@ -245,7 +245,7 @@ function NewDocModal({
       setError(
         err instanceof Error
           ? err.message
-          : "Ð‘Ð°Ñ€Ð¸Ð¼Ñ‚ upload Ñ…Ð¸Ð¹Ð¶ Ñ‡Ð°Ð´ÑÐ°Ð½Ð³Ò¯Ð¹.",
+          : "Баримт оруулж чадсангүй.",
       );
     } finally {
       setSaving(false);
@@ -260,16 +260,16 @@ function NewDocModal({
         className="relative w-[520px] max-w-[95vw] bg-[#0f1520] rounded-3xl border border-slate-700/50 shadow-2xl p-7 flex flex-col gap-4"
         onClick={(event) => event.stopPropagation()}>
         <div className="flex items-center justify-between">
-          <h2 className="text-white text-xl font-bold">Ð¨Ð¸Ð½Ñ Ð±Ð°Ñ€Ð¸Ð¼Ñ‚</h2>
+          <h2 className="text-white text-xl font-bold">Шинэ баримт</h2>
           <button
             onClick={onClose}
             className="text-slate-400 hover:text-white transition-colors text-lg">
-            âœ•
+            ✕
           </button>
         </div>
 
         <label className="flex flex-col gap-2">
-          <span className="text-sm text-slate-300">ÐÐ¶Ð¸Ð»Ñ‚Ð°Ð½</span>
+          <span className="text-sm text-slate-300">Ажилтан</span>
           <select
             value={employeeId}
             onChange={(event) => setEmployeeId(event.target.value)}
@@ -284,7 +284,7 @@ function NewDocModal({
         </label>
 
         <label className="flex flex-col gap-2">
-          <span className="text-sm text-slate-300">Action</span>
+          <span className="text-sm text-slate-300">Үйлдэл</span>
           <input
             value={action}
             onChange={(event) => setAction(event.target.value)}
@@ -294,17 +294,17 @@ function NewDocModal({
         </label>
 
         <label className="flex flex-col gap-2">
-          <span className="text-sm text-slate-300">Ð‘Ð°Ñ€Ð¸Ð¼Ñ‚Ñ‹Ð½ Ð½ÑÑ€</span>
+          <span className="text-sm text-slate-300">Баримтын нэр</span>
           <input
             value={documentName}
             onChange={(event) => setDocumentName(event.target.value)}
             className="h-11 rounded-xl border border-slate-700/50 bg-[#0d1117] px-3 text-sm text-white outline-none"
-            placeholder="Ð–Ð¸ÑˆÑÑ: ÐÑÐ¼ÑÐ»Ñ‚ Ð³ÑÑ€ÑÑ"
+            placeholder="Жишээ: Нэмэлт гэрээ"
           />
         </label>
 
         <label className="flex flex-col gap-2">
-          <span className="text-sm text-slate-300">Ð¤Ð°Ð¹Ð»</span>
+          <span className="text-sm text-slate-300">Файл</span>
           <input
             type="file"
             onChange={(event) => setFile(event.target.files?.[0] ?? null)}
@@ -318,13 +318,13 @@ function NewDocModal({
           <button
             onClick={onClose}
             className="px-5 py-2.5 rounded-xl border border-slate-700/50 text-slate-300 text-sm">
-            Ð‘Ð¾Ð»Ð¸Ñ…
+            Болих
           </button>
           <button
             onClick={handleSubmit}
             disabled={saving}
             className="px-5 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 disabled:opacity-60 text-black text-sm font-semibold transition-colors">
-            {saving ? "Ð˜Ð»Ð³ÑÑÐ¶ Ð±Ð°Ð¹Ð½Ð°..." : "Ð¥Ð°Ð´Ð³Ð°Ð»Ð°Ñ…"}
+            {saving ? "Илгээж байна..." : "Хадгалах"}
           </button>
         </div>
       </div>
@@ -396,7 +396,7 @@ export function FilesComponent() {
       setError(
         err instanceof Error
           ? err.message
-          : "Ð‘Ð°Ñ€Ð¸Ð¼Ñ‚ÑƒÑƒÐ´Ñ‹Ð³ Ð°Ñ‡Ð°Ð°Ð»Ð¶ Ñ‡Ð°Ð´ÑÐ°Ð½Ð³Ò¯Ð¹.",
+          : "Баримтуудыг ачаалж чадсангүй.",
       );
     } finally {
       setLoadingRows(false);
@@ -439,8 +439,8 @@ export function FilesComponent() {
 
   const stages = [
     {
-      label: "ÐÐ¶Ð¸Ð»Ð´ Ð¾Ñ€Ð¾Ñ… Ò¯Ðµ",
-      sub: "Onboarding",
+      label: "Ажилд орох үе",
+      sub: "Онбординг",
       count: stageCounts.onboarding,
       icon: <OnboardIcon />,
       iconBg: "bg-emerald-500",
@@ -448,8 +448,8 @@ export function FilesComponent() {
       bg: "bg-linear-to-br from-green-600/40 to-black",
     },
     {
-      label: "ÐÐ¶Ð¸Ð»Ð»Ð°Ñ… Ò¯Ðµ",
-      sub: "Active Employment",
+      label: "Ажиллах үе",
+      sub: "Идэвхтэй",
       count: stageCounts.active,
       icon: <ActiveIcon />,
       iconBg: "bg-cyan-500",
@@ -457,8 +457,8 @@ export function FilesComponent() {
       bg: "bg-linear-to-br from-[#06B6D4]/40 to-black",
     },
     {
-      label: "ÐÐ¶Ð»Ð°Ð°Ñ Ð³Ð°Ñ€Ð°Ñ… Ò¯Ðµ",
-      sub: "Offboarding",
+      label: "Ажлаас гарах үе",
+      sub: "Оффбординг",
       count: stageCounts.offboarding,
       icon: <OffboardIcon />,
       iconBg: "bg-red-500",
@@ -496,7 +496,7 @@ export function FilesComponent() {
       <div className="w-[500px] shrink-0 flex flex-col gap-5">
         <div>
           <p className="text-slate-400 text-lg font-semibold uppercase tracking-widest mb-3">
-            ÐÐ¸Ð¹Ñ‚ Ð±Ð°Ñ€Ð¸Ð¼Ñ‚
+            Нийт баримт
           </p>
           <div className="rounded-2xl border border-slate-700/40 bg-linear-to-br from-blue-600/40 to-black p-5 flex flex-col justify-between h-44">
             <div className="w-12 h-12 rounded-xl bg-blue-500/20 flex items-center justify-center">
@@ -505,9 +505,9 @@ export function FilesComponent() {
             <div>
               <p className="text-6xl font-bold text-white">{filtered.length}</p>
               <div className="flex items-center justify-between mt-1">
-                <p className="text-slate-400 text-sm">ÐÐ¸Ð¹Ñ‚ Ð±Ð°Ñ€Ð¸Ð¼Ñ‚</p>
+                <p className="text-slate-400 text-sm">Нийт баримт</p>
                 <p className="text-emerald-400 text-sm font-semibold">
-                  Live data
+                  Бодит өгөгдөл
                 </p>
               </div>
             </div>
@@ -516,7 +516,7 @@ export function FilesComponent() {
 
         <div>
           <p className="text-slate-400 text-lg font-semibold uppercase tracking-widest mb-3">
-            Ò®Ðµ ÑˆÐ°Ñ‚Ð°Ð°Ñ€
+            Үе шат
           </p>
           <div className="flex flex-col gap-8">
             {stages.map((stage) => (
@@ -551,7 +551,7 @@ export function FilesComponent() {
               <SearchIcon />
               <input
                 className="bg-transparent text-slate-400 text-sm outline-none placeholder:text-slate-600 w-full"
-                placeholder="Ð‘Ð°Ñ€Ð¸Ð¼Ñ‚, action, employee-Ð¾Ð¾Ñ€ Ñ…Ð°Ð¹Ñ…"
+                placeholder="Баримт, үйлдэл, ажилтнаар хайх"
                 value={search}
                 onChange={(event) => setSearch(event.target.value)}
               />
@@ -562,18 +562,18 @@ export function FilesComponent() {
             className="grid items-center px-5 py-3.5 border-b border-slate-700/40 bg-slate-800/20"
             style={{ gridTemplateColumns: "2fr 1.3fr 1fr 1fr 0.9fr" }}>
             <span className="text-slate-400 font-medium">
-              Ð‘Ð°Ñ€Ð¸Ð¼Ñ‚ Ð±Ð¸Ñ‡Ð¸Ð³
+              Баримт бичиг
             </span>
-            <span className="text-slate-400 font-medium">ÐÐ¶Ð¸Ð»Ñ‚Ð°Ð½</span>
-            <span className="text-slate-400 font-medium">ÐžÐ³Ð½Ð¾Ð¾</span>
-            <span className="text-slate-400 font-medium">Ð¢Ó©Ð»Ó©Ð²</span>
-            <span className="text-slate-400 font-medium">Ò®Ð¹Ð»Ð´ÑÐ»</span>
+            <span className="text-slate-400 font-medium">Ажилтан</span>
+            <span className="text-slate-400 font-medium">Огноо</span>
+            <span className="text-slate-400 font-medium">Төлөв</span>
+            <span className="text-slate-400 font-medium">Үйлдэл</span>
           </div>
 
           {isLoading ? (
             <div className="py-12 flex items-center justify-center gap-3 text-slate-500 text-sm">
               <span className="w-4 h-4 border-2 border-slate-700 border-t-slate-400 rounded-full animate-spin" />
-              Ð£Ð½ÑˆÐ¸Ð¶ Ð±Ð°Ð¹Ð½Ð°...
+              Уншиж байна...
             </div>
           ) : error ? (
             <div className="py-12 text-center text-red-400 text-sm">
@@ -581,7 +581,7 @@ export function FilesComponent() {
             </div>
           ) : filtered.length === 0 ? (
             <div className="py-12 text-center text-slate-500 text-sm">
-              Ð‘Ð°Ñ€Ð¸Ð¼Ñ‚ Ð¾Ð»Ð´ÑÐ¾Ð½Ð³Ò¯Ð¹
+              Баримт олдсонгүй
             </div>
           ) : (
             filtered.map((row) => (
@@ -639,7 +639,7 @@ export function FilesComponent() {
 
           <div className="px-5 py-3.5">
             <span className="text-slate-500 text-sm">
-              ÐÐ¸Ð¹Ñ‚ {filtered.length} Ð±Ð°Ñ€Ð¸Ð¼Ñ‚
+              Нийт {filtered.length} баримт
             </span>
           </div>
         </div>
@@ -649,7 +649,7 @@ export function FilesComponent() {
             onClick={() => setShowModal(true)}
             className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black font-semibold text-sm transition-colors shadow-lg shadow-emerald-500/20">
             <PlusIcon />
-            Ð¨Ð¸Ð½Ñ Ð±Ð°Ñ€Ð¸Ð¼Ñ‚
+            Шинэ баримт
           </button>
         </div>
       </div>
