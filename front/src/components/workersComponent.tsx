@@ -36,19 +36,6 @@ import {
 import { Input } from "./ui/input";
 import { Label } from "@/components/ui/label";
 
-// ── Constants ──────────────────────────────────────────
-const DEPARTMENTS = [
-  "Engineering",
-  "HR",
-  "Sales",
-  "Finance",
-  "Marketing",
-  "Design",
-];
-const STATUSES = ["Ирсэн", "Тасалсан", "Чөлөөтэй"];
-const LEVELS = ["Junior", "Mid", "Senior", "Lead"];
-const BRANCHES = ["Ulaanbaatar", "Darkhan", "Erdenet", "Remote"];
-
 // ── Types ──────────────────────────────────────────────
 type ModalMode = "add" | "edit";
 
@@ -78,48 +65,122 @@ const DOCUMENT_PROFILE_SECTIONS: Array<{
 }> = [
   {
     title: "Company Details",
-    description: "Employment contract deer garah baiguullagiin undsen medeelel.",
+    description:
+      "Employment contract deer garah baiguullagiin undsen medeelel.",
     fields: [
-      { key: "company_name", label: "Company Name", placeholder: "Pinecone Academy LLC" },
-      { key: "company_address", label: "Company Address", placeholder: "Office address" },
-      { key: "company_register_no", label: "Company Register No", placeholder: "Register number" },
+      {
+        key: "company_name",
+        label: "Company Name",
+        placeholder: "Pinecone Academy LLC",
+      },
+      {
+        key: "company_address",
+        label: "Company Address",
+        placeholder: "Office address",
+      },
+      {
+        key: "company_register_no",
+        label: "Company Register No",
+        placeholder: "Register number",
+      },
       {
         key: "employer_representative",
         label: "Employer Representative",
         placeholder: "Representative full name",
       },
-      { key: "company_legal_address", label: "Company Legal Address", placeholder: "Legal address" },
-      { key: "company_legal_phone", label: "Company Legal Phone", placeholder: "Phone number" },
-      { key: "company_legal_fax", label: "Company Legal Fax", placeholder: "Fax number" },
+      {
+        key: "company_legal_address",
+        label: "Company Legal Address",
+        placeholder: "Legal address",
+      },
+      {
+        key: "company_legal_phone",
+        label: "Company Legal Phone",
+        placeholder: "Phone number",
+      },
+      {
+        key: "company_legal_fax",
+        label: "Company Legal Fax",
+        placeholder: "Fax number",
+      },
     ],
   },
   {
     title: "Employee Details",
-    description: "Ajiltnii gereen deer oroh hayg, register, holboo barih medeelel.",
+    description:
+      "Ajiltnii gereen deer oroh hayg, register, holboo barih medeelel.",
     fields: [
-      { key: "employee_address", label: "Employee Address", placeholder: "Home address" },
-      { key: "employee_register_no", label: "Employee Register No", placeholder: "Register number" },
-      { key: "employee_legal_address", label: "Employee Legal Address", placeholder: "Legal address" },
-      { key: "employee_legal_phone", label: "Employee Legal Phone", placeholder: "Phone number" },
-      { key: "employee_legal_fax", label: "Employee Legal Fax", placeholder: "Fax number" },
+      {
+        key: "employee_address",
+        label: "Employee Address",
+        placeholder: "Home address",
+      },
+      {
+        key: "employee_register_no",
+        label: "Employee Register No",
+        placeholder: "Register number",
+      },
+      {
+        key: "employee_legal_address",
+        label: "Employee Legal Address",
+        placeholder: "Legal address",
+      },
+      {
+        key: "employee_legal_phone",
+        label: "Employee Legal Phone",
+        placeholder: "Phone number",
+      },
+      {
+        key: "employee_legal_fax",
+        label: "Employee Legal Fax",
+        placeholder: "Fax number",
+      },
     ],
   },
   {
     title: "Contract Terms",
     description: "Tsalin, ajliin nohtsol, tsagiin huvaariin medeelluud.",
     fields: [
-      { key: "contract_term", label: "Contract Term", placeholder: "1 year / indefinite" },
-      { key: "workplace_location", label: "Workplace Location", placeholder: "Office or branch" },
-      { key: "work_conditions", label: "Work Conditions", placeholder: "Hybrid / on-site / remote" },
-      { key: "work_schedule_type", label: "Work Schedule Type", placeholder: "Full-time" },
+      {
+        key: "contract_term",
+        label: "Contract Term",
+        placeholder: "1 year / indefinite",
+      },
+      {
+        key: "workplace_location",
+        label: "Workplace Location",
+        placeholder: "Office or branch",
+      },
+      {
+        key: "work_conditions",
+        label: "Work Conditions",
+        placeholder: "Hybrid / on-site / remote",
+      },
+      {
+        key: "work_schedule_type",
+        label: "Work Schedule Type",
+        placeholder: "Full-time",
+      },
       { key: "workday_from", label: "Workday From", placeholder: "Monday" },
       { key: "workday_to", label: "Workday To", placeholder: "Friday" },
       { key: "workdays_count", label: "Workdays Count", placeholder: "5" },
       { key: "daily_work_hours", label: "Daily Work Hours", placeholder: "8" },
-      { key: "weekly_work_hours", label: "Weekly Work Hours", placeholder: "40" },
-      { key: "work_start_time", label: "Work Start Time", placeholder: "09:00" },
+      {
+        key: "weekly_work_hours",
+        label: "Weekly Work Hours",
+        placeholder: "40",
+      },
+      {
+        key: "work_start_time",
+        label: "Work Start Time",
+        placeholder: "09:00",
+      },
       { key: "work_end_time", label: "Work End Time", placeholder: "18:00" },
-      { key: "break_start_time", label: "Break Start Time", placeholder: "13:00" },
+      {
+        key: "break_start_time",
+        label: "Break Start Time",
+        placeholder: "13:00",
+      },
       { key: "break_end_time", label: "Break End Time", placeholder: "14:00" },
       {
         key: "monthly_base_salary_amount",
@@ -428,8 +489,8 @@ function EmployeeModal({
               Contract / Document Details
             </h3>
             <p className="text-slate-400 text-xs mt-1">
-              Ene hesgiin medeelel ni ajliin geree bolon PDF template deer
-              shuud ashiglagdana.
+              Ene hesgiin medeelel ni ajliin geree bolon PDF template deer shuud
+              ashiglagdana.
             </p>
           </div>
 
@@ -444,11 +505,16 @@ function EmployeeModal({
               <div className="grid grid-cols-2 gap-4">
                 {section.fields.map((field) => (
                   <label key={field.key} className="flex flex-col gap-1.5">
-                    <span className="text-xs text-slate-400">{field.label}</span>
+                    <span className="text-xs text-slate-400">
+                      {field.label}
+                    </span>
                     <input
                       value={form.documentProfile[field.key] ?? ""}
                       onChange={(event) =>
-                        updateDocumentProfileField(field.key, event.target.value)
+                        updateDocumentProfileField(
+                          field.key,
+                          event.target.value,
+                        )
                       }
                       className="bg-transparent border border-slate-700/60 rounded-xl px-3 py-2.5 text-slate-200 text-sm outline-none"
                       placeholder={field.placeholder}
@@ -461,7 +527,7 @@ function EmployeeModal({
         </div>
 
         <div className="flex items-center justify-end gap-3">
-          <button
+          <Button
             onClick={onClose}
             className="px-6 py-2.5 h-auto rounded-2xl border-slate-600/50 bg-transparent cursor-pointer text-slate-300 hover:bg-slate-800/40 hover:text-white hover:border-slate-500"
           >
