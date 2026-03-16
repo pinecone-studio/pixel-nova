@@ -15,6 +15,7 @@ export async function executeTriggeredAction(
     dryRun?: boolean;
     overrideRecipients?: string[];
     actionConfig?: Awaited<ReturnType<typeof getActionConfigByName>>;
+    templateDataOverrides?: Record<string, string>;
   },
 ) {
   const resendApiKey =
@@ -47,6 +48,7 @@ export async function executeTriggeredAction(
       secret: pdfRendererSecret,
     },
     actionConfig,
+    options?.templateDataOverrides,
   );
 
   // dryRun=true үед email dispatch алгасна (document үүсгэнэ, email илгээхгүй)

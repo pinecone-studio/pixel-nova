@@ -1,0 +1,40 @@
+import { gql } from "@apollo/client";
+
+import { CONTRACT_REQUEST_FIELDS } from "../fragments";
+
+export const SUBMIT_CONTRACT_REQUEST = gql`
+  mutation SubmitContractRequest(
+    $templateIds: [String!]!
+    $signatureMode: String
+    $passcode: String
+    $signatureData: String
+  ) {
+    submitContractRequest(
+      templateIds: $templateIds
+      signatureMode: $signatureMode
+      passcode: $passcode
+      signatureData: $signatureData
+    ) {
+      ...ContractRequestFields
+    }
+  }
+  ${CONTRACT_REQUEST_FIELDS}
+`;
+
+export const APPROVE_CONTRACT_REQUEST = gql`
+  mutation ApproveContractRequest($id: ID!, $note: String) {
+    approveContractRequest(id: $id, note: $note) {
+      ...ContractRequestFields
+    }
+  }
+  ${CONTRACT_REQUEST_FIELDS}
+`;
+
+export const REJECT_CONTRACT_REQUEST = gql`
+  mutation RejectContractRequest($id: ID!, $note: String) {
+    rejectContractRequest(id: $id, note: $note) {
+      ...ContractRequestFields
+    }
+  }
+  ${CONTRACT_REQUEST_FIELDS}
+`;

@@ -111,7 +111,7 @@ export function WorkersComponent() {
   }
 
   return (
-    <div className="min-h-screen bg-[#080c12] text-white font-sans flex flex-col gap-5 p-0">
+    <div className="min-h-screen bg-[#080c12] text-white font-sans flex flex-col gap-5 p-0 animate-fade-up">
       {showAdd && (
         <EmployeeModal
           mode="add"
@@ -149,9 +149,10 @@ export function WorkersComponent() {
       <p className="text-slate-500 text-sm">Нийт {filtered.length} ажилтан</p>
 
       {loading ? (
-        <div className="py-12 flex items-center justify-center gap-3 text-slate-500 text-sm">
-          <span className="w-4 h-4 border-2 border-slate-700 border-t-slate-400 rounded-full animate-spin" />
-          Ажилтнуудыг уншиж байна...
+        <div className="py-8 flex flex-col gap-3">
+          <div className="h-4 w-56 rounded-full skeleton" />
+          <div className="h-3 w-80 rounded-full skeleton" />
+          <div className="h-3 w-72 rounded-full skeleton" />
         </div>
       ) : (
         <div className="grid grid-cols-2 gap-4">

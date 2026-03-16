@@ -158,7 +158,7 @@ export const EmployeeCode = () => {
       <path
         d="M16 0V1H28V0V-1H16V0ZM44 16H43V28H44H45V16H44ZM28 44V43H16V44V45H28V44ZM0 28H1V16H0H-1V28H0ZM16 44V43C7.71573 43 1 36.2843 1 28H0H-1C-1 37.3888 6.61116 45 16 45V44ZM44 28H43C43 36.2843 36.2843 43 28 43V44V45C37.3888 45 45 37.3888 45 28H44ZM28 0V1C36.2843 1 43 7.71573 43 16H44H45C45 6.61116 37.3888 -1 28 -1V0ZM16 0V-1C6.61116 -1 -1 6.61116 -1 16H0H1C1 7.71573 7.71573 1 16 1V0Z"
         fill="#00C0A8"
-        fill-opacity="0.2"
+        fillOpacity="0.2"
         mask="url(#path-1-inside-1_588_2667)"
       />
       <path
@@ -317,35 +317,143 @@ export function EpasLogo({ className = "h-9 w-9" }: { className?: string }) {
       xmlns="http://www.w3.org/2000/svg"
     >
       {/* Outer circle */}
-      <circle cx="256" cy="256" r="246" fill="#060610" stroke="#10B981" strokeWidth="10" />
+      <circle
+        cx="256"
+        cy="256"
+        r="246"
+        fill="#060610"
+        stroke="#10B981"
+        strokeWidth="10"
+      />
       {/* Inner dashed orbit */}
-      <circle cx="256" cy="256" r="226" fill="none" stroke="#10B981" strokeWidth="2" opacity="0.15" strokeDasharray="4 6" />
+      <circle
+        cx="256"
+        cy="256"
+        r="226"
+        fill="none"
+        stroke="#10B981"
+        strokeWidth="2"
+        opacity="0.15"
+        strokeDasharray="4 6"
+      />
 
       {/* Hexagonal shield */}
-      <path d="M256 60 L420 140 L420 340 L256 440 L92 340 L92 140 Z" fill="#10B981" opacity="0.04" />
-      <path d="M256 60 L420 140 L420 340 L256 440 L92 340 L92 140 Z" fill="none" stroke="#10B981" strokeWidth="4" />
+      <path
+        d="M256 60 L420 140 L420 340 L256 440 L92 340 L92 140 Z"
+        fill="#10B981"
+        opacity="0.04"
+      />
+      <path
+        d="M256 60 L420 140 L420 340 L256 440 L92 340 L92 140 Z"
+        fill="none"
+        stroke="#10B981"
+        strokeWidth="4"
+      />
       {/* Inner hex dashed */}
-      <path d="M256 100 L388 164 L388 316 L256 396 L124 316 L124 164 Z" fill="none" stroke="#10B981" strokeWidth="1.5" opacity="0.2" strokeDasharray="6 5" />
+      <path
+        d="M256 100 L388 164 L388 316 L256 396 L124 316 L124 164 Z"
+        fill="none"
+        stroke="#10B981"
+        strokeWidth="1.5"
+        opacity="0.2"
+        strokeDasharray="6 5"
+      />
 
       {/* Person head - filled */}
       <circle cx="256" cy="190" r="46" fill="#34D399" />
       {/* Person shoulders - filled arc */}
-      <path d="M172 340 C172 288 210 254 256 254 C302 254 340 288 340 340 L172 340 Z" fill="#34D399" opacity="0.25" />
-      <path d="M172 340 C172 288 210 254 256 254 C302 254 340 288 340 340" fill="none" stroke="#34D399" strokeWidth="5" strokeLinecap="round" />
+      <path
+        d="M172 340 C172 288 210 254 256 254 C302 254 340 288 340 340 L172 340 Z"
+        fill="#34D399"
+        opacity="0.25"
+      />
+      <path
+        d="M172 340 C172 288 210 254 256 254 C302 254 340 288 340 340"
+        fill="none"
+        stroke="#34D399"
+        strokeWidth="5"
+        strokeLinecap="round"
+      />
 
       {/* Document floating left */}
-      <rect x="108" cy="220" y="200" width="44" height="56" rx="6" fill="none" stroke="#6EE7B7" strokeWidth="2.5" opacity="0.6" transform="rotate(-12 130 228)" />
-      <line x1="118" y1="218" x2="142" y2="214" stroke="#6EE7B7" strokeWidth="2" opacity="0.4" transform="rotate(-12 130 228)" />
-      <line x1="118" y1="228" x2="138" y2="225" stroke="#6EE7B7" strokeWidth="2" opacity="0.3" transform="rotate(-12 130 228)" />
+      <rect
+        x="108"
+        cy="220"
+        y="200"
+        width="44"
+        height="56"
+        rx="6"
+        fill="none"
+        stroke="#6EE7B7"
+        strokeWidth="2.5"
+        opacity="0.6"
+        transform="rotate(-12 130 228)"
+      />
+      <line
+        x1="118"
+        y1="218"
+        x2="142"
+        y2="214"
+        stroke="#6EE7B7"
+        strokeWidth="2"
+        opacity="0.4"
+        transform="rotate(-12 130 228)"
+      />
+      <line
+        x1="118"
+        y1="228"
+        x2="138"
+        y2="225"
+        stroke="#6EE7B7"
+        strokeWidth="2"
+        opacity="0.3"
+        transform="rotate(-12 130 228)"
+      />
 
       {/* Document floating right */}
-      <rect x="360" y="200" width="44" height="56" rx="6" fill="none" stroke="#6EE7B7" strokeWidth="2.5" opacity="0.6" transform="rotate(12 382 228)" />
-      <line x1="370" y1="218" x2="394" y2="222" stroke="#6EE7B7" strokeWidth="2" opacity="0.4" transform="rotate(12 382 228)" />
-      <line x1="370" y1="228" x2="390" y2="231" stroke="#6EE7B7" strokeWidth="2" opacity="0.3" transform="rotate(12 382 228)" />
+      <rect
+        x="360"
+        y="200"
+        width="44"
+        height="56"
+        rx="6"
+        fill="none"
+        stroke="#6EE7B7"
+        strokeWidth="2.5"
+        opacity="0.6"
+        transform="rotate(12 382 228)"
+      />
+      <line
+        x1="370"
+        y1="218"
+        x2="394"
+        y2="222"
+        stroke="#6EE7B7"
+        strokeWidth="2"
+        opacity="0.4"
+        transform="rotate(12 382 228)"
+      />
+      <line
+        x1="370"
+        y1="228"
+        x2="390"
+        y2="231"
+        stroke="#6EE7B7"
+        strokeWidth="2"
+        opacity="0.3"
+        transform="rotate(12 382 228)"
+      />
 
       {/* Checkmark badge bottom */}
       <circle cx="256" cy="400" r="22" fill="#059669" />
-      <path d="M244 400 L252 408 L268 392" fill="none" stroke="white" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" />
+      <path
+        d="M244 400 L252 408 L268 392"
+        fill="none"
+        stroke="white"
+        strokeWidth="4"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
 
       {/* Energy particles spiraling */}
       <circle cx="148" cy="360" r="4" fill="#6EE7B7" opacity="0.8" />
@@ -361,8 +469,24 @@ export function EpasLogo({ className = "h-9 w-9" }: { className?: string }) {
       <circle cx="256" cy="52" r="2.5" fill="#34D399" opacity="0.5" />
 
       {/* Connecting lines from nodes to hex */}
-      <line x1="196" y1="90" x2="174" y2="120" stroke="#10B981" strokeWidth="1" opacity="0.15" />
-      <line x1="316" y1="90" x2="338" y2="120" stroke="#10B981" strokeWidth="1" opacity="0.15" />
+      <line
+        x1="196"
+        y1="90"
+        x2="174"
+        y2="120"
+        stroke="#10B981"
+        strokeWidth="1"
+        opacity="0.15"
+      />
+      <line
+        x1="316"
+        y1="90"
+        x2="338"
+        y2="120"
+        stroke="#10B981"
+        strokeWidth="1"
+        opacity="0.15"
+      />
     </svg>
   );
 }

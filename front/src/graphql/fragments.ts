@@ -124,3 +124,26 @@ export const LEAVE_REQUEST_FIELDS = gql`
     updatedAt
   }
 `;
+
+export const CONTRACT_REQUEST_FIELDS = gql`
+  fragment ContractRequestFields on ContractRequest {
+    id
+    employeeId
+    employee {
+      id
+      employeeCode
+      firstName
+      lastName
+      department
+      jobTitle
+      level
+    }
+    templateIds
+    status
+    note
+    signatureMode
+    createdAt
+    updatedAt
+    decidedAt
+  }
+`;
