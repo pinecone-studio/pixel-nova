@@ -1,226 +1,314 @@
 "use client";
 
-import { useQuery } from "@apollo/client/react";
-import { useEffect, useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useLazyQuery } from "@apollo/client/react";
+import { useMemo, useState } from "react";
 
 import { buildGraphQLHeaders } from "@/lib/apollo-client";
-import { GET_DOCUMENTS, GET_ME } from "@/graphql/queries";
-import type { Document, Employee } from "@/lib/types";
+import { GET_DOCUMENT_CONTENT } from "@/graphql/queries";
+import type { Document, DocumentContent } from "@/lib/types";
 
-import { ContractPreview } from "@/components/contractPreview";
-import { FactIcon } from "@/components/icons";
-import { Request } from "@/components/request";
-import { formatDepartment } from "@/lib/labels";
+// ─── helpers ────────────────────────────────────────────────────────────────
 
-const TOKEN_STORAGE_KEY = "epas_auth_token";
+function formatDate(value: string) {
+  return new Date(value)
+    .toLocaleDateString("mn-MN", {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    })
+    .replace(/\./g, "/");
+}
 
-export default function EmployeePage() {
-  const router = useRouter();
-  const [authToken] = useState(() =>
-    typeof window === "undefined"
-      ? ""
-      : window.localStorage.getItem(TOKEN_STORAGE_KEY) ?? "",
+function buildDataUrl(content: DocumentContent) {
+  if (content.contentType === "application/pdf") {
+    return `data:${content.contentType};base64,${content.content}`;
+  }
+  if (content.contentType.startsWith("text/")) {
+    return `data:${content.contentType};charset=utf-8,${encodeURIComponent(content.content)}`;
+  }
+  return `data:${content.contentType};base64,${content.content}`;
+}
+
+// ─── ActionBtn ───────────────────────────────────────────────────────────────
+
+function ActionBtn({
+  children,
+  title,
+  onClick,
+}: {
+  children: React.ReactNode;
+  title?: string;
+  onClick?: () => void;
+}) {
+  const [hovered, setHovered] = useState(false);
+  return (
+    <span
+      title={title}
+      onClick={onClick}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      style={{
+        color: hovered ? "rgba(148,163,184,0.85)" : "rgba(148,163,184,0.4)",
+        cursor: "pointer",
+        transition: "color 0.12s",
+        display: "flex",
+      }}
+    >
+      {children}
+    </span>
+  );
+}
+
+// ─── ContractPreview ─────────────────────────────────────────────────────────
+
+type ContractPreviewProps = {
+  document: Document;
+  authToken: string;
+};
+
+export const ContractPreview = ({
+  document,
+  authToken,
+}: ContractPreviewProps) => {
+  const [previewOpen, setPreviewOpen] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const [loadContent, { data, loading }] = useLazyQuery<{
+    documentContent: DocumentContent | null;
+  }>(GET_DOCUMENT_CONTENT, { fetchPolicy: "network-only" });
+
+  const content = data?.documentContent ?? null;
+  const previewUrl = useMemo(
+    () => (content ? buildDataUrl(content) : null),
+    [content],
   );
 
-  const {
-    data: meData,
-    loading: meLoading,
-    error: meError,
-  } = useQuery<{ me: Employee | null }>(GET_ME, {
-    skip: !authToken,
-    context: {
-      headers: buildGraphQLHeaders({ authToken }),
-    },
-    fetchPolicy: "network-only",
-  });
-
-  const employee = meData?.me ?? null;
-
-  const {
-    data: documentsData,
-    loading: documentsLoading,
-    error: documentsError,
-  } = useQuery<{ documents: Document[] }>(GET_DOCUMENTS, {
-    skip: !authToken || !employee?.id,
-    variables: {
-      employeeId: employee?.id ?? "",
-    },
-    context: {
-      headers: buildGraphQLHeaders({ authToken }),
-    },
-    fetchPolicy: "network-only",
-  });
-
-  useEffect(() => {
-    if (!authToken) {
-      router.replace("/auth/employee");
-      return;
-    }
-
-    if (!meLoading && !employee) {
-      window.localStorage.removeItem(TOKEN_STORAGE_KEY);
-      router.replace("/auth/employee");
-    }
-  }, [authToken, employee, meLoading, router]);
-
-  const documents = useMemo(() => documentsData?.documents ?? [], [documentsData]);
-
-  if (!authToken) {
-    return null;
+  async function ensureContent() {
+    if (content) return content;
+    const result = await loadContent({
+      variables: { documentId: document.id },
+      context: { headers: buildGraphQLHeaders({ authToken }) },
+    });
+    const next = result.data?.documentContent ?? null;
+    if (!next) throw new Error("Баримтын агуулга олдсонгүй.");
+    return next;
   }
-  const loading = meLoading || Boolean(employee?.id && documentsLoading);
-  const error = meError?.message ?? documentsError?.message ?? null;
 
-  const leaveUsed = 4;
-  const leaveTotal = 14;
-  const leavePercent = (leaveUsed / leaveTotal) * 100;
-  const radius = 28;
-  const circumference = 2 * Math.PI * radius;
-  const dashOffset = circumference - (leavePercent / 100) * circumference;
-  const displayName = employee
-    ? `${employee.lastName} ${employee.firstName}`
-    : "Ажилтан";
+  async function handlePreview() {
+    setPreviewOpen(true);
+    setError(null);
+    try {
+      await ensureContent();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Баримтыг нээж чадсангүй.");
+    }
+  }
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-[#0A0A0F] flex items-center justify-center">
-        <div className="flex items-center gap-3 text-white/70 text-sm">
-          <span className="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin" />
-          Уншиж байна...
-        </div>
-      </div>
-    );
+  async function handleDownload() {
+    setError(null);
+    try {
+      const c = await ensureContent();
+      const link = window.document.createElement("a");
+      link.href = buildDataUrl(c);
+      link.download = c.documentName;
+      window.document.body.appendChild(link);
+      link.click();
+      link.remove();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Файл татаж чадсангүй.");
+    }
   }
 
   return (
-    <div className="min-h-screen bg-[#0A0A0F]">
-      <div className="max-w-6xl mx-auto px-6 py-8 flex flex-col gap-8">
-        <div className="w-full rounded-2xl border border-[#1a1a30] bg-[#0d0d1a] p-8 flex items-center justify-between gap-6">
-          <div className="flex flex-col gap-3">
-            <p className="text-[#00CC99] text-sm font-medium tracking-widest uppercase">
-              Сайн байна уу?
-            </p>
-            <h1 className="text-white text-4xl font-bold tracking-tight">
-              {displayName}
-            </h1>
-            <p className="text-[#4A4A6A] text-sm leading-relaxed max-w-lg">
-              Та хөдөлмөрийн баримт бичиг болон ажлын түүхээ нэг дороос
-              харах боломжтой. Бүх мэдээлэл backend-аас бодитоор ачааллагдана.
-            </p>
-            <div className="flex gap-2 mt-1 flex-wrap">
-              {employee?.department ? (
-                <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#00CC99]/15 text-[#00CC99] text-xs font-semibold border border-[#00CC99]/20">
-                  {formatDepartment(employee.department)}
-                </span>
-              ) : null}
-              {employee?.jobTitle ? (
-                <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/5 text-[#94A3B8] text-xs font-semibold border border-white/10">
-                  {employee.jobTitle}
-                </span>
-              ) : null}
-              {employee?.employeeCode ? (
-                <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/5 text-[#94A3B8] text-xs font-semibold border border-white/10">
-                  {employee.employeeCode}
-                </span>
-              ) : null}
-              {error ? (
-                <span className="px-3 py-1.5 rounded-lg bg-red-500/10 text-red-400 text-xs font-semibold border border-red-500/20">
-                  {error}
-                </span>
-              ) : null}
-            </div>
-          </div>
+    <>
+      {/* Inline actions: eye + download + date */}
+      <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+        <ActionBtn title="Харах" onClick={() => void handlePreview()}>
+          <svg
+            width="15"
+            height="15"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.5"
+            viewBox="0 0 24 24"
+          >
+            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+            <circle cx="12" cy="12" r="3" />
+          </svg>
+        </ActionBtn>
+        <ActionBtn title="Татах" onClick={() => void handleDownload()}>
+          <svg
+            width="15"
+            height="15"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.5"
+            viewBox="0 0 24 24"
+          >
+            <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3" />
+          </svg>
+        </ActionBtn>
+        <span
+          style={{
+            color: "rgba(148,163,184,0.35)",
+            fontSize: 12,
+            minWidth: 80,
+            textAlign: "right",
+          }}
+        >
+          {document.createdAt ? formatDate(document.createdAt) : "—"}
+        </span>
+      </div>
 
-          <div className="shrink-0 rounded-xl border border-[#1a1a30] bg-[#0a0a14] p-5 flex flex-col gap-3 min-w-45">
-            <div className="flex items-center justify-between gap-6">
+      {/* Preview modal */}
+      {previewOpen && (
+        <div
+          style={{
+            position: "fixed",
+            inset: 0,
+            zIndex: 60,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <button
+            type="button"
+            aria-label="Preview close overlay"
+            style={{
+              position: "absolute",
+              inset: 0,
+              background: "rgba(0,0,0,0.70)",
+              border: "none",
+              cursor: "pointer",
+            }}
+            onClick={() => setPreviewOpen(false)}
+          />
+          <div
+            style={{
+              position: "relative",
+              width: 900,
+              maxWidth: "92vw",
+              height: "82vh",
+              background: "#111318",
+              border: "1px solid rgba(255,255,255,0.10)",
+              borderRadius: 16,
+              overflow: "hidden",
+              boxShadow: "0 25px 60px rgba(0,0,0,0.6)",
+            }}
+          >
+            {/* Modal header */}
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                padding: "16px 20px",
+                borderBottom: "1px solid rgba(255,255,255,0.10)",
+              }}
+            >
               <div>
-                <p className="text-white text-2xl font-bold">4 өдөр 1 цаг</p>
-                <p className="text-[#4A4A6A] text-xs mt-0.5">
-                  Чөлөөний боломж
+                <p
+                  style={{
+                    color: "#fff",
+                    fontSize: 14,
+                    fontWeight: 600,
+                    margin: 0,
+                  }}
+                >
+                  {document.action}
+                </p>
+                <p
+                  style={{
+                    color: "rgba(148,163,184,0.5)",
+                    fontSize: 12,
+                    margin: "2px 0 0",
+                  }}
+                >
+                  {document.documentName}
                 </p>
               </div>
-
-              <div className="relative w-16 h-16">
-                <svg viewBox="0 0 72 72" className="w-full h-full -rotate-90">
-                  <circle
-                    cx="36"
-                    cy="36"
-                    r={radius}
-                    fill="none"
-                    stroke="#1a1a30"
-                    strokeWidth="6"
-                  />
-                  <circle
-                    cx="36"
-                    cy="36"
-                    r={radius}
-                    fill="none"
-                    stroke="#00CC99"
-                    strokeWidth="6"
-                    strokeLinecap="round"
-                    strokeDasharray={circumference}
-                    strokeDashoffset={dashOffset}
-                  />
-                </svg>
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <span className="text-white text-xs font-semibold">
-                    {leaveUsed}
-                    <span className="text-[#4A4A6A] text-[10px]">
-                      /{leaveTotal}
-                    </span>
-                  </span>
-                </div>
-              </div>
+              <button
+                type="button"
+                onClick={() => setPreviewOpen(false)}
+                style={{
+                  width: 32,
+                  height: 32,
+                  borderRadius: 8,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  color: "rgba(148,163,184,0.6)",
+                  background: "transparent",
+                  border: "none",
+                  cursor: "pointer",
+                  fontSize: 18,
+                }}
+              >
+                ✕
+              </button>
             </div>
-            <button className="w-full text-center text-xs text-[#8888AA] border border-[#2A2A40] rounded-lg py-1.5 hover:border-[#00CC99]/40 hover:text-white transition-colors">
-              Дэлгэрэнгүй
-            </button>
+
+            {/* Modal body */}
+            <div
+              style={{
+                height: "calc(100% - 65px)",
+                background: "#0a0b0f",
+                padding: 24,
+              }}
+            >
+              {loading ? (
+                <div style={iframeWrapStyle}>Баримт ачаалж байна...</div>
+              ) : error ? (
+                <div
+                  style={{
+                    ...iframeWrapStyle,
+                    border: "1px solid rgba(239,68,68,0.2)",
+                    background: "rgba(239,68,68,0.05)",
+                    color: "#f87171",
+                  }}
+                >
+                  {error}
+                </div>
+              ) : content?.contentType === "text/html" ? (
+                <iframe
+                  title={document.documentName}
+                  style={iframeStyle}
+                  srcDoc={content.content}
+                />
+              ) : previewUrl ? (
+                <iframe
+                  title={document.documentName}
+                  style={iframeStyle}
+                  src={previewUrl}
+                />
+              ) : (
+                <div style={iframeWrapStyle}>Preview бэлэн биш байна.</div>
+              )}
+            </div>
           </div>
         </div>
-
-        <Request />
-
-        <section className="flex flex-col gap-6">
-          <div className="flex items-center gap-4">
-            <h2 className="text-[24px] font-semibold tracking-[-0.02em] text-white">
-              Бүртгэл
-            </h2>
-            <span className="rounded-full border border-[#233246] bg-[#162130] px-4 py-1 text-[14px] font-medium text-[#94A3B8]">
-              {documents.length} баримт
-            </span>
-          </div>
-
-          <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
-            {documents.length > 0 ? (
-              documents.map((document) => (
-                <ContractPreview
-                  key={document.id}
-                  document={document}
-                  authToken={authToken}
-                />
-              ))
-            ) : (
-              <article className="flex h-45 w-full max-w-80.75 flex-col items-center justify-center rounded-[28px] border border-[#0E2741] bg-[linear-gradient(180deg,#03101d_0%,#041424_100%)] p-7 text-center shadow-[0_0_0_1px_rgba(255,255,255,0.03)_inset]">
-                <div className="flex flex-col items-center gap-5">
-                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-[18px] border border-[#24374F] bg-[#132131]">
-                    <FactIcon />
-                  </div>
-                  <div className="flex min-w-0 flex-1 flex-col items-center gap-1 pt-1">
-                    <h3 className="max-w-54.25 text-[17px] font-semibold leading-5 text-[#E7EDF5]">
-                      Баримт одоогоор олдсонгүй
-                    </h3>
-                    <p className="max-w-full text-[13px] text-[#6E7D90]">
-                      Энэ хэсэг зөвхөн backend-аас ирсэн бодит баримтуудыг
-                      харуулна.
-                    </p>
-                  </div>
-                </div>
-              </article>
-            )}
-          </div>
-        </section>
-      </div>
-    </div>
+      )}
+    </>
   );
-}
+};
+
+const iframeStyle: React.CSSProperties = {
+  width: "100%",
+  height: "100%",
+  borderRadius: 10,
+  border: "1px solid rgba(255,255,255,0.10)",
+  background: "#fff",
+};
+
+const iframeWrapStyle: React.CSSProperties = {
+  width: "100%",
+  height: "100%",
+  borderRadius: 10,
+  border: "1px solid rgba(255,255,255,0.10)",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  color: "rgba(148,163,184,0.5)",
+  fontSize: 14,
+};
