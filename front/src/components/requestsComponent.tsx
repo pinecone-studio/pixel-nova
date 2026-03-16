@@ -1,9 +1,10 @@
-"use client";
+﻿"use client";
 
-import { useMutation, useQuery } from "@apollo/client/react";
+import { useApolloClient, useMutation, useQuery } from "@apollo/client/react";
 import { useMemo, useState } from "react";
 import {
   AcepptedIcon,
+  DownIcon,
   DownloadIcon,
   FilterIcon,
   PreviewIcon,
@@ -17,8 +18,8 @@ import {
   APPROVE_LEAVE_REQUEST,
   REJECT_LEAVE_REQUEST,
 } from "@/graphql/mutations";
-import { GET_LEAVE_REQUESTS } from "@/graphql/queries";
-import type { LeaveRequest } from "@/lib/types";
+import { GET_DOCUMENTS, GET_LEAVE_REQUESTS } from "@/graphql/queries";
+import type { Document, LeaveRequest } from "@/lib/types";
 import { formatDepartment, formatLeaveRequestStatus } from "@/lib/labels";
 
 const StatusBadge = ({ status }: { status: string }) => {
@@ -46,20 +47,9 @@ function getInitials(firstName: string, lastName: string) {
   return `${lastName.charAt(0)}${firstName.charAt(0)}`;
 }
 
-const avatarColors = [
-  "bg-cyan-500",
-  "bg-purple-500",
-  "bg-teal-500",
-  "bg-blue-600",
-  "bg-orange-500",
-  "bg-pink-500",
-  "bg-indigo-500",
-];
 function avatarColor(str: string) {
-  let h = 0;
-  for (let i = 0; i < str.length; i++)
-    h = (h * 31 + str.charCodeAt(i)) & 0xffffffff;
-  return avatarColors[Math.abs(h) % avatarColors.length];
+  void str;
+  return "bg-linear-to-br from-[#2d7bff] to-[#00c2ff]";
 }
 
 const PreviewModal = ({
@@ -119,7 +109,7 @@ const PreviewModal = ({
                 <StatusBadge status={row.status} />
               </div>
               <p className="text-slate-400 text-sm mt-0.5">
-                {row.employee.employeeCode} •{" "}
+                {row.employee.employeeCode} â€¢{" "}
                 {formatDepartment(row.employee.department)}
               </p>
             </div>
@@ -128,7 +118,7 @@ const PreviewModal = ({
             onClick={onClose}
             className="text-slate-400 hover:text-white transition-colors text-xl leading-none mt-1"
           >
-            ✕
+            âœ•
           </button>
         </div>
 
@@ -138,28 +128,32 @@ const PreviewModal = ({
           <p className="text-white font-semibold text-base">{row.type}</p>
           <div className="grid grid-cols-2 gap-y-4">
             <div>
-              <p className="text-slate-500 text-xs mb-1">Эхлэх цаг</p>
+              <p className="text-slate-500 text-xs mb-1">Ð­Ñ…Ð»ÑÑ… Ñ†Ð°Ð³</p>
               <p className="text-white text-sm font-medium">{row.startTime}</p>
             </div>
             <div>
-              <p className="text-slate-500 text-xs mb-1">Дуусах цаг</p>
+              <p className="text-slate-500 text-xs mb-1">Ð”ÑƒÑƒÑÐ°Ñ… Ñ†Ð°Ð³</p>
               <p className="text-white text-sm font-medium">{row.endTime}</p>
             </div>
             <div>
-              <p className="text-slate-500 text-xs mb-1">Илгээсэн огноо</p>
+              <p className="text-slate-500 text-xs mb-1">
+                Ð˜Ð»Ð³ÑÑÑÑÐ½ Ð¾Ð³Ð½Ð¾Ð¾
+              </p>
               <p className="text-[#0ad4b1] text-sm font-semibold">
                 {new Date(row.createdAt).toLocaleDateString("mn-MN")}
               </p>
             </div>
             <div>
-              <p className="text-slate-500 text-xs mb-1">Албан тушаал</p>
+              <p className="text-slate-500 text-xs mb-1">
+                ÐÐ»Ð±Ð°Ð½ Ñ‚ÑƒÑˆÐ°Ð°Ð»
+              </p>
               <p className="text-white text-sm font-medium">
                 {row.employee.jobTitle}
               </p>
             </div>
             {row.reason && (
               <div className="col-span-2">
-                <p className="text-slate-500 text-xs mb-1">Шалтгаан</p>
+                <p className="text-slate-500 text-xs mb-1">Ð¨Ð°Ð»Ñ‚Ð³Ð°Ð°Ð½</p>
                 <p className="text-white text-sm font-medium">{row.reason}</p>
               </div>
             )}
@@ -168,13 +162,15 @@ const PreviewModal = ({
 
         <div className="flex flex-col gap-2">
           <p className="text-white font-semibold text-base">
-            Тайлбар{" "}
-            <span className="text-slate-500 font-normal">(Заавал биш)</span>
+            Ð¢Ð°Ð¹Ð»Ð±Ð°Ñ€{" "}
+            <span className="text-slate-500 font-normal">
+              (Ð—Ð°Ð°Ð²Ð°Ð» Ð±Ð¸Ñˆ)
+            </span>
           </p>
           <textarea
             value={note}
             onChange={(e) => setNote(e.target.value)}
-            placeholder="Энд бичнэ үү..."
+            placeholder="Ð­Ð½Ð´ Ð±Ð¸Ñ‡Ð½Ñ Ò¯Ò¯..."
             rows={3}
             className="w-full bg-[#161d2b] border border-slate-700/50 rounded-2xl px-4 py-3 text-slate-300 text-sm placeholder:text-slate-600 outline-none resize-none focus:border-blue-500/50 transition-colors"
           />
@@ -187,19 +183,21 @@ const PreviewModal = ({
               disabled={acting}
               className="flex items-center gap-2 px-5 py-2.5 rounded-xl border border-red-500/50 text-red-400 text-sm font-medium hover:bg-red-500/10 disabled:opacity-50 transition-colors"
             >
-              <span>✕</span> Татгалзах
+              <span>âœ•</span> Ð¢Ð°Ñ‚Ð³Ð°Ð»Ð·Ð°Ñ…
             </button>
             <button
               onClick={handleApprove}
               disabled={acting}
               className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#0ad4b1] text-black text-sm font-medium hover:bg-[#08bfa0] disabled:opacity-50 transition-colors"
             >
-              <span>✓</span> {acting ? "Түр хүлээнэ үү..." : "Батлах"}
+              <span>âœ“</span>{" "}
+              {acting ? "Ð¢Ò¯Ñ€ Ñ…Ò¯Ð»ÑÑÐ½Ñ Ò¯Ò¯..." : "Ð‘Ð°Ñ‚Ð»Ð°Ñ…"}
             </button>
           </div>
         ) : (
           <p className="text-center text-slate-500 text-sm">
-            Энэ хүсэлт аль хэдийн <StatusBadge status={row.status} />
+            Ð­Ð½Ñ Ñ…Ò¯ÑÑÐ»Ñ‚ Ð°Ð»ÑŒ Ñ…ÑÐ´Ð¸Ð¹Ð½{" "}
+            <StatusBadge status={row.status} />
           </p>
         )}
       </div>
@@ -209,27 +207,37 @@ const PreviewModal = ({
 
 const RequestRow = ({
   row,
-  onPreview,
+  expanded,
+  onToggle,
+  documents,
+  documentsLoading,
   divider = true,
 }: {
   row: LeaveRequest;
-  onPreview: (row: LeaveRequest) => void;
+  expanded: boolean;
+  onToggle: (row: LeaveRequest) => void;
+  documents: Document[];
+  documentsLoading: boolean;
   divider?: boolean;
 }) => {
   const initials = getInitials(row.employee.firstName, row.employee.lastName);
   const color = avatarColor(row.employeeId);
+  const documentCount = documents.length;
 
   return (
     <>
-      <div className="flex items-center justify-between px-5 py-3.5 hover:bg-slate-800/30 transition-colors cursor-pointer">
+      <div
+        className="flex items-center justify-between h-24 p-5 hover:bg-[#101822] transition-colors cursor-pointer"
+        onClick={() => onToggle(row)}
+      >
         <div className="flex items-center gap-3">
           <div
             className={`w-11 h-11 rounded-xl ${color} flex items-center justify-center font-bold text-white text-sm shrink-0`}
           >
             {initials}
           </div>
-          <div>
-            <p className="text-white font-semibold text-sm">
+          <div className=" flex justify-center flex-col">
+            <p className="text-white font-semibold text-sm h-6">
               {row.employee.lastName} {row.employee.firstName}
             </p>
             <p className="text-slate-500 text-xs">
@@ -239,27 +247,76 @@ const RequestRow = ({
           </div>
         </div>
         <div className="flex items-center gap-3">
-          <span className="text-slate-400 text-xs hidden sm:block">
-            {row.type}
+          <span className="text-[#5aa7ff] text-[11px] px-2.5 py-1 rounded-full bg-[#0b2740] border border-[#1c395a] hidden sm:block">
+            {documentsLoading ? "..." : documentCount} гэрээ
           </span>
-          <StatusBadge status={row.status} />
-          <button
-            onClick={() => onPreview(row)}
-            className={`w-9 h-9 flex items-center justify-center rounded-xl border transition-colors ${eyeStyleMap[row.status] ?? "border-slate-700 text-slate-400"}`}
-          >
-            <PreviewIcon />
-          </button>
+          <DownIcon
+            className={
+              expanded
+                ? "rotate-180 transition-transform"
+                : "transition-transform"
+            }
+          />
         </div>
       </div>
-      {divider && <div className="h-px bg-slate-800/60" />}
+      {expanded ? (
+        <div className="px-5 pb-4">
+          <div className="rounded-xl border border-[#1f2a38] bg-[#0c121a] overflow-hidden">
+            {documentsLoading ? (
+              <div className="py-8 flex items-center justify-center gap-3 text-slate-500 text-sm">
+                <span className="w-4 h-4 border-2 border-slate-700 border-t-slate-400 rounded-full animate-spin" />
+                уншиж байна
+              </div>
+            ) : documents.length === 0 ? (
+              <div className="py-8 text-center text-slate-500 text-sm">
+                Мэдээлэл байхгүй байна
+              </div>
+            ) : (
+              documents.map((doc, idx) => (
+                <div
+                  key={doc.id}
+                  className={`flex items-center justify-between px-4 py-3 ${idx > 0 ? "border-t border-[#1f2a38]" : ""}`}
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-[#101826] border border-[#1f2a38] flex items-center justify-center text-slate-400">
+                      <ReqIcon />
+                    </div>
+                    <div>
+                      <p className="text-white text-sm font-semibold">
+                        {doc.documentName}
+                      </p>
+                      <p className="text-slate-500 text-xs">{doc.action}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-4 text-slate-500 text-xs">
+                    <PreviewIcon />
+                    <DownloadIcon />
+                    <span className="min-w-[72px] text-right">
+                      {new Date(doc.createdAt).toLocaleDateString("mn-MN")}
+                    </span>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+      ) : null}
+      {divider && <div className="h-px bg-[#1a2432]" />}
     </>
   );
 };
 
 export const RequestsComponent = () => {
-  const [activeTab, setActiveTab] = useState("Бүгд");
+  const [activeTab, setActiveTab] = useState("Ð‘Ò¯Ð³Ð´");
   const [search, setSearch] = useState("");
   const [previewRow, setPreviewRow] = useState<LeaveRequest | null>(null);
+  const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [documentsByEmployee, setDocumentsByEmployee] = useState<
+    Record<string, Document[]>
+  >({});
+  const [documentsLoading, setDocumentsLoading] = useState<
+    Record<string, boolean>
+  >({});
 
   const queryContext = useMemo(
     () => ({
@@ -267,6 +324,8 @@ export const RequestsComponent = () => {
     }),
     [],
   );
+
+  const apolloClient = useApolloClient();
 
   const { data, loading } = useQuery<{ leaveRequests: LeaveRequest[] }>(
     GET_LEAVE_REQUESTS,
@@ -308,9 +367,6 @@ export const RequestsComponent = () => {
   );
 
   const requests = data?.leaveRequests ?? [];
-  const approvedCount = requests.filter((r) => r.status === "approved").length;
-  const rejectedCount = requests.filter((r) => r.status === "rejected").length;
-  const pendingCount = requests.filter((r) => r.status === "pending").length;
 
   async function handleApprove(id: string, note: string) {
     try {
@@ -329,30 +385,48 @@ export const RequestsComponent = () => {
   }
 
   const filtered = requests.filter((r) => {
-    const matchTab =
-      activeTab === "Бүгд"
-        ? true
-        : activeTab === "Хүлээгдэж буй"
-          ? r.status === "pending"
-          : activeTab === "Баталсан"
-            ? r.status === "approved"
-            : activeTab === "Татгалзсан"
-              ? r.status === "rejected"
-              : true;
     const matchSearch =
       !search ||
       r.employee.firstName.toLowerCase().includes(search.toLowerCase()) ||
       r.employee.lastName.toLowerCase().includes(search.toLowerCase()) ||
       r.employee.employeeCode.toLowerCase().includes(search.toLowerCase());
-    return matchTab && matchSearch;
+    return matchSearch;
   });
 
-  const tabs = [
-    { label: "Бүгд", count: requests.length },
-    { label: "Хүлээгдэж буй", count: pendingCount },
-    { label: "Баталсан", count: approvedCount },
-    { label: "Татгалзсан", count: rejectedCount },
-  ];
+  function handleToggle(row: LeaveRequest) {
+    setExpandedId((prev) => {
+      const next = prev === row.id ? null : row.id;
+      if (next) {
+        void loadDocuments(row.employeeId);
+      }
+      return next;
+    });
+  }
+
+  async function loadDocuments(employeeId: string) {
+    if (documentsByEmployee[employeeId] || documentsLoading[employeeId]) return;
+
+    setDocumentsLoading((prev) => ({ ...prev, [employeeId]: true }));
+
+    try {
+      const result = await apolloClient.query<{ documents: Document[] }>({
+        query: GET_DOCUMENTS,
+        variables: { employeeId },
+        context: queryContext,
+        fetchPolicy: "network-only",
+      });
+
+      setDocumentsByEmployee((prev) => ({
+        ...prev,
+        [employeeId]: result.data?.documents ?? [],
+      }));
+    } catch (error) {
+      console.error(error);
+      setDocumentsByEmployee((prev) => ({ ...prev, [employeeId]: [] }));
+    } finally {
+      setDocumentsLoading((prev) => ({ ...prev, [employeeId]: false }));
+    }
+  }
 
   return (
     <div className="min-h-screen bg-[#080c12] text-white font-sans p-6 flex flex-col gap-4 animate-fade-up">
@@ -365,93 +439,31 @@ export const RequestsComponent = () => {
         />
       )}
 
-      <div className="grid grid-cols-3 gap-4">
-        <div className="rounded-2xl border border-blue-500/50 bg-linear-to-br from-blue-600/45 to-black p-5 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-xl bg-blue-500/30 flex items-center justify-center shrink-0">
-              <ReqIcon />
-            </div>
-            <div className="flex items-baseline gap-2">
-              <span className="text-5xl font-bold">
-                {loading ? "—" : requests.length}
-              </span>
-              <span className="text-slate-400 text-lg">Хүсэлтүүд</span>
-            </div>
-          </div>
-        </div>
-
-        <div className="rounded-2xl border border-green-500/50 bg-linear-to-br from-green-600/45 to-black p-5 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-full bg-green-500/30 flex items-center justify-center shrink-0">
-              <AcepptedIcon />
-            </div>
-            <div className="flex items-baseline gap-2">
-              <span className="text-5xl font-bold">
-                {loading ? "—" : approvedCount}
-              </span>
-              <span className="text-slate-400 text-lg">Баталсан</span>
-            </div>
-          </div>
-          <ScrollIcon />
-        </div>
-
-        <div className="rounded-2xl border border-red-500/50 bg-linear-to-br from-red-600/45 to-black p-5 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-full bg-red-500/30 flex items-center justify-center shrink-0">
-              <RejectedIcon />
-            </div>
-            <div className="flex items-baseline gap-2">
-              <span className="text-5xl font-bold">
-                {loading ? "—" : rejectedCount}
-              </span>
-              <span className="text-slate-400 text-lg">Татгалзсан</span>
-            </div>
-          </div>
-          <ScrollIcon />
-        </div>
-      </div>
-
-      <div className="rounded-2xl border border-blue-500/50 bg-[#0b0f18] overflow-hidden">
-        <div className="flex items-center gap-52 px-5 py-4 flex-wrap">
-          <div className="flex items-center gap-2 bg-[#0d1117] border border-slate-700/50 rounded-xl px-3 py-2 min-w-[230px]">
+      <div className="rounded-2xl border border-[#1a2432] bg-[#0b1118] overflow-hidden shadow-[0_20px_60px_rgba(0,0,0,0.5)]">
+        <div className="flex items-center justify-between gap-4 px-5 py-4 flex-wrap border-b border-[#1a2432]">
+          <div className="flex items-center gap-2 bg-[#0c131b] border border-[#1a2432] rounded-xl px-3 py-2 min-w-[230px]">
             <SearchIcon />
             <input
-              className="bg-transparent text-slate-400 text-sm outline-none placeholder:text-slate-600 w-full"
-              placeholder="Ажилтaны кодоор хайх"
+              className="bg-transparent text-slate-300 text-sm outline-none placeholder:text-slate-500 w-full"
+              placeholder="Ажилтны кодоор хайх"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />
           </div>
 
-          <div className="flex items-center gap-1.5">
-            {tabs.map((tab) => (
-              <button
-                key={tab.label}
-                onClick={() => setActiveTab(tab.label)}
-                className={`px-4 py-2 rounded-xl text-sm font-medium transition-all cursor-pointer ${
-                  activeTab === tab.label
-                    ? "bg-linear-to-br from-[#00C0A8] to-black/10 text-black"
-                    : "bg-[#0d1117] border border-slate-700/50 text-slate-400 hover:text-slate-200"
-                }`}
-              >
-                {tab.label} ({tab.count})
-              </button>
-            ))}
-          </div>
-
           <div className="flex items-center gap-2 ml-auto">
-            <button className="flex items-center gap-2 px-3 py-2 rounded-xl bg-[#0d1117] border border-slate-700/50 text-slate-300 text-sm hover:bg-slate-800 transition-colors">
+            <button className="flex items-center gap-2 px-3 py-2 rounded-xl bg-[#0c131b] border border-[#1a2432] text-slate-300 text-sm hover:bg-[#141d27] transition-colors">
               <FilterIcon />
               Шүүлтүүр
             </button>
-            <button className="flex items-center gap-2 px-3 py-2 rounded-xl bg-[#0d1117] border border-slate-700/50 text-slate-300 text-sm hover:bg-slate-800 transition-colors">
+            <button className="flex items-center gap-2 px-3 py-2 rounded-xl bg-[#0c131b] border border-[#1a2432] text-slate-300 text-sm hover:bg-[#141d27] transition-colors">
               <DownloadIcon />
               Татах
             </button>
           </div>
         </div>
 
-        <div className="h-px bg-blue-500/40" />
+        <div className="h-px bg-[#1a2432]" />
 
         <div className="flex flex-col">
           {loading ? (
@@ -462,14 +474,17 @@ export const RequestsComponent = () => {
             </div>
           ) : filtered.length === 0 ? (
             <div className="py-12 text-center text-slate-500 text-sm">
-              Хүсэлт олдсонгүй
+              Мэдээлэл байхгүй байна
             </div>
           ) : (
             filtered.map((row, i) => (
               <RequestRow
                 key={row.id}
                 row={row}
-                onPreview={setPreviewRow}
+                expanded={expandedId === row.id}
+                onToggle={handleToggle}
+                documents={documentsByEmployee[row.employeeId] ?? []}
+                documentsLoading={documentsLoading[row.employeeId] ?? false}
                 divider={i < filtered.length - 1}
               />
             ))

@@ -72,11 +72,11 @@ export function HrShell({ children }: { children: React.ReactNode }) {
             <div className="flex items-center gap-3">
               <Link
                 href="/hr/employees"
-                className="flex items-center gap-2 h-9 px-4 rounded-lg border cursor-pointer border-[#0ad4b1]/50 bg-linear-to-br from-[#0a3b33] to-[#0ad4b1]/20 text-white text-sm font-medium hover:border-[#0ad4b1] transition-colors"
+                className="flex items-center gap-2 h-9 px-4 rounded-lg border cursor-pointer border-[#0ad4b1]/40 bg-[#0b201d] text-[#d7fff8] text-sm font-medium hover:bg-[#0f2b27] hover:border-[#0ad4b1] shadow-[0_0_12px_rgba(10,212,177,0.2)] transition-colors"
               >
                 <span>＋</span> Ажилтан нэмэх
               </Link>
-              <button className="h-9 w-9 rounded-lg border border-[#0ad4b1] cursor-pointer text-slate-300 flex items-center justify-center hover:border-white/40 transition-colors">
+              <button className="h-9 w-9 rounded-lg border border-[#0ad4b1]/40 bg-[#0b201d] cursor-pointer text-[#d7fff8] flex items-center justify-center hover:border-[#0ad4b1] hover:bg-[#0f2b27] transition-colors">
                 <NotifIcon />
               </button>
             </div>
