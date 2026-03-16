@@ -71,7 +71,7 @@ const DownloadIcon = () => <FiDownload className="h-3.5 w-3.5" />;
 const CloseIcon = () => <FiX className="h-[18px] w-[18px]" />;
 const DocBigIcon = () => <FiFileText className="h-12 w-12 text-blue-400" />;
 const DocSmallIcon = () => (
-  <FiFileText className="h-5 w-5 text-slate-400 flex-shrink-0" />
+  <FiFileText className="h-5 w-5 text-slate-400 shrink-0" />
 );
 const TrashIcon = () => (
   <svg width="14" height="14" fill="none" viewBox="0 0 24 24">
@@ -593,6 +593,7 @@ function WorkflowCard({
 }
 
 // ── LogRow (accordion, kept for tabs) ─────────────────
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function LogRow({ entry }: { entry: LogEntry }) {
   const [open, setOpen] = useState(false);
   const [previewDoc, setPreviewDoc] = useState<LogDocument | null>(null);

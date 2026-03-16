@@ -7,7 +7,6 @@ import {
   CheckIcon,
   ClockIcon,
   FileIcon,
-  TrendIcon,
   UsersIcon,
 } from "@/components/icons";
 import { FiFilter } from "react-icons/fi";
