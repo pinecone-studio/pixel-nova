@@ -53,6 +53,7 @@ interface UpsertEmployeeInput {
   isKpi?: boolean | null;
   birthDayAndMonth?: string | null;
   birthdayPoster?: string | null;
+  documentProfile?: Record<string, unknown> | null;
 }
 
 interface ResolveEmployeeActionInput {
@@ -136,6 +137,10 @@ export const mutationResolvers = {
     const persisted = await upsertEmployeeRecord(ctx.db, {
       ...args.input,
       jobTitle: args.input.jobTitle ?? undefined,
+      documentProfile:
+        args.input.documentProfile === undefined
+          ? undefined
+          : JSON.stringify(args.input.documentProfile ?? {}),
     });
     await ensureDefaultActionConfigs(ctx.db);
 

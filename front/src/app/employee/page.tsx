@@ -1,18 +1,33 @@
 "use client";
 
-import { useQuery } from "@apollo/client/react";
-import { useEffect, useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useLazyQuery } from "@apollo/client/react";
+import { useMemo, useState } from "react";
 
 import { buildGraphQLHeaders } from "@/lib/apollo-client";
-import { GET_DOCUMENTS, GET_ME } from "@/graphql/queries";
-import type { Document, Employee } from "@/lib/types";
+import { GET_DOCUMENT_CONTENT } from "@/graphql/queries";
+import type { Document, DocumentContent } from "@/lib/types";
 
-import { ContractPreview } from "@/components/contractPreview";
-import { FactIcon } from "@/components/icons";
-import { Request } from "@/components/request";
+// ─── helpers ────────────────────────────────────────────────────────────────
 
-const TOKEN_STORAGE_KEY = "epas_auth_token";
+function formatDate(value: string) {
+  return new Date(value)
+    .toLocaleDateString("mn-MN", {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    })
+    .replace(/\./g, "/");
+}
+
+function buildDataUrl(content: DocumentContent) {
+  if (content.contentType === "application/pdf") {
+    return `data:${content.contentType};base64,${content.content}`;
+  }
+  if (content.contentType.startsWith("text/")) {
+    return `data:${content.contentType};charset=utf-8,${encodeURIComponent(content.content)}`;
+  }
+  return `data:${content.contentType};base64,${content.content}`;
+}
 
 export default function EmployeePage() {
   const router = useRouter();
@@ -21,55 +36,39 @@ export default function EmployeePage() {
       ? ""
       : (window.localStorage.getItem(TOKEN_STORAGE_KEY) ?? ""),
   );
+}
 
-  const {
-    data: meData,
-    loading: meLoading,
-    error: meError,
-  } = useQuery<{ me: Employee | null }>(GET_ME, {
-    skip: !authToken,
-    context: {
-      headers: buildGraphQLHeaders({ authToken }),
-    },
-    fetchPolicy: "network-only",
-  });
+// ─── ContractPreview ─────────────────────────────────────────────────────────
 
-  const employee = meData?.me ?? null;
-
-  const {
-    data: documentsData,
-    loading: documentsLoading,
-    error: documentsError,
-  } = useQuery<{ documents: Document[] }>(GET_DOCUMENTS, {
-    skip: !authToken || !employee?.id,
-    variables: {
-      employeeId: employee?.id ?? "",
-    },
-    context: {
-      headers: buildGraphQLHeaders({ authToken }),
-    },
-    fetchPolicy: "network-only",
-  });
-
-  useEffect(() => {
-    if (!authToken) {
-      router.replace("/auth/employee");
-      return;
-    }
-
-    if (!meLoading && !employee) {
-      window.localStorage.removeItem(TOKEN_STORAGE_KEY);
-      router.replace("/auth/employee");
-    }
-  }, [authToken, employee, meLoading, router]);
+type ContractPreviewProps = {
+  document: Document;
+  authToken: string;
+};
 
   const documents = useMemo(
     () => documentsData?.documents ?? [],
     [documentsData],
   );
 
-  if (!authToken) {
-    return null;
+  const [loadContent, { data, loading }] = useLazyQuery<{
+    documentContent: DocumentContent | null;
+  }>(GET_DOCUMENT_CONTENT, { fetchPolicy: "network-only" });
+
+  const content = data?.documentContent ?? null;
+  const previewUrl = useMemo(
+    () => (content ? buildDataUrl(content) : null),
+    [content],
+  );
+
+  async function ensureContent() {
+    if (content) return content;
+    const result = await loadContent({
+      variables: { documentId: document.id },
+      context: { headers: buildGraphQLHeaders({ authToken }) },
+    });
+    const next = result.data?.documentContent ?? null;
+    if (!next) throw new Error("Баримтын агуулга олдсонгүй.");
+    return next;
   }
   const loading = meLoading || Boolean(employee?.id && documentsLoading);
   const error = meError?.message ?? documentsError?.message ?? null;
@@ -128,6 +127,10 @@ export default function EmployeePage() {
             </div>
           </div>
         </div>
+      )}
+    </>
+  );
+};
 
         <div className="mx-auto w-full max-w-[1056px]">
           <Request />

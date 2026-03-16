@@ -28,7 +28,8 @@ export default function RoleSelectPage() {
             {/* HR Button */}
             <Link
               href="/auth/hr"
-              className="group flex flex-col items-center gap-4 rounded-2xl border border-[#1a1a30] bg-[#0d0d1a] p-8 hover:border-[#00CC99]/40 hover:bg-[#0d1a14] transition-all duration-200">
+              className="group flex flex-col items-center gap-4 rounded-2xl border border-[#1a1a30] bg-[#0d0d1a] p-8 hover:border-[#00CC99]/40 hover:bg-[#0d1a14] transition-all duration-200"
+            >
               <div className="w-16 h-16 rounded-2xl bg-[#00CC99]/10 border border-[#00CC99]/20 flex items-center justify-center group-hover:bg-[#00CC99]/20 transition-colors">
                 <BiBriefcase className="w-8 h-8 text-[#00CC99]" />
               </div>
@@ -43,7 +44,8 @@ export default function RoleSelectPage() {
             {/* Employee Button */}
             <Link
               href="/auth/employee"
-              className="group flex flex-col items-center gap-4 rounded-2xl border border-[#1a1a30] bg-[#0d0d1a] p-8 hover:border-[#00CC99]/40 hover:bg-[#0d1a14] transition-all duration-200">
+              className="group flex flex-col items-center gap-4 rounded-2xl border border-[#1a1a30] bg-[#0d0d1a] p-8 hover:border-[#00CC99]/40 hover:bg-[#0d1a14] transition-all duration-200"
+            >
               <div className="w-16 h-16 rounded-2xl bg-[#00CC99]/10 border border-[#00CC99]/20 flex items-center justify-center group-hover:bg-[#00CC99]/20 transition-colors">
                 <BiUser className="w-8 h-8 text-[#00CC99]" />
               </div>
@@ -58,7 +60,7 @@ export default function RoleSelectPage() {
         </div>
 
         {/* Footer */}
-        <p className="text-[#4A4A6A] text-xs">© 2025 EPAS — Team 6</p>
+        <p className="text-[#4A4A6A] text-xs">© 2025 EPAS — 6-р баг</p>
       </div>
     </div>
   );

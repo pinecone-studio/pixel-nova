@@ -29,6 +29,7 @@ export interface GenerateDocumentInput {
   generatedAt: string;
   documentId: string;
   templateFile?: string;
+  templateData?: Record<string, string>;
 }
 
 export interface GeneratedDocumentTemplate {
@@ -45,14 +46,20 @@ function renderTemplateTokens(
   });
 }
 
+function stripUnresolvedTemplateTokens(templateHtml: string): string {
+  return templateHtml.replace(/\{\{\{?[\s\S]*?\}?\}\}/g, "");
+}
+
 function renderHtmlTemplate(
   templateHtml: string,
   input: GenerateDocumentInput,
 ): string {
   const { employee, action, generatedAt, documentId } = input;
 
-  const templateData = buildTemplateData(employee, generatedAt);
-  const renderedHtml = renderTemplateTokens(templateHtml, templateData);
+  const templateData = input.templateData ?? buildTemplateData(employee, generatedAt);
+  const renderedHtml = stripUnresolvedTemplateTokens(
+    renderTemplateTokens(templateHtml, templateData),
+  );
 
   const metadata = `
 <!-- EPAS Document Metadata

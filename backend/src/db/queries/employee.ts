@@ -120,6 +120,10 @@ export async function upsertEmployeeRecord(
     employee.terminationDate === undefined
       ? previousEmployee?.terminationDate ?? null
       : employee.terminationDate ?? null;
+  const documentProfile =
+    employee.documentProfile === undefined
+      ? previousEmployee?.documentProfile ?? "{}"
+      : employee.documentProfile ?? "{}";
 
   const nextEmployee = previousEmployee
     ? await updateEmployee(db, employee.id, {
@@ -144,11 +148,13 @@ export async function upsertEmployeeRecord(
         isKpi: employee.isKpi ?? previousEmployee.isKpi,
         birthDayAndMonth: employee.birthDayAndMonth ?? previousEmployee.birthDayAndMonth,
         birthdayPoster: employee.birthdayPoster ?? previousEmployee.birthdayPoster,
+        documentProfile,
       })
     : await insertEmployee(db, {
         ...employee,
         employeeCode: resolvedEmployeeCode,
         terminationDate,
+        documentProfile,
       });
 
   if (!nextEmployee) {

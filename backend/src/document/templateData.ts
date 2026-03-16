@@ -33,6 +33,19 @@ export function buildTemplateData(
   employee: Employee,
   generatedAt: string,
 ): Record<string, string> {
+  let documentProfile: Record<string, string> = {};
+
+  try {
+    const parsed = JSON.parse(employee.documentProfile ?? "{}");
+    if (parsed && typeof parsed === "object") {
+      documentProfile = Object.fromEntries(
+        Object.entries(parsed).map(([key, value]) => [key, value == null ? "" : String(value)]),
+      );
+    }
+  } catch {
+    documentProfile = {};
+  }
+
   const date = new Date(generatedAt);
   const hireDate = employee.hireDate ? new Date(employee.hireDate) : null;
   const termDate = employee.terminationDate ? new Date(employee.terminationDate) : null;
@@ -202,5 +215,6 @@ export function buildTemplateData(
     new_department: employee.department ?? "",
     new_position: jobTitle,
     current_position: jobTitle,
+    ...documentProfile,
   };
 }

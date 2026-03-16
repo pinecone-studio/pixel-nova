@@ -16,6 +16,7 @@ import { buildGraphQLHeaders } from "@/lib/apollo-client";
 import { APPROVE_LEAVE_REQUEST, REJECT_LEAVE_REQUEST } from "@/graphql/mutations";
 import { GET_LEAVE_REQUESTS } from "@/graphql/queries";
 import type { LeaveRequest } from "@/lib/types";
+import { formatDepartment, formatLeaveRequestStatus } from "@/lib/labels";
 
 const StatusBadge = ({ status }: { status: string }) => {
   const styles: Record<string, string> = {
@@ -23,15 +24,10 @@ const StatusBadge = ({ status }: { status: string }) => {
     approved: "bg-green-600/30 text-green-400 border border-green-600/40",
     rejected: "bg-red-600/30 text-red-400 border border-red-600/40",
   };
-  const labels: Record<string, string> = {
-    pending: "Ð¥Ò¯Ð»ÑÑÐ³Ð´ÑÐ¶ Ð±ÑƒÐ¹",
-    approved: "Ð‘Ð°Ñ‚Ð»Ð°ÑÐ°Ð½",
-    rejected: "Ð¢Ð°Ñ‚Ð³Ð°Ð»Ð·ÑÐ°Ð½",
-  };
   return (
     <span
       className={`text-xs px-3 py-1 rounded-full font-medium whitespace-nowrap ${styles[status] ?? "bg-slate-600/30 text-slate-400"}`}>
-      {labels[status] ?? status}
+      {formatLeaveRequestStatus(status) || status}
     </span>
   );
 };
@@ -116,14 +112,14 @@ const PreviewModal = ({
                 <StatusBadge status={row.status} />
               </div>
               <p className="text-slate-400 text-sm mt-0.5">
-                {row.employee.employeeCode} â€¢ {row.employee.department}
+                {row.employee.employeeCode} • {formatDepartment(row.employee.department)}
               </p>
             </div>
           </div>
           <button
             onClick={onClose}
             className="text-slate-400 hover:text-white transition-colors text-xl leading-none mt-1">
-            âœ•
+            ✕
           </button>
         </div>
 
@@ -133,28 +129,28 @@ const PreviewModal = ({
           <p className="text-white font-semibold text-base">{row.type}</p>
           <div className="grid grid-cols-2 gap-y-4">
             <div>
-              <p className="text-slate-500 text-xs mb-1">Ð­Ñ…Ð»ÑÑ… Ñ†Ð°Ð³</p>
+              <p className="text-slate-500 text-xs mb-1">Эхлэх цаг</p>
               <p className="text-white text-sm font-medium">{row.startTime}</p>
             </div>
             <div>
-              <p className="text-slate-500 text-xs mb-1">Ð”ÑƒÑƒÑÐ°Ñ… Ñ†Ð°Ð³</p>
+              <p className="text-slate-500 text-xs mb-1">Дуусах цаг</p>
               <p className="text-white text-sm font-medium">{row.endTime}</p>
             </div>
             <div>
-              <p className="text-slate-500 text-xs mb-1">Ð˜Ð»Ð³ÑÑÑÑÐ½ Ð¾Ð³Ð½Ð¾Ð¾</p>
+              <p className="text-slate-500 text-xs mb-1">Илгээсэн огноо</p>
               <p className="text-[#0ad4b1] text-sm font-semibold">
                 {new Date(row.createdAt).toLocaleDateString("mn-MN")}
               </p>
             </div>
             <div>
-              <p className="text-slate-500 text-xs mb-1">ÐÐ»Ð±Ð°Ð½ Ñ‚ÑƒÑˆÐ°Ð°Ð»</p>
+              <p className="text-slate-500 text-xs mb-1">Албан тушаал</p>
               <p className="text-white text-sm font-medium">
                 {row.employee.jobTitle}
               </p>
             </div>
             {row.reason && (
               <div className="col-span-2">
-                <p className="text-slate-500 text-xs mb-1">Ð¨Ð°Ð»Ñ‚Ð³Ð°Ð°Ð½</p>
+                <p className="text-slate-500 text-xs mb-1">Шалтгаан</p>
                 <p className="text-white text-sm font-medium">{row.reason}</p>
               </div>
             )}
@@ -163,12 +159,12 @@ const PreviewModal = ({
 
         <div className="flex flex-col gap-2">
           <p className="text-white font-semibold text-base">
-            Ð¢Ð°Ð¹Ð»Ð±Ð°Ñ€ <span className="text-slate-500 font-normal">(Ð—Ð°Ð°Ð²Ð°Ð» Ð±Ð¸Ñˆ)</span>
+            Тайлбар <span className="text-slate-500 font-normal">(Заавал биш)</span>
           </p>
           <textarea
             value={note}
             onChange={(e) => setNote(e.target.value)}
-            placeholder="Ð­Ð½Ð´ Ð±Ð¸Ñ‡Ð½Ñ Ò¯Ò¯..."
+            placeholder="Энд бичнэ үү..."
             rows={3}
             className="w-full bg-[#161d2b] border border-slate-700/50 rounded-2xl px-4 py-3 text-slate-300 text-sm placeholder:text-slate-600 outline-none resize-none focus:border-blue-500/50 transition-colors"
           />
@@ -180,18 +176,18 @@ const PreviewModal = ({
               onClick={handleReject}
               disabled={acting}
               className="flex items-center gap-2 px-5 py-2.5 rounded-xl border border-red-500/50 text-red-400 text-sm font-medium hover:bg-red-500/10 disabled:opacity-50 transition-colors">
-              <span>âœ•</span> Ð¢Ð°Ñ‚Ð³Ð°Ð»Ð·Ð°Ñ…
+              <span>✕</span> Татгалзах
             </button>
             <button
               onClick={handleApprove}
               disabled={acting}
               className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#0ad4b1] text-black text-sm font-medium hover:bg-[#08bfa0] disabled:opacity-50 transition-colors">
-              <span>âœ“</span> {acting ? "Ð¢Ò¯Ñ€ Ñ…Ò¯Ð»ÑÑÐ½Ñ Ò¯Ò¯..." : "Ð‘Ð°Ñ‚Ð»Ð°Ñ…"}
+              <span>✓</span> {acting ? "Түр хүлээнэ үү..." : "Батлах"}
             </button>
           </div>
         ) : (
           <p className="text-center text-slate-500 text-sm">
-            Ð­Ð½Ñ Ñ…Ò¯ÑÑÐ»Ñ‚ Ð°Ð»ÑŒ Ñ…ÑÐ´Ð¸Ð¹Ð½ <StatusBadge status={row.status} />
+            Энэ хүсэлт аль хэдийн <StatusBadge status={row.status} />
           </p>
         )}
       </div>
@@ -224,7 +220,7 @@ const RequestRow = ({
               {row.employee.lastName} {row.employee.firstName}
             </p>
             <p className="text-slate-500 text-xs">
-              {row.employee.employeeCode} â€¢ {row.employee.department}
+              {row.employee.employeeCode} • {formatDepartment(row.employee.department)}
             </p>
           </div>
         </div>
@@ -246,7 +242,7 @@ const RequestRow = ({
 };
 
 export const RequestsComponent = () => {
-  const [activeTab, setActiveTab] = useState("Ð‘Ò¯Ð³Ð´");
+  const [activeTab, setActiveTab] = useState("Бүгд");
   const [search, setSearch] = useState("");
   const [previewRow, setPreviewRow] = useState<LeaveRequest | null>(null);
 
@@ -287,6 +283,7 @@ export const RequestsComponent = () => {
   const requests = data?.leaveRequests ?? [];
   const approvedCount = requests.filter((r) => r.status === "approved").length;
   const rejectedCount = requests.filter((r) => r.status === "rejected").length;
+  const pendingCount = requests.filter((r) => r.status === "pending").length;
 
   async function handleApprove(id: string, note: string) {
     try {
@@ -306,13 +303,13 @@ export const RequestsComponent = () => {
 
   const filtered = requests.filter((r) => {
     const matchTab =
-      activeTab === "Ð‘Ò¯Ð³Ð´"
+      activeTab === "Бүгд"
         ? true
-        : activeTab === "Ð§Ó©Ð»Ó©Ó©"
-          ? true
-          : activeTab === "Ð‘Ð°Ñ‚Ð»Ð°ÑÐ°Ð½"
+        : activeTab === "Хүлээгдэж буй"
+          ? r.status === "pending"
+          : activeTab === "Баталсан"
             ? r.status === "approved"
-            : activeTab === "Ð¢Ð°Ñ‚Ð³Ð°Ð»Ð·ÑÐ°Ð½"
+            : activeTab === "Татгалзсан"
               ? r.status === "rejected"
               : true;
     const matchSearch =
@@ -324,10 +321,10 @@ export const RequestsComponent = () => {
   });
 
   const tabs = [
-    { label: "Ð‘Ò¯Ð³Ð´", count: requests.length },
-    { label: "Ð§Ó©Ð»Ó©Ó©", count: requests.length },
-    { label: "Ð‘Ð°Ñ‚Ð»Ð°ÑÐ°Ð½", count: approvedCount },
-    { label: "Ð¢Ð°Ñ‚Ð³Ð°Ð»Ð·ÑÐ°Ð½", count: rejectedCount },
+    { label: "Бүгд", count: requests.length },
+    { label: "Хүлээгдэж буй", count: pendingCount },
+    { label: "Баталсан", count: approvedCount },
+    { label: "Татгалзсан", count: rejectedCount },
   ];
 
   return (
@@ -349,9 +346,9 @@ export const RequestsComponent = () => {
             </div>
             <div className="flex items-baseline gap-2">
               <span className="text-5xl font-bold">
-                {loading ? "â€”" : requests.length}
+                {loading ? "—" : requests.length}
               </span>
-              <span className="text-slate-400 text-lg">Ð¥Ò¯ÑÑÐ»Ñ‚Ò¯Ò¯Ð´</span>
+              <span className="text-slate-400 text-lg">Хүсэлтүүд</span>
             </div>
           </div>
         </div>
@@ -363,9 +360,9 @@ export const RequestsComponent = () => {
             </div>
             <div className="flex items-baseline gap-2">
               <span className="text-5xl font-bold">
-                {loading ? "â€”" : approvedCount}
+                {loading ? "—" : approvedCount}
               </span>
-              <span className="text-slate-400 text-lg">Ð‘Ð°Ñ‚Ð»Ð°ÑÐ°Ð½</span>
+              <span className="text-slate-400 text-lg">Баталсан</span>
             </div>
           </div>
           <ScrollIcon />
@@ -378,9 +375,9 @@ export const RequestsComponent = () => {
             </div>
             <div className="flex items-baseline gap-2">
               <span className="text-5xl font-bold">
-                {loading ? "â€”" : rejectedCount}
+                {loading ? "—" : rejectedCount}
               </span>
-              <span className="text-slate-400 text-lg">Ð¢Ð°Ñ‚Ð³Ð°Ð»Ð·ÑÐ°Ð½</span>
+              <span className="text-slate-400 text-lg">Татгалзсан</span>
             </div>
           </div>
           <ScrollIcon />
@@ -393,7 +390,7 @@ export const RequestsComponent = () => {
             <SearchIcon />
             <input
               className="bg-transparent text-slate-400 text-sm outline-none placeholder:text-slate-600 w-full"
-              placeholder="ÐÐ¶Ð¸Ð»Ñ‚Ð°Ð½Ñ‹ Ð½ÑÑ€ ÑÑÐ²ÑÐ» ÐºÐ¾Ð´Ð¾Ð¾Ñ€ Ñ…Ð°Ð¹Ñ…"
+              placeholder="Ажилтны нэр эсвэл кодоор хайх"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />
@@ -417,11 +414,11 @@ export const RequestsComponent = () => {
           <div className="flex items-center gap-2 ml-auto">
             <button className="flex items-center gap-2 px-3 py-2 rounded-xl bg-[#0d1117] border border-slate-700/50 text-slate-300 text-sm hover:bg-slate-800 transition-colors">
               <FilterIcon />
-              Ð¨Ò¯Ò¯Ð»Ñ‚Ò¯Ò¯Ñ€
+              Шүүлтүүр
             </button>
             <button className="flex items-center gap-2 px-3 py-2 rounded-xl bg-[#0d1117] border border-slate-700/50 text-slate-300 text-sm hover:bg-slate-800 transition-colors">
               <DownloadIcon />
-              Ð¢Ð°Ñ‚Ð°Ñ…
+              Татах
             </button>
           </div>
         </div>
@@ -432,11 +429,11 @@ export const RequestsComponent = () => {
           {loading ? (
             <div className="py-12 flex items-center justify-center gap-3 text-slate-500 text-sm">
               <span className="w-4 h-4 border-2 border-slate-700 border-t-slate-400 rounded-full animate-spin" />
-              Ð£Ð½ÑˆÐ¸Ð¶ Ð±Ð°Ð¹Ð½Ð°...
+              Уншиж байна...
             </div>
           ) : filtered.length === 0 ? (
             <div className="py-12 text-center text-slate-500 text-sm">
-              Ð¥Ò¯ÑÑÐ»Ñ‚ Ð¾Ð»Ð´ÑÐ¾Ð½Ð³Ò¯Ð¹
+              Хүсэлт олдсонгүй
             </div>
           ) : (
             filtered.map((row, i) => (

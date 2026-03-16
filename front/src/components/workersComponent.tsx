@@ -6,7 +6,12 @@ import { useMemo, useState } from "react";
 import { buildGraphQLHeaders } from "@/lib/apollo-client";
 import { UPSERT_EMPLOYEE } from "@/graphql/mutations";
 import { GET_EMPLOYEES } from "@/graphql/queries";
-import type { Employee, UpsertEmployeeInput } from "@/lib/types";
+import type {
+  Employee,
+  EmployeeDocumentProfile,
+  UpsertEmployeeInput,
+} from "@/lib/types";
+import { formatBranch, formatDepartment, formatLevel } from "@/lib/labels";
 import {
   AbsentIcon,
   ActiveIconn,
@@ -34,7 +39,78 @@ type EmployeeFormState = {
   level: string;
   hireDate: string;
   status: string;
+  documentProfile: EmployeeDocumentProfile;
 };
+
+const DOCUMENT_PROFILE_SECTIONS: Array<{
+  title: string;
+  description: string;
+  fields: Array<{
+    key: keyof EmployeeDocumentProfile;
+    label: string;
+    placeholder: string;
+  }>;
+}> = [
+  {
+    title: "Company Details",
+    description: "Employment contract deer garah baiguullagiin undsen medeelel.",
+    fields: [
+      { key: "company_name", label: "Company Name", placeholder: "Pinecone Academy LLC" },
+      { key: "company_address", label: "Company Address", placeholder: "Office address" },
+      { key: "company_register_no", label: "Company Register No", placeholder: "Register number" },
+      {
+        key: "employer_representative",
+        label: "Employer Representative",
+        placeholder: "Representative full name",
+      },
+      { key: "company_legal_address", label: "Company Legal Address", placeholder: "Legal address" },
+      { key: "company_legal_phone", label: "Company Legal Phone", placeholder: "Phone number" },
+      { key: "company_legal_fax", label: "Company Legal Fax", placeholder: "Fax number" },
+    ],
+  },
+  {
+    title: "Employee Details",
+    description: "Ajiltnii gereen deer oroh hayg, register, holboo barih medeelel.",
+    fields: [
+      { key: "employee_address", label: "Employee Address", placeholder: "Home address" },
+      { key: "employee_register_no", label: "Employee Register No", placeholder: "Register number" },
+      { key: "employee_legal_address", label: "Employee Legal Address", placeholder: "Legal address" },
+      { key: "employee_legal_phone", label: "Employee Legal Phone", placeholder: "Phone number" },
+      { key: "employee_legal_fax", label: "Employee Legal Fax", placeholder: "Fax number" },
+    ],
+  },
+  {
+    title: "Contract Terms",
+    description: "Tsalin, ajliin nohtsol, tsagiin huvaariin medeelluud.",
+    fields: [
+      { key: "contract_term", label: "Contract Term", placeholder: "1 year / indefinite" },
+      { key: "workplace_location", label: "Workplace Location", placeholder: "Office or branch" },
+      { key: "work_conditions", label: "Work Conditions", placeholder: "Hybrid / on-site / remote" },
+      { key: "work_schedule_type", label: "Work Schedule Type", placeholder: "Full-time" },
+      { key: "workday_from", label: "Workday From", placeholder: "Monday" },
+      { key: "workday_to", label: "Workday To", placeholder: "Friday" },
+      { key: "workdays_count", label: "Workdays Count", placeholder: "5" },
+      { key: "daily_work_hours", label: "Daily Work Hours", placeholder: "8" },
+      { key: "weekly_work_hours", label: "Weekly Work Hours", placeholder: "40" },
+      { key: "work_start_time", label: "Work Start Time", placeholder: "09:00" },
+      { key: "work_end_time", label: "Work End Time", placeholder: "18:00" },
+      { key: "break_start_time", label: "Break Start Time", placeholder: "13:00" },
+      { key: "break_end_time", label: "Break End Time", placeholder: "14:00" },
+      {
+        key: "monthly_base_salary_amount",
+        label: "Monthly Base Salary Amount",
+        placeholder: "2500000",
+      },
+      {
+        key: "monthly_base_salary_words",
+        label: "Monthly Base Salary In Words",
+        placeholder: "Two million five hundred thousand tugriks",
+      },
+      { key: "salary_pay_day_1", label: "Salary Pay Day 1", placeholder: "15" },
+      { key: "salary_pay_day_2", label: "Salary Pay Day 2", placeholder: "30" },
+    ],
+  },
+];
 
 const DEPARTMENTS = [
   "Engineering",
@@ -44,7 +120,7 @@ const DEPARTMENTS = [
   "Marketing",
   "Design",
 ];
-const STATUSES = ["Ð˜Ñ€ÑÑÐ½", "Ð¢Ð°ÑÐ°Ð»ÑÐ°Ð½", "Ð§Ó©Ð»Ó©Ó©Ñ‚ÑÐ¹"];
+const STATUSES = ["Ирсэн", "Тасалсан", "Чөлөөтэй"];
 const LEVELS = ["Junior", "Mid", "Senior", "Lead"];
 const BRANCHES = ["Ulaanbaatar", "Darkhan", "Erdenet", "Remote"];
 
@@ -71,11 +147,11 @@ function avatarColor(seed: string) {
 }
 
 function statusStyle(status: string) {
-  if (status === "Ð˜Ñ€ÑÑÐ½") {
+  if (status === "Ирсэн") {
     return "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30";
   }
 
-  if (status === "Ð¢Ð°ÑÐ°Ð»ÑÐ°Ð½") {
+  if (status === "Тасалсан") {
     return "bg-red-500/20 text-red-400 border border-red-500/30";
   }
 
@@ -96,6 +172,7 @@ function employeeToForm(employee?: Employee | null): EmployeeFormState {
     hireDate:
       employee?.hireDate?.slice(0, 10) ?? new Date().toISOString().slice(0, 10),
     status: employee?.status ?? STATUSES[0],
+    documentProfile: employee?.documentProfile ?? {},
   };
 }
 
@@ -123,23 +200,36 @@ function EmployeeModal({
     setForm((prev) => ({ ...prev, [key]: value }));
   }
 
+  function updateDocumentProfileField(
+    key: keyof EmployeeDocumentProfile,
+    value: string,
+  ) {
+    setForm((prev) => ({
+      ...prev,
+      documentProfile: {
+        ...prev.documentProfile,
+        [key]: value,
+      },
+    }));
+  }
+
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
       onClick={onClose}>
       <div
-        className="w-[560px] max-w-[95vw] rounded-2xl bg-[#0f1520] p-6 flex flex-col gap-5 border border-slate-700/50"
+        className="w-[820px] max-w-[95vw] max-h-[92vh] overflow-y-auto rounded-2xl bg-[#0f1520] p-6 flex flex-col gap-5 border border-slate-700/50"
         onClick={(event) => event.stopPropagation()}>
         <div className="flex items-center justify-between">
           <h2 className="text-white font-bold text-lg">
             {mode === "add"
-              ? "Ð¨Ð¸Ð½Ñ Ð°Ð¶Ð¸Ð»Ñ‚Ð°Ð½ Ð½ÑÐ¼ÑÑ…"
-              : "ÐÐ¶Ð¸Ð»Ñ‚Ð½Ñ‹ Ð¼ÑÐ´ÑÑÐ»ÑÐ» Ð·Ð°ÑÐ°Ñ…"}
+              ? "Шинэ ажилтан нэмэх"
+              : "Ажилтны мэдээлэл засах"}
           </h2>
           <button
             onClick={onClose}
             className="text-slate-400 hover:text-white transition-colors">
-            âœ•
+            ✕
           </button>
         </div>
 
@@ -148,13 +238,13 @@ function EmployeeModal({
             value={form.lastName}
             onChange={(event) => updateField("lastName", event.target.value)}
             className="bg-transparent border border-slate-700/60 rounded-xl px-3 py-2.5 text-slate-200 text-sm outline-none"
-            placeholder="ÐžÐ²Ð¾Ð³"
+            placeholder="Овог"
           />
           <input
             value={form.firstName}
             onChange={(event) => updateField("firstName", event.target.value)}
             className="bg-transparent border border-slate-700/60 rounded-xl px-3 py-2.5 text-slate-200 text-sm outline-none"
-            placeholder="ÐÑÑ€"
+            placeholder="Нэр"
           />
           <input
             value={form.employeeCode}
@@ -162,13 +252,13 @@ function EmployeeModal({
               updateField("employeeCode", event.target.value.toUpperCase())
             }
             className="bg-transparent border border-slate-700/60 rounded-xl px-3 py-2.5 text-slate-200 text-sm outline-none"
-            placeholder="Employee code"
+            placeholder="Ажилтны код"
           />
           <input
             value={form.email}
             onChange={(event) => updateField("email", event.target.value)}
             className="bg-transparent border border-slate-700/60 rounded-xl px-3 py-2.5 text-slate-200 text-sm outline-none"
-            placeholder="Ð˜Ð¼ÑÐ¹Ð»"
+            placeholder="Имэйл"
           />
           <select
             value={form.department}
@@ -176,7 +266,7 @@ function EmployeeModal({
             className="bg-[#0f1520] border border-slate-700/60 rounded-xl px-3 py-2.5 text-slate-200 text-sm outline-none">
             {DEPARTMENTS.map((department) => (
               <option key={department} value={department}>
-                {department}
+                {formatDepartment(department)}
               </option>
             ))}
           </select>
@@ -184,25 +274,63 @@ function EmployeeModal({
             value={form.jobTitle}
             onChange={(event) => updateField("jobTitle", event.target.value)}
             className="bg-transparent border border-slate-700/60 rounded-xl px-3 py-2.5 text-slate-200 text-sm outline-none"
-            placeholder="ÐÐ»Ð±Ð°Ð½ Ñ‚ÑƒÑˆÐ°Ð°Ð»"
+            placeholder="Албан тушаал"
           />
+        </div>
+
+        <div className="rounded-2xl border border-slate-700/50 bg-[#0b1018] p-5 flex flex-col gap-5">
+          <div>
+            <h3 className="text-white font-semibold text-sm">
+              Contract / Document Details
+            </h3>
+            <p className="text-slate-400 text-xs mt-1">
+              Ene hesgiin medeelel ni ajliin geree bolon PDF template deer
+              shuud ashiglagdana.
+            </p>
+          </div>
+
+          {DOCUMENT_PROFILE_SECTIONS.map((section) => (
+            <div key={section.title} className="flex flex-col gap-3">
+              <div>
+                <p className="text-sm font-medium text-slate-200">
+                  {section.title}
+                </p>
+                <p className="text-xs text-slate-500">{section.description}</p>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                {section.fields.map((field) => (
+                  <label key={field.key} className="flex flex-col gap-1.5">
+                    <span className="text-xs text-slate-400">{field.label}</span>
+                    <input
+                      value={form.documentProfile[field.key] ?? ""}
+                      onChange={(event) =>
+                        updateDocumentProfileField(field.key, event.target.value)
+                      }
+                      className="bg-transparent border border-slate-700/60 rounded-xl px-3 py-2.5 text-slate-200 text-sm outline-none"
+                      placeholder={field.placeholder}
+                    />
+                  </label>
+                ))}
+              </div>
+            </div>
+          ))}
         </div>
 
         <div className="flex items-center justify-end gap-3">
           <button
             onClick={onClose}
             className="px-5 py-2.5 rounded-xl border border-slate-600/50 text-slate-300 text-sm hover:bg-slate-800/50 transition-colors">
-            Ð¢Ð°Ñ‚Ð³Ð°Ð»Ð·Ð°Ñ…
+            Болих
           </button>
           <button
             onClick={() => void onSave(form)}
             disabled={saving}
             className="px-5 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 disabled:opacity-60 text-black text-sm font-semibold transition-colors">
             {saving
-              ? "Ð¥Ð°Ð´Ð³Ð°Ð»Ð¶ Ð±Ð°Ð¹Ð½Ð°..."
+              ? "Хадгалж байна..."
               : mode === "add"
-                ? "ÐÑÐ¼ÑÑ…"
-                : "Ð¥Ð°Ð´Ð³Ð°Ð»Ð°Ñ…"}
+                ? "Нэмэх"
+                : "Хадгалах"}
           </button>
         </div>
       </div>
@@ -230,7 +358,7 @@ function EmployeeCard({
               {employee.lastName} {employee.firstName}
             </p>
             <p className="text-slate-500 text-xs">
-              {employee.jobTitle || employee.level}
+              {employee.jobTitle || formatLevel(employee.level)}
             </p>
             <p className="text-slate-600 text-xs">{employee.employeeCode}</p>
           </div>
@@ -245,18 +373,18 @@ function EmployeeCard({
         <div className="flex items-center gap-2">
           <MailIcon />
           <span className="text-slate-400 text-xs">
-            {employee.email || "Ð˜Ð¼ÑÐ¹Ð» Ð±Ð°Ð¹Ñ…Ð³Ò¯Ð¹"}
+            {employee.email || "Имэйл байхгүй"}
           </span>
         </div>
         <div className="flex items-center gap-2">
           <BuildingIcon />
           <span className="px-2 py-0.5 rounded-md bg-slate-700/50 text-slate-300 text-xs">
-            {employee.department}
+            {formatDepartment(employee.department)}
           </span>
         </div>
         <div className="flex items-center gap-2">
           <LockIcon />
-          <span className="text-slate-400 text-xs">{employee.branch}</span>
+          <span className="text-slate-400 text-xs">{formatBranch(employee.branch)}</span>
         </div>
       </div>
 
@@ -266,13 +394,13 @@ function EmployeeCard({
         <div className="flex items-center gap-1.5">
           <CalIcon />
           <span className="text-slate-500 text-xs">
-            ÐžÑ€ÑÐ¾Ð½: {employee.hireDate}
+            Орсон: {employee.hireDate}
           </span>
         </div>
         <button
           onClick={() => onEdit(employee)}
           className="h-7 px-3 rounded-lg border border-slate-700/50 text-slate-400 text-xs hover:text-white hover:border-slate-500 transition-colors">
-          Ð—Ð°ÑÐ°Ñ…
+          Засах
         </button>
       </div>
     </div>
@@ -333,10 +461,10 @@ export function WorkersComponent() {
   );
 
   const totalActive = employees.filter(
-    (employee) => employee.status === "Ð˜Ñ€ÑÑÐ½",
+    (employee) => employee.status === "Ирсэн",
   ).length;
   const totalOnLeave = employees.filter(
-    (employee) => employee.status === "Ð§Ó©Ð»Ó©Ó©Ñ‚ÑÐ¹",
+    (employee) => employee.status === "Чөлөөтэй",
   ).length;
   const totalNewThisMonth = employees.filter((employee) => {
     const hireDate = new Date(employee.hireDate);
@@ -374,6 +502,7 @@ export function WorkersComponent() {
         isKpi: null,
         birthDayAndMonth: null,
         birthdayPoster: null,
+        documentProfile: form.documentProfile,
       };
 
       await saveEmployee({
@@ -386,7 +515,7 @@ export function WorkersComponent() {
       setError(
         err instanceof Error
           ? err.message
-          : "Ð¥Ð°Ð´Ð³Ð°Ð»Ð¶ Ñ‡Ð°Ð´ÑÐ°Ð½Ð³Ò¯Ð¹.",
+          : "Хадгалж чадсангүй.",
       );
     }
   }
@@ -416,7 +545,7 @@ export function WorkersComponent() {
         style={{ gridTemplateColumns: "1.4fr 1fr 1fr" }}>
         <div className="rounded-2xl border border-slate-700/40 bg-linear-to-br from-green-700/30 to-black p-5">
           <p className="text-slate-500 text-xs font-semibold uppercase tracking-widest mb-3">
-            ÐÐ¸Ð¹Ñ‚ Ð°Ð¶Ð¸Ð»Ñ‡Ð¸Ð´
+            Нийт ажилчид
           </p>
           <div className="flex items-end justify-between">
             <div>
@@ -425,11 +554,11 @@ export function WorkersComponent() {
                   {employees.length}
                 </p>
                 <span className="px-2 py-1 rounded-lg bg-emerald-500/15 text-emerald-400 text-xs font-semibold">
-                  Real data
+                  Бодит өгөгдөл
                 </span>
               </div>
               <p className="text-slate-500 text-sm mt-1">
-                Backend employee Ð¶Ð°Ð³ÑÐ°Ð°Ð»Ñ‚
+                Backend ажилтны жагсаалт
               </p>
             </div>
             <div className="w-12 h-12 rounded-xl bg-emerald-500/20 flex items-center justify-center">
@@ -441,7 +570,7 @@ export function WorkersComponent() {
         <div className="rounded-2xl border border-cyan-600/30 bg-linear-to-br from-cyan-600/15 to-transparent p-5">
           <div className="flex items-start justify-between mb-3">
             <p className="text-slate-500 text-xs font-semibold uppercase tracking-widest">
-              Ð˜Ð´ÑÐ²Ñ…Ñ‚ÑÐ¹
+              Идэвхтэй
             </p>
           </div>
           <div className="w-10 h-10 rounded-xl bg-cyan-500/20 flex items-center justify-center mb-3">
@@ -453,7 +582,7 @@ export function WorkersComponent() {
         <div className="flex flex-col gap-4">
           <div className="rounded-2xl border border-emerald-600/30 bg-linear-to-br from-emerald-600/15 to-transparent p-4 flex-1">
             <p className="text-slate-500 text-xs uppercase tracking-widest mb-2">
-              Ð­Ð½Ñ ÑÐ°Ñ€
+              Энэ сар
             </p>
             <div className="w-9 h-9 rounded-xl bg-emerald-500/20 flex items-center justify-center mb-2">
               <HiredIcon />
@@ -462,7 +591,7 @@ export function WorkersComponent() {
           </div>
           <div className="rounded-2xl border border-purple-600/30 bg-linear-to-br from-purple-600/15 to-transparent p-4 flex-1">
             <p className="text-slate-500 text-xs uppercase tracking-widest mb-2">
-              Ð§Ó©Ð»Ó©Ó©Ñ‚ÑÐ¹
+              Чөлөөтэй
             </p>
             <div className="w-9 h-9 rounded-xl bg-purple-500/20 flex items-center justify-center mb-2">
               <AbsentIcon />
@@ -479,15 +608,15 @@ export function WorkersComponent() {
             value={search}
             onChange={(event) => setSearch(event.target.value)}
             className="bg-transparent text-slate-300 text-sm outline-none placeholder:text-slate-600 w-full"
-            placeholder="ÐÑÑ€, Ð¸Ð¼ÑÐ¹Ð», ÐºÐ¾Ð´..."
+            placeholder="Нэр, имэйл, код..."
           />
         </div>
         <div className="flex items-center gap-2 ml-auto">
           <button className="flex items-center gap-2 px-3 py-2 rounded-xl bg-[#0d1117] border border-slate-700/50 text-slate-300 text-sm">
-            <FilterIcon /> Ð‘Ò¯Ð³Ð´
+            <FilterIcon /> Бүгд
           </button>
           <button className="flex items-center gap-2 px-3 py-2 rounded-xl bg-[#0d1117] border border-slate-700/50 text-slate-300 text-sm">
-            <LockIcon /> Ð‘Ò¯Ð³Ð´
+            <LockIcon /> Бүгд
           </button>
         </div>
       </div>
@@ -499,13 +628,13 @@ export function WorkersComponent() {
       ) : null}
 
       <p className="text-slate-500 text-sm">
-        ÐÐ¸Ð¹Ñ‚ {filtered.length} Ð°Ð¶Ð¸Ð»Ñ‚Ð°Ð½
+        Нийт {filtered.length} ажилтан
       </p>
 
       {loading ? (
         <div className="py-12 flex items-center justify-center gap-3 text-slate-500 text-sm">
           <span className="w-4 h-4 border-2 border-slate-700 border-t-slate-400 rounded-full animate-spin" />
-          ÐÐ¶Ð¸Ð»Ñ‚Ð½ÑƒÑƒÐ´Ñ‹Ð³ ÑƒÐ½ÑˆÐ¸Ð¶ Ð±Ð°Ð¹Ð½Ð°...
+          Ажилтнуудыг уншиж байна...
         </div>
       ) : (
         <div className="grid grid-cols-2 gap-4">
@@ -524,7 +653,7 @@ export function WorkersComponent() {
           onClick={() => setShowAdd(true)}
           className="flex items-center cursor-pointer gap-2 px-5 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black font-semibold text-sm transition-colors shadow-lg shadow-emerald-500/20">
           <PlusIcon />
-          ÐÐ¶Ð¸Ð»Ñ‚Ð°Ð½ Ð½ÑÐ¼ÑÑ…
+          Ажилтан нэмэх
         </button>
       </div>
     </div>

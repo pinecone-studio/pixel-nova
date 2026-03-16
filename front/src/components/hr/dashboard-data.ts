@@ -42,11 +42,11 @@ const avatarColors = [
 function formatElapsed(value: string) {
   const diff = Date.now() - new Date(value).getTime();
   const hours = Math.max(1, Math.floor(diff / (1000 * 60 * 60)));
-  if (hours < 24) return `${hours} Ã‘â€ ÃÂ°ÃÂ³ÃÂ¸ÃÂ¹ÃÂ½ Ã“Â©ÃÂ¼ÃÂ½Ã“Â©`;
+  if (hours < 24) return `${hours} цагийн өмнө`;
   const days = Math.floor(hours / 24);
-  if (days < 30) return `${days} Ã“Â©ÃÂ´Ã‘â‚¬ÃÂ¸ÃÂ¹ÃÂ½ Ã“Â©ÃÂ¼ÃÂ½Ã“Â©`;
+  if (days < 30) return `${days} өдрийн өмнө`;
   const months = Math.floor(days / 30);
-  return `${months} Ã‘ÂÃÂ°Ã‘â‚¬Ã‘â€¹ÃÂ½ Ã“Â©ÃÂ¼ÃÂ½Ã“Â©`;
+  return `${months} сарын өмнө`;
 }
 
 function getApprovalRate(requests: LeaveRequest[]) {
@@ -196,11 +196,7 @@ export function useHrDashboardData() {
 
     const pendingRequests = requests.filter((request) => request.status === "pending").length;
     const approvedRequests = requests.filter((request) => request.status === "approved").length;
-    const onLeaveStatuses = new Set([
-      "ÃÂ§Ã“Â©ÃÂ»Ã“Â©Ã“Â©Ã‘â€šÃ‘ÂÃÂ¹",
-      "ÃÂÃÂ¼Ã‘â‚¬ÃÂ°ÃÂ»Ã‘â€šÃ‘â€šÃÂ°ÃÂ¹",
-      "ÃÂ¢Ã’Â¯Ã‘â‚¬ Ã‘â€¡Ã“Â©ÃÂ»Ã“Â©Ã“Â©Ã‘â€šÃ‘ÂÃÂ¹",
-    ]);
+    const onLeaveStatuses = new Set(["Чөлөөтэй", "Амралттай", "Түр чөлөөтэй"]);
     const employeesOnLeave = employees.filter((employee) =>
       onLeaveStatuses.has(employee.status),
     ).length;

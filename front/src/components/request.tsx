@@ -110,9 +110,7 @@ function UploadArea({ label, subtitle }: { label: string; subtitle?: string }) {
         <p className="text-sm font-medium text-white">
           {subtitle ?? "Файл хавсаргах (заавал биш)"}
         </p>
-        <p className="text-xs text-gray-500">
-          JPEG, PNG, PDF, and MP4 formats, up to 50MB
-        </p>
+        <p className="text-xs text-gray-500">JPEG, PNG, PDF, MP4 төрлүүд — 50MB хүртэл</p>
         <button className="mt-1 border border-[#1a2035] text-xs text-gray-300 px-4 py-1.5 rounded-lg hover:bg-white/5 transition-colors">
           Оруулах
         </button>
