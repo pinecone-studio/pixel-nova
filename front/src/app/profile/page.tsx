@@ -3,7 +3,7 @@
 import { useQuery } from "@apollo/client/react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useSyncExternalStore } from "react";
 
 import {
   AjildOrson,
@@ -71,10 +71,10 @@ function getInitials(employee: Employee | null) {
 
 export default function Profile() {
   const router = useRouter();
-  const [authToken] = useState(() =>
-    typeof window === "undefined"
-      ? ""
-      : (window.localStorage.getItem(TOKEN_STORAGE_KEY) ?? ""),
+  const authToken = useSyncExternalStore(
+    () => () => {},
+    () => window.localStorage.getItem(TOKEN_STORAGE_KEY) ?? "",
+    () => "",
   );
 
   const { data, loading, error } = useQuery<{ me: Employee | null }>(GET_ME, {
