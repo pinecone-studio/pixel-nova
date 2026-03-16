@@ -41,7 +41,10 @@ export async function createTriggeredActionRecords(
   const requiredEmployeeFields = actionConfig?.requiredEmployeeFields ?? [];
 
   const templateData = buildTemplateData(employee, now);
-  const { incompleteFields } = validateRequiredFields(templateData, requiredEmployeeFields);
+  const {
+    data: patchedTemplateData,
+    incompleteFields,
+  } = validateRequiredFields(templateData, requiredEmployeeFields);
 
   const documentInserts: Array<{
     id: string;
@@ -61,6 +64,7 @@ export async function createTriggeredActionRecords(
       generatedAt: now,
       documentId,
       templateFile: tmpl.template,
+      templateData: patchedTemplateData,
     });
     const pdfBytes = await renderPdfFromService({
       html: generated.html,
