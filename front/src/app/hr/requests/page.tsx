@@ -15,8 +15,8 @@ export default function HrRequestsPage() {
           onClick={() => setTab("leave")}
           className={`rounded-full border px-4 py-1.5 text-sm font-medium transition-colors ${
             tab === "leave"
-              ? "border-[#00CC99]/60 bg-[#00CC99]/15 text-[#9BEBD7]"
-              : "border-white/10 bg-white/5 text-slate-400 hover:text-white"
+              ? "border-emerald-200 bg-emerald-50 text-emerald-600"
+              : "border-slate-200 bg-white text-slate-500 hover:text-slate-700"
           }`}
         >
           Чөлөөний хүсэлт
@@ -25,8 +25,8 @@ export default function HrRequestsPage() {
           onClick={() => setTab("contract")}
           className={`rounded-full border px-4 py-1.5 text-sm font-medium transition-colors ${
             tab === "contract"
-              ? "border-[#00CC99]/60 bg-[#00CC99]/15 text-[#9BEBD7]"
-              : "border-white/10 bg-white/5 text-slate-400 hover:text-white"
+              ? "border-emerald-200 bg-emerald-50 text-emerald-600"
+              : "border-slate-200 bg-white text-slate-500 hover:text-slate-700"
           }`}
         >
           Гэрээний хүсэлт

@@ -14,7 +14,7 @@ export function EmployeeCard({
   onEdit: (employee: Employee) => void;
 }) {
   return (
-    <div className="rounded-2xl border border-slate-700/40 bg-[#0d1117] p-5 flex flex-col gap-3 hover:border-slate-600/60 transition-colors">
+    <div className="rounded-2xl border border-slate-200 bg-white p-5 flex flex-col gap-3 hover:border-slate-300 transition-colors shadow-[0_1px_2px_rgba(15,23,42,0.06)]">
       <div className="flex items-start justify-between">
         <div className="flex items-center gap-3">
           <div
@@ -23,13 +23,13 @@ export function EmployeeCard({
             {getInitials(employee)}
           </div>
           <div>
-            <p className="text-white font-semibold text-sm">
+            <p className="text-slate-900 font-semibold text-sm">
               {employee.lastName} {employee.firstName}
             </p>
             <p className="text-slate-500 text-xs">
               {employee.jobTitle || formatLevel(employee.level)}
             </p>
-            <p className="text-slate-600 text-xs">{employee.employeeCode}</p>
+            <p className="text-slate-400 text-xs">{employee.employeeCode}</p>
           </div>
         </div>
         <span
@@ -42,25 +42,25 @@ export function EmployeeCard({
       <div className="flex flex-col gap-1.5">
         <div className="flex items-center gap-2">
           <MailIcon />
-          <span className="text-slate-400 text-xs">
-            {employee.email || "Имэйл байхгүй"}
-          </span>
+            <span className="text-slate-500 text-xs">
+              {employee.email || "Имэйл байхгүй"}
+            </span>
+          </div>
+          <div className="flex items-center gap-2">
+            <BuildingIcon />
+            <span className="px-2 py-0.5 rounded-md bg-slate-100 text-slate-600 text-xs">
+              {formatDepartment(employee.department)}
+            </span>
+          </div>
+          <div className="flex items-center gap-2">
+            <LockIcon />
+            <span className="text-slate-500 text-xs">
+              {formatBranch(employee.branch)}
+            </span>
+          </div>
         </div>
-        <div className="flex items-center gap-2">
-          <BuildingIcon />
-          <span className="px-2 py-0.5 rounded-md bg-slate-700/50 text-slate-300 text-xs">
-            {formatDepartment(employee.department)}
-          </span>
-        </div>
-        <div className="flex items-center gap-2">
-          <LockIcon />
-          <span className="text-slate-400 text-xs">
-            {formatBranch(employee.branch)}
-          </span>
-        </div>
-      </div>
 
-      <div className="h-px bg-slate-800/60" />
+      <div className="h-px bg-slate-200" />
 
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-1.5">
@@ -69,7 +69,7 @@ export function EmployeeCard({
         </div>
         <button
           onClick={() => onEdit(employee)}
-          className="h-7 px-3 rounded-lg border border-slate-700/50 text-slate-400 text-xs hover:text-white hover:border-slate-500 transition-colors"
+          className="h-7 px-3 rounded-lg border border-slate-200 text-slate-500 text-xs hover:text-slate-900 hover:border-slate-300 transition-colors"
         >
           Засах
         </button>

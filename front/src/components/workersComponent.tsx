@@ -110,7 +110,7 @@ export function WorkersComponent() {
   }
 
   return (
-    <div className="min-h-screen bg-[#080c12] text-white font-sans flex flex-col gap-5 p-0 animate-fade-up">
+    <div className="min-h-screen bg-[#F4F5F7] text-slate-900 font-sans flex flex-col gap-5 p-0 animate-fade-up">
       {showAdd && (
         <EmployeeModal
           mode="add"
@@ -139,7 +139,7 @@ export function WorkersComponent() {
       <WorkersToolbar search={search} onSearchChange={setSearch} />
 
       {error && (
-        <div className="rounded-xl border border-red-500/20 bg-red-500/5 px-4 py-3 text-sm text-red-400">
+        <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-500">
           {error}
         </div>
       )}
