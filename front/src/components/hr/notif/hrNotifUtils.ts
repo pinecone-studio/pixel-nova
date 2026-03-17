@@ -1,7 +1,5 @@
-import type { ContractRequest } from "@/lib/types";
+import type { ContractRequest, EmployeeNotification } from "@/lib/types";
 import { formatDepartment } from "@/lib/labels";
-
-import type { HrNotifItem } from "./types";
 
 const TEMPLATE_LABELS: Record<string, string> = {
   employment_contract: "Хөдөлмөрийн гэрээ",
@@ -15,26 +13,43 @@ const TEMPLATE_LABELS: Record<string, string> = {
   handover_sheet: "Хүлээлгэн өгөх акт",
 };
 
+const STATUS_LABELS: Record<ContractRequest["status"], string> = {
+  pending: "Хүлээгдэж буй",
+  approved: "Батлагдсан",
+  rejected: "Татгалзсан",
+};
+
 function formatTemplateLabel(id: string) {
   return TEMPLATE_LABELS[id] ?? id;
 }
 
 export function buildHrNotifBody(row: ContractRequest) {
   const labels = row.templateIds.map(formatTemplateLabel).join(", ");
-  return `${row.employee.lastName} ${row.employee.firstName} • ${formatDepartment(
-    row.employee.department,
-  )} • ${labels}`;
+  const parts = [
+    `${row.employee.lastName} ${row.employee.firstName}`,
+    formatDepartment(row.employee.department),
+    labels,
+    `Төлөв: ${STATUS_LABELS[row.status]}`,
+  ];
+
+  if (row.note?.trim()) {
+    parts.push(`Тайлбар: ${row.note.trim()}`);
+  }
+
+  return parts.join("\n");
 }
 
-export function mapContractRequestToNotif(row: ContractRequest): HrNotifItem {
+export function mapContractRequestToEmployeeNotification(
+  row: ContractRequest,
+): EmployeeNotification {
   return {
-    id: `contract-${row.id}`,
+    id: row.id,
+    employeeId: row.employeeId,
     title: "Гэрээний хүсэлт",
     body: buildHrNotifBody(row),
-    status: row.status,
-    date: row.createdAt,
-    audience: "HR",
-    employeeName: `${row.employee.lastName} ${row.employee.firstName}`,
+    status: row.status === "pending" ? "unread" : "read",
+    createdAt: row.createdAt,
+    readAt: row.decidedAt ?? null,
   };
 }
 
