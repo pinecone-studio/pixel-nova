@@ -5,14 +5,14 @@ import { usePathname } from "next/navigation";
 import { useMemo, useState } from "react";
 import { useQuery } from "@apollo/client/react";
 
-import { EmployeeNotifDrawer } from "@/components/employee-notif/EmployeeNotifDrawer";
 import { EpasLogo, NotifIcon } from "@/components/icons";
 import { GET_CONTRACT_REQUESTS } from "@/graphql/queries";
 import { buildGraphQLHeaders } from "@/lib/apollo-client";
 import type { ContractRequest } from "@/lib/types";
 
 import { getActiveHrNavItem, HR_NAV_ITEMS } from "./navigation";
-import { mapContractRequestToEmployeeNotification } from "./notif/hrNotifUtils";
+import { mapContractRequestToHrNotifItem } from "./notif/hrNotifUtils";
+import { HrShellNotifRow } from "./notif/HrShellNotifRow";
 
 export function HrShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -20,7 +20,7 @@ export function HrShell({ children }: { children: React.ReactNode }) {
   const [notifOpen, setNotifOpen] = useState(false);
   const [selectedNotifId, setSelectedNotifId] = useState<string | null>(null);
 
-  const { data: contractData, loading: notificationsLoading } = useQuery<{
+  const { data: contractData } = useQuery<{
     contractRequests: ContractRequest[];
   }>(GET_CONTRACT_REQUESTS, {
     context: {
@@ -31,14 +31,11 @@ export function HrShell({ children }: { children: React.ReactNode }) {
 
   const notifications = useMemo(() => {
     return (contractData?.contractRequests ?? [])
-      .map(mapContractRequestToEmployeeNotification)
-      .sort(
-        (a, b) =>
-          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
-      );
+      .map(mapContractRequestToHrNotifItem)
+      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
   }, [contractData]);
 
-  const unreadCount = notifications.filter((n) => n.status === "unread").length;
+  const unreadCount = notifications.filter((n) => n.status === "pending").length;
 
   return (
     <div className="h-screen overflow-hidden bg-slate-50">
@@ -63,12 +60,14 @@ export function HrShell({ children }: { children: React.ReactNode }) {
                     active
                       ? "bg-emerald-50 text-emerald-600 border border-emerald-200 shadow-[0_0_12px_rgba(16,185,129,0.12)]"
                       : "text-slate-500 hover:text-slate-700 hover:bg-slate-100 border border-transparent"
-                  }`}>
+                  }`}
+                >
                   {active ? (
                     <span className="absolute left-0 top-1/2 -translate-y-1/2 w-0.75 h-5 rounded-r-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.6)]" />
                   ) : null}
                   <span
-                    className={`flex h-9 w-9 items-center justify-center rounded-lg shrink-0 transition-all ${active ? "bg-emerald-100" : ""}`}>
+                    className={`flex h-9 w-9 items-center justify-center rounded-lg shrink-0 transition-all ${active ? "bg-emerald-100" : ""}`}
+                  >
                     {item.icon}
                   </span>
                   <span className="whitespace-nowrap text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-200">
@@ -102,7 +101,8 @@ export function HrShell({ children }: { children: React.ReactNode }) {
             <div className="flex items-center gap-3">
               <Link
                 href="/hr/employees"
-                className="flex items-center gap-2 h-9 px-4 rounded-lg border cursor-pointer border-slate-900 bg-slate-900 text-white text-sm font-medium hover:bg-slate-800 transition-colors">
+                className="flex items-center gap-2 h-9 px-4 rounded-lg border cursor-pointer border-slate-900 bg-slate-900 text-white text-sm font-medium hover:bg-slate-800 transition-colors"
+              >
                 <span>＋</span> Ажилтан нэмэх
               </Link>
               <div className="relative">
@@ -151,18 +151,20 @@ export function HrShell({ children }: { children: React.ReactNode }) {
                           Одоогоор мэдэгдэл алга байна.
                         </div>
                       ) : (
-                        notifications.slice(0, 6).map((item) => (
-                          <HrShellNotifRow
-                            key={item.id}
-                            item={item}
-                            expanded={selectedNotifId === item.id}
-                            onSelect={() =>
-                              setSelectedNotifId((current) =>
-                                current === item.id ? null : item.id,
-                              )
-                            }
-                          />
-                        ))
+                        notifications
+                          .slice(0, 6)
+                          .map((item) => (
+                            <HrShellNotifRow
+                              key={item.id}
+                              item={item}
+                              expanded={selectedNotifId === item.id}
+                              onSelect={() =>
+                                setSelectedNotifId((current) =>
+                                  current === item.id ? null : item.id,
+                                )
+                              }
+                            />
+                          ))
                       )}
                     </div>
                   </div>
@@ -177,23 +179,6 @@ export function HrShell({ children }: { children: React.ReactNode }) {
         </main>
       </div>
 
-      <EmployeeNotifDrawer
-        open={notifOpen}
-        loading={notificationsLoading}
-        notifications={notifications}
-        selectedId={selectedNotifId}
-        onOpenChange={(nextOpen) => {
-          setNotifOpen(nextOpen);
-          if (!nextOpen) {
-            setSelectedNotifId(null);
-          }
-        }}
-        onSelect={(notification) => {
-          setSelectedNotifId((current) =>
-            current === notification.id ? null : notification.id,
-          );
-        }}
-      />
     </div>
   );
 }

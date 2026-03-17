@@ -91,7 +91,7 @@ export function AuditActionCard({
 
       <button
         onClick={() => onSendRequest(action)}
-        className="flex items-center justify-center gap-2 py-2.5 rounded-xl border border-slate-200 bg-black text-white text-sm font-medium hover:bg-slate-50 transition-colors"
+        className="flex items-center justify-center gap-2 py-2.5 rounded-xl border border-slate-200 bg-black text-white text-sm font-medium cursor-pointer transition-colors"
       >
         <EditIcon />
         Хүсэлт илгээх
