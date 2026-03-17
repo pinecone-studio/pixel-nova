@@ -4,13 +4,13 @@ import { useQuery } from "@apollo/client/react";
 import { useMemo, useState } from "react";
 
 import { EmployeeNotifEmptyState } from "@/components/employee-notif/EmployeeNotifEmptyState";
+import { EmployeeNotifPanel } from "@/components/employee-notif/EmployeeNotifPanel";
 import { GET_CONTRACT_REQUESTS } from "@/graphql/queries";
 import { buildGraphQLHeaders } from "@/lib/apollo-client";
 import type { ContractRequest } from "@/lib/types";
 
 import { HrNotifStats } from "./HrNotifStats";
-import { mapContractRequestToHrNotifItem } from "./hrNotifUtils";
-import { HrShellNotifRow } from "./HrShellNotifRow";
+import { mapContractRequestToEmployeeNotification } from "./hrNotifUtils";
 
 export function HrNotifPage() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -28,10 +28,10 @@ export function HrNotifPage() {
   const items = useMemo(
     () =>
       (data?.contractRequests ?? [])
-        .map(mapContractRequestToHrNotifItem)
+        .map(mapContractRequestToEmployeeNotification)
         .sort(
           (a, b) =>
-            new Date(b.date).getTime() - new Date(a.date).getTime(),
+            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
         ),
     [data],
   );
@@ -44,13 +44,13 @@ export function HrNotifPage() {
   ).length;
 
   return (
-    <div className="min-h-screen bg-[#F4F5F7] px-6 pb-16 pt-8 text-slate-900">
-      <div className="mx-auto flex w-full max-w-[1120px] flex-col gap-6">
+    <div className="min-h-screen bg-white px-6 pb-16 pt-8 text-[#101828]">
+      <div className="mx-auto flex w-full max-w-280 flex-col gap-6">
         <div>
-          <h1 className="text-[34px] font-semibold tracking-[-0.03em] text-slate-900">
+          <h1 className="text-[34px] font-semibold tracking-[-0.03em] text-[#101828]">
             Мэдэгдэл
           </h1>
-          <p className="mt-2 text-[16px] text-slate-500">
+          <p className="mt-2 text-[16px] text-[#667085]">
             HR багт ирсэн гэрээ болон баримтын хүсэлтүүд.
           </p>
         </div>
@@ -61,13 +61,13 @@ export function HrNotifPage() {
           approvedCount={approvedCount}
         />
 
-        <section className="overflow-hidden rounded-[28px] border border-slate-200 bg-white shadow-[0_1px_2px_rgba(15,23,42,0.06)]">
-          <div className="border-b border-slate-200 px-7 pb-3 pt-2">
+        <section className="overflow-hidden rounded-[28px] border border-[#EAECF0] bg-white shadow-[0_1px_2px_rgba(16,24,40,0.04)]">
+          <div className="border-b border-[#EAECF0] px-7 pb-3 pt-2">
             <div className="flex items-center justify-between gap-3">
-              <h2 className="text-[27px] font-semibold leading-none tracking-[-0.03em] text-slate-900">
+              <h2 className="text-[27px] font-semibold leading-none tracking-[-0.03em] text-[#101828]">
                 Шинэ мэдэгдлүүд
               </h2>
-              <span className="text-sm text-slate-400">
+              <span className="text-sm text-[#667085]">
                 {loading ? "Ачаалж байна..." : `${items.length} мэдэгдэл`}
               </span>
             </div>
@@ -79,7 +79,7 @@ export function HrNotifPage() {
                 {Array.from({ length: 3 }).map((_, index) => (
                   <div
                     key={index}
-                    className="rounded-[20px] border border-slate-200 bg-white px-4 py-4"
+                    className="rounded-[20px] border border-[#EAECF0] bg-white px-4 py-4"
                   >
                     <div className="h-4 w-48 rounded-full skeleton" />
                     <div className="mt-3 h-3 w-full rounded-full skeleton" />
@@ -88,22 +88,16 @@ export function HrNotifPage() {
                 ))}
               </div>
             ) : items.length === 0 ? (
-              <EmployeeNotifEmptyState />
+              <EmployeeNotifEmptyState theme="light" />
             ) : (
-              <div className="flex flex-col">
-                {items.map((item) => (
-                  <HrShellNotifRow
-                    key={item.id}
-                    item={item}
-                    expanded={selectedId === item.id}
-                    onSelect={() =>
-                      setSelectedId((current) =>
-                        current === item.id ? null : item.id,
-                      )
-                    }
-                  />
-                ))}
-              </div>
+              <EmployeeNotifPanel
+                notifications={items}
+                selectedId={selectedId}
+                theme="light"
+                onSelect={(item) =>
+                  setSelectedId((current) => (current === item.id ? null : item.id))
+                }
+              />
             )}
           </div>
         </section>

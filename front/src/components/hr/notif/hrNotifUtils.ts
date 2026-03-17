@@ -1,6 +1,5 @@
-import type { ContractRequest } from "@/lib/types";
+import type { ContractRequest, EmployeeNotification } from "@/lib/types";
 import { formatDepartment } from "@/lib/labels";
-import type { HrNotifItem } from "./types";
 
 const TEMPLATE_LABELS: Record<string, string> = {
   employment_contract: "Хөдөлмөрийн гэрээ",
@@ -40,17 +39,17 @@ export function buildHrNotifBody(row: ContractRequest) {
   return parts.join("\n");
 }
 
-export function mapContractRequestToHrNotifItem(
+export function mapContractRequestToEmployeeNotification(
   row: ContractRequest,
-): HrNotifItem {
+): EmployeeNotification {
   return {
     id: row.id,
+    employeeId: row.employeeId,
     title: "Гэрээний хүсэлт",
     body: buildHrNotifBody(row),
-    status: row.status,
-    date: row.createdAt,
-    audience: formatDepartment(row.employee.department),
-    employeeName: `${row.employee.lastName} ${row.employee.firstName}`,
+    status: row.status === "pending" ? "unread" : "read",
+    createdAt: row.createdAt,
+    readAt: row.decidedAt ?? null,
   };
 }
 
