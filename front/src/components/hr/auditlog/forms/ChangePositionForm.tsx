@@ -1,0 +1,161 @@
+import type { ChangeEvent, JSX, ReactNode } from "react";
+
+type SelectWrapperProps = {
+  value: string;
+  onChange: (e: ChangeEvent<HTMLSelectElement>) => void;
+  children: ReactNode;
+};
+
+export type ChangePositionFormProps = {
+  employeeCode: string;
+  setEmployeeCode: (v: string) => void;
+  lastName: string;
+  setLastName: (v: string) => void;
+  firstName: string;
+  setFirstName: (v: string) => void;
+  currentDept: string;
+  setCurrentDept: (v: string) => void;
+  currentPosition: string;
+  setCurrentPosition: (v: string) => void;
+  nextDept: string;
+  setNextDept: (v: string) => void;
+  nextPosition: string;
+  setNextPosition: (v: string) => void;
+  changeReason: string;
+  setChangeReason: (v: string) => void;
+  departments: string[];
+  labelClass: string;
+  inputClass: string;
+  SelectWrapper: (props: SelectWrapperProps) => JSX.Element;
+  RecipientsSection: ReactNode;
+  DocumentsSection: ReactNode;
+};
+
+export function ChangePositionForm({
+  employeeCode,
+  setEmployeeCode,
+  lastName,
+  setLastName,
+  firstName,
+  setFirstName,
+  currentDept,
+  setCurrentDept,
+  currentPosition,
+  setCurrentPosition,
+  nextDept,
+  setNextDept,
+  nextPosition,
+  setNextPosition,
+  changeReason,
+  setChangeReason,
+  departments,
+  labelClass,
+  inputClass,
+  SelectWrapper,
+  RecipientsSection,
+  DocumentsSection,
+}: ChangePositionFormProps) {
+  return (
+    <div className="flex min-w-0 flex-col gap-[16px]">
+      <div className="flex min-w-0 flex-col gap-[8px]">
+        <label className={labelClass}>Ажилтны код</label>
+        <input
+          value={employeeCode}
+          onChange={(e) => setEmployeeCode(e.target.value)}
+          placeholder="EMP001"
+          name="employee_code"
+          autoComplete="off"
+          autoCorrect="off"
+          autoCapitalize="off"
+          spellCheck={false}
+          className={inputClass}
+        />
+      </div>
+      <div className="flex min-w-0 flex-col gap-[8px]">
+        <label className={labelClass}>Овог</label>
+        <input
+          value={lastName}
+          onChange={(e) => setLastName(e.target.value)}
+          placeholder="Дорж"
+          className={inputClass}
+        />
+      </div>
+      <div className="flex min-w-0 flex-col gap-[8px]">
+        <label className={labelClass}>Нэр</label>
+        <input
+          value={firstName}
+          onChange={(e) => setFirstName(e.target.value)}
+          placeholder="Дуламрагчаа"
+          className={inputClass}
+        />
+      </div>
+
+      <div className="grid min-w-0 grid-cols-2 gap-[16px]">
+        <div className="flex min-w-0 flex-col gap-[8px]">
+          <label className={labelClass}>Одоогийн хэлтэс</label>
+          <SelectWrapper
+            value={currentDept}
+            onChange={(e) => setCurrentDept(e.target.value)}
+          >
+            {departments.map((d) => (
+              <option key={d} value={d}>
+                {d}
+              </option>
+            ))}
+          </SelectWrapper>
+        </div>
+        <div className="flex min-w-0 flex-col gap-[8px]">
+          <label className={labelClass}>Одоогийн албан тушаал</label>
+          <input
+            value={currentPosition}
+            onChange={(e) => setCurrentPosition(e.target.value)}
+            placeholder="Junior Engineer"
+            className={inputClass}
+          />
+        </div>
+      </div>
+
+      <div className="grid min-w-0 grid-cols-2 gap-[16px]">
+        <div className="flex min-w-0 flex-col gap-[8px]">
+          <label className={labelClass}>Шилжих буй хэлтэс</label>
+          <SelectWrapper
+            value={nextDept}
+            onChange={(e) => setNextDept(e.target.value)}
+          >
+            {departments.map((d) => (
+              <option key={d} value={d}>
+                {d}
+              </option>
+            ))}
+          </SelectWrapper>
+        </div>
+        <div className="flex min-w-0 flex-col gap-[8px]">
+          <label className={labelClass}>Шилжих буй албан тушаал</label>
+          <input
+            value={nextPosition}
+            onChange={(e) => setNextPosition(e.target.value)}
+            placeholder="Junior Engineer"
+            className={inputClass}
+          />
+        </div>
+      </div>
+
+      <div className="flex min-w-0 flex-col gap-[8px]">
+        <label className={labelClass}>Албан тушаал өөрчилсөн үндэслэл</label>
+        <SelectWrapper
+          value={changeReason}
+          onChange={(e) => setChangeReason(e.target.value)}
+        >
+          <option value="">Сонгох</option>
+          <option value="Ажлын шаардлага">Ажлын шаардлага</option>
+          <option value="Гүйцэтгэлийн үнэлгээ">Гүйцэтгэлийн үнэлгээ</option>
+          <option value="Дотоод шилжилт">Дотоод шилжилт</option>
+          <option value="Бусад">Бусад</option>
+        </SelectWrapper>
+      </div>
+
+      {RecipientsSection}
+      {DocumentsSection}
+    </div>
+  );
+}

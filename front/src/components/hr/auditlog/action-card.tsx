@@ -12,11 +12,19 @@ export function AuditActionCard({
   action: ActionConfig;
   onSendRequest: (action: ActionConfig) => void;
 }) {
+  const actionLabelMap: Record<string, string> = {
+    add_employee: "Шинэ ажилтан",
+    change_position: "Албан тушаал өөрчлөх",
+    promote_employee: "Ажилтан дэвшүүлэх",
+    offboard_employee: "Ажлаас чөлөөлөх",
+  };
+  const actionLabel = actionLabelMap[action.name] ?? action.name;
+
   return (
     <div className="rounded-2xl border border-slate-200 bg-white p-5 flex flex-col gap-4 shadow-[0_1px_2px_rgba(15,23,42,0.06)]">
       <div className="flex items-start justify-between">
         <p className="text-slate-900 font-bold text-base tracking-wide uppercase">
-          {action.name}
+          {actionLabel}
         </p>
         <span
           className={`text-xs px-2.5 py-1 rounded-full font-medium ${phaseBadge(action.phase)}`}
