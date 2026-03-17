@@ -10,81 +10,49 @@ export function EmployeeNotifRow({
   notification,
   expanded,
   onSelect,
-  theme = "dark",
 }: {
   notification: EmployeeNotification;
   expanded: boolean;
   onSelect: () => void;
-  theme?: "dark" | "light";
 }) {
-  const isLight = theme === "light";
-
   return (
-    <div
-      className={
-        isLight
-          ? "border-b border-[#EAECF0] last:border-b-0"
-          : "border-b border-[#182433] last:border-b-0"
-      }
-    >
+    <div className="border-b border-[#182433] last:border-b-0">
       <button
         type="button"
         onClick={onSelect}
         className={`flex w-full items-start gap-4 rounded-[20px] px-4 py-4 text-left transition ${
           expanded
-            ? isLight
-              ? "bg-[#F0FDF4] shadow-[inset_0_0_0_1px_rgba(134,239,172,1)]"
-              : "bg-[#101925] shadow-[inset_0_0_0_1px_rgba(41,59,78,0.9)]"
-            : isLight
-              ? "bg-transparent hover:bg-[#F9FAFB]"
-              : "bg-transparent hover:bg-[#0D1520]"
+            ? "bg-[#101925] shadow-[inset_0_0_0_1px_rgba(41,59,78,0.9)]"
+            : "bg-transparent hover:bg-[#0D1520]"
         }`}
       >
-        <div
-          className={`mt-0.5 flex h-[54px] w-[54px] shrink-0 items-center justify-center rounded-full text-base font-semibold ${
-            isLight
-              ? "border border-[#86EFAC] bg-white text-[#16A34A] shadow-sm"
-              : "bg-linear-to-br from-[#A7AFF8] to-[#1B295E] text-white shadow-[0_10px_25px_rgba(33,46,103,0.28)]"
-          }`}
-        >
+        <div className="mt-0.5 flex h-[54px] w-[54px] shrink-0 items-center justify-center rounded-full bg-linear-to-br from-[#A7AFF8] to-[#1B295E] text-base font-semibold text-white shadow-[0_10px_25px_rgba(33,46,103,0.28)]">
           {getNotificationInitial(notification)}
         </div>
 
         <div className="min-w-0 flex-1">
           <div className="flex items-start justify-between gap-3">
-            <p
-              className={`truncate text-[18px] font-semibold leading-7 ${
-                isLight ? "text-[#101828]" : "text-[#F3F7FB]"
-              }`}
-            >
+            <p className="truncate text-[17px] font-semibold text-[#F3F7FB]">
               {notification.title}
             </p>
-            <span
-              className={`shrink-0 pt-1 text-[12px] uppercase tracking-[0.14em] ${
-                isLight ? "text-[#98A2B3]" : "text-[#708096]"
-              }`}
-            >
+            <span className="shrink-0 text-[11px] uppercase tracking-[0.16em] text-[#708096]">
               {formatNotificationDateWithYear(notification.createdAt)}
             </span>
           </div>
 
           <p
-            className={`mt-2 text-[15px] leading-7 transition-all duration-300 ${
+            className={`mt-2 text-[13px] leading-6 text-[#CFD8E3] transition-all duration-300 ${
               expanded
-                ? "max-h-[140px] overflow-y-auto pr-2 line-clamp-none scrollbar-slim"
+                ? "max-h-[104px] overflow-y-auto pr-2 line-clamp-none scrollbar-slim"
                 : "truncate whitespace-nowrap"
-            } ${isLight ? "text-[#667085]" : "text-[#CFD8E3]"}`}
+            }`}
           >
             {notification.body}
           </p>
         </div>
 
         {notification.status === "unread" ? (
-          <span
-            className={`mt-1 h-2.5 w-2.5 shrink-0 self-center rounded-full ${
-              isLight ? "bg-[#22C55E]" : "bg-[#11D3C5]"
-            }`}
-          />
+          <span className="mt-1 h-2.5 w-2.5 shrink-0 self-center rounded-full bg-[#11D3C5]" />
         ) : null}
       </button>
 
@@ -94,11 +62,8 @@ export function EmployeeNotifRow({
         }`}
       >
         <div className="overflow-hidden px-4">
-          <div className="pb-5 pt-2">
-            <EmployeeNotifExpandedContent
-              notification={notification}
-              theme={theme}
-            />
+          <div className="pb-4 pt-1">
+            <EmployeeNotifExpandedContent notification={notification} />
           </div>
         </div>
       </div>
