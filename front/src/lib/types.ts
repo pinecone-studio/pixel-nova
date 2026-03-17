@@ -191,3 +191,17 @@ export interface EmployeeNotification {
   createdAt: string;
   readAt?: string | null;
 }
+
+export interface Announcement {
+  id: string;
+  title: string;
+  body: string;
+  status: "draft" | "published";
+  audience: string;
+  createdBy?: string | null;
+  createdAt: string;
+  updatedAt: string;
+  publishedAt?: string | null;
+  recipientCount: number;
+  readCount: number;
+}
