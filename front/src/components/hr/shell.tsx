@@ -11,8 +11,8 @@ import { buildGraphQLHeaders } from "@/lib/apollo-client";
 import type { ContractRequest } from "@/lib/types";
 
 import { getActiveHrNavItem, HR_NAV_ITEMS } from "./navigation";
+import { mapContractRequestToHrNotifItem } from "./notif/hrNotifUtils";
 import { HrShellNotifRow } from "./notif/HrShellNotifRow";
-import { mapContractRequestToNotif } from "./notif/hrNotifUtils";
 
 export function HrShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -31,14 +31,14 @@ export function HrShell({ children }: { children: React.ReactNode }) {
 
   const notifications = useMemo(() => {
     return (contractData?.contractRequests ?? [])
-      .map(mapContractRequestToNotif)
+      .map(mapContractRequestToHrNotifItem)
       .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
   }, [contractData]);
 
   const unreadCount = notifications.filter((n) => n.status === "pending").length;
 
   return (
-    <div className="h-screen overflow-hidden bg-[#060d0c]">
+    <div className="h-screen overflow-hidden bg-slate-50">
       <div className="flex h-full overflow-hidden">
         <aside className="scrollbar-hidden group sticky top-0 h-screen overflow-y-auto overflow-x-hidden w-17 hover:w-60 transition-[width] duration-300 border-r border-white/8 bg-[#060d0c] flex flex-col py-4 px-2 shrink-0">
           <div className="mb-8 flex items-center gap-3 px-2 text-black">
@@ -58,14 +58,16 @@ export function HrShell({ children }: { children: React.ReactNode }) {
                   href={item.href}
                   className={`relative flex items-center gap-3 rounded-xl px-2 py-2 transition-all duration-200 text-left w-full ${
                     active
-                      ? "bg-[#0ad4b1]/10 text-[#0ad4b1] border border-[#0ad4b1]/25 shadow-[0_0_12px_rgba(10,212,177,0.15)]"
-                      : "text-slate-500 hover:text-slate-200 hover:bg-white/5 border border-transparent"
-                  }`}>
+                      ? "bg-emerald-50 text-emerald-600 border border-emerald-200 shadow-[0_0_12px_rgba(16,185,129,0.12)]"
+                      : "text-slate-500 hover:text-slate-700 hover:bg-slate-100 border border-transparent"
+                  }`}
+                >
                   {active ? (
-                    <span className="absolute left-0 top-1/2 -translate-y-1/2 w-0.75 h-5 rounded-r-full bg-[#0ad4b1] shadow-[0_0_8px_rgba(10,212,177,0.8)]" />
+                    <span className="absolute left-0 top-1/2 -translate-y-1/2 w-0.75 h-5 rounded-r-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.6)]" />
                   ) : null}
                   <span
-                    className={`flex h-9 w-9 items-center justify-center rounded-lg shrink-0 transition-all ${active ? "bg-[#0ad4b1]/15" : ""}`}>
+                    className={`flex h-9 w-9 items-center justify-center rounded-lg shrink-0 transition-all ${active ? "bg-emerald-100" : ""}`}
+                  >
                     {item.icon}
                   </span>
                   <span className="whitespace-nowrap text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-200">
@@ -80,18 +82,18 @@ export function HrShell({ children }: { children: React.ReactNode }) {
             <span className="flex h-9 w-9 items-center justify-center rounded-full bg-linear-to-br from-purple-500 to-pink-500 text-white text-xs font-bold shrink-0">
               HR
             </span>
-            <span className="whitespace-nowrap text-sm text-slate-400 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+            <span className="whitespace-nowrap text-sm text-slate-500 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
               HR баг
             </span>
           </div>
         </aside>
 
         <main className="scrollbar-hidden flex-1 min-w-0 min-h-0 overflow-y-auto overflow-x-hidden flex flex-col">
-          <header className="h-14 border-b border-white/8 flex items-center justify-between px-6 shrink-0 bg-[#060d0c]">
+          <header className="h-14 border-b border-slate-200 flex items-center justify-between px-6 shrink-0 bg-white">
             <div className="flex items-center gap-2 text-sm">
               <span className="text-slate-500">HR</span>
-              <span className="text-slate-600">›</span>
-              <span className="text-[#0ad4b1] font-semibold">
+              <span className="text-slate-400">›</span>
+              <span className="text-slate-900 font-semibold">
                 {activeItem.label}
               </span>
             </div>
@@ -99,7 +101,8 @@ export function HrShell({ children }: { children: React.ReactNode }) {
             <div className="flex items-center gap-3">
               <Link
                 href="/hr/employees"
-                className="flex items-center gap-2 h-9 px-4 rounded-lg border cursor-pointer border-[#0ad4b1]/50 bg-linear-to-br from-[#0a3b33] to-[#0ad4b1]/20 text-white text-sm font-medium hover:border-[#0ad4b1] transition-colors">
+                className="flex items-center gap-2 h-9 px-4 rounded-lg border cursor-pointer border-slate-900 bg-slate-900 text-white text-sm font-medium hover:bg-slate-800 transition-colors"
+              >
                 <span>＋</span> Ажилтан нэмэх
               </Link>
               <div className="relative">
@@ -113,21 +116,21 @@ export function HrShell({ children }: { children: React.ReactNode }) {
                       return next;
                     })
                   }
-                  className="h-9 w-9 rounded-lg border border-[#0ad4b1]/40 bg-[#0b201d] cursor-pointer text-[#d7fff8] flex items-center justify-center hover:border-[#0ad4b1] hover:bg-[#0f2b27] transition-colors"
+                  className="h-9 w-9 rounded-lg border border-slate-200 bg-white cursor-pointer text-slate-600 flex items-center justify-center hover:border-slate-300 hover:bg-slate-50 transition-colors"
                 >
                   <NotifIcon />
                 </button>
                 {unreadCount > 0 ? (
-                  <span className="absolute -top-1 -right-1 h-4 min-w-[16px] px-1 rounded-full bg-emerald-400 text-[10px] text-black font-bold flex items-center justify-center">
+                  <span className="absolute -top-1 -right-1 h-4 min-w-[16px] px-1 rounded-full bg-emerald-500 text-[10px] text-white font-bold flex items-center justify-center">
                     {unreadCount}
                   </span>
                 ) : null}
 
                 {notifOpen ? (
-                  <div className="absolute right-0 top-[52px] z-50 w-[420px] overflow-hidden rounded-[24px] border border-[#223244] bg-[#050A11] shadow-[0_24px_70px_rgba(0,0,0,0.42)]">
-                    <div className="border-b border-[#182433] px-6 pb-3 pt-2">
+                  <div className="absolute right-0 top-[52px] z-50 w-[420px] overflow-hidden rounded-[24px] border border-slate-200 bg-white shadow-[0_24px_70px_rgba(15,23,42,0.18)]">
+                    <div className="border-b border-slate-200 px-6 pb-3 pt-2">
                       <div className="flex items-center justify-between gap-3">
-                        <p className="text-[27px] font-semibold leading-none tracking-[-0.03em] text-white">
+                        <p className="text-[27px] font-semibold leading-none tracking-[-0.03em] text-slate-900">
                           Мэдэгдэл
                         </p>
                         <button
@@ -135,7 +138,7 @@ export function HrShell({ children }: { children: React.ReactNode }) {
                             setNotifOpen(false);
                             setSelectedNotifId(null);
                           }}
-                          className="text-sm text-[#708096] hover:text-white"
+                          className="text-sm text-slate-500 hover:text-slate-700"
                         >
                           Хаах
                         </button>
@@ -144,22 +147,24 @@ export function HrShell({ children }: { children: React.ReactNode }) {
 
                     <div className="scrollbar-slim max-h-[406px] overflow-y-auto px-4 pb-4 pt-0">
                       {notifications.length === 0 ? (
-                        <div className="flex min-h-[180px] items-center justify-center text-sm text-[#718099]">
+                        <div className="flex min-h-[180px] items-center justify-center text-sm text-slate-500">
                           Одоогоор мэдэгдэл алга байна.
                         </div>
                       ) : (
-                        notifications.slice(0, 6).map((item) => (
-                          <HrShellNotifRow
-                            key={item.id}
-                            item={item}
-                            expanded={selectedNotifId === item.id}
-                            onSelect={() =>
-                              setSelectedNotifId((current) =>
-                                current === item.id ? null : item.id,
-                              )
-                            }
-                          />
-                        ))
+                        notifications
+                          .slice(0, 6)
+                          .map((item) => (
+                            <HrShellNotifRow
+                              key={item.id}
+                              item={item}
+                              expanded={selectedNotifId === item.id}
+                              onSelect={() =>
+                                setSelectedNotifId((current) =>
+                                  current === item.id ? null : item.id,
+                                )
+                              }
+                            />
+                          ))
                       )}
                     </div>
                   </div>
@@ -173,6 +178,7 @@ export function HrShell({ children }: { children: React.ReactNode }) {
           </div>
         </main>
       </div>
+
     </div>
   );
 }

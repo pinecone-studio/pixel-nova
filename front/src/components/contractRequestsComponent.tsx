@@ -144,11 +144,11 @@ const RequestModal = ({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm"
       onClick={onClose}
     >
       <div
-        className="relative w-[460px] max-w-[95vw] bg-[#0f1520] rounded-3xl border border-slate-700/60 shadow-2xl p-6 flex flex-col gap-5"
+        className="relative w-[460px] max-w-[95vw] bg-white rounded-3xl border border-slate-200 shadow-[0_28px_60px_rgba(15,23,42,0.12)] p-6 flex flex-col gap-5"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-start justify-between">
@@ -162,12 +162,12 @@ const RequestModal = ({
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <p className="text-white font-bold text-xl">
+                <p className="text-slate-900 font-bold text-xl">
                   {row.employee.lastName} {row.employee.firstName}
                 </p>
                 <StatusBadge status={row.status} />
               </div>
-              <p className="text-slate-400 text-sm mt-0.5">
+              <p className="text-slate-500 text-sm mt-0.5">
                 {row.employee.employeeCode} •{" "}
                 {formatDepartment(row.employee.department)}
               </p>
@@ -175,23 +175,23 @@ const RequestModal = ({
           </div>
           <button
             onClick={onClose}
-            className="text-slate-400 hover:text-white transition-colors text-xl leading-none mt-1"
+            className="text-slate-400 hover:text-slate-700 transition-colors text-xl leading-none mt-1"
           >
             ✕
           </button>
         </div>
 
-        <div className="h-px bg-slate-700/50" />
+        <div className="h-px bg-slate-200" />
 
-        <div className="bg-[#161d2b] rounded-2xl p-4 flex flex-col gap-3">
-          <p className="text-white font-semibold text-base">
+        <div className="bg-slate-50 rounded-2xl p-4 flex flex-col gap-3 border border-slate-200">
+          <p className="text-slate-900 font-semibold text-base">
             Сонгосон гэрээнүүд
           </p>
           <div className="flex flex-wrap gap-2">
             {row.templateIds.map((id) => (
               <span
                 key={id}
-                className="rounded-full border border-[#00CC99]/30 bg-[#00CC99]/10 px-2.5 py-1 text-[11px] text-[#9BEBD7]"
+                className="rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-[11px] text-emerald-600"
               >
                 {formatTemplateLabel(id)}
               </span>
@@ -204,7 +204,7 @@ const RequestModal = ({
         </div>
 
         <div className="flex flex-col gap-2">
-          <p className="text-white font-semibold text-base">
+          <p className="text-slate-900 font-semibold text-base">
             Тайлбар{" "}
             <span className="text-slate-500 font-normal">(Заавал биш)</span>
           </p>
@@ -213,12 +213,12 @@ const RequestModal = ({
             onChange={(e) => setNote(e.target.value)}
             placeholder="Энд бичнэ үү..."
             rows={3}
-            className="w-full bg-[#161d2b] border border-slate-700/50 rounded-2xl px-4 py-3 text-slate-300 text-sm placeholder:text-slate-600 outline-none resize-none focus:border-blue-500/50 transition-colors"
+            className="w-full bg-white border border-slate-200 rounded-2xl px-4 py-3 text-slate-700 text-sm placeholder:text-slate-400 outline-none resize-none focus:border-slate-300 transition-colors"
           />
         </div>
 
         {error ? (
-          <p className="text-red-400 text-xs bg-red-500/10 border border-red-500/20 rounded-lg px-3 py-2">
+          <p className="text-red-500 text-xs bg-red-50 border border-red-200 rounded-lg px-3 py-2">
             {error}
           </p>
         ) : null}
@@ -228,14 +228,14 @@ const RequestModal = ({
             <button
               onClick={handleReject}
               disabled={acting}
-              className="flex items-center gap-2 px-5 py-2.5 rounded-xl border border-red-500/50 text-red-400 text-sm font-medium hover:bg-red-500/10 disabled:opacity-50 transition-colors"
+              className="flex items-center gap-2 px-5 py-2.5 rounded-xl border border-red-200 text-red-500 text-sm font-medium hover:bg-red-50 disabled:opacity-50 transition-colors"
             >
               <span>✕</span> Татгалзах
             </button>
             <button
               onClick={handleApprove}
               disabled={acting}
-              className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#0ad4b1] text-black text-sm font-medium hover:bg-[#08bfa0] disabled:opacity-50 transition-colors"
+              className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-slate-900 text-white text-sm font-medium hover:bg-slate-800 disabled:opacity-50 transition-colors"
             >
               <span>✓</span> {acting ? "Түр хүлээнэ үү..." : "Батлах"}
             </button>
@@ -424,29 +424,29 @@ export const ContractRequestsComponent = () => {
   return (
     <div className="flex flex-col gap-6 animate-fade-up">
       {successMessage ? (
-        <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-300">
+        <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-600">
           {successMessage}
         </div>
       ) : null}
 
-      <div className="rounded-2xl border border-white/10 bg-[#0b0f18] px-5 py-4 flex flex-wrap items-center gap-3 justify-between">
-        <div className="flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-slate-300 ">
-          <FiSearch className="text-slate-500" />
+      <div className="rounded-2xl border border-slate-200 bg-white px-5 py-4 flex flex-wrap items-center gap-3 justify-between shadow-[0_1px_2px_rgba(15,23,42,0.06)]">
+        <div className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-600">
+          <FiSearch className="text-slate-400" />
           <input
             value={search}
             onChange={(event) => setSearch(event.target.value)}
             placeholder="Ажилтны кодоор хайх"
-            className="bg-transparent outline-none w-60 text-sm text-slate-200 placeholder:text-slate-500"
+            className="bg-transparent outline-none w-60 text-sm text-slate-600 placeholder:text-slate-400"
           />
         </div>
 
         <div className="flex items-center gap-2">
-          <div className="flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-xs text-slate-300">
-            <FiFilter className="text-slate-500" />
+          <div className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs text-slate-600">
+            <FiFilter className="text-slate-400" />
             <select
               value={activeStatus}
               onChange={(event) => setActiveStatus(event.target.value)}
-              className="bg-transparent outline-none text-xs text-slate-200"
+              className="bg-transparent outline-none text-xs text-slate-600"
             >
               {filters.map((filter) => (
                 <option key={filter.key} value={filter.key}>
@@ -455,20 +455,20 @@ export const ContractRequestsComponent = () => {
               ))}
             </select>
           </div>
-          <button className="flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-xs text-slate-300 hover:text-white">
-            <FiDownload className="text-slate-500" />
+          <button className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs text-slate-600 hover:text-slate-900">
+            <FiDownload className="text-slate-400" />
             Татах
           </button>
         </div>
       </div>
 
       {error ? (
-        <div className="rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-300">
+        <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-500">
           {error.message}
         </div>
       ) : null}
 
-      <div className="rounded-2xl border border-white/10 bg-[#0b0f18]">
+      <div className="rounded-2xl border border-slate-200 bg-white shadow-[0_1px_2px_rgba(15,23,42,0.06)]">
         {loading ? (
           <div className="p-6 flex flex-col gap-3">
             <div className="h-4 w-48 rounded-full skeleton" />
@@ -476,9 +476,9 @@ export const ContractRequestsComponent = () => {
             <div className="h-3 w-56 rounded-full skeleton" />
           </div>
         ) : filtered.length === 0 ? (
-          <div className="p-6 text-slate-500 text-sm">Хүсэлт байхгүй.</div>
+          <div className="p-6 text-slate-400 text-sm">Хүсэлт байхгүй.</div>
         ) : (
-          <div className="divide-y divide-white/10">
+          <div className="divide-y divide-slate-200">
             {filtered.map((row) => {
               const initials = getInitials(
                 row.employee.firstName,
@@ -497,7 +497,7 @@ export const ContractRequestsComponent = () => {
                       setSelected(row);
                     }
                   }}
-                  className="w-full text-left px-5 py-4 flex flex-col gap-3 hover:bg-white/5 transition-colors"
+                  className="w-full text-left px-5 py-4 flex flex-col gap-3 hover:bg-slate-50 transition-colors"
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
@@ -509,7 +509,7 @@ export const ContractRequestsComponent = () => {
                         </div>
                       </div>
                       <div>
-                        <p className="text-white font-medium">
+                        <p className="text-slate-900 font-medium">
                           {row.employee.lastName} {row.employee.firstName}
                         </p>
                         <p className="text-xs text-slate-500">
@@ -529,7 +529,7 @@ export const ContractRequestsComponent = () => {
                             prev === row.id ? null : row.id,
                           );
                         }}
-                        className="text-slate-500 hover:text-white cursor-pointer"
+                        className="text-slate-500 hover:text-slate-700 cursor-pointer"
                       >
                         {expandedId === row.id ? (
                           <FiChevronUp className="text-sm" />
@@ -548,20 +548,20 @@ export const ContractRequestsComponent = () => {
                   </div>
                   {expandedId === row.id ? (
                     <div
-                      className="rounded-xl border border-white/10 bg-[#0c111b] overflow-hidden"
+                      className="rounded-xl border border-slate-200 bg-white overflow-hidden"
                       onClick={(event) => event.stopPropagation()}
                     >
                       {row.templateIds.map((id, index) => (
                         <div
                           key={id}
-                          className={`flex items-center justify-between px-4 py-3 ${index < row.templateIds.length - 1 ? "border-b border-white/5" : ""}`}
+                          className={`flex items-center justify-between px-4 py-3 ${index < row.templateIds.length - 1 ? "border-b border-slate-200" : ""}`}
                         >
                           <div className="flex items-center gap-3">
-                            <div className="h-9 w-9 rounded-lg border border-white/10 bg-white/5 flex items-center justify-center text-slate-300">
+                            <div className="h-9 w-9 rounded-lg border border-slate-200 bg-slate-50 flex items-center justify-center text-slate-500">
                               <FiFileText className="text-base" />
                             </div>
                             <div>
-                              <p className="text-sm text-white font-medium">
+                              <p className="text-sm text-slate-900 font-medium">
                                 {formatTemplateLabel(id)}
                               </p>
                               <p className="text-xs text-slate-500">
@@ -569,13 +569,13 @@ export const ContractRequestsComponent = () => {
                               </p>
                             </div>
                           </div>
-                          <div className="flex items-center gap-3 text-slate-400">
+                          <div className="flex items-center gap-3 text-slate-500">
                             <button
                               onClick={(event) => {
                                 event.stopPropagation();
                                 handlePreview(row, id, index);
                               }}
-                              className="hover:text-white transition-colors"
+                              className="hover:text-slate-900 transition-colors"
                             >
                               <FiEye className="text-sm" />
                             </button>
@@ -584,7 +584,7 @@ export const ContractRequestsComponent = () => {
                                 event.stopPropagation();
                                 handleDownload(row, id, index);
                               }}
-                              className="hover:text-white transition-colors"
+                              className="hover:text-slate-900 transition-colors"
                             >
                               <FiDownload className="text-sm" />
                             </button>
@@ -615,7 +615,7 @@ export const ContractRequestsComponent = () => {
       ) : null}
 
       {previewOpen ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
           <div
             aria-label="Close preview"
             className="absolute inset-0"
@@ -625,27 +625,27 @@ export const ContractRequestsComponent = () => {
               setPreviewError(null);
             }}
           />
-          <div className="relative w-[920px] max-w-[95vw] h-[82vh] bg-[#0f1520] rounded-2xl border border-white/10 overflow-hidden shadow-2xl">
-            <div className="flex items-center justify-between px-5 py-4 border-b border-white/10">
-              <p className="text-sm text-white font-semibold">Inline Preview</p>
+          <div className="relative w-[920px] max-w-[95vw] h-[82vh] bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-[0_28px_60px_rgba(15,23,42,0.12)]">
+            <div className="flex items-center justify-between px-5 py-4 border-b border-slate-200">
+              <p className="text-sm text-slate-900 font-semibold">Inline Preview</p>
               <button
                 onClick={() => {
                   setPreviewOpen(false);
                   setPreviewContent(null);
                   setPreviewError(null);
                 }}
-                className="text-slate-400 hover:text-white"
+                className="text-slate-400 hover:text-slate-700"
               >
                 ✕
               </button>
             </div>
-            <div className="h-[calc(100%-56px)] bg-[#0b0f18] p-4">
+            <div className="h-[calc(100%-56px)] bg-slate-50 p-4">
               {previewLoading ? (
                 <div className="h-full flex items-center justify-center text-slate-500">
                   Ачаалж байна...
                 </div>
               ) : previewError ? (
-                <div className="h-full flex items-center justify-center text-red-400">
+                <div className="h-full flex items-center justify-center text-red-500">
                   {previewError}
                 </div>
               ) : previewContent ? (

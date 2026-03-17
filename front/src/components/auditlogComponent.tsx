@@ -39,7 +39,7 @@ export function AuditlogComponent() {
   }, [actions, search]);
 
   return (
-    <div className="min-h-screen bg-[#080c12] text-white font-sans flex flex-col gap-4 p-0">
+    <div className="min-h-screen bg-[#F4F5F7] text-slate-900 font-sans flex flex-col gap-4 p-0">
       <AddEmployeeRequestDialog
         key={sendRequestAction?.id ?? "empty"}
         action={sendRequestAction}
@@ -49,28 +49,10 @@ export function AuditlogComponent() {
         }}
       />
 
-      <div className="flex items-center justify-between">
-        <div>
-          <p className="text-white text-2xl font-bold">Үйлдлийн тохиргоо</p>
-          <p className="text-slate-500 text-sm mt-0.5">
-            HR үйлдлүүдийн тохиргоо ба баримт бичгийн холболт
-          </p>
-        </div>
-        <div className="flex items-center gap-2 bg-[#0d1117] border border-slate-700/50 rounded-xl px-4 py-2.5 min-w-[220px]">
-          <SearchIcon />
-          <input
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="bg-transparent text-slate-300 text-sm outline-none placeholder:text-slate-600 w-full"
-            placeholder="Хайх..."
-          />
-        </div>
-      </div>
-
       <p className="text-slate-500 text-sm">Нийт {filtered.length} үйлдэл</p>
 
       {error && (
-        <div className="rounded-2xl border border-red-500/20 bg-red-500/5 px-5 py-4 text-sm text-red-400">
+        <div className="rounded-2xl border border-red-200 bg-red-50 px-5 py-4 text-sm text-red-500">
           {error.message}
         </div>
       )}
@@ -83,7 +65,7 @@ export function AuditlogComponent() {
           <div className="h-3 w-72 rounded-full skeleton" />
         </div>
       ) : filtered.length === 0 ? (
-        <div className="py-12 text-center text-slate-500 text-sm">
+        <div className="py-12 text-center text-slate-400 text-sm">
           Үйлдэл олдсонгүй
         </div>
       ) : (
