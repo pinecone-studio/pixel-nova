@@ -24,11 +24,25 @@ export function AuditlogComponent() {
   );
 
   const actions = useMemo(() => data?.actions ?? [], [data?.actions]);
+  const allowedActionNames = useMemo(
+    () =>
+      new Set([
+        "add_employee",
+        "change_position",
+        "promote_employee",
+        "offboard_employee",
+      ]),
+    [],
+  );
+  const visibleActions = useMemo(
+    () => actions.filter((action) => allowedActionNames.has(action.name)),
+    [actions, allowedActionNames],
+  );
 
   const filtered = useMemo(() => {
-    if (!search) return actions;
+    if (!search) return visibleActions;
     const query = search.toLowerCase();
-    return actions.filter(
+    return visibleActions.filter(
       (action) =>
         action.name.toLowerCase().includes(query) ||
         action.phase.toLowerCase().includes(query) ||
@@ -36,7 +50,7 @@ export function AuditlogComponent() {
           recipient.toLowerCase().includes(query),
         ),
     );
-  }, [actions, search]);
+  }, [visibleActions, search]);
 
   return (
     <div className="min-h-screen bg-[#F4F5F7] text-slate-900 font-sans flex flex-col gap-4 p-0">
