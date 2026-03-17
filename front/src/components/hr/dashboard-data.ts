@@ -8,8 +8,9 @@ import {
   GET_AUDIT_LOGS,
   GET_DOCUMENTS,
   GET_EMPLOYEES,
+  GET_LEAVE_REQUESTS,
 } from "@/graphql/queries";
-import type { AuditLog, Document, Employee } from "@/lib/types";
+import type { AuditLog, Document, Employee, LeaveRequest } from "@/lib/types";
 
 export type DashboardStats = {
   totalEmployees: number;
@@ -63,9 +64,18 @@ export function useHrDashboardData() {
     fetchPolicy: "cache-and-network",
   });
 
+  const { data: pendingRequestsData, loading: pendingLoading } = useQuery<{
+    leaveRequests: LeaveRequest[];
+  }>(GET_LEAVE_REQUESTS, {
+    variables: { status: "pending" },
+    context: queryContext,
+    fetchPolicy: "cache-and-network",
+  });
+
   const employees = useMemo(() => employeesData?.employees ?? [], [employeesData]);
   const auditLogs = useMemo(() => auditLogsData?.auditLogs ?? [], [auditLogsData]);
-  const loading = employeesLoading || auditLogsLoading || documentsLoading;
+  const loading =
+    employeesLoading || auditLogsLoading || documentsLoading || pendingLoading;
 
   useEffect(() => {
     let cancelled = false;
@@ -150,5 +160,6 @@ export function useHrDashboardData() {
     barData,
     loading,
     stats,
+    pendingRequests: pendingRequestsData?.leaveRequests ?? [],
   };
 }

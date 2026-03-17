@@ -5,7 +5,6 @@ import { useMutation, useQuery } from "@apollo/client/react";
 import { FiEdit2, FiPlus, FiSend, FiX } from "react-icons/fi";
 
 import {
-  AcepptedIcon,
   AnnouncementIcon,
   CalIcon,
   ClockIcon,
@@ -175,7 +174,7 @@ export default function NotificationsPage() {
           </div>
           <div className="rounded-2xl border border-slate-200 bg-white p-5 flex items-center gap-4 shadow-sm">
             <div className="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center">
-              <AcepptedIcon className="text-emerald-600 " />
+              <FiSend className="h-5 w-5" />
             </div>
             <div>
               <p className="text-3xl font-bold text-slate-900">
