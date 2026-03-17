@@ -198,6 +198,10 @@ export const Request = ({ employee }: { employee?: Employee }) => {
   const [profileForm, setProfileForm] = useState<EmployeeDocumentProfile>({});
   const [profileError, setProfileError] = useState<string | null>(null);
   const [profileSaved, setProfileSaved] = useState(false);
+  const [useSavedProfile, setUseSavedProfile] = useState(true);
+  const [toasts, setToasts] = useState<Array<{ id: string; text: string }>>(
+    [],
+  );
 
   const authToken =
     typeof window === "undefined"
@@ -231,6 +235,15 @@ export const Request = ({ employee }: { employee?: Employee }) => {
   const [updateDocumentProfile, { loading: savingProfile }] = useMutation<{
     updateMyDocumentProfile: Employee;
   }>(UPDATE_MY_DOCUMENT_PROFILE);
+
+  function pushToast(text: string) {
+    const id = crypto.randomUUID();
+    setToasts((prev) => [...prev, { id, text }]);
+    setTimeout(
+      () => setToasts((prev) => prev.filter((toast) => toast.id !== id)),
+      2200,
+    );
+  }
 
   async function sendRequest(payload: {
     type: string;
@@ -271,6 +284,7 @@ export const Request = ({ employee }: { employee?: Employee }) => {
         value ? String(value).trim().length > 0 : false,
       ),
     );
+    setUseSavedProfile(true);
   }, [activeTab, employee?.documentProfile]);
 
   useEffect(() => {
@@ -408,6 +422,8 @@ export const Request = ({ employee }: { employee?: Employee }) => {
     });
 
     setProfileSaved(true);
+    setUseSavedProfile(true);
+    pushToast("Мэдээлэл амжилттай хадгаллаа.");
   }
 
   function getTemplateLabel(templateId: string) {
@@ -437,7 +453,7 @@ export const Request = ({ employee }: { employee?: Employee }) => {
 
     try {
       if (activeTab === "Гэрээний хүсэлт") {
-        if (!profileSaved) {
+        if (!profileSaved || !useSavedProfile) {
           setSendError("Гэрээний мэдээллээ эхлээд бүрдүүлнэ үү.");
           return;
         }
@@ -485,6 +501,7 @@ export const Request = ({ employee }: { employee?: Employee }) => {
             headers: buildGraphQLHeaders({ authToken }),
           },
         });
+        pushToast("Гэрээний хүсэлт амжилттай илгээгдлээ.");
       } else if (activeTab === "Тойрох хуудас") {
         await sendRequest({
           type: `Тойрох хуудас${clearanceType ? ` - ${clearanceType}` : ""}`,
@@ -720,7 +737,7 @@ export const Request = ({ employee }: { employee?: Employee }) => {
       {activeTab === "Гэрээний хүсэлт" && !submitted && (
         <div className="fixed inset-0 flex items-center justify-center bg-black/60 backdrop-blur-sm z-50">
           <div
-            className={`w-[520px] max-h-[82vh] overflow-y-auto rounded-2xl ${DIALOG_BG} text-white p-6 border ${DIALOG_BORDER} shadow-2xl flex flex-col gap-4 animate-fade-up`}
+            className={`w-[560px] max-h-[82vh] overflow-y-auto rounded-2xl ${DIALOG_BG} text-white p-6 border ${DIALOG_BORDER} shadow-2xl flex flex-col gap-4 animate-fade-up`}
           >
             <div className="flex justify-between items-start">
               <div>
@@ -791,23 +808,54 @@ export const Request = ({ employee }: { employee?: Employee }) => {
                 )}
               </div>
 
-              <div className="grid grid-cols-1 gap-2">
-                {PROFILE_REQUIRED_FIELDS.map((field) => (
-                  <div key={field.key} className="flex flex-col gap-1">
-                    <label className="text-xs text-gray-400">
-                      {field.label}
-                    </label>
+              {profileSaved ? (
+                <div className="flex flex-wrap gap-3 text-sm text-gray-300">
+                  <label className="flex items-center gap-2">
                     <input
-                      className={INPUT_CLASS}
-                      value={profileForm[field.key] ?? ""}
-                      onChange={(e) =>
-                        updateProfileField(field.key, e.target.value)
-                      }
-                      placeholder={field.label}
+                      type="radio"
+                      name="profile-mode"
+                      checked={useSavedProfile}
+                      onChange={() => setUseSavedProfile(true)}
+                      className="h-4 w-4 text-[#00CC99] border-[#1a2035] bg-[#040d18] focus:ring-0"
                     />
-                  </div>
-                ))}
-              </div>
+                    Мэдээллээр үргэлжлүүлэх
+                  </label>
+                  <label className="flex items-center gap-2">
+                    <input
+                      type="radio"
+                      name="profile-mode"
+                      checked={!useSavedProfile}
+                      onChange={() => setUseSavedProfile(false)}
+                      className="h-4 w-4 text-[#00CC99] border-[#1a2035] bg-[#040d18] focus:ring-0"
+                    />
+                    Засварлах
+                  </label>
+                </div>
+              ) : null}
+
+              {!profileSaved || !useSavedProfile ? (
+                <div className="grid grid-cols-1 gap-2">
+                  {PROFILE_REQUIRED_FIELDS.map((field) => (
+                    <div key={field.key} className="flex flex-col gap-1">
+                      <label className="text-xs text-gray-400">
+                        {field.label}
+                      </label>
+                      <input
+                        className={INPUT_CLASS}
+                        value={profileForm[field.key] ?? ""}
+                        onChange={(e) =>
+                          updateProfileField(field.key, e.target.value)
+                        }
+                        placeholder={field.label}
+                      />
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-xs text-gray-500">
+                  Мэдээлэл бүрдсэн. Хэрэв өөрчлөх бол “Засварлах”‑ыг сонгоно уу.
+                </p>
+              )}
 
               {profileError ? (
                 <p className="text-amber-300 text-xs bg-amber-500/10 border border-amber-500/20 rounded-lg px-3 py-2">
@@ -815,16 +863,18 @@ export const Request = ({ employee }: { employee?: Employee }) => {
                 </p>
               ) : null}
 
-              <div className="flex justify-end">
-                <button
-                  type="button"
-                  onClick={handleSaveProfile}
-                  disabled={savingProfile}
-                  className="border border-[#1a2035] px-4 py-2 rounded-lg text-xs text-gray-300 hover:bg-white/5 hover:text-white transition-colors disabled:opacity-50"
-                >
-                  {savingProfile ? "Хадгалж байна..." : "Мэдээлэл хадгалах"}
-                </button>
-              </div>
+              {!profileSaved || !useSavedProfile ? (
+                <div className="flex justify-end">
+                  <button
+                    type="button"
+                    onClick={handleSaveProfile}
+                    disabled={savingProfile}
+                    className="border border-[#1a2035] px-4 py-2 rounded-lg text-xs text-gray-300 hover:bg-white/5 hover:text-white transition-colors disabled:opacity-50"
+                  >
+                    {savingProfile ? "Хадгалж байна..." : "Мэдээлэл хадгалах"}
+                  </button>
+                </div>
+              ) : null}
             </div>
 
             <div className="rounded-lg border border-white/10 bg-[#040d18] p-3 flex flex-col gap-3">
@@ -977,6 +1027,19 @@ export const Request = ({ employee }: { employee?: Employee }) => {
           </div>
         </div>
       )}
+
+      {toasts.length > 0 ? (
+        <div className="fixed bottom-6 right-6 z-[60] flex flex-col gap-2">
+          {toasts.map((toast) => (
+            <div
+              key={toast.id}
+              className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-200 shadow-lg"
+            >
+              {toast.text}
+            </div>
+          ))}
+        </div>
+      ) : null}
     </div>
   );
 };
