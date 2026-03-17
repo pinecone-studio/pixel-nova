@@ -398,9 +398,8 @@ export const mutationResolvers = {
     );
 
     if (incompleteFields.length > 0) {
-      console.warn(
-        "Contract request approved with incomplete fields:",
-        incompleteFields,
+      throw new Error(
+        `Дутуу мэдээлэл байна: ${incompleteFields.join(", ")}`,
       );
     }
 
@@ -417,13 +416,15 @@ export const mutationResolvers = {
 
     await executeTriggeredAction(ctx, request.employeeId, "contract_request", {
       actionConfig,
-      templateDataOverrides: signatureHtml
-        ? {
-            employee_signature: signatureHtml,
-            employee_sign_line: signatureHtml,
-            employee_sign_date: signDate,
-          }
-        : { employee_sign_date: signDate },
+      templateDataOverrides: {
+        employee_sign_date: signDate,
+        ...(signatureHtml
+          ? {
+              employee_signature: signatureHtml,
+              employee_sign_line: signatureHtml,
+            }
+          : {}),
+      },
     });
 
     const updated = await updateContractRequestStatus(
