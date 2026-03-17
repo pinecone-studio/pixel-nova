@@ -25,7 +25,7 @@ function AuditSummaryCard({
     <button
       type="button"
       onClick={onClick}
-      className={`flex h-[92px] items-center justify-between rounded-[24px] border px-7 text-left transition-[flex-basis,background-color,border-color] duration-300 lg:basis-[32%] ${active ? "lg:basis-[66%]" : ""} ${summaryCardTone(active, tone)}`}
+      className={`flex h-23 items-center justify-between rounded-[24px] border px-7 text-left transition-[flex-basis,background-color,border-color] duration-300 lg:basis-[32%] ${active ? "lg:basis-[66%]" : ""} ${summaryCardTone(active, tone)}`}
     >
       <div className="flex min-w-0 items-center gap-5">
         {icon}

@@ -7,7 +7,6 @@ import { FiEdit2, FiPlus, FiSend, FiX } from "react-icons/fi";
 import {
   AcepptedIcon,
   AnnouncementIcon,
-  BellIcon,
   CalIcon,
 } from "@/components/icons";
 import {
@@ -148,7 +147,7 @@ export default function NotificationsPage() {
             <h1 className="text-2xl font-semibold mt-2">Мэдэгдэл</h1>
           </div>
           <div className="flex items-center gap-3">
-            <div className="h-9 w-[220px] rounded-full border border-white/10 bg-white/5 px-4 text-xs text-slate-300 flex items-center">
+            <div className="h-9 w-55 rounded-full border border-white/10 bg-white/5 px-4 text-xs text-slate-300 flex items-center">
               Хайх...
             </div>
             <button
@@ -290,7 +289,7 @@ export default function NotificationsPage() {
             className="absolute inset-0 bg-black/60"
             onClick={() => setDrawerOpen(false)}
           />
-          <div className="relative h-[485px] w-[500px] rounded-lg bg-[#0b111a] border-l border-white/10 p-6 flex flex-col gap-4 shadow-[0_20px_60px_rgba(0,0,0,0.6)]">
+          <div className="relative h-121.25 w-125 rounded-lg bg-[#0b111a] border-l border-white/10 p-6 flex flex-col gap-4 shadow-[0_20px_60px_rgba(0,0,0,0.6)]">
             <div className="flex items-center justify-between">
               <p className="text-lg font-semibold">Шинэ мэдэгдэл</p>
               <button
@@ -320,7 +319,7 @@ export default function NotificationsPage() {
                 }
                 placeholder="Мэдэгдлийн агуулга"
                 rows={8}
-                className="rounded-xl w-[452px] h-30 border border-white/10 bg-white/5 px-4 py-3 text-sm text-white placeholder:text-slate-500 outline-none focus:border-emerald-500/40 resize-none"
+                className="rounded-xl w-113 h-30 border border-white/10 bg-white/5 px-4 py-3 text-sm text-white placeholder:text-slate-500 outline-none focus:border-emerald-500/40 resize-none"
               />
             </div>
             <div className="flex flex-col gap-2">

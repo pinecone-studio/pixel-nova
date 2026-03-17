@@ -80,8 +80,7 @@ export async function updateAnnouncementDraft(
       audience: data.audience ?? "all",
       updatedAt: now,
     })
-    .where(eq(announcements.id, id))
-    .where(eq(announcements.status, "draft"));
+    .where(and(eq(announcements.id, id), eq(announcements.status, "draft")));
 
   const [row] = await db
     .select()

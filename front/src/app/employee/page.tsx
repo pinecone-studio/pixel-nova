@@ -102,9 +102,9 @@ export default function EmployeePage() {
 
   return (
     <div className="min-h-screen bg-[#0A0A0F]">
-      <div className="mx-auto flex w-full max-w-[1200px] flex-col gap-10 px-6 py-10">
-        <div className="mx-auto flex h-[264px] w-full max-w-[1056px] items-center rounded-2xl bg-[linear-gradient(135deg,#0a0f15_0%,#0b1018_45%,#0a0d12_100%)] p-10 shadow-[0_0_0_1px_rgba(0,153,255,0.2),0_20px_60px_rgba(0,0,0,0.45)]">
-          <div className="flex max-w-[640px] flex-col gap-3">
+      <div className="mx-auto flex w-full max-w-300 flex-col gap-10 px-6 py-10">
+        <div className="mx-auto flex h-66 w-full max-w-264 items-center rounded-2xl bg-[linear-gradient(135deg,#0a0f15_0%,#0b1018_45%,#0a0d12_100%)] p-10 shadow-[0_0_0_1px_rgba(0,153,255,0.2),0_20px_60px_rgba(0,0,0,0.45)]">
+          <div className="flex max-w-160 flex-col gap-3">
             <p className="text-[#00CC99] text-sm font-medium tracking-widest uppercase">
               Сайн байна уу?
             </p>
@@ -140,13 +140,13 @@ export default function EmployeePage() {
           </div>
         </div>
 
-        <div className="mx-auto w-full max-w-[1056px]">
+        <div className="mx-auto w-full max-w-264">
           <Request employee={employee ?? undefined} />
         </div>
 
         <MyContractRequests />
 
-        <section className="mx-auto flex w-full max-w-[1056px] flex-col gap-6 animate-fade-up">
+        <section className="mx-auto flex w-full max-w-264 flex-col gap-6 animate-fade-up">
           <div className="flex items-center gap-4">
             <h2 className="text-[24px] font-semibold tracking-[-0.02em] text-white">
               Бичиг Баримтууд

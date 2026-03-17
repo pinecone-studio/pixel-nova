@@ -40,7 +40,7 @@ export const EmployeeNotifications = () => {
   }
 
   return (
-    <section className="mx-auto flex w-full max-w-[1056px] flex-col gap-4 animate-fade-up">
+    <section className="mx-auto flex w-full max-w-264 flex-col gap-4 animate-fade-up">
       <div className="flex items-center gap-3">
         <h2 className="text-[20px] font-semibold tracking-[-0.02em] text-white">
           Мэдэгдэл

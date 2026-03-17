@@ -11,11 +11,14 @@ import { buildGraphQLHeaders } from "@/lib/apollo-client";
 import type { ContractRequest } from "@/lib/types";
 
 import { getActiveHrNavItem, HR_NAV_ITEMS } from "./navigation";
+import { HrShellNotifRow } from "./notif/HrShellNotifRow";
+import { mapContractRequestToNotif } from "./notif/hrNotifUtils";
 
 export function HrShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const activeItem = getActiveHrNavItem(pathname);
   const [notifOpen, setNotifOpen] = useState(false);
+  const [selectedNotifId, setSelectedNotifId] = useState<string | null>(null);
 
   const { data: contractData } = useQuery<{
     contractRequests: ContractRequest[];
@@ -27,17 +30,9 @@ export function HrShell({ children }: { children: React.ReactNode }) {
   });
 
   const notifications = useMemo(() => {
-    const contracts = (contractData?.contractRequests ?? []).map((row) => ({
-      id: `contract-${row.id}`,
-      title: "Гэрээний хүсэлт",
-      body: `${row.employee.lastName} ${row.employee.firstName} • ${row.templateIds.join(", ")}`,
-      status: row.status,
-      createdAt: row.createdAt,
-    }));
-    return contracts.sort(
-      (a, b) =>
-        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
-    );
+    return (contractData?.contractRequests ?? [])
+      .map(mapContractRequestToNotif)
+      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
   }, [contractData]);
 
   const unreadCount = notifications.filter((n) => n.status === "pending").length;
@@ -109,7 +104,15 @@ export function HrShell({ children }: { children: React.ReactNode }) {
               </Link>
               <div className="relative">
                 <button
-                  onClick={() => setNotifOpen((prev) => !prev)}
+                  onClick={() =>
+                    setNotifOpen((prev) => {
+                      const next = !prev;
+                      if (!next) {
+                        setSelectedNotifId(null);
+                      }
+                      return next;
+                    })
+                  }
                   className="h-9 w-9 rounded-lg border border-[#0ad4b1]/40 bg-[#0b201d] cursor-pointer text-[#d7fff8] flex items-center justify-center hover:border-[#0ad4b1] hover:bg-[#0f2b27] transition-colors"
                 >
                   <NotifIcon />
@@ -121,43 +124,41 @@ export function HrShell({ children }: { children: React.ReactNode }) {
                 ) : null}
 
                 {notifOpen ? (
-                  <div className="absolute right-0 mt-3 w-[320px] rounded-2xl border border-white/10 bg-[#0b111a] shadow-2xl p-3 z-50">
-                    <div className="flex items-center justify-between mb-2">
-                      <p className="text-sm font-semibold text-white">
-                        Мэдэгдэл
-                      </p>
-                      <button
-                        onClick={() => setNotifOpen(false)}
-                        className="text-xs text-slate-400 hover:text-white"
-                      >
-                        Хаах
-                      </button>
+                  <div className="absolute right-0 top-[52px] z-50 w-[420px] overflow-hidden rounded-[24px] border border-[#223244] bg-[#050A11] shadow-[0_24px_70px_rgba(0,0,0,0.42)]">
+                    <div className="border-b border-[#182433] px-6 pb-3 pt-2">
+                      <div className="flex items-center justify-between gap-3">
+                        <p className="text-[27px] font-semibold leading-none tracking-[-0.03em] text-white">
+                          Мэдэгдэл
+                        </p>
+                        <button
+                          onClick={() => {
+                            setNotifOpen(false);
+                            setSelectedNotifId(null);
+                          }}
+                          className="text-sm text-[#708096] hover:text-white"
+                        >
+                          Хаах
+                        </button>
+                      </div>
                     </div>
-                    <div className="max-h-[320px] overflow-y-auto flex flex-col gap-2">
+
+                    <div className="scrollbar-slim max-h-[406px] overflow-y-auto px-4 pb-4 pt-0">
                       {notifications.length === 0 ? (
-                        <div className="text-xs text-slate-500 py-3 text-center">
+                        <div className="flex min-h-[180px] items-center justify-center text-sm text-[#718099]">
                           Одоогоор мэдэгдэл алга байна.
                         </div>
                       ) : (
                         notifications.slice(0, 6).map((item) => (
-                          <div
+                          <HrShellNotifRow
                             key={item.id}
-                            className="rounded-xl border border-white/5 bg-white/5 px-3 py-2"
-                          >
-                            <div className="flex items-center justify-between">
-                              <p className="text-xs font-semibold text-white">
-                                {item.title}
-                              </p>
-                              <span className="text-[10px] text-slate-500">
-                                {new Date(item.createdAt).toLocaleDateString(
-                                  "mn-MN",
-                                )}
-                              </span>
-                            </div>
-                            <p className="text-[11px] text-slate-400">
-                              {item.body}
-                            </p>
-                          </div>
+                            item={item}
+                            expanded={selectedNotifId === item.id}
+                            onSelect={() =>
+                              setSelectedNotifId((current) =>
+                                current === item.id ? null : item.id,
+                              )
+                            }
+                          />
                         ))
                       )}
                     </div>

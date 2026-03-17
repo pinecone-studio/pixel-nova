@@ -17,7 +17,7 @@ export function AuditToolbar({
 }) {
   return (
     <div className="flex w-full items-center gap-3">
-      <div className="flex h-[44px] flex-1 items-center gap-3 rounded-[12px] border border-[#1B2431] bg-[#161E2A] px-4">
+      <div className="flex h-11 flex-1 items-center gap-3 rounded-[12px] border border-[#1B2431] bg-[#161E2A] px-4">
         <BiSearch className="h-5 w-5 text-[#7E8A9E]" />
         <input
           value={search}
@@ -31,7 +31,7 @@ export function AuditToolbar({
         <select
           value={listFilter}
           onChange={(event) => onFilterChange(event.target.value as ListFilter)}
-          className="h-[44px] w-[186px] appearance-none rounded-[12px] border border-[#1B2431] bg-[#161E2A] px-4 pr-11 text-[15px] text-[#E6EDF5] outline-none"
+          className="h-11 w-46.5 appearance-none rounded-[12px] border border-[#1B2431] bg-[#161E2A] px-4 pr-11 text-[15px] text-[#E6EDF5] outline-none"
         >
           {visibleFilterOptions.map((option) => (
             <option key={option.value} value={option.value}>
