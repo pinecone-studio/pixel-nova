@@ -199,13 +199,13 @@ const FILTER_OPTIONS: Record<AuditView, Array<{ value: ListFilter; label: string
 function summaryCardTone(active: boolean, color: "blue" | "green") {
   if (color === "blue") {
     return active
-      ? "border-[#98C1FF] bg-white"
-      : "border-[#EAECF0] bg-white hover:border-[#98C1FF]";
+      ? "border-[#0B74FF] bg-[radial-gradient(circle_at_top_left,rgba(14,95,255,0.22),transparent_42%),#060B14]"
+      : "border-[#10223D] bg-[#070B12]";
   }
 
   return active
-    ? "border-[#86EFAC] bg-white"
-    : "border-[#EAECF0] bg-white hover:border-[#86EFAC]";
+    ? "border-[#0C9E4F] bg-[radial-gradient(circle_at_top_left,rgba(15,162,71,0.18),transparent_42%),#050B08]"
+    : "border-[#133223] bg-[#070B0A]";
 }
 
 function sectionLabel(type: AuditView) {
@@ -216,7 +216,7 @@ function sectionLabel(type: AuditView) {
 
 function SectionPill({ count }: { count: number }) {
   return (
-    <span className="rounded-full border border-[#D0D5DD] bg-[#F9FAFB] px-3 py-1 text-xs text-[#98A2B3]">
+    <span className="rounded-full border border-[#243243] bg-[#131C28] px-3 py-1 text-xs text-[#7E8A9E]">
       {count} хүсэлт
     </span>
   );
@@ -233,8 +233,8 @@ function Field({
 }) {
   return (
     <div className={full ? "w-full" : ""}>
-      <p className="mb-2 text-sm text-[#344054]">{label}</p>
-      <div className="rounded-xl border border-[#D0D5DD] bg-white px-4 py-3 text-[15px] text-[#101828]">
+      <p className="mb-2 text-sm text-[#D9E2EC]">{label}</p>
+      <div className="rounded-xl border border-[#2A3545] bg-[#0C131E] px-4 py-3 text-[15px] text-[#E6EDF5]">
         {value}
       </div>
     </div>
@@ -250,18 +250,18 @@ function EmployeeRequestModal({
 }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/65 p-4 backdrop-blur-sm">
-      <div className="w-full max-w-[612px] rounded-[28px] border border-[#EAECF0] bg-white p-7 shadow-[0_24px_80px_rgba(0,0,0,0.18)]">
+      <div className="w-full max-w-[612px] rounded-[28px] border border-[#1A2431] bg-[#09111C] p-7 shadow-[0_24px_80px_rgba(0,0,0,0.45)]">
         <div className="mb-8 flex items-start justify-between">
           <div>
-            <p className="text-[13px] text-[#98A2B3]">Add Employee request</p>
-            <h2 className="mt-3 text-[20px] font-semibold text-[#101828]">
+            <p className="text-[13px] text-[#9AA7BA]">Add Employee request</p>
+            <h2 className="mt-3 text-[20px] font-semibold text-white">
               Шинэ ажилтан
             </h2>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="text-[#101828] transition hover:opacity-70"
+            className="text-[#B0BAC7] transition hover:text-white"
           >
             <BiX className="h-7 w-7" />
           </button>
@@ -280,27 +280,27 @@ function EmployeeRequestModal({
         </div>
 
         <div className="mt-6">
-          <p className="mb-3 text-sm font-medium text-[#101828]">Хавсаргасан файл</p>
+          <p className="mb-3 text-sm font-medium text-white">Хавсаргасан файл</p>
           <div className="flex flex-col gap-3">
             {entry.files.map((file) => (
               <div
                 key={file.id}
-                className="flex items-center justify-between rounded-2xl border border-[#EAECF0] bg-white px-3 py-3"
+                className="flex items-center justify-between rounded-2xl border border-[#1A2431] bg-[#121A25] px-3 py-3"
               >
                 <div className="flex items-center gap-3">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-[#D0D5DD] bg-[#F9FAFB] text-[#667085]">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-[#222E3E] bg-[#0D1623] text-[#7E8A9E]">
                     <FiFileText className="h-5 w-5" />
                   </div>
                   <div>
-                    <p className="text-sm font-medium text-[#101828]">
+                    <p className="text-sm font-medium text-[#E6EDF5]">
                       {file.title}
                     </p>
-                    <p className="text-xs text-[#98A2B3]">{file.fileName}</p>
+                    <p className="text-xs text-[#7E8A9E]">{file.fileName}</p>
                   </div>
                 </div>
                 <button
                   type="button"
-                  className="rounded-full p-2 text-[#667085] transition hover:bg-[#F2F4F7] hover:text-[#101828]"
+                  className="rounded-full p-2 text-[#7E8A9E] transition hover:bg-white/5 hover:text-white"
                 >
                   <FiEye className="h-4 w-4" />
                 </button>
@@ -313,14 +313,14 @@ function EmployeeRequestModal({
           <button
             type="button"
             onClick={onClose}
-            className="rounded-2xl border border-[#FF5C5C] px-6 py-3 text-[15px] font-medium text-[#FF3B30] transition hover:bg-[#FFF1F1]"
+            className="rounded-2xl border border-[#FF3B3B] px-6 py-3 text-[15px] font-medium text-[#FF3B3B] transition hover:bg-[#FF3B3B]/10"
           >
             Татгалзах
           </button>
           <button
             type="button"
             onClick={onClose}
-            className="rounded-2xl bg-[#101828] px-6 py-3 text-[15px] font-medium text-white transition hover:bg-[#1D2939]"
+            className="rounded-2xl bg-[#16D17A] px-6 py-3 text-[15px] font-medium text-[#05100B] transition hover:bg-[#1BE589]"
           >
             Баталгаажуулах
           </button>
@@ -339,44 +339,44 @@ function DocumentReviewModal({
 }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/65 p-4 backdrop-blur-sm">
-      <div className="w-full max-w-[500px] rounded-[28px] border border-[#EAECF0] bg-white px-8 py-9 shadow-[0_24px_80px_rgba(0,0,0,0.18)]">
+      <div className="w-full max-w-[500px] rounded-[28px] border border-[#1A2431] bg-[#09111C] px-8 py-9 shadow-[0_24px_80px_rgba(0,0,0,0.45)]">
         <div className="mb-8 flex items-start justify-between gap-4">
-          <h2 className="text-[32px] font-medium leading-none text-[#101828]">
+          <h2 className="text-[32px] font-medium leading-none text-white">
             {entry.modalTitle}
           </h2>
           <button
             type="button"
             onClick={onClose}
-            className="text-[#101828] transition hover:opacity-70"
+            className="text-[#F3F7FB] transition hover:opacity-75"
           >
             <BiX className="h-9 w-9" />
           </button>
         </div>
 
         <div>
-          <p className="mb-3 text-[18px] font-semibold text-[#101828]">Тайлбар</p>
-          <div className="min-h-[120px] rounded-[18px] border border-[#D0D5DD] bg-[#FCFCFD] px-5 py-4 text-[18px] leading-[1.35] text-[#667085]">
+          <p className="mb-3 text-[18px] font-semibold text-white">Тайлбар</p>
+          <div className="min-h-[120px] rounded-[18px] border border-[#2B3545] bg-[#0A121D] px-5 py-4 text-[18px] leading-[1.35] text-[#EEF4FA]">
             {entry.description}
           </div>
         </div>
 
         <div className="mt-8">
-          <p className="mb-4 text-[18px] font-semibold text-[#101828]">Хавсаргасан файл</p>
-          <div className="flex items-center justify-between rounded-[18px] border border-[#EAECF0] bg-white px-3.5 py-3.5">
+          <p className="mb-4 text-[18px] font-semibold text-white">Хавсаргасан файл</p>
+          <div className="flex items-center justify-between rounded-[18px] border border-[#1A2431] bg-[#151E29] px-3.5 py-3.5">
             <div className="flex items-center gap-4">
-              <div className="flex h-[56px] w-[56px] items-center justify-center rounded-[20px] border border-[#D0D5DD] bg-[#F9FAFB] text-[#667085]">
+              <div className="flex h-[56px] w-[56px] items-center justify-center rounded-[20px] border border-[#2B3545] bg-[#111A26] text-[#7E8A9E]">
                 <FiFileText className="h-6 w-6" />
               </div>
               <div>
-                <p className="text-[16px] font-medium text-[#101828]">
+                <p className="text-[16px] font-medium text-[#EEF4FA]">
                   {entry.fileTitle}
                 </p>
-                <p className="mt-1 text-[14px] text-[#98A2B3]">{entry.fileName}</p>
+                <p className="mt-1 text-[14px] text-[#9BA8B9]">{entry.fileName}</p>
               </div>
             </div>
             <button
               type="button"
-              className="rounded-full p-3 text-[#667085] transition hover:bg-[#F2F4F7] hover:text-[#101828]"
+              className="rounded-full p-3 text-[#7E8A9E] transition hover:bg-white/5 hover:text-white"
             >
               <FiEye className="h-6 w-6" />
             </button>
@@ -387,14 +387,14 @@ function DocumentReviewModal({
           <button
             type="button"
             onClick={onClose}
-            className="rounded-[18px] border border-[#FF5C5C] px-7 py-3 text-[16px] font-medium text-[#FF3B30] transition hover:bg-[#FFF1F1]"
+            className="rounded-[18px] border border-[#FF3131] px-7 py-3 text-[16px] font-medium text-[#FF3131] transition hover:bg-[#FF3131]/10"
           >
             Татгалзах
           </button>
           <button
             type="button"
             onClick={onClose}
-            className="rounded-[18px] bg-[#101828] px-8 py-3 text-[16px] font-medium text-white transition hover:bg-[#1D2939]"
+            className="rounded-[18px] bg-[#19D37B] px-8 py-3 text-[16px] font-medium text-[#F7FFFB] transition hover:bg-[#21E789]"
           >
             Баталгаажуулах
           </button>
@@ -415,17 +415,17 @@ function NewEmployeeRow({
     <button
       type="button"
       onClick={() => onOpen(entry)}
-      className="flex w-full items-center justify-between rounded-[20px] border border-[#EAECF0] bg-white px-5 py-5 text-left transition hover:border-[#D0D5DD] hover:bg-[#FCFCFD]"
+      className="flex w-full items-center justify-between rounded-[20px] border border-[#122236] bg-[#0B1623] px-5 py-5 text-left transition hover:border-[#1D3654] hover:bg-[#0D1A28]"
     >
       <div className="flex items-center gap-4">
-        <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-[#B7EAC7] bg-[#F0FDF4] text-[#22C55E]">
+        <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#0B2E2A] text-[#00D3A7]">
           <FiCheckCircle className="h-5 w-5" />
         </div>
         <div>
-          <p className="text-[18px] font-semibold text-[#101828]">
+          <p className="text-[18px] font-semibold text-[#F2F7FB]">
             {entry.lastName.charAt(0)}. {entry.firstName}
           </p>
-          <div className="mt-1 flex items-center gap-2 text-[13px] text-[#98A2B3]">
+          <div className="mt-1 flex items-center gap-2 text-[13px] text-[#7E8A9E]">
             <FiFileText className="h-3.5 w-3.5" />
             <span>{entry.files.length} баримт хавсаргасан</span>
           </div>
@@ -433,11 +433,11 @@ function NewEmployeeRow({
       </div>
 
       <div className="flex items-center gap-6">
-        <span className="rounded-full border border-[#FF8A80] bg-white px-3 py-1.5 text-[13px] font-medium text-[#FF3B30]">
+        <span className="rounded-full border border-[#0B8B7D] bg-[#052D31] px-3 py-1.5 text-[13px] font-medium text-[#06D2C4]">
           Ажилтан нэмэх
         </span>
-        <span className="text-[13px] text-[#98A2B3]">{entry.submittedAt}</span>
-        <BiChevronRight className="h-6 w-6 text-[#98A2B3]" />
+        <span className="text-[13px] text-[#7E8A9E]">{entry.submittedAt}</span>
+        <BiChevronRight className="h-6 w-6 text-[#7E8A9E]" />
       </div>
     </button>
   );
@@ -452,8 +452,8 @@ function DocumentRow({
 }) {
   const badgeClasses =
     entry.badgeTone === "gold"
-      ? "border-[#FF8A80] bg-white text-[#FF3B30]"
-      : "border-[#86EFAC] bg-white text-[#22C55E]";
+      ? "border-[#735200] bg-[#2A1E00] text-[#F2B94B]"
+      : "border-[#214C91] bg-[#0B214A] text-[#3E8CFF]";
 
   return (
     <div
@@ -466,15 +466,15 @@ function DocumentRow({
           onOpen(entry);
         }
       }}
-      className="flex w-full items-center justify-between border-b border-[#EAECF0] px-4 py-6 text-left transition hover:bg-[#FCFCFD] last:border-b-0"
+      className="flex w-full items-center justify-between border-b border-[#0D2726] py-6 text-left transition hover:bg-white/[0.02] last:border-b-0"
     >
       <div className="flex items-center gap-4">
-        <div className="flex h-14 w-14 items-center justify-center rounded-[18px] border border-[#98C1FF] bg-white text-[#2484FF]">
+        <div className="flex h-14 w-14 items-center justify-center rounded-[18px] border border-[#243243] bg-[#111A26] text-[#7E8A9E]">
           <FiFileText className="h-6 w-6" />
         </div>
         <div>
-          <p className="text-[16px] font-medium text-[#101828]">{entry.title}</p>
-          <p className="mt-1 text-[14px] text-[#98A2B3]">{entry.fileName}</p>
+          <p className="text-[16px] font-medium text-[#EDF4FB]">{entry.title}</p>
+          <p className="mt-1 text-[14px] text-[#8A97AA]">{entry.fileName}</p>
         </div>
       </div>
 
@@ -495,7 +495,7 @@ function DocumentRow({
             event.stopPropagation();
             onOpen(entry);
           }}
-          className="rounded-full p-2 text-[#667085] transition hover:bg-[#F2F4F7] hover:text-[#101828]"
+          className="rounded-full p-2 text-[#7E8A9E] transition hover:bg-white/5 hover:text-white"
         >
           <FiEye className="h-4 w-4" />
         </button>
@@ -504,7 +504,7 @@ function DocumentRow({
           onClick={(event) => {
             event.stopPropagation();
           }}
-          className="rounded-full p-2 text-[#667085] transition hover:bg-[#F2F4F7] hover:text-[#101828]"
+          className="rounded-full p-2 text-[#7E8A9E] transition hover:bg-white/5 hover:text-white"
         >
           <BiDownload className="h-4 w-4" />
         </button>
@@ -516,14 +516,14 @@ function DocumentRow({
 function StatusRow({ entry }: { entry: StatusUpdate }) {
   const tone =
     entry.tone === "gold"
-      ? "border-[#FF8A80] bg-white text-[#FF3B30]"
-      : "border-[#86EFAC] bg-white text-[#22C55E]";
+      ? "border-[#735200] bg-[#2A1E00] text-[#F2B94B]"
+      : "border-[#0C8060] bg-[#052C23] text-[#22D39A]";
 
   return (
-    <div className="flex items-center justify-between rounded-[20px] border border-[#EAECF0] bg-white px-5 py-5">
+    <div className="flex items-center justify-between rounded-[20px] border border-[#122236] bg-[#0B1623] px-5 py-5">
       <div>
-        <p className="text-[16px] font-medium text-[#101828]">{entry.title}</p>
-        <p className="mt-1 text-[13px] text-[#98A2B3]">{entry.subtitle}</p>
+        <p className="text-[16px] font-medium text-[#EDF4FB]">{entry.title}</p>
+        <p className="mt-1 text-[13px] text-[#7E8A9E]">{entry.subtitle}</p>
       </div>
       <span className={`rounded-full border px-4 py-1.5 text-[13px] font-medium ${tone}`}>
         {entry.status}
@@ -597,7 +597,7 @@ export function EmployeeAuditComponent() {
   const visibleFilterOptions = FILTER_OPTIONS[selectedView];
 
   return (
-    <div className="min-h-screen bg-white px-6 py-8 text-[#101828]">
+    <div className="min-h-screen bg-[#05070B] px-6 py-8 text-white">
       {selectedEmployee ? (
         <EmployeeRequestModal
           entry={selectedEmployee}
@@ -613,10 +613,10 @@ export function EmployeeAuditComponent() {
 
       <div className="mx-auto flex w-full max-w-[1061px] flex-col gap-8">
         <div className="flex w-full flex-col gap-1.5">
-          <h1 className="text-[34px] font-semibold leading-[1.1] tracking-[-0.03em] text-[#101828]">
+          <h1 className="text-[34px] font-semibold leading-[1.1] tracking-[-0.03em] text-white">
             Аудит хүсэлтүүд
           </h1>
-          <p className="text-[16px] text-[#667085]">
+          <p className="text-[16px] text-[#7D8694]">
             Хүний нөөцийн ажилтнаас илгээсэн хүсэлтүүд
           </p>
         </div>
@@ -632,18 +632,18 @@ export function EmployeeAuditComponent() {
           >
             <div className="flex min-w-0 items-center gap-5">
               <div className="flex h-14 w-14 items-center justify-center rounded-[18px] bg-[#2F7BFF] text-white shadow-[0_10px_30px_rgba(47,123,255,0.35)]">
-                <FiCheckCircle className="h-6 w-6" />
+                <FiFileText className="h-6 w-6" />
               </div>
               <div className="flex min-w-0 items-end gap-3">
-                <span className="text-[46px] font-semibold leading-none text-[#101828]">
+                <span className="text-[46px] font-semibold leading-none text-white">
                   7
                 </span>
-                <span className="truncate pb-1 text-[14px] text-[#667085]">
+                <span className="truncate pb-1 text-[14px] text-[#A4AFC0]">
                   Шинэ ажилтаны хүсэлт
                 </span>
               </div>
             </div>
-            <BiChevronRight className="h-8 w-8 text-[#98A2B3]" />
+            <BiChevronRight className="h-8 w-8 text-[#7E8A9E]" />
           </button>
 
           <button
@@ -656,29 +656,29 @@ export function EmployeeAuditComponent() {
           >
             <div className="flex min-w-0 items-center gap-5">
               <div className="flex h-14 w-14 items-center justify-center rounded-[18px] bg-[#12C95E] text-white shadow-[0_10px_30px_rgba(18,201,94,0.28)]">
-                <FiFileText className="h-6 w-6" />
+                <FiCheckCircle className="h-6 w-6" />
               </div>
               <div className="flex min-w-0 items-end gap-3">
-                <span className="text-[46px] font-semibold leading-none text-[#101828]">
+                <span className="text-[46px] font-semibold leading-none text-white">
                   2
                 </span>
-                <span className="truncate pb-1 text-[14px] text-[#667085]">
+                <span className="truncate pb-1 text-[14px] text-[#A4AFC0]">
                   Баримт бичиг баталгаажуулах
                 </span>
               </div>
             </div>
-            <BiChevronRight className="h-8 w-8 text-[#98A2B3]" />
+            <BiChevronRight className="h-8 w-8 text-[#7E8A9E]" />
           </button>
         </div>
 
         <div className="flex w-full flex-col gap-7">
           <div className="flex w-full items-center gap-3">
-            <div className="flex h-[44px] flex-1 items-center gap-3 rounded-[12px] border border-[#D0D5DD] bg-white px-4">
-              <BiSearch className="h-5 w-5 text-[#667085]" />
+            <div className="flex h-[44px] flex-1 items-center gap-3 rounded-[12px] border border-[#1B2431] bg-[#161E2A] px-4">
+              <BiSearch className="h-5 w-5 text-[#7E8A9E]" />
               <input
                 value={search}
                 onChange={(event) => setSearch(event.target.value)}
-                className="w-full bg-transparent text-[15px] text-[#101828] outline-none placeholder:text-[#98A2B3]"
+                className="w-full bg-transparent text-[15px] text-white outline-none placeholder:text-[#6D7685]"
                 placeholder="Хайх..."
               />
             </div>
@@ -687,7 +687,7 @@ export function EmployeeAuditComponent() {
               <select
                 value={listFilter}
                 onChange={(event) => setListFilter(event.target.value as ListFilter)}
-                className="h-[44px] w-[186px] appearance-none rounded-[12px] border border-[#D0D5DD] bg-white px-4 pr-11 text-[15px] text-[#667085] outline-none"
+                className="h-[44px] w-[186px] appearance-none rounded-[12px] border border-[#1B2431] bg-[#161E2A] px-4 pr-11 text-[15px] text-[#E6EDF5] outline-none"
               >
                 {visibleFilterOptions.map((option) => (
                   <option key={option.value} value={option.value}>
@@ -695,12 +695,12 @@ export function EmployeeAuditComponent() {
                   </option>
                 ))}
               </select>
-              <BiChevronDown className="pointer-events-none absolute right-4 top-1/2 h-5 w-5 -translate-y-1/2 text-[#667085]" />
+              <BiChevronDown className="pointer-events-none absolute right-4 top-1/2 h-5 w-5 -translate-y-1/2 text-[#7E8A9E]" />
             </div>
           </div>
 
           <div className="flex items-center gap-4">
-            <h2 className="text-[22px] font-semibold text-[#101828]">
+            <h2 className="text-[22px] font-semibold text-white">
               {sectionLabel(selectedView)}
             </h2>
             <SectionPill count={selectedList} />
@@ -719,7 +719,7 @@ export function EmployeeAuditComponent() {
           ) : null}
 
           {selectedView === "documentReview" ? (
-            <div className="flex flex-col rounded-[24px] border border-[#EAECF0] bg-white">
+            <div className="flex flex-col">
               {filteredDocuments.map((entry) => (
                 <DocumentRow
                   key={entry.id}
