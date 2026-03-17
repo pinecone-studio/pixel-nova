@@ -1,13 +1,7 @@
 "use client";
 
 import { useLazyQuery, useQuery } from "@apollo/client/react";
-import {
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  useSyncExternalStore,
-} from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { buildGraphQLHeaders } from "@/lib/apollo-client";
@@ -80,10 +74,10 @@ function CustomDropdown({
         style={{
           height: 38,
           padding: "0 14px",
-          background: "rgba(255,255,255,0.05)",
+          background: "white",
           border: "1px solid rgba(255,255,255,0.1)",
           borderRadius: 10,
-          color: "rgba(148,163,184,0.7)",
+          color: "white",
           fontSize: 13,
           cursor: "pointer",
           fontFamily: "inherit",
@@ -117,7 +111,7 @@ function CustomDropdown({
             top: "calc(100% + 6px)",
             right: 0,
             minWidth: 160,
-            background: "#1a1d24",
+            background: "white",
             border: "1px solid rgba(255,255,255,0.1)",
             borderRadius: 10,
             overflow: "hidden",
@@ -135,11 +129,10 @@ function CustomDropdown({
               style={{
                 width: "100%",
                 padding: "10px 14px",
-                background:
-                  filter === value ? "rgba(255,255,255,0.07)" : "transparent",
+                background: filter === value ? "white" : "transparent",
                 border: "none",
                 borderBottom: "1px solid rgba(255,255,255,0.05)",
-                color: filter === value ? "#e2e8f0" : "#f4f4f7",
+                color: filter === value ? "black" : "rgba(148,163,184,0.7)",
                 fontSize: 13,
                 textAlign: "left",
                 cursor: "pointer",
@@ -266,7 +259,7 @@ function DocRow({
           style={{
             width: 36,
             height: 36,
-            background: "rgba(255,255,255,0.07)",
+            background: "white",
             borderRadius: 8,
             display: "flex",
             alignItems: "center",
@@ -278,7 +271,7 @@ function DocRow({
             width="16"
             height="16"
             fill="none"
-            stroke="rgba(148,163,184,0.6)"
+            stroke="black"
             strokeWidth="1.5"
             viewBox="0 0 24 24"
           >
@@ -287,12 +280,12 @@ function DocRow({
         </div>
 
         <div style={{ flex: 1 }}>
-          <div style={{ color: "#e2e8f0", fontSize: 14, fontWeight: 500 }}>
+          <div style={{ color: "black", fontSize: 14, fontWeight: 500 }}>
             {document.documentName}
           </div>
           <div
             style={{
-              color: "rgba(148,163,184,0.45)",
+              color: "black",
               fontSize: 12,
               marginTop: 2,
             }}
@@ -329,7 +322,7 @@ function DocRow({
           </ActionBtn>
           <span
             style={{
-              color: "rgba(148,163,184,0.35)",
+              color: "black",
               fontSize: 12,
               minWidth: 80,
               textAlign: "right",
@@ -357,7 +350,7 @@ function DocRow({
             style={{
               position: "absolute",
               inset: 0,
-              background: "rgba(0,0,0,0.70)",
+              background: "black",
               border: "none",
               cursor: "pointer",
             }}
@@ -369,7 +362,7 @@ function DocRow({
               width: 900,
               maxWidth: "92vw",
               height: "82vh",
-              background: "#111318",
+              background: "black",
               border: "1px solid rgba(255,255,255,0.10)",
               borderRadius: 16,
               overflow: "hidden",
@@ -388,7 +381,7 @@ function DocRow({
               <div>
                 <p
                   style={{
-                    color: "#fff",
+                    color: "fff",
                     fontSize: 14,
                     fontWeight: 600,
                     margin: 0,
@@ -416,8 +409,8 @@ function DocRow({
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
-                  color: "rgba(148,163,184,0.6)",
-                  background: "transparent",
+                  color: "black",
+                  background: "white",
                   border: "none",
                   cursor: "pointer",
                   fontSize: 18,
@@ -430,7 +423,7 @@ function DocRow({
             <div
               style={{
                 height: "calc(100% - 65px)",
-                background: "#0a0b0f",
+                background: "white",
                 padding: 24,
               }}
             >
@@ -457,7 +450,7 @@ function DocRow({
                     height: "100%",
                     borderRadius: 10,
                     border: "1px solid rgba(239,68,68,0.2)",
-                    background: "rgba(239,68,68,0.05)",
+                    background: "white",
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
@@ -487,340 +480,7 @@ function DocRow({
                     height: "100%",
                     borderRadius: 10,
                     border: "1px solid rgba(255,255,255,0.10)",
-                    background: "#fff",
-                  }}
-                  src={previewUrl}
-                />
-              ) : (
-                <div
-                  style={{
-                    width: "100%",
-                    height: "100%",
-                    borderRadius: 10,
-                    border: "1px solid rgba(255,255,255,0.10)",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    color: "rgba(148,163,184,0.5)",
-                    fontSize: 14,
-                  }}
-                >
-                  Preview бэлэн биш байна.
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
-    </>
-  );
-}
-
-// ─── DocCard ─────────────────────────────────────────────────────────────────
-
-function DocCard({
-  document,
-  authToken,
-}: {
-  document: Document;
-  authToken: string;
-}) {
-  const [previewOpen, setPreviewOpen] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  const [loadContent, { data, loading }] = useLazyQuery<{
-    documentContent: DocumentContent | null;
-  }>(GET_DOCUMENT_CONTENT, { fetchPolicy: "network-only" });
-
-  const content = data?.documentContent ?? null;
-  const previewUrl = useMemo(
-    () => (content ? buildDataUrl(content) : null),
-    [content],
-  );
-
-  async function ensureContent() {
-    if (content) return content;
-    const result = await loadContent({
-      variables: { documentId: document.id },
-      context: { headers: buildGraphQLHeaders({ authToken }) },
-    });
-    const next = result.data?.documentContent ?? null;
-    if (!next) throw new Error("Баримтын агуулга олдсонгүй.");
-    return next;
-  }
-
-  async function handlePreview() {
-    setPreviewOpen(true);
-    setError(null);
-    try {
-      await ensureContent();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Баримтыг нээж чадсангүй.");
-    }
-  }
-
-  async function handleDownload() {
-    setError(null);
-    try {
-      const c = await ensureContent();
-      const link = window.document.createElement("a");
-      link.href = buildDataUrl(c);
-      link.download = c.documentName;
-      window.document.body.appendChild(link);
-      link.click();
-      link.remove();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Файл татаж чадсангүй.");
-    }
-  }
-
-  return (
-    <>
-      <div
-        style={{
-          borderRadius: 14,
-          border: "1px solid rgba(255,255,255,0.08)",
-          background: "rgba(255,255,255,0.03)",
-          padding: "16px 16px 14px",
-          display: "flex",
-          flexDirection: "column",
-          gap: 10,
-          minHeight: 150,
-        }}
-      >
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            gap: 8,
-          }}
-        >
-          <span
-            style={{
-              fontSize: 11,
-              color: "rgba(148,163,184,0.6)",
-            }}
-          >
-            {document.createdAt ? formatDate(document.createdAt) : "—"}
-          </span>
-          <div
-            style={{
-              width: 28,
-              height: 28,
-              borderRadius: 8,
-              background: "rgba(255,255,255,0.07)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              flexShrink: 0,
-            }}
-          >
-            <svg
-              width="14"
-              height="14"
-              fill="none"
-              stroke="rgba(148,163,184,0.6)"
-              strokeWidth="1.5"
-              viewBox="0 0 24 24"
-            >
-              <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-            </svg>
-          </div>
-        </div>
-
-        <div style={{ flex: 1 }}>
-          <div style={{ color: "#e2e8f0", fontSize: 13, fontWeight: 600 }}>
-            {document.documentName}
-          </div>
-          <div
-            style={{
-              color: "rgba(148,163,184,0.45)",
-              fontSize: 12,
-              marginTop: 4,
-            }}
-          >
-            {document.action}
-          </div>
-        </div>
-
-        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <ActionBtn title="Харах" onClick={() => void handlePreview()}>
-            <svg
-              width="15"
-              height="15"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.5"
-              viewBox="0 0 24 24"
-            >
-              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-              <circle cx="12" cy="12" r="3" />
-            </svg>
-          </ActionBtn>
-          <ActionBtn title="Татах" onClick={() => void handleDownload()}>
-            <svg
-              width="15"
-              height="15"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.5"
-              viewBox="0 0 24 24"
-            >
-              <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3" />
-            </svg>
-          </ActionBtn>
-        </div>
-      </div>
-
-      {previewOpen && (
-        <div
-          style={{
-            position: "fixed",
-            inset: 0,
-            zIndex: 60,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          <button
-            type="button"
-            aria-label="Preview close overlay"
-            style={{
-              position: "absolute",
-              inset: 0,
-              background: "rgba(0,0,0,0.70)",
-              border: "none",
-              cursor: "pointer",
-            }}
-            onClick={() => setPreviewOpen(false)}
-          />
-          <div
-            style={{
-              position: "relative",
-              width: 900,
-              maxWidth: "92vw",
-              height: "82vh",
-              background: "#111318",
-              border: "1px solid rgba(255,255,255,0.10)",
-              borderRadius: 16,
-              overflow: "hidden",
-              boxShadow: "0 25px 60px rgba(0,0,0,0.6)",
-            }}
-          >
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
-                padding: "16px 20px",
-                borderBottom: "1px solid rgba(255,255,255,0.10)",
-              }}
-            >
-              <div>
-                <p
-                  style={{
-                    color: "#fff",
-                    fontSize: 14,
-                    fontWeight: 600,
-                    margin: 0,
-                  }}
-                >
-                  {document.action}
-                </p>
-                <p
-                  style={{
-                    color: "rgba(148,163,184,0.5)",
-                    fontSize: 12,
-                    marginTop: 2,
-                  }}
-                >
-                  {document.documentName}
-                </p>
-              </div>
-              <button
-                type="button"
-                onClick={() => setPreviewOpen(false)}
-                style={{
-                  width: 32,
-                  height: 32,
-                  borderRadius: 8,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  color: "rgba(148,163,184,0.6)",
-                  background: "transparent",
-                  border: "none",
-                  cursor: "pointer",
-                  fontSize: 18,
-                }}
-              >
-                ✕
-              </button>
-            </div>
-
-            <div
-              style={{
-                height: "calc(100% - 65px)",
-                background: "#0a0b0f",
-                padding: 24,
-              }}
-            >
-              {loading ? (
-                <div
-                  style={{
-                    width: "100%",
-                    height: "100%",
-                    borderRadius: 10,
-                    border: "1px solid rgba(255,255,255,0.10)",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    color: "rgba(148,163,184,0.5)",
-                    fontSize: 14,
-                  }}
-                >
-                  Баримт ачаалж байна...
-                </div>
-              ) : error ? (
-                <div
-                  style={{
-                    width: "100%",
-                    height: "100%",
-                    borderRadius: 10,
-                    border: "1px solid rgba(239,68,68,0.2)",
-                    background: "rgba(239,68,68,0.05)",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    color: "#f87171",
-                    fontSize: 14,
-                  }}
-                >
-                  {error}
-                </div>
-              ) : content?.contentType === "text/html" ? (
-                <iframe
-                  title={document.documentName}
-                  style={{
-                    width: "100%",
-                    height: "100%",
-                    borderRadius: 10,
-                    border: "1px solid rgba(255,255,255,0.10)",
-                    background: "#fff",
-                  }}
-                  srcDoc={content.content}
-                />
-              ) : previewUrl ? (
-                <iframe
-                  title={document.documentName}
-                  style={{
-                    width: "100%",
-                    height: "100%",
-                    borderRadius: 10,
-                    border: "1px solid rgba(255,255,255,0.10)",
-                    background: "#fff",
+                    background: "#f4f4f7",
                   }}
                   src={previewUrl}
                 />
@@ -854,7 +514,7 @@ function DocCard({
 const emptyBoxStyle: React.CSSProperties = {
   borderRadius: 14,
   border: "1px solid rgba(255,255,255,0.08)",
-  background: "rgba(255,255,255,0.02)",
+  background: "white",
   padding: "48px 24px",
   textAlign: "center",
   color: "rgba(148,163,184,0.5)",
@@ -867,11 +527,10 @@ export default function FilesPage() {
   const router = useRouter();
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<FilterValue>("all");
-  const [viewMode, setViewMode] = useState<"list" | "grid">("list");
-  const authToken = useSyncExternalStore(
-    () => () => {},
-    () => window.localStorage.getItem(TOKEN_STORAGE_KEY) ?? "",
-    () => "",
+  const [authToken] = useState(() =>
+    typeof window === "undefined"
+      ? ""
+      : (window.localStorage.getItem(TOKEN_STORAGE_KEY) ?? ""),
   );
 
   const {
@@ -938,7 +597,7 @@ export default function FilesPage() {
       style={{
         width: 1056,
         height: 724,
-        background: "#0a0b0f",
+        background: "white",
         padding: "32px 40px",
         fontFamily: "inherit",
         boxSizing: "border-box",
@@ -950,42 +609,31 @@ export default function FilesPage() {
       <div
         style={{
           display: "flex",
-          alignItems: "flex-start",
-          justifyContent: "space-between",
+          flexDirection: "column",
+          gap: 4,
           marginBottom: 28,
-          gap: 16,
         }}
       >
-        <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-          <p
-            style={{
-              color: "#fff",
-              fontSize: 22,
-              fontWeight: 600,
-              letterSpacing: "-0.3px",
-              margin: 0,
-            }}
-          >
-            Миний баримтууд
-          </p>
-          <p
-            style={{
-              color: "rgba(148,163,184,0.6)",
-              fontSize: 13,
-              margin: 0,
-            }}
-          >
-            {employee
-              ? `${employee.lastName} ${employee.firstName} ажилтны баримтууд.`
-              : "Таны бүх хөдөлмөрийн баримт бичгийг эндээс харах болон татах боломжтой."}
-          </p>
-        </div>
+        <p
+          style={{
+            color: "black",
+            fontSize: 22,
+            fontWeight: 600,
+            letterSpacing: "-0.3px",
+            margin: 0,
+          }}
+        >
+          Миний баримтууд
+        </p>
+        <p style={{ color: "black", fontSize: 13, margin: 0 }}>
+          {employee
+            ? `${employee.lastName} ${employee.firstName} ажилтны баримтууд.`
+            : "Таны бүх хөдөлмөрийн баримт бичгийг эндээс харах болон татах боломжтой."}
+        </p>
       </div>
 
       {/* Toolbar */}
-      <div
-        style={{ display: "flex", gap: 10, marginBottom: 28, flexWrap: "wrap" }}
-      >
+      <div style={{ display: "flex", gap: 10, marginBottom: 28 }}>
         <div style={{ position: "relative", flex: 1 }}>
           <span
             style={{
@@ -993,7 +641,7 @@ export default function FilesPage() {
               left: 11,
               top: "50%",
               transform: "translateY(-50%)",
-              color: "rgba(148,163,184,0.45)",
+              color: "white",
               pointerEvents: "none",
               display: "flex",
             }}
@@ -1002,7 +650,7 @@ export default function FilesPage() {
               width="13"
               height="13"
               fill="none"
-              stroke="currentColor"
+              stroke="black"
               strokeWidth="2"
               viewBox="0 0 24 24"
             >
@@ -1020,61 +668,15 @@ export default function FilesPage() {
               height: 38,
               padding: "0 12px 0 34px",
               background: "rgba(255,255,255,0.05)",
-              border: "1px solid rgba(255,255,255,0.1)",
+              border: "1px solid black",
               borderRadius: 10,
-              color: "#cbd5e1",
+              color: "black",
               fontSize: 13,
               outline: "none",
             }}
           />
         </div>
         <CustomDropdown filter={filter} setFilter={setFilter} />
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 6,
-            padding: 4,
-            borderRadius: 999,
-            border: "1px solid rgba(255,255,255,0.1)",
-            background: "rgba(255,255,255,0.05)",
-          }}
-        >
-          <button
-            type="button"
-            onClick={() => setViewMode("list")}
-            style={{
-              height: 30,
-              padding: "0 12px",
-              borderRadius: 999,
-              border: "none",
-              cursor: "pointer",
-              background: viewMode === "list" ? "#fff" : "transparent",
-              color: viewMode === "list" ? "#0a0b0f" : "rgba(203,213,225,0.8)",
-              fontSize: 12,
-              fontWeight: 600,
-            }}
-          >
-            List
-          </button>
-          <button
-            type="button"
-            onClick={() => setViewMode("grid")}
-            style={{
-              height: 30,
-              padding: "0 12px",
-              borderRadius: 999,
-              border: "none",
-              cursor: "pointer",
-              background: viewMode === "grid" ? "#fff" : "transparent",
-              color: viewMode === "grid" ? "#0a0b0f" : "rgba(203,213,225,0.8)",
-              fontSize: 12,
-              fontWeight: 600,
-            }}
-          >
-            Grid
-          </button>
-        </div>
       </div>
 
       {/* Section Label */}
@@ -1094,7 +696,7 @@ export default function FilesPage() {
         <span
           style={{
             padding: "2px 8px",
-            background: "rgba(255,255,255,0.05)",
+            background: "black",
             border: "1px solid rgba(255,255,255,0.1)",
             borderRadius: 5,
             fontSize: 11,
@@ -1121,29 +723,13 @@ export default function FilesPage() {
         </div>
       ) : filteredDocuments.length === 0 ? (
         <div style={emptyBoxStyle}>Баримт олдсонгүй.</div>
-      ) : viewMode === "grid" ? (
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))",
-            gap: 14,
-          }}
-        >
-          {filteredDocuments.map((document) => (
-            <DocCard
-              key={document.id}
-              document={document}
-              authToken={authToken}
-            />
-          ))}
-        </div>
       ) : (
         <div
           style={{
             borderRadius: 14,
             overflow: "hidden",
             border: "1px solid rgba(255,255,255,0.08)",
-            background: "rgba(255,255,255,0.02)",
+            background: "white",
           }}
         >
           {filteredDocuments.map((document, index) => (
