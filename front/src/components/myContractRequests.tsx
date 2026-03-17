@@ -2,6 +2,7 @@
 
 import { useQuery } from "@apollo/client/react";
 import { useMemo, useState } from "react";
+import { BiChevronDown, BiChevronUp } from "react-icons/bi";
 
 import { GET_MY_CONTRACT_REQUESTS } from "@/graphql/queries";
 import { buildGraphQLHeaders } from "@/lib/apollo-client";
@@ -122,9 +123,14 @@ export const MyContractRequests = () => {
           <button
             type="button"
             onClick={() => setExpanded((prev) => !prev)}
-            className="text-xs text-[#9BEBD7] hover:text-white transition-colors"
+            className="flex items-center gap-1 text-xs text-[#9BEBD7] hover:text-white transition-colors"
           >
             {expanded ? "Хаах" : "Бүгдийг харах"}
+            {expanded ? (
+              <BiChevronUp className="text-base" />
+            ) : (
+              <BiChevronDown className="text-base" />
+            )}
           </button>
         </div>
       ) : null}

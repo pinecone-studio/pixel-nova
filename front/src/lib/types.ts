@@ -195,3 +195,13 @@ export interface EmployeeSignatureStatus {
   hasPasscode: boolean;
   updatedAt?: string | null;
 }
+
+export interface EmployeeNotification {
+  id: string;
+  employeeId: string;
+  title: string;
+  body: string;
+  status: "unread" | "read";
+  createdAt: string;
+  readAt?: string | null;
+}

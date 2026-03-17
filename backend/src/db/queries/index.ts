@@ -44,6 +44,11 @@ export {
   finishProcessedEvent,
 } from "./eventProcessing";
 export {
+  insertEmployeeNotification,
+  getEmployeeNotifications,
+  markEmployeeNotificationRead,
+} from "./employeeNotification";
+export {
   insertLeaveRequest,
   getLeaveRequests,
   getLeaveRequestById,

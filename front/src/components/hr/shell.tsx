@@ -2,14 +2,63 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useMemo, useState } from "react";
+import { useQuery } from "@apollo/client/react";
 
 import { EpasLogo, NotifIcon } from "@/components/icons";
+import { GET_CONTRACT_REQUESTS, GET_LEAVE_REQUESTS } from "@/graphql/queries";
+import { buildGraphQLHeaders } from "@/lib/apollo-client";
+import type { ContractRequest, LeaveRequest } from "@/lib/types";
 
 import { getActiveHrNavItem, HR_NAV_ITEMS } from "./navigation";
 
 export function HrShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const activeItem = getActiveHrNavItem(pathname);
+  const [notifOpen, setNotifOpen] = useState(false);
+
+  const { data: contractData } = useQuery<{
+    contractRequests: ContractRequest[];
+  }>(GET_CONTRACT_REQUESTS, {
+    context: {
+      headers: buildGraphQLHeaders({ actorRole: "hr" }),
+    },
+    fetchPolicy: "network-only",
+  });
+
+  const { data: leaveData } = useQuery<{
+    leaveRequests: LeaveRequest[];
+  }>(GET_LEAVE_REQUESTS, {
+    context: {
+      headers: buildGraphQLHeaders({ actorRole: "hr" }),
+    },
+    fetchPolicy: "network-only",
+  });
+
+  const notifications = useMemo(() => {
+    const contracts = (contractData?.contractRequests ?? []).map((row) => ({
+      id: `contract-${row.id}`,
+      title: "Гэрээний хүсэлт",
+      body: `${row.employee.lastName} ${row.employee.firstName} • ${row.templateIds.join(", ")}`,
+      status: row.status,
+      createdAt: row.createdAt,
+    }));
+
+    const leaves = (leaveData?.leaveRequests ?? []).map((row) => ({
+      id: `leave-${row.id}`,
+      title: "Чөлөөний хүсэлт",
+      body: `${row.employee.lastName} ${row.employee.firstName} • ${row.type}`,
+      status: row.status,
+      createdAt: row.createdAt,
+    }));
+
+    return [...contracts, ...leaves].sort(
+      (a, b) =>
+        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+    );
+  }, [contractData, leaveData]);
+
+  const unreadCount = notifications.filter((n) => n.status === "pending").length;
 
   return (
     <div className="h-screen overflow-hidden bg-[#060d0c]">
@@ -76,9 +125,63 @@ export function HrShell({ children }: { children: React.ReactNode }) {
                 className="flex items-center gap-2 h-9 px-4 rounded-lg border cursor-pointer border-[#0ad4b1]/50 bg-linear-to-br from-[#0a3b33] to-[#0ad4b1]/20 text-white text-sm font-medium hover:border-[#0ad4b1] transition-colors">
                 <span>＋</span> Ажилтан нэмэх
               </Link>
-              <button className="h-9 w-9 rounded-lg border border-[#0ad4b1]/40 bg-[#0b201d] cursor-pointer text-[#d7fff8] flex items-center justify-center hover:border-[#0ad4b1] hover:bg-[#0f2b27] transition-colors">
-                <NotifIcon />
-              </button>
+              <div className="relative">
+                <button
+                  onClick={() => setNotifOpen((prev) => !prev)}
+                  className="h-9 w-9 rounded-lg border border-[#0ad4b1]/40 bg-[#0b201d] cursor-pointer text-[#d7fff8] flex items-center justify-center hover:border-[#0ad4b1] hover:bg-[#0f2b27] transition-colors"
+                >
+                  <NotifIcon />
+                </button>
+                {unreadCount > 0 ? (
+                  <span className="absolute -top-1 -right-1 h-4 min-w-[16px] px-1 rounded-full bg-emerald-400 text-[10px] text-black font-bold flex items-center justify-center">
+                    {unreadCount}
+                  </span>
+                ) : null}
+
+                {notifOpen ? (
+                  <div className="absolute right-0 mt-3 w-[320px] rounded-2xl border border-white/10 bg-[#0b111a] shadow-2xl p-3 z-50">
+                    <div className="flex items-center justify-between mb-2">
+                      <p className="text-sm font-semibold text-white">
+                        Мэдэгдэл
+                      </p>
+                      <button
+                        onClick={() => setNotifOpen(false)}
+                        className="text-xs text-slate-400 hover:text-white"
+                      >
+                        Хаах
+                      </button>
+                    </div>
+                    <div className="max-h-[320px] overflow-y-auto flex flex-col gap-2">
+                      {notifications.length === 0 ? (
+                        <div className="text-xs text-slate-500 py-3 text-center">
+                          Одоогоор мэдэгдэл алга байна.
+                        </div>
+                      ) : (
+                        notifications.slice(0, 6).map((item) => (
+                          <div
+                            key={item.id}
+                            className="rounded-xl border border-white/5 bg-white/5 px-3 py-2"
+                          >
+                            <div className="flex items-center justify-between">
+                              <p className="text-xs font-semibold text-white">
+                                {item.title}
+                              </p>
+                              <span className="text-[10px] text-slate-500">
+                                {new Date(item.createdAt).toLocaleDateString(
+                                  "mn-MN",
+                                )}
+                              </span>
+                            </div>
+                            <p className="text-[11px] text-slate-400">
+                              {item.body}
+                            </p>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  </div>
+                ) : null}
+              </div>
             </div>
           </header>
 

@@ -16,7 +16,6 @@ export type HrSectionKey =
   | "requests"
   | "documents"
   | "audit-log"
-  | "notif"
   | "settings";
 
 export type HrNavItem = {
@@ -62,12 +61,6 @@ export const HR_NAV_ITEMS: HrNavItem[] = [
     label: "Тохиргоо",
     href: "/hr/settings",
     icon: <SettingsIcon />,
-  },
-  {
-    key: "notif",
-    label: "Мэдэгдэл",
-    href: "/hr/notif",
-    icon: <NotifIcon />,
   },
 ];
 

@@ -8,6 +8,7 @@ import {
   getContractRequestById,
   insertDocument,
   insertContractRequest,
+  insertEmployeeNotification,
   insertLeaveRequest,
   listActionConfigs,
   requestEmployeeOtp,
@@ -19,6 +20,7 @@ import {
   updateLeaveRequestStatus,
   verifyEmployeeSignaturePasscode,
   verifyEmployeeOtp,
+  markEmployeeNotificationRead,
 } from "../db/queries";
 import {
   buildEmployeeChangeSet,
@@ -396,9 +398,8 @@ export const mutationResolvers = {
     );
 
     if (incompleteFields.length > 0) {
-      console.warn(
-        "Contract request approved with incomplete fields:",
-        incompleteFields,
+      throw new Error(
+        `Дутуу мэдээлэл байна: ${incompleteFields.join(", ")}`,
       );
     }
 
@@ -415,13 +416,15 @@ export const mutationResolvers = {
 
     await executeTriggeredAction(ctx, request.employeeId, "contract_request", {
       actionConfig,
-      templateDataOverrides: signatureHtml
-        ? {
-            employee_signature: signatureHtml,
-            employee_sign_line: signatureHtml,
-            employee_sign_date: signDate,
-          }
-        : { employee_sign_date: signDate },
+      templateDataOverrides: {
+        employee_sign_date: signDate,
+        ...(signatureHtml
+          ? {
+              employee_signature: signatureHtml,
+              employee_sign_line: signatureHtml,
+            }
+          : {}),
+      },
     });
 
     const updated = await updateContractRequestStatus(
@@ -431,6 +434,13 @@ export const mutationResolvers = {
       args.note,
     );
     if (!updated) throw new Error("Failed to update contract request");
+
+    await insertEmployeeNotification(ctx.db, {
+      employeeId: request.employeeId,
+      title: "Гэрээ батлагдлаа",
+      body: `Таны гэрээний хүсэлт батлагдлаа. (${normalized.join(", ")})`,
+    });
+
     return updated;
   },
 
@@ -449,6 +459,25 @@ export const mutationResolvers = {
       args.note,
     );
     if (!updated) throw new Error("Contract request not found");
+    return updated;
+  },
+
+  markNotificationRead: async (
+    _: unknown,
+    args: { id: string },
+    ctx: Ctx,
+  ) => {
+    if (ctx.actor.role !== "employee" || !ctx.actor.id) {
+      throw new Error("Unauthorized");
+    }
+    const updated = await markEmployeeNotificationRead(
+      ctx.db,
+      args.id,
+      ctx.actor.id,
+    );
+    if (!updated) {
+      throw new Error("Notification not found");
+    }
     return updated;
   },
 
