@@ -37,13 +37,13 @@ export function HrNotifPage() {
   const approvedCount = items.filter((item) => item.status === "approved").length;
 
   return (
-    <div className="min-h-screen bg-[#050A11] px-6 pb-16 pt-8 text-white">
+    <div className="min-h-screen bg-[#F4F5F7] px-6 pb-16 pt-8 text-slate-900">
       <div className="mx-auto flex w-full max-w-[1120px] flex-col gap-6">
         <div>
-          <h1 className="text-[34px] font-semibold tracking-[-0.03em] text-white">
+          <h1 className="text-[34px] font-semibold tracking-[-0.03em] text-slate-900">
             Мэдэгдэл
           </h1>
-          <p className="mt-2 text-[16px] text-[#7D8A9D]">
+          <p className="mt-2 text-[16px] text-slate-500">
             HR багт ирсэн гэрээ болон баримтын хүсэлтүүд.
           </p>
         </div>
@@ -54,13 +54,13 @@ export function HrNotifPage() {
           approvedCount={approvedCount}
         />
 
-        <section className="overflow-hidden rounded-[28px] border border-[#223244] bg-[#050A11] shadow-[0_24px_70px_rgba(0,0,0,0.42)]">
-          <div className="border-b border-[#182433] px-7 pb-3 pt-2">
+        <section className="overflow-hidden rounded-[28px] border border-slate-200 bg-white shadow-[0_1px_2px_rgba(15,23,42,0.06)]">
+          <div className="border-b border-slate-200 px-7 pb-3 pt-2">
             <div className="flex items-center justify-between gap-3">
-              <h2 className="text-[27px] font-semibold leading-none tracking-[-0.03em] text-white">
+              <h2 className="text-[27px] font-semibold leading-none tracking-[-0.03em] text-slate-900">
                 Шинэ мэдэгдлүүд
               </h2>
-              <span className="text-sm text-[#708096]">
+              <span className="text-sm text-slate-400">
                 {loading ? "Ачаалж байна..." : `${items.length} мэдэгдэл`}
               </span>
             </div>
@@ -72,7 +72,7 @@ export function HrNotifPage() {
                 {Array.from({ length: 3 }).map((_, index) => (
                   <div
                     key={index}
-                    className="rounded-[20px] border border-[#182433] bg-[#09111B] px-4 py-4"
+                    className="rounded-[20px] border border-slate-200 bg-white px-4 py-4"
                   >
                     <div className="h-4 w-48 rounded-full skeleton" />
                     <div className="mt-3 h-3 w-full rounded-full skeleton" />
@@ -81,7 +81,7 @@ export function HrNotifPage() {
                 ))}
               </div>
             ) : items.length === 0 ? (
-              <div className="flex min-h-[260px] items-center justify-center text-sm text-[#718099]">
+              <div className="flex min-h-[260px] items-center justify-center text-sm text-slate-400">
                 Одоогоор мэдэгдэл алга байна.
               </div>
             ) : (
