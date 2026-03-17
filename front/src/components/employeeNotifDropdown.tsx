@@ -92,12 +92,12 @@ export const EmployeeNotifDropdown = () => {
             return next;
           });
         }}
-        className="relative flex h-9 w-9 cursor-pointer items-center justify-center text-[#000000] transition-all duration-200 hover:text-[#00CC99]"
+        className="relative flex h-9 w-9 cursor-pointer items-center justify-center rounded-full border border-[#D0D5DD] bg-white text-[#667085] transition-all duration-200 hover:border-[#101828] hover:text-[#101828]"
         aria-label="Мэдэгдэл"
       >
         <GrNotification className="h-4 w-4" />
         {unreadCount > 0 ? (
-          <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-[#fc171b]" />
+          <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full border-2 border-white bg-[#101828]" />
         ) : null}
       </button>
 
@@ -106,6 +106,7 @@ export const EmployeeNotifDropdown = () => {
         loading={loading}
         notifications={notifications}
         selectedId={selectedId}
+        theme="light"
         onOpenChange={(nextOpen) => {
           setOpen(nextOpen);
           if (!nextOpen) {

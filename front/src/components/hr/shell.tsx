@@ -179,6 +179,24 @@ export function HrShell({ children }: { children: React.ReactNode }) {
         </main>
       </div>
 
+      <EmployeeNotifDrawer
+        open={notifOpen}
+        loading={notificationsLoading}
+        notifications={notifications}
+        selectedId={selectedNotifId}
+        theme="light"
+        onOpenChange={(nextOpen) => {
+          setNotifOpen(nextOpen);
+          if (!nextOpen) {
+            setSelectedNotifId(null);
+          }
+        }}
+        onSelect={(notification) => {
+          setSelectedNotifId((current) =>
+            current === notification.id ? null : notification.id,
+          );
+        }}
+      />
     </div>
   );
 }

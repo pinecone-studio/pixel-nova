@@ -16,6 +16,7 @@ export function EmployeeNotifDrawer({
   selectedId,
   onOpenChange,
   onSelect,
+  theme = "dark",
 }: {
   open: boolean;
   loading: boolean;
@@ -23,7 +24,10 @@ export function EmployeeNotifDrawer({
   selectedId: string | null;
   onOpenChange: (open: boolean) => void;
   onSelect: (notification: EmployeeNotification) => void;
+  theme?: "dark" | "light";
 }) {
+  const isLight = theme === "light";
+
   return (
     <Dialog
       open={open}
@@ -33,25 +37,44 @@ export function EmployeeNotifDrawer({
     >
       <DialogContent
         showCloseButton={false}
-        className="top-7 right-0 left-auto flex h-[calc(100vh-52px)] w-[min(520px,100vw)] max-w-[min(520px,100vw)] translate-x-0 translate-y-0 flex-col gap-0 overflow-hidden rounded-none rounded-l-[28px] border-l border-[#223244] bg-[#050A11] p-0 text-white shadow-[0_24px_70px_rgba(0,0,0,0.42)] data-open:slide-in-from-right data-closed:slide-out-to-right sm:max-w-130"
+        className={`top-7 right-0 left-auto flex h-[calc(100vh-52px)] w-[min(520px,100vw)] max-w-[min(520px,100vw)] translate-x-0 translate-y-0 flex-col gap-0 overflow-hidden rounded-none rounded-l-[28px] border-l p-0 shadow-[0_24px_70px_rgba(0,0,0,0.42)] data-open:slide-in-from-right data-closed:slide-out-to-right sm:max-w-130 ${
+          isLight
+            ? "border-[#EAECF0] bg-white text-[#101828]"
+            : "border-[#223244] bg-[#050A11] text-white"
+        }`}
       >
-        <DialogHeader className="shrink-0 border-b border-[#182433] bg-[#050A11]/95 px-7 pb-3 pt-0.5 backdrop-blur-md">
-          <DialogTitle className="text-[27px] font-semibold leading-none tracking-[-0.03em] text-white">
+        <DialogHeader
+          className={`shrink-0 border-b px-7 pb-3 pt-0.5 backdrop-blur-md ${
+            isLight
+              ? "border-[#EAECF0] bg-white/95"
+              : "border-[#182433] bg-[#050A11]/95"
+          }`}
+        >
+          <DialogTitle
+            className={`text-[27px] font-semibold leading-none tracking-[-0.03em] ${
+              isLight ? "text-[#101828]" : "text-white"
+            }`}
+          >
             Мэдэгдэл
           </DialogTitle>
         </DialogHeader>
 
         <div className="scrollbar-slim min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 pb-5 pt-0">
           {loading ? (
-            <div className="flex h-full items-center justify-center text-sm text-[#718099]">
+            <div
+              className={`flex h-full items-center justify-center text-sm ${
+                isLight ? "text-[#667085]" : "text-[#718099]"
+              }`}
+            >
               Уншиж байна...
             </div>
           ) : notifications.length === 0 ? (
-            <EmployeeNotifEmptyState />
+            <EmployeeNotifEmptyState theme={theme} />
           ) : (
             <EmployeeNotifPanel
               notifications={notifications}
               selectedId={selectedId}
+              theme={theme}
               onSelect={onSelect}
             />
           )}

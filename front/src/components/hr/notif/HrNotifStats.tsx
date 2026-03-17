@@ -13,26 +13,26 @@ export function HrNotifStats({
     {
       value: totalCount,
       label: "Нийт мэдэгдэл",
-      border: "border-slate-200",
+      border: "border-[#EAECF0]",
       bg: "bg-white",
-      iconBg: "bg-emerald-50",
-      iconColor: "text-emerald-500",
+      iconBg: "bg-[#F2F4F7]",
+      iconColor: "text-[#101828]",
     },
     {
       value: pendingCount,
       label: "Хүлээгдэж буй",
-      border: "border-slate-200",
+      border: "border-[#EAECF0]",
       bg: "bg-white",
-      iconBg: "bg-blue-50",
-      iconColor: "text-blue-500",
+      iconBg: "bg-[#F2F4F7]",
+      iconColor: "text-[#101828]",
     },
     {
       value: approvedCount,
       label: "Баталсан",
-      border: "border-slate-200",
+      border: "border-[#EAECF0]",
       bg: "bg-white",
-      iconBg: "bg-emerald-50",
-      iconColor: "text-emerald-500",
+      iconBg: "bg-[#F2F4F7]",
+      iconColor: "text-[#101828]",
     },
   ];
 
@@ -41,7 +41,7 @@ export function HrNotifStats({
       {items.map((item) => (
         <div
           key={item.label}
-          className={`rounded-[24px] border ${item.border} ${item.bg} px-6 py-5 shadow-[0_1px_2px_rgba(15,23,42,0.06)]`}
+          className={`rounded-[24px] border ${item.border} ${item.bg} px-6 py-5 shadow-[0_1px_2px_rgba(16,24,40,0.04)]`}
         >
           <div className="flex items-center gap-4">
             <div
@@ -50,10 +50,10 @@ export function HrNotifStats({
               <BellIcon />
             </div>
             <div>
-              <p className="text-[34px] font-semibold leading-none text-slate-900">
+              <p className="text-[34px] font-semibold leading-none text-[#101828]">
                 {item.value}
               </p>
-              <p className="mt-2 text-sm text-slate-500">{item.label}</p>
+              <p className="mt-2 text-sm text-[#667085]">{item.label}</p>
             </div>
           </div>
         </div>
