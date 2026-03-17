@@ -17,6 +17,9 @@ import {
 } from "./shared";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
+const EMPLOYEE_CODE_PATTERN = /^EMP-\d{4}$/;
+const GMAIL_PATTERN = /^[^\s@]+@gmail\.com$/i;
+
 export function EmployeeModal({
   mode,
   employee,
@@ -33,16 +36,34 @@ export function EmployeeModal({
   const fileRef = useRef<HTMLInputElement>(null);
   const [file, setFile] = useState<File | null>(null);
   const [dragging, setDragging] = useState(false);
-  const [form, setForm] = useState<EmployeeFormState>(() =>
-    employeeToForm(employee),
-  );
   const [errors, setErrors] = useState<Record<string, string>>({});
+
+  function normalizeEmployeeCode(value: string) {
+    const trimmed = value.trim().toUpperCase().replace(/\s+/g, "");
+    if (/^EMP\d{4}$/.test(trimmed)) {
+      return `EMP-${trimmed.slice(3)}`;
+    }
+    return trimmed;
+  }
+
+  const [form, setForm] = useState<EmployeeFormState>(() => {
+    const initial = employeeToForm(employee);
+    return {
+      ...initial,
+      employeeCode: normalizeEmployeeCode(initial.employeeCode ?? ""),
+    };
+  });
 
   function updateField<K extends keyof EmployeeFormState>(
     key: K,
     value: EmployeeFormState[K],
   ) {
-    setForm((prev) => ({ ...prev, [key]: value }));
+    const nextValue =
+      key === "employeeCode" && typeof value === "string"
+        ? normalizeEmployeeCode(value)
+        : value;
+
+    setForm((prev) => ({ ...prev, [key]: nextValue }));
     setErrors((prev) => {
       if (!prev[key as string]) return prev;
       const next = { ...prev };
@@ -53,9 +74,18 @@ export function EmployeeModal({
 
   function validate() {
     const next: Record<string, string> = {};
+    if (!form.employeeCode.trim()) {
+      next.employeeCode = "Ажилтны код заавал оруулна уу.";
+    } else if (!EMPLOYEE_CODE_PATTERN.test(form.employeeCode.trim())) {
+      next.employeeCode = "EMP-0000 форматтай код оруулна уу.";
+    }
     if (!form.lastName.trim()) next.lastName = "Овгоо заавал оруулна уу.";
     if (!form.firstName.trim()) next.firstName = "Нэрээ заавал оруулна уу.";
-    if (!form.email.trim()) next.email = "Имэйлээ заавал оруулна уу.";
+    if (!form.email.trim()) {
+      next.email = "Имэйлээ заавал оруулна уу.";
+    } else if (mode === "add" && !GMAIL_PATTERN.test(form.email.trim())) {
+      next.email = "Зөвхөн @gmail.com төгсгөлтэй имэйл оруулна уу.";
+    }
     if (!form.department.trim()) next.department = "Хэлтэс заавал сонгоно уу.";
     if (!form.jobTitle.trim()) next.jobTitle = "Албан тушаал заавал оруулна уу.";
     return next;
@@ -84,6 +114,19 @@ export function EmployeeModal({
             {mode === "add" ? "Шинэ ажилтан нэмэх" : "Ажилтны мэдээлэл засах"}
           </DialogTitle>
         </DialogHeader>
+
+        <div className="flex flex-col gap-1.5 shrink-0">
+          <Label className="text-white text-sm font-medium">Ажилтны код</Label>
+          <Input
+            value={form.employeeCode}
+            onChange={(e) => updateField("employeeCode", e.target.value)}
+            placeholder="EMP-0001"
+            className="bg-transparent border-slate-700/60 rounded-2xl px-4 py-3 h-auto text-slate-300 text-sm placeholder:text-slate-600 focus-visible:ring-0 focus-visible:border-slate-500 transition-colors"
+          />
+          {errors.employeeCode ? (
+            <p className="text-xs text-red-400">{errors.employeeCode}</p>
+          ) : null}
+        </div>
 
         <div className="grid grid-cols-2 gap-4 shrink-0">
           <div className="flex flex-col gap-1.5">

@@ -163,6 +163,20 @@ export interface AuthSession {
   employee: Employee;
 }
 
+export interface LeaveRequest {
+  id: string;
+  employeeId: string;
+  employee: Employee;
+  type: string;
+  startTime: string;
+  endTime: string;
+  reason: string;
+  status: "pending" | "approved" | "rejected";
+  note?: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface ContractRequest {
   id: string;
   employeeId: string;

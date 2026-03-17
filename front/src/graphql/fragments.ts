@@ -101,6 +101,30 @@ export const ACTION_CONFIG_FIELDS = gql`
   }
 `;
 
+export const LEAVE_REQUEST_FIELDS = gql`
+  fragment LeaveRequestFields on LeaveRequest {
+    id
+    employeeId
+    employee {
+      id
+      employeeCode
+      firstName
+      lastName
+      department
+      jobTitle
+      level
+    }
+    type
+    startTime
+    endTime
+    reason
+    status
+    note
+    createdAt
+    updatedAt
+  }
+`;
+
 export const CONTRACT_REQUEST_FIELDS = gql`
   fragment ContractRequestFields on ContractRequest {
     id

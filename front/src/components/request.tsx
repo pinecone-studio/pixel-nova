@@ -1,11 +1,18 @@
 import { useMutation, useQuery } from "@apollo/client/react";
 import { useEffect, useRef, useState } from "react";
 import type { PointerEvent } from "react";
-import { BiChevronRight, BiFile, BiPlus } from "react-icons/bi";
-import { FiCheck, FiSend, FiX } from "react-icons/fi";
+import {
+  BiCalendar,
+  BiChevronDown,
+  BiChevronRight,
+  BiFile,
+  BiPlus,
+} from "react-icons/bi";
+import { FiCheck, FiSend, FiUploadCloud, FiX } from "react-icons/fi";
 
 import { buildGraphQLHeaders } from "@/lib/apollo-client";
 import {
+  SUBMIT_LEAVE_REQUEST,
   SUBMIT_CONTRACT_REQUEST,
   UPDATE_MY_DOCUMENT_PROFILE,
 } from "@/graphql/mutations";
@@ -15,6 +22,7 @@ import type {
   Employee,
   EmployeeDocumentProfile,
   EmployeeSignatureStatus,
+  LeaveRequest,
 } from "@/lib/types";
 
 const TOKEN_KEY = "epas_auth_token";
@@ -22,6 +30,7 @@ const TOKEN_KEY = "epas_auth_token";
 const DIALOG_BG = "bg-[#030810]";
 const DIALOG_BORDER = "border-[#1a2035]";
 const INPUT_CLASS = `w-full bg-[#040d18] border border-[#1a2035] rounded-lg p-2.5 text-sm text-gray-300 focus:outline-none focus:border-[#00CC99]/40 appearance-none`;
+const TEXTAREA_CLASS = `w-full bg-[#040d18] border border-[#1a2035] rounded-lg p-3 text-sm text-gray-300 placeholder-gray-600 resize-none focus:outline-none focus:border-[#00CC99]/40`;
 const MAX_CONTRACT_SELECTION = 3;
 const PROFILE_REQUIRED_FIELDS: Array<{
   key: keyof EmployeeDocumentProfile;
@@ -103,10 +112,72 @@ function BackBtn({ onClick }: { onClick: () => void }) {
   );
 }
 
+function SelectField({
+  label,
+  id,
+  options,
+  placeholder = "Сонгоно уу",
+  value,
+  onChange,
+}: {
+  label: string;
+  id: string;
+  options: string[];
+  placeholder?: string;
+  value?: string;
+  onChange?: (v: string) => void;
+}) {
+  return (
+    <div className="flex flex-col gap-1.5">
+      <label htmlFor={id} className="text-sm font-medium text-white">
+        {label}
+      </label>
+      <div className="relative">
+        <select
+          id={id}
+          className={INPUT_CLASS}
+          value={value}
+          onChange={(e) => onChange?.(e.target.value)}>
+          <option value="">{placeholder}</option>
+          {options.map((opt) => (
+            <option key={opt} value={opt}>
+              {opt}
+            </option>
+          ))}
+        </select>
+        <BiChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 pointer-events-none" />
+      </div>
+    </div>
+  );
+}
+
+function UploadArea({ label, subtitle }: { label: string; subtitle?: string }) {
+  return (
+    <div className="flex flex-col gap-1.5">
+      <span className="text-sm font-medium text-white">{label}</span>
+      <div className="border border-dashed border-[#1a2035] rounded-xl p-7 flex flex-col items-center gap-2 hover:border-[#00CC99]/30 transition-colors cursor-pointer">
+        <FiUploadCloud className="w-8 h-8 text-gray-500" />
+        <p className="text-sm font-medium text-white">
+          {subtitle ?? "Файл хавсаргах (заавал биш)"}
+        </p>
+        <p className="text-xs text-gray-500">
+          JPEG, PNG, PDF, MP4 төрлүүд — 50MB хүртэл
+        </p>
+        <button className="mt-1 border border-[#1a2035] text-xs text-gray-300 px-4 py-1.5 rounded-lg hover:bg-white/5 transition-colors">
+          Оруулах
+        </button>
+      </div>
+    </div>
+  );
+}
+
 export const Request = ({ employee }: { employee?: Employee }) => {
   const [activeTab, setActiveTab] = useState<string | null>(null);
   const [submitted, setSubmitted] = useState(false);
   const [sendError, setSendError] = useState<string | null>(null);
+
+  const [clearanceType, setClearanceType] = useState("");
+  const [clearanceReason, setClearanceReason] = useState("");
 
   const [contractTemplates, setContractTemplates] = useState<string[]>([]);
   const [contractWarning, setContractWarning] = useState<string | null>(null);
@@ -144,6 +215,10 @@ export const Request = ({ employee }: { employee?: Employee }) => {
   const signatureStatus = signatureStatusData?.mySignatureStatus ?? null;
   const hasSignature = signatureStatus?.hasSignature ?? false;
   const hasPasscode = signatureStatus?.hasPasscode ?? false;
+
+  const [submitLeaveRequest, { loading: sending }] = useMutation<{
+    submitLeaveRequest: LeaveRequest;
+  }>(SUBMIT_LEAVE_REQUEST);
 
   const [submitContractRequest, { loading: sendingContract }] = useMutation<{
     submitContractRequest: ContractRequest;
@@ -297,6 +372,8 @@ export const Request = ({ employee }: { employee?: Employee }) => {
     setSubmitted(false);
     setSendError(null);
     setActiveTab(null);
+    setClearanceType("");
+    setClearanceReason("");
     setContractTemplates([]);
     setContractWarning(null);
     setSignatureMode("redraw");
@@ -341,6 +418,25 @@ export const Request = ({ employee }: { employee?: Employee }) => {
     setProfileSaved(true);
     setUseSavedProfile(true);
     pushToast("Мэдээлэл амжилттай хадгаллаа.");
+  }
+
+  async function sendRequest(payload: {
+    type: string;
+    startTime: string;
+    endTime: string;
+    reason: string;
+  }) {
+    const token = window.localStorage.getItem(TOKEN_KEY);
+    if (!token) {
+      throw new Error("Нэвтрэх шаардлагатай");
+    }
+
+    await submitLeaveRequest({
+      variables: payload,
+      context: {
+        headers: buildGraphQLHeaders({ authToken: token }),
+      },
+    });
   }
 
   function getTemplateLabel(templateId: string) {
@@ -419,6 +515,20 @@ export const Request = ({ employee }: { employee?: Employee }) => {
           },
         });
         pushToast("Гэрээний хүсэлт амжилттай илгээгдлээ.");
+      } else if (activeTab === "Тойрох хуудас") {
+        await sendRequest({
+          type: `Тойрох хуудас${clearanceType ? ` - ${clearanceType}` : ""}`,
+          startTime: new Date().toISOString(),
+          endTime: new Date().toISOString(),
+          reason: clearanceReason,
+        });
+      } else if (activeTab === "Томилолт") {
+        await sendRequest({
+          type: "Томилолт",
+          startTime: new Date().toISOString(),
+          endTime: new Date().toISOString(),
+          reason: clearanceReason,
+        });
       }
 
       setSubmitted(true);
@@ -451,6 +561,22 @@ export const Request = ({ employee }: { employee?: Employee }) => {
       bg: "border-[#4A3B00] bg-[radial-gradient(circle_at_top_left,_rgba(255,209,102,0.28),_transparent_38%),linear-gradient(180deg,#1a1402_0%,#0b0a06_100%)]",
       iconBg:
         "border-[#5E4B00] bg-[linear-gradient(180deg,rgba(46,35,3,0.95)_0%,rgba(24,19,5,0.95)_100%)]",
+    },
+    {
+      icon: <BiFile className="w-5 h-5 text-[#2A8CFF]" />,
+      title: "Томилолт",
+      desc: "Томилолт авах хүсэлт",
+      bg: "border-[#0E6A3F] bg-[radial-gradient(circle_at_top_left,_rgba(12,137,74,0.30),_transparent_38%),linear-gradient(180deg,#05160e_0%,#04070c_100%)]",
+      iconBg:
+        "border-[#0E4360] bg-[linear-gradient(180deg,rgba(7,37,58,0.95)_0%,rgba(8,24,34,0.95)_100%)]",
+    },
+    {
+      icon: <BiCalendar className="w-5 h-5 text-[#00CC99]" />,
+      title: "Тойрох хуудас",
+      desc: "Тойрох хуудас авах хүсэлт",
+      bg: "border-[#5B269D] bg-[radial-gradient(circle_at_top_left,_rgba(129,81,244,0.30),_transparent_38%),linear-gradient(180deg,#180e2a_0%,#04070d_100%)]",
+      iconBg:
+        "border-[#29397A] bg-[linear-gradient(180deg,rgba(27,29,75,0.95)_0%,rgba(16,18,38,0.95)_100%)]",
     },
   ];
 
@@ -514,6 +640,103 @@ export const Request = ({ employee }: { employee?: Employee }) => {
               <p className="text-gray-500 text-sm mt-1">
                 Таны хүсэлтийг хянаж үзнэ
               </p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {activeTab === "Тойрох хуудас" && !submitted && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black/60 backdrop-blur-sm z-50">
+          <div
+            className={`w-[460px] rounded-2xl ${DIALOG_BG} text-white p-7 border ${DIALOG_BORDER} shadow-2xl flex flex-col gap-5`}>
+            <div className="flex justify-between items-start">
+              <div>
+                <h2 className="text-xl font-semibold">
+                  Тойрох хуудас авах хүсэлт
+                </h2>
+                <p className="text-sm text-gray-500 mt-1">
+                  Тойрох хуудас авах шалтгаан болон файл оруулна уу
+                </p>
+              </div>
+              <CloseBtn onClick={closeDialog} />
+            </div>
+
+            <SelectField
+              label="Төрөл"
+              id="clearance-type"
+              options={[
+                "Ажлаас гарах",
+                "Дотоод шилжилт",
+                "Гадаад томилолт",
+                "Бусад",
+              ]}
+              value={clearanceType}
+              onChange={setClearanceType}
+            />
+
+            <UploadArea label="Файл хавсаргах" />
+
+            <div className="flex flex-col gap-1.5">
+              <label className="text-sm font-medium text-white">Шалтгаан</label>
+              <textarea
+                rows={3}
+                placeholder="Шалтгаанаа бичнэ үү..."
+                className={TEXTAREA_CLASS}
+                value={clearanceReason}
+                onChange={(e) => setClearanceReason(e.target.value)}
+              />
+            </div>
+
+            {sendError && (
+              <p className="text-red-400 text-xs bg-red-500/10 border border-red-500/20 rounded-lg px-3 py-2">
+                {sendError}
+              </p>
+            )}
+
+            <div className="flex justify-end gap-3">
+              <BackBtn onClick={closeDialog} />
+              <SendBtn onClick={handleSend} disabled={sending} />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {activeTab === "Томилолт" && !submitted && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black/60 backdrop-blur-sm z-50">
+          <div
+            className={`w-[460px] rounded-2xl ${DIALOG_BG} text-white p-7 border ${DIALOG_BORDER} shadow-2xl flex flex-col gap-5`}>
+            <div className="flex justify-between items-start">
+              <div>
+                <h2 className="text-xl font-semibold">Томилолтын мэдээлэл</h2>
+                <p className="text-sm text-gray-500 mt-1">
+                  Томилолтын мэдээллээ оруулна уу.
+                </p>
+              </div>
+              <CloseBtn onClick={closeDialog} />
+            </div>
+
+            <UploadArea label="Файл хавсаргах" subtitle="Файл хавсаргана уу." />
+
+            <div className="flex flex-col gap-1.5">
+              <label className="text-sm font-medium text-white">Шалтгаан</label>
+              <textarea
+                rows={3}
+                placeholder="Томилолтын шалтгаанаа бичнэ үү..."
+                className={TEXTAREA_CLASS}
+                value={clearanceReason}
+                onChange={(e) => setClearanceReason(e.target.value)}
+              />
+            </div>
+
+            {sendError && (
+              <p className="text-red-400 text-xs bg-red-500/10 border border-red-500/20 rounded-lg px-3 py-2">
+                {sendError}
+              </p>
+            )}
+
+            <div className="flex justify-end gap-3">
+              <BackBtn onClick={closeDialog} />
+              <SendBtn onClick={handleSend} disabled={sending} />
             </div>
           </div>
         </div>
