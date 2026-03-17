@@ -245,9 +245,9 @@ export const ChevronDownn = withDefaults(
 );
 export const ActiveIconn = withDefaults(
   AiFillCheckCircle,
-  "h-8 w-8 text-white",
+  "h-8 w-8 text-black",
 );
-export const HiredIcon = withDefaults(BiUserPlus, "h-8 w-8 text-white");
+export const HiredIcon = withDefaults(BiUserPlus, "h-8 w-8 text-black");
 export const AbsentIcon = withDefaults(FiCalendar, "h-8 w-8 text-white");
 export const PhoneIcon = withDefaults(
   FiMail,
