@@ -1,15 +1,28 @@
 "use client";
 
-import { useMutation, useQuery } from "@apollo/client/react";
+import { useLazyQuery, useMutation, useQuery } from "@apollo/client/react";
 import { useMemo, useState } from "react";
+import {
+  FiChevronDown,
+  FiChevronUp,
+  FiDownload,
+  FiEye,
+  FiFileText,
+  FiFilter,
+  FiSearch,
+} from "react-icons/fi";
 
 import {
   APPROVE_CONTRACT_REQUEST,
   REJECT_CONTRACT_REQUEST,
 } from "@/graphql/mutations";
-import { GET_CONTRACT_REQUESTS } from "@/graphql/queries";
+import {
+  GET_CONTRACT_REQUESTS,
+  GET_DOCUMENTS,
+  GET_DOCUMENT_CONTENT,
+} from "@/graphql/queries";
 import { buildGraphQLHeaders } from "@/lib/apollo-client";
-import type { ContractRequest } from "@/lib/types";
+import type { ContractRequest, Document, DocumentContent } from "@/lib/types";
 import { formatDepartment } from "@/lib/labels";
 
 const StatusBadge = ({ status }: { status: string }) => {
@@ -68,6 +81,21 @@ const TEMPLATE_LABELS: Record<string, string> = {
 
 function formatTemplateLabel(id: string) {
   return TEMPLATE_LABELS[id] ?? id;
+}
+
+function formatTemplateFilename(id: string, index: number) {
+  const prefix = String(index + 1).padStart(2, "0");
+  return `${prefix}_${id}.pdf`;
+}
+
+function buildDataUrl(content: DocumentContent) {
+  if (content.contentType === "application/pdf") {
+    return `data:${content.contentType};base64,${content.content}`;
+  }
+  if (content.contentType.startsWith("text/")) {
+    return `data:${content.contentType};charset=utf-8,${encodeURIComponent(content.content)}`;
+  }
+  return `data:${content.contentType};base64,${content.content}`;
 }
 
 const RequestModal = ({
@@ -140,7 +168,8 @@ const RequestModal = ({
                 <StatusBadge status={row.status} />
               </div>
               <p className="text-slate-400 text-sm mt-0.5">
-                {row.employee.employeeCode} • {formatDepartment(row.employee.department)}
+                {row.employee.employeeCode} •{" "}
+                {formatDepartment(row.employee.department)}
               </p>
             </div>
           </div>
@@ -155,7 +184,9 @@ const RequestModal = ({
         <div className="h-px bg-slate-700/50" />
 
         <div className="bg-[#161d2b] rounded-2xl p-4 flex flex-col gap-3">
-          <p className="text-white font-semibold text-base">Сонгосон гэрээнүүд</p>
+          <p className="text-white font-semibold text-base">
+            Сонгосон гэрээнүүд
+          </p>
           <div className="flex flex-wrap gap-2">
             {row.templateIds.map((id) => (
               <span
@@ -167,13 +198,15 @@ const RequestModal = ({
             ))}
           </div>
           <p className="text-xs text-slate-500">
-            Илгээсэн огноо: {new Date(row.createdAt).toLocaleDateString("mn-MN")}
+            Илгээсэн огноо:{" "}
+            {new Date(row.createdAt).toLocaleDateString("mn-MN")}
           </p>
         </div>
 
         <div className="flex flex-col gap-2">
           <p className="text-white font-semibold text-base">
-            Тайлбар <span className="text-slate-500 font-normal">(Заавал биш)</span>
+            Тайлбар{" "}
+            <span className="text-slate-500 font-normal">(Заавал биш)</span>
           </p>
           <textarea
             value={note}
@@ -219,8 +252,17 @@ const RequestModal = ({
 
 export const ContractRequestsComponent = () => {
   const [activeStatus, setActiveStatus] = useState("all");
+  const [search, setSearch] = useState("");
   const [selected, setSelected] = useState<ContractRequest | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [docCache, setDocCache] = useState<Record<string, Document[]>>({});
+  const [previewOpen, setPreviewOpen] = useState(false);
+  const [previewContent, setPreviewContent] = useState<DocumentContent | null>(
+    null,
+  );
+  const [previewError, setPreviewError] = useState<string | null>(null);
+  const [previewLoading, setPreviewLoading] = useState(false);
 
   const { data, loading, error, refetch } = useQuery<{
     contractRequests: ContractRequest[];
@@ -243,14 +285,30 @@ export const ContractRequestsComponent = () => {
     },
   });
 
+  const [loadDocuments] = useLazyQuery<{ documents: Document[] }>(
+    GET_DOCUMENTS,
+    {
+      fetchPolicy: "network-only",
+    },
+  );
+
+  const [loadDocumentContent] = useLazyQuery<{
+    documentContent: DocumentContent | null;
+  }>(GET_DOCUMENT_CONTENT, {
+    fetchPolicy: "network-only",
+  });
+
   const rows = useMemo(() => data?.contractRequests ?? [], [data]);
   const pendingCount = rows.filter((row) => row.status === "pending").length;
   const approvedCount = rows.filter((row) => row.status === "approved").length;
   const rejectedCount = rows.filter((row) => row.status === "rejected").length;
 
   const filtered = rows.filter((row) => {
-    if (activeStatus === "all") return true;
-    return row.status === activeStatus;
+    if (activeStatus !== "all" && row.status !== activeStatus) return false;
+    if (!search.trim()) return true;
+    const haystack =
+      `${row.employee.firstName} ${row.employee.lastName} ${row.employee.employeeCode} ${row.employee.department}`.toLowerCase();
+    return haystack.includes(search.trim().toLowerCase());
   });
 
   async function handleApprove(id: string, note: string) {
@@ -263,6 +321,97 @@ export const ContractRequestsComponent = () => {
   async function handleReject(id: string, note: string) {
     await rejectContractRequest({ variables: { id, note } });
     await refetch();
+  }
+
+  async function getDocumentsForEmployee(employeeId: string) {
+    if (docCache[employeeId]) return docCache[employeeId];
+    const result = await loadDocuments({
+      variables: { employeeId },
+      context: {
+        headers: buildGraphQLHeaders({ actorRole: "hr" }),
+      },
+    });
+    const docs = result.data?.documents ?? [];
+    setDocCache((prev) => ({ ...prev, [employeeId]: docs }));
+    return docs;
+  }
+
+  async function getDocumentByTemplate(
+    row: ContractRequest,
+    templateId: string,
+    index: number,
+  ) {
+    const docs = await getDocumentsForEmployee(row.employee.id);
+    const expectedName = formatTemplateFilename(templateId, index);
+    return docs.find((doc) => doc.documentName === expectedName) ?? null;
+  }
+
+  async function handlePreview(
+    row: ContractRequest,
+    templateId: string,
+    index: number,
+  ) {
+    setPreviewOpen(true);
+    setPreviewError(null);
+    setPreviewLoading(true);
+    try {
+      const doc = await getDocumentByTemplate(row, templateId, index);
+      if (!doc) {
+        setPreviewError("Баримт олдсонгүй.");
+        return;
+      }
+      const result = await loadDocumentContent({
+        variables: { documentId: doc.id },
+        context: {
+          headers: buildGraphQLHeaders({ actorRole: "hr" }),
+        },
+      });
+      const content = result.data?.documentContent ?? null;
+      if (!content) {
+        setPreviewError("Баримтын агуулга олдсонгүй.");
+        return;
+      }
+      setPreviewContent(content);
+    } catch (err) {
+      setPreviewError(err instanceof Error ? err.message : "Алдаа гарлаа.");
+    } finally {
+      setPreviewLoading(false);
+    }
+  }
+
+  async function handleDownload(
+    row: ContractRequest,
+    templateId: string,
+    index: number,
+  ) {
+    try {
+      const doc = await getDocumentByTemplate(row, templateId, index);
+      if (!doc) {
+        setSuccessMessage("Баримт олдсонгүй.");
+        return;
+      }
+      const result = await loadDocumentContent({
+        variables: { documentId: doc.id },
+        context: {
+          headers: buildGraphQLHeaders({ actorRole: "hr" }),
+        },
+      });
+      const content = result.data?.documentContent ?? null;
+      if (!content) {
+        setSuccessMessage("Баримтын агуулга олдсонгүй.");
+        return;
+      }
+      const link = window.document.createElement("a");
+      link.href = buildDataUrl(content);
+      link.download = content.documentName;
+      window.document.body.appendChild(link);
+      link.click();
+      link.remove();
+    } catch (err) {
+      setSuccessMessage(
+        err instanceof Error ? err.message : "Файл татаж чадсангүй.",
+      );
+    }
   }
 
   const filters = [
@@ -279,35 +428,38 @@ export const ContractRequestsComponent = () => {
           {successMessage}
         </div>
       ) : null}
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-white text-xl font-semibold">Гэрээний хүсэлтүүд</h2>
-          <p className="text-slate-500 text-sm mt-1">
-            Ажилтнуудын гэрээний хүсэлтийг хянаж батална.
-          </p>
-        </div>
-        <div className="text-xs text-slate-500">
-          {loading ? "Ачаалж байна..." : `${rows.length} хүсэлт`}
-        </div>
-      </div>
 
-      <div className="flex flex-wrap gap-2">
-        {filters.map((filter) => (
-          <button
-            key={filter.key}
-            onClick={() => setActiveStatus(filter.key)}
-            className={`flex items-center gap-2 rounded-full border px-4 py-1.5 text-xs font-medium transition-colors ${
-              activeStatus === filter.key
-                ? "border-[#00CC99]/60 bg-[#00CC99]/15 text-[#9BEBD7]"
-                : "border-white/10 bg-white/5 text-slate-400 hover:text-white"
-            }`}
-          >
-            {filter.label}
-            <span className="rounded-full bg-white/10 px-2 py-0.5 text-[11px]">
-              {filter.count}
-            </span>
+      <div className="rounded-2xl border border-white/10 bg-[#0b0f18] px-5 py-4 flex flex-wrap items-center gap-3 justify-between">
+        <div className="flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-slate-300 ">
+          <FiSearch className="text-slate-500" />
+          <input
+            value={search}
+            onChange={(event) => setSearch(event.target.value)}
+            placeholder="Ажилтны кодоор хайх"
+            className="bg-transparent outline-none w-60 text-sm text-slate-200 placeholder:text-slate-500"
+          />
+        </div>
+
+        <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-xs text-slate-300">
+            <FiFilter className="text-slate-500" />
+            <select
+              value={activeStatus}
+              onChange={(event) => setActiveStatus(event.target.value)}
+              className="bg-transparent outline-none text-xs text-slate-200"
+            >
+              {filters.map((filter) => (
+                <option key={filter.key} value={filter.key}>
+                  {filter.label} ({filter.count})
+                </option>
+              ))}
+            </select>
+          </div>
+          <button className="flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-xs text-slate-300 hover:text-white">
+            <FiDownload className="text-slate-500" />
+            Татах
           </button>
-        ))}
+        </div>
       </div>
 
       {error ? (
@@ -334,15 +486,22 @@ export const ContractRequestsComponent = () => {
               );
               const color = avatarColor(row.employeeId);
               return (
-                <button
+                <div
                   key={row.id}
-                  type="button"
+                  role="button"
+                  tabIndex={0}
                   onClick={() => setSelected(row)}
+                  onKeyDown={(event) => {
+                    if (event.key === "Enter" || event.key === " ") {
+                      event.preventDefault();
+                      setSelected(row);
+                    }
+                  }}
                   className="w-full text-left px-5 py-4 flex flex-col gap-3 hover:bg-white/5 transition-colors"
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full overflow-hidden shrink-0">
+                      <div className="w-10 h-10 rounded-lg overflow-hidden shrink-0">
                         <div
                           className={`w-full h-full ${color} flex items-center justify-center text-white font-semibold text-sm`}
                         >
@@ -354,26 +513,92 @@ export const ContractRequestsComponent = () => {
                           {row.employee.lastName} {row.employee.firstName}
                         </p>
                         <p className="text-xs text-slate-500">
-                          {row.employee.employeeCode} • {formatDepartment(row.employee.department)}
+                          {row.employee.employeeCode} •{" "}
+                          {formatDepartment(row.employee.department)}
                         </p>
                       </div>
                     </div>
-                    <StatusBadge status={row.status} />
-                  </div>
-                  <div className="flex flex-wrap gap-2">
-                    {row.templateIds.map((id) => (
-                      <span
-                        key={id}
-                        className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[11px] text-slate-300"
-                      >
-                        {formatTemplateLabel(id)}
+                    <div className="flex items-center gap-3">
+                      <span className="rounded-full border border-[#7aa7ff]/40 bg-[#7aa7ff]/15 px-3 py-1 text-[11px] text-[#a7c1ff]">
+                        {row.templateIds.length} гэрээ
                       </span>
-                    ))}
+                      <button
+                        onClick={(event) => {
+                          event.stopPropagation();
+                          setExpandedId((prev) =>
+                            prev === row.id ? null : row.id,
+                          );
+                        }}
+                        className="text-slate-500 hover:text-white cursor-pointer"
+                      >
+                        {expandedId === row.id ? (
+                          <FiChevronUp className="text-sm" />
+                        ) : (
+                          <FiChevronDown className="text-sm" />
+                        )}
+                      </button>
+                    </div>
                   </div>
-                  <p className="text-xs text-slate-500">
-                    Илгээсэн огноо: {new Date(row.createdAt).toLocaleDateString("mn-MN")}
-                  </p>
-                </button>
+
+                  <div className="flex items-center justify-between">
+                    <p className="text-xs text-slate-500">
+                      Илгээсэн огноо:{" "}
+                      {new Date(row.createdAt).toLocaleDateString("mn-MN")}
+                    </p>
+                  </div>
+                  {expandedId === row.id ? (
+                    <div
+                      className="rounded-xl border border-white/10 bg-[#0c111b] overflow-hidden"
+                      onClick={(event) => event.stopPropagation()}
+                    >
+                      {row.templateIds.map((id, index) => (
+                        <div
+                          key={id}
+                          className={`flex items-center justify-between px-4 py-3 ${index < row.templateIds.length - 1 ? "border-b border-white/5" : ""}`}
+                        >
+                          <div className="flex items-center gap-3">
+                            <div className="h-9 w-9 rounded-lg border border-white/10 bg-white/5 flex items-center justify-center text-slate-300">
+                              <FiFileText className="text-base" />
+                            </div>
+                            <div>
+                              <p className="text-sm text-white font-medium">
+                                {formatTemplateLabel(id)}
+                              </p>
+                              <p className="text-xs text-slate-500">
+                                {formatTemplateFilename(id, index)}
+                              </p>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-3 text-slate-400">
+                            <button
+                              onClick={(event) => {
+                                event.stopPropagation();
+                                handlePreview(row, id, index);
+                              }}
+                              className="hover:text-white transition-colors"
+                            >
+                              <FiEye className="text-sm" />
+                            </button>
+                            <button
+                              onClick={(event) => {
+                                event.stopPropagation();
+                                handleDownload(row, id, index);
+                              }}
+                              className="hover:text-white transition-colors"
+                            >
+                              <FiDownload className="text-sm" />
+                            </button>
+                            <span className="text-[11px] text-slate-500">
+                              {new Date(row.createdAt).toLocaleDateString(
+                                "mn-MN",
+                              )}
+                            </span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : null}
+                </div>
               );
             })}
           </div>
@@ -387,6 +612,64 @@ export const ContractRequestsComponent = () => {
           onApprove={handleApprove}
           onReject={handleReject}
         />
+      ) : null}
+
+      {previewOpen ? (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+          <div
+            aria-label="Close preview"
+            className="absolute inset-0"
+            onClick={() => {
+              setPreviewOpen(false);
+              setPreviewContent(null);
+              setPreviewError(null);
+            }}
+          />
+          <div className="relative w-[920px] max-w-[95vw] h-[82vh] bg-[#0f1520] rounded-2xl border border-white/10 overflow-hidden shadow-2xl">
+            <div className="flex items-center justify-between px-5 py-4 border-b border-white/10">
+              <p className="text-sm text-white font-semibold">Inline Preview</p>
+              <button
+                onClick={() => {
+                  setPreviewOpen(false);
+                  setPreviewContent(null);
+                  setPreviewError(null);
+                }}
+                className="text-slate-400 hover:text-white"
+              >
+                ✕
+              </button>
+            </div>
+            <div className="h-[calc(100%-56px)] bg-[#0b0f18] p-4">
+              {previewLoading ? (
+                <div className="h-full flex items-center justify-center text-slate-500">
+                  Ачаалж байна...
+                </div>
+              ) : previewError ? (
+                <div className="h-full flex items-center justify-center text-red-400">
+                  {previewError}
+                </div>
+              ) : previewContent ? (
+                previewContent.contentType === "text/html" ? (
+                  <iframe
+                    title={previewContent.documentName}
+                    className="w-full h-full rounded-xl bg-white"
+                    srcDoc={previewContent.content}
+                  />
+                ) : (
+                  <iframe
+                    title={previewContent.documentName}
+                    className="w-full h-full rounded-xl bg-white"
+                    src={buildDataUrl(previewContent)}
+                  />
+                )
+              ) : (
+                <div className="h-full flex items-center justify-center text-slate-500">
+                  Preview бэлэн биш байна.
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
       ) : null}
     </div>
   );

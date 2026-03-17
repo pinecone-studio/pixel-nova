@@ -4,3 +4,4 @@ export * from "./documents";
 export * from "./employees";
 export * from "./contract-requests";
 export * from "./notifications";
+export * from "./announcements";

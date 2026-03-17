@@ -152,13 +152,33 @@ export const employeeNotifications = sqliteTable(
     employeeId: text("employee_id")
       .notNull()
       .references(() => employees.id, { onDelete: "cascade" }),
+    announcementId: text("announcement_id"),
     title: text("title").notNull(),
     body: text("body").notNull(),
     status: text("status").notNull().default("unread"),
     createdAt: text("created_at").notNull(),
     readAt: text("read_at"),
   },
-  (table) => [index("employee_notifications_employee_id_idx").on(table.employeeId)],
+  (table) => [
+    index("employee_notifications_employee_id_idx").on(table.employeeId),
+    index("employee_notifications_announcement_id_idx").on(table.announcementId),
+  ],
+);
+
+export const announcements = sqliteTable(
+  "announcements",
+  {
+    id: text("id").primaryKey(),
+    title: text("title").notNull(),
+    body: text("body").notNull(),
+    status: text("status").notNull().default("draft"),
+    audience: text("audience").notNull().default("all"),
+    createdBy: text("created_by"),
+    createdAt: text("created_at").notNull(),
+    updatedAt: text("updated_at").notNull(),
+    publishedAt: text("published_at"),
+  },
+  (table) => [index("announcements_status_idx").on(table.status)],
 );
 
 export const contractRequests = sqliteTable(
@@ -206,6 +226,7 @@ export const schema = {
   otpCodes,
   authSessions,
   employeeNotifications,
+  announcements,
   contractRequests,
   employeeSignatures,
 };
@@ -228,6 +249,8 @@ export type AuthSession = typeof authSessions.$inferSelect;
 export type NewAuthSession = typeof authSessions.$inferInsert;
 export type EmployeeNotification = typeof employeeNotifications.$inferSelect;
 export type NewEmployeeNotification = typeof employeeNotifications.$inferInsert;
+export type Announcement = typeof announcements.$inferSelect;
+export type NewAnnouncement = typeof announcements.$inferInsert;
 export type ContractRequest = typeof contractRequests.$inferSelect;
 export type NewContractRequest = typeof contractRequests.$inferInsert;
 export type EmployeeSignature = typeof employeeSignatures.$inferSelect;

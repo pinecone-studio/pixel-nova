@@ -199,6 +199,20 @@ export const typeDefs = /* GraphQL */ `
     updatedAt: String
   }
 
+  type Announcement {
+    id: ID!
+    title: String!
+    body: String!
+    status: String!
+    audience: String!
+    createdBy: String
+    createdAt: String!
+    updatedAt: String!
+    publishedAt: String
+    recipientCount: Int!
+    readCount: Int!
+  }
+
   type Query {
     me: Employee
     employees(search: String, status: String, department: String): [Employee!]!
@@ -210,6 +224,7 @@ export const typeDefs = /* GraphQL */ `
     myContractRequests: [ContractRequest!]!
     mySignatureStatus: EmployeeSignatureStatus!
     myNotifications: [EmployeeNotification!]!
+    announcements: [Announcement!]!
   }
 
   type Mutation {
@@ -231,6 +246,10 @@ export const typeDefs = /* GraphQL */ `
     approveContractRequest(id: ID!, note: String): ContractRequest!
     rejectContractRequest(id: ID!, note: String): ContractRequest!
     markNotificationRead(id: ID!): EmployeeNotification!
+    sendAnnouncement(title: String!, body: String!): Int!
+    createAnnouncementDraft(title: String!, body: String!, audience: String): Announcement!
+    updateAnnouncementDraft(id: ID!, title: String!, body: String!, audience: String): Announcement!
+    publishAnnouncement(id: ID!): Announcement!
     uploadHrDocument(input: UploadHrDocumentInput!): Document!
   }
 `;
