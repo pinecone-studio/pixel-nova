@@ -1,12 +1,7 @@
 import { useMutation, useQuery } from "@apollo/client/react";
-import type { ApolloError } from "@apollo/client";
 import { useEffect, useRef, useState } from "react";
 import type { PointerEvent } from "react";
-import {
-  BiChevronRight,
-  BiFile,
-  BiPlus,
-} from "react-icons/bi";
+import { BiChevronRight, BiFile, BiPlus } from "react-icons/bi";
 import { FiCheck, FiSend, FiX } from "react-icons/fi";
 
 import { buildGraphQLHeaders } from "@/lib/apollo-client";
@@ -27,7 +22,6 @@ const TOKEN_KEY = "epas_auth_token";
 const DIALOG_BG = "bg-[#030810]";
 const DIALOG_BORDER = "border-[#1a2035]";
 const INPUT_CLASS = `w-full bg-[#040d18] border border-[#1a2035] rounded-lg p-2.5 text-sm text-gray-300 focus:outline-none focus:border-[#00CC99]/40 appearance-none`;
-const TEXTAREA_CLASS = `w-full bg-[#040d18] border border-[#1a2035] rounded-lg p-3 text-sm text-gray-300 placeholder-gray-600 resize-none focus:outline-none focus:border-[#00CC99]/40`;
 const MAX_CONTRACT_SELECTION = 3;
 const PROFILE_REQUIRED_FIELDS: Array<{
   key: keyof EmployeeDocumentProfile;
@@ -71,8 +65,7 @@ function CloseBtn({ onClick }: { onClick: () => void }) {
   return (
     <button
       onClick={onClick}
-      className="text-gray-500 hover:text-white transition-colors"
-    >
+      className="text-gray-500 hover:text-white transition-colors">
       <FiX className="w-5 h-5" />
     </button>
   );
@@ -89,8 +82,7 @@ function SendBtn({
     <button
       onClick={onClick}
       disabled={disabled}
-      className="bg-[#00CC99] hover:bg-[#00b388] disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-medium px-5 py-2.5 rounded-lg flex items-center gap-2 transition-colors"
-    >
+      className="bg-[#00CC99] hover:bg-[#00b388] disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-medium px-5 py-2.5 rounded-lg flex items-center gap-2 transition-colors">
       <FiSend className="w-4 h-4" />
       {disabled ? "Илгээж байна..." : "Илгээх"}
     </button>
@@ -101,8 +93,7 @@ function BackBtn({ onClick }: { onClick: () => void }) {
   return (
     <button
       onClick={onClick}
-      className="border border-[#1a2035] px-5 py-2.5 rounded-lg text-sm text-gray-400 hover:bg-white/5 hover:text-white transition-colors"
-    >
+      className="border border-[#1a2035] px-5 py-2.5 rounded-lg text-sm text-gray-400 hover:bg-white/5 hover:text-white transition-colors">
       Буцах
     </button>
   );
@@ -127,9 +118,7 @@ export const Request = ({ employee }: { employee?: Employee }) => {
   const [profileError, setProfileError] = useState<string | null>(null);
   const [profileSaved, setProfileSaved] = useState(false);
   const [useSavedProfile, setUseSavedProfile] = useState(true);
-  const [toasts, setToasts] = useState<Array<{ id: string; text: string }>>(
-    [],
-  );
+  const [toasts, setToasts] = useState<Array<{ id: string; text: string }>>([]);
 
   const authToken =
     typeof window === "undefined"
@@ -173,23 +162,40 @@ export const Request = ({ employee }: { employee?: Employee }) => {
     if (activeTab !== "Гэрээний хүсэлт") return;
     if (signatureStatusLoading) return;
 
-    if (hasSignature) {
-      setSignatureMode("reuse");
-    } else {
-      setSignatureMode("redraw");
-    }
+    let isActive = true;
+    queueMicrotask(() => {
+      if (!isActive) return;
+      if (hasSignature) {
+        setSignatureMode("reuse");
+      } else {
+        setSignatureMode("redraw");
+      }
+    });
+
+    return () => {
+      isActive = false;
+    };
   }, [activeTab, hasSignature, signatureStatusLoading]);
 
   useEffect(() => {
     if (activeTab !== "Гэрээний хүсэлт") return;
     const existing = employee?.documentProfile ?? {};
-    setProfileForm(existing);
-    setProfileSaved(
-      Object.values(existing).some((value) =>
-        value ? String(value).trim().length > 0 : false,
-      ),
-    );
-    setUseSavedProfile(true);
+
+    let isActive = true;
+    queueMicrotask(() => {
+      if (!isActive) return;
+      setProfileForm(existing);
+      setProfileSaved(
+        Object.values(existing).some((value) =>
+          value ? String(value).trim().length > 0 : false,
+        ),
+      );
+      setUseSavedProfile(true);
+    });
+
+    return () => {
+      isActive = false;
+    };
   }, [activeTab, employee?.documentProfile]);
 
   useEffect(() => {
@@ -218,11 +224,19 @@ export const Request = ({ employee }: { employee?: Employee }) => {
   }, [activeTab, signatureMode]);
 
   useEffect(() => {
-    if (signatureMode === "reuse") {
-      setUsePasscode(false);
-      setSignatureData("");
-    }
-    setPasscode("");
+    let isActive = true;
+    queueMicrotask(() => {
+      if (!isActive) return;
+      if (signatureMode === "reuse") {
+        setUsePasscode(false);
+        setSignatureData("");
+      }
+      setPasscode("");
+    });
+
+    return () => {
+      isActive = false;
+    };
   }, [signatureMode]);
 
   function clearSignature() {
@@ -408,7 +422,9 @@ export const Request = ({ employee }: { employee?: Employee }) => {
         resetForm();
       }, 2000);
     } catch (err) {
-      const apolloError = err as ApolloError | undefined;
+      const apolloError = err as
+        | { graphQLErrors?: Array<{ message: string }> }
+        | undefined;
       const gqlMessage = apolloError?.graphQLErrors?.[0]?.message?.trim() ?? "";
       setSendError(
         gqlMessage ||
@@ -445,8 +461,7 @@ export const Request = ({ employee }: { employee?: Employee }) => {
         </div>
         <a
           href="#"
-          className="flex items-center gap-1 text-[#00CC99] text-[14px] font-medium hover:underline"
-        >
+          className="flex items-center gap-1 text-[#00CC99] text-[14px] font-medium hover:underline">
           Бүх хүсэлтүүд <BiChevronRight className="w-4 h-4" />
         </a>
       </div>
@@ -455,12 +470,10 @@ export const Request = ({ employee }: { employee?: Employee }) => {
         {quickActions.map((action) => (
           <div
             key={action.title}
-            className={`${action.bg} flex h-[136px] w-full items-center justify-between gap-3 rounded-[16px] border px-6 py-6 shadow-[0_0_0_1px_rgba(255,255,255,0.03)_inset]`}
-          >
+            className={`${action.bg} flex h-[136px] w-full items-center justify-between gap-3 rounded-[16px] border px-6 py-6 shadow-[0_0_0_1px_rgba(255,255,255,0.03)_inset]`}>
             <div className="flex items-center gap-4">
               <div
-                className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-[12px] border ${action.iconBg}`}
-              >
+                className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-[12px] border ${action.iconBg}`}>
                 {action.icon}
               </div>
 
@@ -476,8 +489,7 @@ export const Request = ({ employee }: { employee?: Employee }) => {
 
             <button
               onClick={() => setActiveTab(action.title)}
-              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-[#8B96A8] transition-colors hover:bg-white/5 hover:text-white"
-            >
+              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-[#8B96A8] transition-colors hover:bg-white/5 hover:text-white">
               <BiPlus className="h-5 w-5" />
             </button>
           </div>
@@ -487,8 +499,7 @@ export const Request = ({ employee }: { employee?: Employee }) => {
       {submitted && activeTab && (
         <div className="fixed inset-0 flex items-center justify-center bg-black/60 backdrop-blur-sm z-50">
           <div
-            className={`w-[360px] rounded-2xl ${DIALOG_BG} text-white p-8 border ${DIALOG_BORDER} shadow-2xl flex flex-col items-center gap-4`}
-          >
+            className={`w-[360px] rounded-2xl ${DIALOG_BG} text-white p-8 border ${DIALOG_BORDER} shadow-2xl flex flex-col items-center gap-4`}>
             <div className="w-14 h-14 rounded-full bg-[#00CC99]/15 border border-[#00CC99]/30 flex items-center justify-center">
               <FiCheck className="w-7 h-7 text-[#00CC99]" />
             </div>
@@ -507,8 +518,7 @@ export const Request = ({ employee }: { employee?: Employee }) => {
       {activeTab === "Гэрээний хүсэлт" && !submitted && (
         <div className="fixed inset-0 flex items-center justify-center bg-black/60 backdrop-blur-sm z-50">
           <div
-            className={`w-[560px] max-h-[82vh] overflow-y-auto rounded-2xl ${DIALOG_BG} text-white p-6 border ${DIALOG_BORDER} shadow-2xl flex flex-col gap-4 animate-fade-up`}
-          >
+            className={`w-[560px] max-h-[82vh] overflow-y-auto rounded-2xl ${DIALOG_BG} text-white p-6 border ${DIALOG_BORDER} shadow-2xl flex flex-col gap-4 animate-fade-up`}>
             <div className="flex justify-between items-start">
               <div>
                 <h2 className="text-xl font-semibold">Гэрээний хүсэлт</h2>
@@ -528,8 +538,7 @@ export const Request = ({ employee }: { employee?: Employee }) => {
                   contractTemplates.map((item) => (
                     <span
                       key={item}
-                      className="rounded-full border border-[#00CC99]/30 bg-[#00CC99]/10 px-2.5 py-1 text-[11px] text-[#9BEBD7]"
-                    >
+                      className="rounded-full border border-[#00CC99]/30 bg-[#00CC99]/10 px-2.5 py-1 text-[11px] text-[#9BEBD7]">
                       {getTemplateLabel(item)}
                     </span>
                   ))
@@ -551,14 +560,12 @@ export const Request = ({ employee }: { employee?: Employee }) => {
                       selected
                         ? "border-[#00CC99]/50 bg-[#00CC99]/15 text-white"
                         : "border-[#1a2035] bg-[#040d18] text-gray-300 hover:border-[#00CC99]/30"
-                    }`}
-                  >
+                    }`}>
                     <span>{template.label}</span>
                     <span
                       className={`text-xs ${
                         selected ? "text-[#00CC99]" : "text-gray-500"
-                      }`}
-                    >
+                      }`}>
                       {selected ? "Сонгосон" : "Сонгох"}
                     </span>
                   </button>
@@ -639,8 +646,7 @@ export const Request = ({ employee }: { employee?: Employee }) => {
                     type="button"
                     onClick={handleSaveProfile}
                     disabled={savingProfile}
-                    className="border border-[#1a2035] px-4 py-2 rounded-lg text-xs text-gray-300 hover:bg-white/5 hover:text-white transition-colors disabled:opacity-50"
-                  >
+                    className="border border-[#1a2035] px-4 py-2 rounded-lg text-xs text-gray-300 hover:bg-white/5 hover:text-white transition-colors disabled:opacity-50">
                     {savingProfile ? "Хадгалж байна..." : "Мэдээлэл хадгалах"}
                   </button>
                 </div>
@@ -703,8 +709,7 @@ export const Request = ({ employee }: { employee?: Employee }) => {
                     <button
                       type="button"
                       onClick={clearSignature}
-                      className="text-xs text-gray-400 hover:text-white transition-colors"
-                    >
+                      className="text-xs text-gray-400 hover:text-white transition-colors">
                       Арилгах
                     </button>
                   </div>
@@ -722,8 +727,7 @@ export const Request = ({ employee }: { employee?: Employee }) => {
                     />
                     <label
                       htmlFor="use-passcode"
-                      className="text-sm text-gray-300"
-                    >
+                      className="text-sm text-gray-300">
                       4 оронтой код тохируулах (заавал биш)
                     </label>
                   </div>
@@ -789,22 +793,18 @@ export const Request = ({ employee }: { employee?: Employee }) => {
 
             <div className="flex justify-end gap-3">
               <BackBtn onClick={closeDialog} />
-              <SendBtn
-                onClick={handleSend}
-                disabled={sendingContract}
-              />
+              <SendBtn onClick={handleSend} disabled={sendingContract} />
             </div>
           </div>
         </div>
       )}
 
       {toasts.length > 0 ? (
-        <div className="fixed bottom-6 right-6 z-[60] flex flex-col gap-2">
+        <div className="fixed bottom-6 right-6 z-60 flex flex-col gap-2">
           {toasts.map((toast) => (
             <div
               key={toast.id}
-              className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-200 shadow-lg"
-            >
+              className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-200 shadow-lg">
               {toast.text}
             </div>
           ))}

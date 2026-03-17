@@ -8,17 +8,13 @@ import { useEffect, useSyncExternalStore } from "react";
 import {
   AjildOrson,
   Ajillasan,
-  AjiltniiCode,
   AlbanTushaal,
-  CompanyTsalin,
   Email,
   EmployeeCode,
   Engineering,
-  EntraID,
   Github,
   Heltes,
   Idevhtei,
-  KPI,
   Salbar,
   Senior,
   Signature,
@@ -88,7 +84,6 @@ export default function Profile() {
   });
 
   const employee = data?.me ?? null;
-  console;
   useEffect(() => {
     if (!authToken) {
       router.replace("/auth/employee");
@@ -253,8 +248,7 @@ export default function Profile() {
               {workInfo.map((item) => (
                 <div
                   key={item.label}
-                  className="flex h-[68px] items-center gap-3"
-                >
+                  className="flex h-[68px] items-center gap-3">
                   <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-teal-900/50 text-sm">
                     {item.icon}
                   </div>
@@ -278,8 +272,7 @@ export default function Profile() {
               {personalInfo.map((item) => (
                 <div
                   key={item.label}
-                  className="flex h-[68px] items-center gap-3"
-                >
+                  className="flex h-[68px] items-center gap-3">
                   <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-teal-900/50 text-sm">
                     {item.icon}
                   </div>
