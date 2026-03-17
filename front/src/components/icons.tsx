@@ -311,181 +311,54 @@ export function ChevronDown({
 export function EpasLogo({ className = "h-9 w-9" }: { className?: string }) {
   return (
     <svg
-      className={className}
-      viewBox="0 0 512 512"
+      width="36"
+      height="36"
+      viewBox="0 0 36 36"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
     >
-      {/* Outer circle */}
-      <circle
-        cx="256"
-        cy="256"
-        r="246"
-        fill="#060610"
-        stroke="#10B981"
-        strokeWidth="10"
-      />
-      {/* Inner dashed orbit */}
-      <circle
-        cx="256"
-        cy="256"
-        r="226"
-        fill="none"
-        stroke="#10B981"
-        strokeWidth="2"
-        opacity="0.15"
-        strokeDasharray="4 6"
-      />
-
-      {/* Hexagonal shield */}
+      <mask id="path-1-inside-1_985_4405" fill="white">
+        <path d="M0 12C0 5.37258 5.37258 0 12 0H24C30.6274 0 36 5.37258 36 12V24C36 30.6274 30.6274 36 24 36H12C5.37258 36 0 30.6274 0 24V12Z" />
+      </mask>
       <path
-        d="M256 60 L420 140 L420 340 L256 440 L92 340 L92 140 Z"
-        fill="#10B981"
-        opacity="0.04"
+        d="M12 0V1H24V0V-1H12V0ZM36 12H35V24H36H37V12H36ZM24 36V35H12V36V37H24V36ZM0 24H1V12H0H-1V24H0ZM12 36V35C5.92487 35 1 30.0751 1 24H0H-1C-1 31.1797 4.8203 37 12 37V36ZM36 24H35C35 30.0751 30.0751 35 24 35V36V37C31.1797 37 37 31.1797 37 24H36ZM24 0V1C30.0751 1 35 5.92487 35 12H36H37C37 4.8203 31.1797 -1 24 -1V0ZM12 0V-1C4.8203 -1 -1 4.8203 -1 12H0H1C1 5.92487 5.92487 1 12 1V0Z"
+        fill="black"
+        mask="url(#path-1-inside-1_985_4405)"
       />
       <path
-        d="M256 60 L420 140 L420 340 L256 440 L92 340 L92 140 Z"
-        fill="none"
-        stroke="#10B981"
-        strokeWidth="4"
-      />
-      {/* Inner hex dashed */}
-      <path
-        d="M256 100 L388 164 L388 316 L256 396 L124 316 L124 164 Z"
-        fill="none"
-        stroke="#10B981"
-        strokeWidth="1.5"
-        opacity="0.2"
-        strokeDasharray="6 5"
-      />
-
-      {/* Person head - filled */}
-      <circle cx="256" cy="190" r="46" fill="#34D399" />
-      {/* Person shoulders - filled arc */}
-      <path
-        d="M172 340 C172 288 210 254 256 254 C302 254 340 288 340 340 L172 340 Z"
-        fill="#34D399"
-        opacity="0.25"
-      />
-      <path
-        d="M172 340 C172 288 210 254 256 254 C302 254 340 288 340 340"
-        fill="none"
-        stroke="#34D399"
-        strokeWidth="5"
-        strokeLinecap="round"
-      />
-
-      {/* Document floating left */}
-      <rect
-        x="108"
-        cy="220"
-        y="200"
-        width="44"
-        height="56"
-        rx="6"
-        fill="none"
-        stroke="#6EE7B7"
-        strokeWidth="2.5"
-        opacity="0.6"
-        transform="rotate(-12 130 228)"
-      />
-      <line
-        x1="118"
-        y1="218"
-        x2="142"
-        y2="214"
-        stroke="#6EE7B7"
-        strokeWidth="2"
-        opacity="0.4"
-        transform="rotate(-12 130 228)"
-      />
-      <line
-        x1="118"
-        y1="228"
-        x2="138"
-        y2="225"
-        stroke="#6EE7B7"
-        strokeWidth="2"
-        opacity="0.3"
-        transform="rotate(-12 130 228)"
-      />
-
-      {/* Document floating right */}
-      <rect
-        x="360"
-        y="200"
-        width="44"
-        height="56"
-        rx="6"
-        fill="none"
-        stroke="#6EE7B7"
-        strokeWidth="2.5"
-        opacity="0.6"
-        transform="rotate(12 382 228)"
-      />
-      <line
-        x1="370"
-        y1="218"
-        x2="394"
-        y2="222"
-        stroke="#6EE7B7"
-        strokeWidth="2"
-        opacity="0.4"
-        transform="rotate(12 382 228)"
-      />
-      <line
-        x1="370"
-        y1="228"
-        x2="390"
-        y2="231"
-        stroke="#6EE7B7"
-        strokeWidth="2"
-        opacity="0.3"
-        transform="rotate(12 382 228)"
-      />
-
-      {/* Checkmark badge bottom */}
-      <circle cx="256" cy="400" r="22" fill="#059669" />
-      <path
-        d="M244 400 L252 408 L268 392"
-        fill="none"
-        stroke="white"
-        strokeWidth="4"
+        d="M14 24.6667C13.6463 24.6667 13.3072 24.5262 13.0572 24.2762C12.8071 24.0261 12.6666 23.687 12.6666 23.3333V12.6667C12.6666 12.3131 12.8071 11.9739 13.0572 11.7239C13.3072 11.4738 13.6463 11.3333 14 11.3333H19.3333C19.5443 11.333 19.7533 11.3744 19.9483 11.4552C20.1433 11.536 20.3203 11.6545 20.4693 11.804L22.8613 14.196C23.0112 14.345 23.1301 14.5222 23.2111 14.7175C23.2921 14.9127 23.3336 15.122 23.3333 15.3333V23.3333C23.3333 23.687 23.1928 24.0261 22.9428 24.2762C22.6927 24.5262 22.3536 24.6667 22 24.6667H14Z"
+        stroke="black"
+        strokeWidth="1.33333"
         strokeLinecap="round"
         strokeLinejoin="round"
       />
-
-      {/* Energy particles spiraling */}
-      <circle cx="148" cy="360" r="4" fill="#6EE7B7" opacity="0.8" />
-      <circle cx="132" cy="320" r="3" fill="#34D399" opacity="0.6" />
-      <circle cx="124" cy="280" r="2.5" fill="#10B981" opacity="0.4" />
-      <circle cx="364" cy="360" r="4" fill="#6EE7B7" opacity="0.8" />
-      <circle cx="380" cy="320" r="3" fill="#34D399" opacity="0.6" />
-      <circle cx="388" cy="280" r="2.5" fill="#10B981" opacity="0.4" />
-
-      {/* Top accent nodes */}
-      <circle cx="196" cy="90" r="3" fill="#6EE7B7" opacity="0.7" />
-      <circle cx="316" cy="90" r="3" fill="#6EE7B7" opacity="0.7" />
-      <circle cx="256" cy="52" r="2.5" fill="#34D399" opacity="0.5" />
-
-      {/* Connecting lines from nodes to hex */}
-      <line
-        x1="196"
-        y1="90"
-        x2="174"
-        y2="120"
-        stroke="#10B981"
-        strokeWidth="1"
-        opacity="0.15"
+      <path
+        d="M19.3334 11.3333V14.6667C19.3334 14.8435 19.4036 15.0131 19.5286 15.1381C19.6537 15.2631 19.8232 15.3333 20 15.3333H23.3334"
+        stroke="black"
+        strokeWidth="1.33333"
+        strokeLinecap="round"
+        strokeLinejoin="round"
       />
-      <line
-        x1="316"
-        y1="90"
-        x2="338"
-        y2="120"
-        stroke="#10B981"
-        strokeWidth="1"
-        opacity="0.15"
+      <path
+        d="M16.6667 16H15.3334"
+        stroke="black"
+        strokeWidth="1.33333"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M20.6667 18.6667H15.3334"
+        stroke="black"
+        strokeWidth="1.33333"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M20.6667 21.3333H15.3334"
+        stroke="black"
+        strokeWidth="1.33333"
+        strokeLinecap="round"
+        strokeLinejoin="round"
       />
     </svg>
   );

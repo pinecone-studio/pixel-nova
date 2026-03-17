@@ -24,7 +24,7 @@ export const EmployeeNotifDropdown = () => {
   const token =
     typeof window === "undefined"
       ? ""
-      : window.localStorage.getItem(TOKEN_KEY) ?? "";
+      : (window.localStorage.getItem(TOKEN_KEY) ?? "");
 
   const { data, loading, refetch } = useQuery<{
     myNotifications: EmployeeNotification[];
@@ -44,7 +44,9 @@ export const EmployeeNotifDropdown = () => {
 
   const liveNotifications = data?.myNotifications ?? [];
   const useMockNotifications = liveNotifications.length === 0;
-  const notifications = useMockNotifications ? mockNotifications : liveNotifications;
+  const notifications = useMockNotifications
+    ? mockNotifications
+    : liveNotifications;
 
   const unreadCount = notifications.filter((n) => n.status === "unread").length;
 
@@ -69,13 +71,14 @@ export const EmployeeNotifDropdown = () => {
   }
 
   async function handleSelect(notification: EmployeeNotification) {
-    const nextSelectedId = selectedId === notification.id ? null : notification.id;
+    const nextSelectedId =
+      selectedId === notification.id ? null : notification.id;
     setSelectedId(nextSelectedId);
 
     if (notification.status === "unread") {
       await handleMarkRead(notification.id);
     }
-  } 
+  }
 
   return (
     <>
@@ -89,12 +92,12 @@ export const EmployeeNotifDropdown = () => {
             return next;
           });
         }}
-        className="relative flex h-9 w-9 cursor-pointer items-center justify-center text-[#6B6B8A] transition-all duration-200 hover:text-[#00CC99]"
+        className="relative flex h-9 w-9 cursor-pointer items-center justify-center text-[#000000] transition-all duration-200 hover:text-[#00CC99]"
         aria-label="Мэдэгдэл"
       >
         <GrNotification className="h-4 w-4" />
         {unreadCount > 0 ? (
-          <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full border-2 border-[#0A0A0F] bg-[#00CC99]" />
+          <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-[#fc171b]" />
         ) : null}
       </button>
 
