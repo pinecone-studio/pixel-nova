@@ -8,6 +8,7 @@ import {
   getContractRequestById,
   insertDocument,
   insertContractRequest,
+  insertEmployeeNotification,
   insertLeaveRequest,
   listActionConfigs,
   requestEmployeeOtp,
@@ -19,6 +20,7 @@ import {
   updateLeaveRequestStatus,
   verifyEmployeeSignaturePasscode,
   verifyEmployeeOtp,
+  markEmployeeNotificationRead,
 } from "../db/queries";
 import {
   buildEmployeeChangeSet,
@@ -431,6 +433,13 @@ export const mutationResolvers = {
       args.note,
     );
     if (!updated) throw new Error("Failed to update contract request");
+
+    await insertEmployeeNotification(ctx.db, {
+      employeeId: request.employeeId,
+      title: "Гэрээ батлагдлаа",
+      body: `Таны гэрээний хүсэлт батлагдлаа. (${normalized.join(", ")})`,
+    });
+
     return updated;
   },
 
@@ -449,6 +458,25 @@ export const mutationResolvers = {
       args.note,
     );
     if (!updated) throw new Error("Contract request not found");
+    return updated;
+  },
+
+  markNotificationRead: async (
+    _: unknown,
+    args: { id: string },
+    ctx: Ctx,
+  ) => {
+    if (ctx.actor.role !== "employee" || !ctx.actor.id) {
+      throw new Error("Unauthorized");
+    }
+    const updated = await markEmployeeNotificationRead(
+      ctx.db,
+      args.id,
+      ctx.actor.id,
+    );
+    if (!updated) {
+      throw new Error("Notification not found");
+    }
     return updated;
   },
 

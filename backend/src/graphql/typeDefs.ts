@@ -197,6 +197,16 @@ export const typeDefs = /* GraphQL */ `
     decidedAt: String
   }
 
+  type EmployeeNotification {
+    id: ID!
+    employeeId: ID!
+    title: String!
+    body: String!
+    status: String!
+    createdAt: String!
+    readAt: String
+  }
+
   type EmployeeSignatureStatus {
     hasSignature: Boolean!
     hasPasscode: Boolean!
@@ -215,6 +225,7 @@ export const typeDefs = /* GraphQL */ `
     contractRequests(status: String): [ContractRequest!]!
     myContractRequests: [ContractRequest!]!
     mySignatureStatus: EmployeeSignatureStatus!
+    myNotifications: [EmployeeNotification!]!
   }
 
   type Mutation {
@@ -238,6 +249,7 @@ export const typeDefs = /* GraphQL */ `
     ): ContractRequest!
     approveContractRequest(id: ID!, note: String): ContractRequest!
     rejectContractRequest(id: ID!, note: String): ContractRequest!
+    markNotificationRead(id: ID!): EmployeeNotification!
     uploadHrDocument(input: UploadHrDocumentInput!): Document!
   }
 `;

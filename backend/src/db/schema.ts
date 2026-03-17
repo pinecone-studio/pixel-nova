@@ -164,6 +164,22 @@ export const leaveRequests = sqliteTable(
   (table) => [index("leave_requests_employee_id_idx").on(table.employeeId)],
 );
 
+export const employeeNotifications = sqliteTable(
+  "employee_notifications",
+  {
+    id: text("id").primaryKey(),
+    employeeId: text("employee_id")
+      .notNull()
+      .references(() => employees.id, { onDelete: "cascade" }),
+    title: text("title").notNull(),
+    body: text("body").notNull(),
+    status: text("status").notNull().default("unread"),
+    createdAt: text("created_at").notNull(),
+    readAt: text("read_at"),
+  },
+  (table) => [index("employee_notifications_employee_id_idx").on(table.employeeId)],
+);
+
 export const contractRequests = sqliteTable(
   "contract_requests",
   {
@@ -209,6 +225,7 @@ export const schema = {
   otpCodes,
   authSessions,
   leaveRequests,
+  employeeNotifications,
   contractRequests,
   employeeSignatures,
 };
@@ -231,6 +248,8 @@ export type AuthSession = typeof authSessions.$inferSelect;
 export type NewAuthSession = typeof authSessions.$inferInsert;
 export type LeaveRequest = typeof leaveRequests.$inferSelect;
 export type NewLeaveRequest = typeof leaveRequests.$inferInsert;
+export type EmployeeNotification = typeof employeeNotifications.$inferSelect;
+export type NewEmployeeNotification = typeof employeeNotifications.$inferInsert;
 export type ContractRequest = typeof contractRequests.$inferSelect;
 export type NewContractRequest = typeof contractRequests.$inferInsert;
 export type EmployeeSignature = typeof employeeSignatures.$inferSelect;

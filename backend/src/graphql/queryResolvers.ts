@@ -6,6 +6,7 @@ import {
   getLeaveRequests,
   getContractRequests,
   getEmployeeSignatureStatus,
+  getEmployeeNotifications,
   listEmployees,
   listActionConfigs,
 } from "../db/queries";
@@ -111,6 +112,13 @@ export const queryResolvers = {
       throw new Error("Unauthorized");
     }
     return getEmployeeSignatureStatus(ctx.db, ctx.actor.id);
+  },
+
+  myNotifications: (_: unknown, __: unknown, ctx: Ctx) => {
+    if (ctx.actor.role !== "employee" || !ctx.actor.id) {
+      throw new Error("Unauthorized");
+    }
+    return getEmployeeNotifications(ctx.db, ctx.actor.id);
   },
 
   documentContent: async (
