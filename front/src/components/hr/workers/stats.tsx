@@ -1,17 +1,15 @@
 "use client";
 
-import { AbsentIcon, ActiveIconn, HiredIcon } from "@/components/icons";
+import { ActiveIconn, HiredIcon } from "@/components/icons";
 
 export function WorkersStats({
   totalEmployees,
   totalActive,
   totalNewThisMonth,
-  totalOnLeave,
 }: {
   totalEmployees: number;
   totalActive: number;
   totalNewThisMonth: number;
-  totalOnLeave: number;
 }) {
   return (
     <div className="grid gap-4" style={{ gridTemplateColumns: "1.4fr 1fr 1fr" }}>
@@ -54,15 +52,6 @@ export function WorkersStats({
             <HiredIcon />
           </div>
           <p className="text-4xl font-bold text-white">{totalNewThisMonth}</p>
-        </div>
-        <div className="rounded-2xl border border-purple-600/30 bg-linear-to-br from-purple-600/15 to-transparent p-4 flex-1">
-          <p className="text-slate-500 text-xs uppercase tracking-widest mb-2">
-            Чөлөөтэй
-          </p>
-          <div className="w-9 h-9 rounded-xl bg-purple-500/20 flex items-center justify-center mb-2">
-            <AbsentIcon />
-          </div>
-          <p className="text-4xl font-bold text-white">{totalOnLeave}</p>
         </div>
       </div>
     </div>

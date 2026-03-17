@@ -10,7 +10,6 @@ import type { Document, Employee } from "@/lib/types";
 
 import { ContractPreview } from "@/components/contractPreview";
 import { FactIcon } from "@/components/icons";
-import { EmployeeNotifications } from "@/components/employeeNotifications";
 import { Request } from "@/components/request";
 import { MyContractRequests } from "@/components/myContractRequests";
 
@@ -146,7 +145,6 @@ export default function EmployeePage() {
         </div>
 
         <MyContractRequests />
-        <EmployeeNotifications />
 
         <section className="mx-auto flex w-full max-w-[1056px] flex-col gap-6 animate-fade-up">
           <div className="flex items-center gap-4">

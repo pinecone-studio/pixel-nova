@@ -35,13 +35,3 @@ export function formatBranch(value?: string | null) {
   if (!value) return "";
   return BRANCH_LABELS[value] ?? value;
 }
-
-export function formatLeaveRequestStatus(value?: string | null) {
-  if (!value) return "";
-  const labels: Record<string, string> = {
-    pending: "Хүлээгдэж буй",
-    approved: "Баталсан",
-    rejected: "Татгалзсан",
-  };
-  return labels[value] ?? value;
-}

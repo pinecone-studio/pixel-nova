@@ -4,9 +4,9 @@ import { useQuery } from "@apollo/client/react";
 import { useMemo } from "react";
 
 import { BellIcon } from "@/components/icons";
-import { GET_CONTRACT_REQUESTS, GET_LEAVE_REQUESTS } from "@/graphql/queries";
+import { GET_CONTRACT_REQUESTS } from "@/graphql/queries";
 import { buildGraphQLHeaders } from "@/lib/apollo-client";
-import type { ContractRequest, LeaveRequest } from "@/lib/types";
+import type { ContractRequest } from "@/lib/types";
 import { formatDepartment } from "@/lib/labels";
 
 type NotifItem = {
@@ -59,23 +59,10 @@ function buildContractBody(row: ContractRequest) {
   return `${row.employee.lastName} ${row.employee.firstName} • ${formatDepartment(row.employee.department)} • ${labels}`;
 }
 
-function buildLeaveBody(row: LeaveRequest) {
-  return `${row.employee.lastName} ${row.employee.firstName} • ${formatDepartment(row.employee.department)} • ${row.type}`;
-}
-
 export default function NotificationsPage() {
   const { data: contractData, loading: contractsLoading } = useQuery<{
     contractRequests: ContractRequest[];
   }>(GET_CONTRACT_REQUESTS, {
-    context: {
-      headers: buildGraphQLHeaders({ actorRole: "hr" }),
-    },
-    fetchPolicy: "network-only",
-  });
-
-  const { data: leaveData, loading: leaveLoading } = useQuery<{
-    leaveRequests: LeaveRequest[];
-  }>(GET_LEAVE_REQUESTS, {
     context: {
       headers: buildGraphQLHeaders({ actorRole: "hr" }),
     },
@@ -91,26 +78,16 @@ export default function NotificationsPage() {
       date: row.createdAt,
       audience: "HR",
     }));
-
-    const leaveRows = (leaveData?.leaveRequests ?? []).map((row) => ({
-      id: `leave-${row.id}`,
-      title: "Чөлөөний хүсэлт",
-      body: buildLeaveBody(row),
-      status: row.status,
-      date: row.createdAt,
-      audience: "HR",
-    }));
-
-    return [...contractRows, ...leaveRows].sort(
+    return contractRows.sort(
       (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
     );
-  }, [contractData, leaveData]);
+  }, [contractData]);
 
   const totalCount = notifs.length;
   const pendingCount = notifs.filter((n) => n.status === "pending").length;
   const approvedCount = notifs.filter((n) => n.status === "approved").length;
 
-  const loading = contractsLoading || leaveLoading;
+  const loading = contractsLoading;
 
   return (
     <div className="min-h-screen bg-[#080c12] text-white font-sans animate-fade-up">

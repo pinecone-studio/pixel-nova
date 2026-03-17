@@ -27,7 +27,7 @@ export const DEPARTMENTS = [
   "Design",
 ];
 
-export const STATUSES = ["Ирсэн", "Тасалсан", "Чөлөөтэй"];
+export const STATUSES = ["Ирсэн", "Тасалсан"];
 export const LEVELS = ["Junior", "Mid", "Senior", "Lead"];
 export const BRANCHES = ["Ulaanbaatar", "Darkhan", "Erdenet", "Remote"];
 
