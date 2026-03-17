@@ -632,7 +632,7 @@ export function EmployeeAuditComponent() {
           >
             <div className="flex min-w-0 items-center gap-5">
               <div className="flex h-14 w-14 items-center justify-center rounded-[18px] bg-[#2F7BFF] text-white shadow-[0_10px_30px_rgba(47,123,255,0.35)]">
-                <FiCheckCircle className="h-6 w-6" />
+                <FiFileText className="h-6 w-6" />
               </div>
               <div className="flex min-w-0 items-end gap-3">
                 <span className="text-[46px] font-semibold leading-none text-[#101828]">
@@ -656,7 +656,7 @@ export function EmployeeAuditComponent() {
           >
             <div className="flex min-w-0 items-center gap-5">
               <div className="flex h-14 w-14 items-center justify-center rounded-[18px] bg-[#12C95E] text-white shadow-[0_10px_30px_rgba(18,201,94,0.28)]">
-                <FiFileText className="h-6 w-6" />
+                <FiCheckCircle className="h-6 w-6" />
               </div>
               <div className="flex min-w-0 items-end gap-3">
                 <span className="text-[46px] font-semibold leading-none text-[#101828]">
