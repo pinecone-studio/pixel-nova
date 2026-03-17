@@ -13,26 +13,26 @@ export function HrNotifStats({
     {
       value: totalCount,
       label: "Нийт мэдэгдэл",
-      border: "border-[#164C46]",
-      bg: "bg-[radial-gradient(circle_at_top_left,rgba(0,204,153,0.2),transparent_45%),#09111B]",
-      iconBg: "bg-[#0B302C]",
-      iconColor: "text-[#00CC99]",
+      border: "border-[#EAECF0]",
+      bg: "bg-white",
+      iconBg: "bg-[#F2F4F7]",
+      iconColor: "text-[#101828]",
     },
     {
       value: pendingCount,
       label: "Хүлээгдэж буй",
-      border: "border-[#193C63]",
-      bg: "bg-[radial-gradient(circle_at_top_left,rgba(59,130,246,0.18),transparent_45%),#09111B]",
-      iconBg: "bg-[#11273E]",
-      iconColor: "text-[#60A5FA]",
+      border: "border-[#EAECF0]",
+      bg: "bg-white",
+      iconBg: "bg-[#F2F4F7]",
+      iconColor: "text-[#101828]",
     },
     {
       value: approvedCount,
       label: "Баталсан",
-      border: "border-[#1D5A34]",
-      bg: "bg-[radial-gradient(circle_at_top_left,rgba(34,197,94,0.18),transparent_45%),#09111B]",
-      iconBg: "bg-[#133021]",
-      iconColor: "text-[#4ADE80]",
+      border: "border-[#EAECF0]",
+      bg: "bg-white",
+      iconBg: "bg-[#F2F4F7]",
+      iconColor: "text-[#101828]",
     },
   ];
 
@@ -41,7 +41,7 @@ export function HrNotifStats({
       {items.map((item) => (
         <div
           key={item.label}
-          className={`rounded-[24px] border ${item.border} ${item.bg} px-6 py-5 shadow-[0_20px_48px_rgba(0,0,0,0.28)]`}
+          className={`rounded-[24px] border ${item.border} ${item.bg} px-6 py-5 shadow-[0_1px_2px_rgba(16,24,40,0.04)]`}
         >
           <div className="flex items-center gap-4">
             <div
@@ -50,10 +50,10 @@ export function HrNotifStats({
               <BellIcon />
             </div>
             <div>
-              <p className="text-[34px] font-semibold leading-none text-white">
+              <p className="text-[34px] font-semibold leading-none text-[#101828]">
                 {item.value}
               </p>
-              <p className="mt-2 text-sm text-[#7D8A9D]">{item.label}</p>
+              <p className="mt-2 text-sm text-[#667085]">{item.label}</p>
             </div>
           </div>
         </div>

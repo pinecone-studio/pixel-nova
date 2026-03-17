@@ -141,6 +141,7 @@ export function HrShell({ children }: { children: React.ReactNode }) {
         loading={notificationsLoading}
         notifications={notifications}
         selectedId={selectedNotifId}
+        theme="light"
         onOpenChange={(nextOpen) => {
           setNotifOpen(nextOpen);
           if (!nextOpen) {

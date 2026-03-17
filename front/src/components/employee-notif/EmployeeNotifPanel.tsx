@@ -6,10 +6,12 @@ export function EmployeeNotifPanel({
   notifications,
   selectedId,
   onSelect,
+  theme = "dark",
 }: {
   notifications: EmployeeNotification[];
   selectedId: string | null;
   onSelect: (notification: EmployeeNotification) => void;
+  theme?: "dark" | "light";
 }) {
   return (
     <div className="flex flex-col">
@@ -18,6 +20,7 @@ export function EmployeeNotifPanel({
           key={item.id}
           notification={item}
           expanded={selectedId === item.id}
+          theme={theme}
           onSelect={() => {
             onSelect(item);
           }}
