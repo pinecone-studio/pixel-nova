@@ -4,13 +4,13 @@ import { useQuery } from "@apollo/client/react";
 import { useMemo, useState } from "react";
 
 import { EmployeeNotifEmptyState } from "@/components/employee-notif/EmployeeNotifEmptyState";
+import { EmployeeNotifPanel } from "@/components/employee-notif/EmployeeNotifPanel";
 import { GET_CONTRACT_REQUESTS } from "@/graphql/queries";
 import { buildGraphQLHeaders } from "@/lib/apollo-client";
 import type { ContractRequest } from "@/lib/types";
 
 import { HrNotifStats } from "./HrNotifStats";
-import { mapContractRequestToHrNotifItem } from "./hrNotifUtils";
-import { HrShellNotifRow } from "./HrShellNotifRow";
+import { mapContractRequestToEmployeeNotification } from "./hrNotifUtils";
 
 export function HrNotifPage() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -28,10 +28,10 @@ export function HrNotifPage() {
   const items = useMemo(
     () =>
       (data?.contractRequests ?? [])
-        .map(mapContractRequestToHrNotifItem)
+        .map(mapContractRequestToEmployeeNotification)
         .sort(
           (a, b) =>
-            new Date(b.date).getTime() - new Date(a.date).getTime(),
+            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
         ),
     [data],
   );
@@ -44,8 +44,8 @@ export function HrNotifPage() {
   ).length;
 
   return (
-    <div className="min-h-screen bg-[#F4F5F7] px-6 pb-16 pt-8 text-slate-900">
-      <div className="mx-auto flex w-full max-w-[1120px] flex-col gap-6">
+    <div className="min-h-screen bg-white px-6 pb-16 pt-8 text-[#101828]">
+      <div className="mx-auto flex w-full max-w-280 flex-col gap-6">
         <div>
           <h1 className="text-[34px] font-semibold tracking-[-0.03em] text-slate-900">
             Мэдэгдэл
