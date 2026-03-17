@@ -41,9 +41,9 @@ export function HrShell({ children }: { children: React.ReactNode }) {
     <div className="h-screen overflow-hidden bg-[#060d0c]">
       <div className="flex h-full overflow-hidden">
         <aside className="scrollbar-hidden group sticky top-0 h-screen overflow-y-auto overflow-x-hidden w-17 hover:w-60 transition-[width] duration-300 border-r border-white/8 bg-[#060d0c] flex flex-col py-4 px-2 shrink-0">
-          <div className="mb-8 flex items-center gap-3 px-2">
-            <EpasLogo className="w-9 h-9 rounded-xl shrink-0" />
-            <span className="whitespace-nowrap text-sm font-bold text-white opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+          <div className="mb-8 flex items-center gap-3 px-2 text-black">
+            <EpasLogo className="w-9 h-9 rounded-xl shrink-0 text-black" />
+            <span className="whitespace-nowrap text-sm font-bold text-black opacity-0 group-hover:opacity-100 transition-opacity duration-200">
               EPAS
             </span>
           </div>
