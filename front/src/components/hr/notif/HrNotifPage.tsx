@@ -4,13 +4,13 @@ import { useQuery } from "@apollo/client/react";
 import { useMemo, useState } from "react";
 
 import { EmployeeNotifEmptyState } from "@/components/employee-notif/EmployeeNotifEmptyState";
-import { EmployeeNotifPanel } from "@/components/employee-notif/EmployeeNotifPanel";
 import { GET_CONTRACT_REQUESTS } from "@/graphql/queries";
 import { buildGraphQLHeaders } from "@/lib/apollo-client";
 import type { ContractRequest } from "@/lib/types";
 
 import { HrNotifStats } from "./HrNotifStats";
-import { mapContractRequestToEmployeeNotification } from "./hrNotifUtils";
+import { mapContractRequestToHrNotifItem } from "./hrNotifUtils";
+import { HrShellNotifRow } from "./HrShellNotifRow";
 
 export function HrNotifPage() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -28,10 +28,10 @@ export function HrNotifPage() {
   const items = useMemo(
     () =>
       (data?.contractRequests ?? [])
-        .map(mapContractRequestToEmployeeNotification)
+        .map(mapContractRequestToHrNotifItem)
         .sort(
           (a, b) =>
-            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+            new Date(b.date).getTime() - new Date(a.date).getTime(),
         ),
     [data],
   );
@@ -90,13 +90,20 @@ export function HrNotifPage() {
             ) : items.length === 0 ? (
               <EmployeeNotifEmptyState />
             ) : (
-              <EmployeeNotifPanel
-                notifications={items}
-                selectedId={selectedId}
-                onSelect={(item) =>
-                  setSelectedId((current) => (current === item.id ? null : item.id))
-                }
-              />
+              <div className="flex flex-col">
+                {items.map((item) => (
+                  <HrShellNotifRow
+                    key={item.id}
+                    item={item}
+                    expanded={selectedId === item.id}
+                    onSelect={() =>
+                      setSelectedId((current) =>
+                        current === item.id ? null : item.id,
+                      )
+                    }
+                  />
+                ))}
+              </div>
             )}
           </div>
         </section>
