@@ -2,13 +2,9 @@ import type { EmployeeNotification } from "@/lib/types";
 
 export function EmployeeNotifExpandedContent({
   notification,
-  theme = "dark",
 }: {
   notification: EmployeeNotification;
-  theme?: "dark" | "light";
 }) {
-  const isLight = theme === "light";
-
   return (
     <div
       className={`rounded-[18px] border px-4 py-4 ${

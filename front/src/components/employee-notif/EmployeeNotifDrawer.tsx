@@ -16,7 +16,6 @@ export function EmployeeNotifDrawer({
   selectedId,
   onOpenChange,
   onSelect,
-  theme = "dark",
 }: {
   open: boolean;
   loading: boolean;
@@ -24,10 +23,7 @@ export function EmployeeNotifDrawer({
   selectedId: string | null;
   onOpenChange: (open: boolean) => void;
   onSelect: (notification: EmployeeNotification) => void;
-  theme?: "dark" | "light";
 }) {
-  const isLight = theme === "light";
-
   return (
     <Dialog
       open={open}
@@ -61,20 +57,15 @@ export function EmployeeNotifDrawer({
 
         <div className="scrollbar-slim min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 pb-5 pt-0">
           {loading ? (
-            <div
-              className={`flex h-full items-center justify-center text-sm ${
-                isLight ? "text-[#667085]" : "text-[#718099]"
-              }`}
-            >
+            <div className="flex h-full items-center justify-center text-sm text-[#718099]">
               Уншиж байна...
             </div>
           ) : notifications.length === 0 ? (
-            <EmployeeNotifEmptyState theme={theme} />
+            <EmployeeNotifEmptyState />
           ) : (
             <EmployeeNotifPanel
               notifications={notifications}
               selectedId={selectedId}
-              theme={theme}
               onSelect={onSelect}
             />
           )}

@@ -10,15 +10,11 @@ export function EmployeeNotifRow({
   notification,
   expanded,
   onSelect,
-  theme = "dark",
 }: {
   notification: EmployeeNotification;
   expanded: boolean;
   onSelect: () => void;
-  theme?: "dark" | "light";
 }) {
-  const isLight = theme === "light";
-
   return (
     <div className={`border-b last:border-b-0 ${isLight ? "border-[#EAECF0]" : "border-[#182433]"}`}>
       <button
@@ -26,12 +22,8 @@ export function EmployeeNotifRow({
         onClick={onSelect}
         className={`flex w-full items-start gap-4 rounded-[20px] px-4 py-4 text-left transition ${
           expanded
-            ? isLight
-              ? "bg-[#F0FDF4] shadow-[inset_0_0_0_1px_rgba(134,239,172,1)]"
-              : "bg-[#101925] shadow-[inset_0_0_0_1px_rgba(41,59,78,0.9)]"
-            : isLight
-              ? "bg-transparent hover:bg-[#F9FAFB]"
-              : "bg-transparent hover:bg-[#0D1520]"
+            ? "bg-[#101925] shadow-[inset_0_0_0_1px_rgba(41,59,78,0.9)]"
+            : "bg-transparent hover:bg-[#0D1520]"
         }`}
       >
         <div
@@ -59,7 +51,7 @@ export function EmployeeNotifRow({
               expanded
                 ? "max-h-26 overflow-y-auto pr-2 line-clamp-none scrollbar-slim"
                 : "truncate whitespace-nowrap"
-            } ${isLight ? "text-[#667085]" : "text-[#CFD8E3]"}`}
+            }`}
           >
             {notification.body}
           </p>

@@ -106,7 +106,6 @@ export const EmployeeNotifDropdown = () => {
         loading={loading}
         notifications={notifications}
         selectedId={selectedId}
-        theme="light"
         onOpenChange={(nextOpen) => {
           setOpen(nextOpen);
           if (!nextOpen) {
