@@ -193,6 +193,39 @@
   animation: fade-up 0.28s ease-out both;
 }
 
+@keyframes hr-page-enter {
+  0% {
+    opacity: 0;
+    transform: translateY(52px) scale(0.92) rotateX(10deg);
+    filter: saturate(130%);
+  }
+  55% {
+    opacity: 1;
+    transform: translateY(-10px) scale(1.03) rotateX(0deg);
+    filter: saturate(112%);
+  }
+  75% {
+    transform: translateY(6px) scale(0.995);
+    filter: saturate(100%);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: saturate(100%);
+  }
+}
+
+.hr-page-transition {
+  transform-origin: 50% 0%;
+  animation: hr-page-enter 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hr-page-transition {
+    animation: none;
+  }
+}
+
 @keyframes shimmer {
   0% {
     background-position: -200% 0;

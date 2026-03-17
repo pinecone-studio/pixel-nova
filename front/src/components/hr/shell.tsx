@@ -60,110 +60,18 @@ export function HrShell({ children }: { children: React.ReactNode }) {
                   href={item.href}
                   className={`relative flex items-center gap-3 rounded-xl px-2 py-2 transition-all duration-200 text-left w-full ${
                     active
-                      ? "text-slate-900 border border-transparent"
+                      ? "bg-white text-slate-900 border border-[#111827]/20 shadow-[0_8px_20px_rgba(17,24,39,0.12)]"
                       : "text-slate-500 hover:text-slate-700 hover:bg-slate-100 border border-transparent"
                   }`}
                 >
-                  {active ? (
-                    <span className="absolute left-1 top-1/2 -translate-y-1/2 w-16 h-14">
-                      <svg
-                        width="64"
-                        height="56"
-                        viewBox="0 0 64 56"
-                        fill="none"
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="w-16 h-14"
-                      >
-                        <mask id="path-1-inside-1_1161_1455" fill="white">
-                          <path d="M0 14C0 6.26801 6.26801 0 14 0H50C57.732 0 64 6.26801 64 14V42C64 49.732 57.732 56 50 56H14C6.26801 56 0 49.732 0 42V14Z" />
-                        </mask>
-                        <path
-                          d="M0 14C0 6.26801 6.26801 0 14 0H50C57.732 0 64 6.26801 64 14V42C64 49.732 57.732 56 50 56H14C6.26801 56 0 49.732 0 42V14Z"
-                          fill="url(#paint0_linear_1161_1455)"
-                        />
-                        <path
-                          d="M14 0V1H50V0V-1H14V0ZM64 14H63V42H64H65V14H64ZM50 56V55H14V56V57H50V56ZM0 42H1V14H0H-1V42H0ZM14 56V55C6.8203 55 1 49.1797 1 42H0H-1C-1 50.2843 5.71573 57 14 57V56ZM64 42H63C63 49.1797 57.1797 55 50 55V56V57C58.2843 57 65 50.2843 65 42H64ZM50 0V1C57.1797 1 63 6.8203 63 14H64H65C65 5.71573 58.2843 -1 50 -1V0ZM14 0V-1C5.71573 -1 -1 5.71573 -1 14H0H1C1 6.8203 6.8203 1 14 1V0Z"
-                          fill="#121316"
-                          mask="url(#path-1-inside-1_1161_1455)"
-                        />
-                        <path
-                          d="M1 12C3.20914 12 5 13.7909 5 16V40C5 42.2091 3.20914 44 1 44V12Z"
-                          fill="#121316"
-                        />
-                        <path
-                          d="M33.4998 19.6667H28.4998C28.0396 19.6667 27.6665 20.0398 27.6665 20.5V22.1667C27.6665 22.6269 28.0396 23 28.4998 23H33.4998C33.9601 23 34.3332 22.6269 34.3332 22.1667V20.5C34.3332 20.0398 33.9601 19.6667 33.4998 19.6667Z"
-                          stroke="#121316"
-                          strokeWidth="1.66667"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        />
-                        <path
-                          d="M34.3335 21.3333H36.0002C36.4422 21.3333 36.8661 21.5089 37.1787 21.8215C37.4912 22.134 37.6668 22.558 37.6668 23V34.6666C37.6668 35.1087 37.4912 35.5326 37.1787 35.8452C36.8661 36.1577 36.4422 36.3333 36.0002 36.3333H26.0002C25.5581 36.3333 25.1342 36.1577 24.8217 35.8452C24.5091 35.5326 24.3335 35.1087 24.3335 34.6666V23C24.3335 22.558 24.5091 22.134 24.8217 21.8215C25.1342 21.5089 25.5581 21.3333 26.0002 21.3333H27.6668"
-                          stroke="#121316"
-                          strokeWidth="1.66667"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        />
-                        <path
-                          d="M31 27.1667H34.3333"
-                          stroke="#121316"
-                          strokeWidth="1.66667"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        />
-                        <path
-                          d="M31 31.3333H34.3333"
-                          stroke="#121316"
-                          strokeWidth="1.66667"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        />
-                        <path
-                          d="M27.6665 27.1667H27.6748"
-                          stroke="#121316"
-                          strokeWidth="1.66667"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        />
-                        <path
-                          d="M27.6665 31.3333H27.6748"
-                          stroke="#121316"
-                          strokeWidth="1.66667"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        />
-                        <defs>
-                          <linearGradient
-                            id="paint0_linear_1161_1455"
-                            x1="32"
-                            y1="0"
-                            x2="32"
-                            y2="56"
-                            gradientUnits="userSpaceOnUse"
-                          >
-                            <stop stopColor="white" />
-                            <stop offset="0.158654" stopColor="#F1F1F1" />
-                            <stop offset="0.298077" stopColor="#E9E9E9" />
-                            <stop offset="0.451923" stopColor="#D3D3D3" />
-                            <stop offset="0.629808" stopColor="#AFAFAF" />
-                            <stop offset="0.8125" stopColor="#898989" />
-                            <stop offset="0.899038" stopColor="#7E7E7E" />
-                            <stop offset="1" />
-                          </linearGradient>
-                        </defs>
-                      </svg>
-                    </span>
-                  ) : null}
-                  {!active ? (
-                    <span className="relative z-10 flex h-9 w-9 items-center justify-center rounded-lg shrink-0 transition-all">
-                      {item.icon}
-                    </span>
-                  ) : null}
-                  {!active ? (
-                    <span className="relative z-10 whitespace-nowrap text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                      {item.label}
-                    </span>
-                  ) : null}
+                  <span
+                    className={`flex h-9 w-9 items-center justify-center rounded-lg shrink-0 transition-all ${active ? "bg-linear-to-b from-white/25 to-black/60 text-black" : ""}`}
+                  >
+                    {item.icon}
+                  </span>
+                  <span className="whitespace-nowrap text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                    {item.label}
+                  </span>
                 </Link>
               );
             })}
@@ -265,11 +173,12 @@ export function HrShell({ children }: { children: React.ReactNode }) {
           </header>
 
           <div className="flex-1 min-w-0 overflow-x-hidden px-6 py-6 flex flex-col gap-5">
-            {children}
+            <div key={pathname} className="hr-page-transition flex flex-col gap-5">
+              {children}
+            </div>
           </div>
         </main>
       </div>
-
     </div>
   );
 }
