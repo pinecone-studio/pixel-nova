@@ -47,7 +47,14 @@ export {
   insertEmployeeNotification,
   getEmployeeNotifications,
   markEmployeeNotificationRead,
+  insertAnnouncementNotificationsForAudience,
 } from "./employeeNotification";
+export {
+  listAnnouncements,
+  insertAnnouncementDraft,
+  updateAnnouncementDraft,
+  publishAnnouncement,
+} from "./announcement";
 export {
   insertContractRequest,
   getContractRequests,

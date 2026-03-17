@@ -8,6 +8,10 @@ import {
   insertDocument,
   insertContractRequest,
   insertEmployeeNotification,
+  insertAnnouncementNotificationsForAudience,
+  insertAnnouncementDraft as insertAnnouncementDraftRecord,
+  updateAnnouncementDraft as updateAnnouncementDraftRecord,
+  publishAnnouncement as publishAnnouncementRecord,
   listActionConfigs,
   requestEmployeeOtp,
   updateContractRequestStatus,
@@ -431,6 +435,77 @@ export const mutationResolvers = {
       throw new Error("Notification not found");
     }
     return updated;
+  },
+
+  sendAnnouncement: async (
+    _: unknown,
+    args: { title: string; body: string },
+    ctx: Ctx,
+  ) => {
+    if (ctx.actor.role !== "hr" && ctx.actor.role !== "admin") {
+      throw new Error("Unauthorized");
+    }
+    const count = await insertAnnouncementNotificationsForAudience(ctx.db, {
+      title: args.title,
+      body: args.body,
+      announcementId: crypto.randomUUID(),
+      audience: "all",
+    });
+    return count;
+  },
+
+  createAnnouncementDraft: async (
+    _: unknown,
+    args: { title: string; body: string; audience?: string | null },
+    ctx: Ctx,
+  ) => {
+    if (ctx.actor.role !== "hr" && ctx.actor.role !== "admin") {
+      throw new Error("Unauthorized");
+    }
+    const draft = await insertAnnouncementDraftRecord(ctx.db, {
+      title: args.title,
+      body: args.body,
+      audience: args.audience ?? "all",
+      createdBy: ctx.actor.id ?? null,
+    });
+    if (!draft) throw new Error("Failed to create announcement");
+    return draft;
+  },
+
+  updateAnnouncementDraft: async (
+    _: unknown,
+    args: { id: string; title: string; body: string; audience?: string | null },
+    ctx: Ctx,
+  ) => {
+    if (ctx.actor.role !== "hr" && ctx.actor.role !== "admin") {
+      throw new Error("Unauthorized");
+    }
+    const draft = await updateAnnouncementDraftRecord(ctx.db, args.id, {
+      title: args.title,
+      body: args.body,
+      audience: args.audience ?? "all",
+    });
+    if (!draft) throw new Error("Announcement not found");
+    return draft;
+  },
+
+  publishAnnouncement: async (
+    _: unknown,
+    args: { id: string },
+    ctx: Ctx,
+  ) => {
+    if (ctx.actor.role !== "hr" && ctx.actor.role !== "admin") {
+      throw new Error("Unauthorized");
+    }
+    const row = await publishAnnouncementRecord(ctx.db, args.id);
+    if (!row) throw new Error("Announcement not found");
+    await insertAnnouncementNotificationsForAudience(ctx.db, {
+      title: row.title,
+      body: row.body,
+      announcementId: row.id,
+      audience: row.audience ?? "all",
+    });
+    return row;
   },
 
   uploadHrDocument: async (
