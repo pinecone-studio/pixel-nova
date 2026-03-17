@@ -3,27 +3,30 @@
 import { useQuery } from "@apollo/client/react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useEffect, useSyncExternalStore } from "react";
+import { useEffect, useState } from "react";
+
+import { buildGraphQLHeaders } from "@/lib/apollo-client";
+import { GET_ME } from "@/graphql/queries";
+import type { Employee } from "@/lib/types";
+import { formatBranch, formatDepartment, formatLevel } from "@/lib/labels";
 
 import {
   AjildOrson,
   Ajillasan,
+  AjiltniiCode,
   AlbanTushaal,
+  CompanyTsalin,
   Email,
-  EmployeeCode,
   Engineering,
+  EntraID,
   Github,
   Heltes,
   Idevhtei,
+  KPI,
   Salbar,
   Senior,
-  Signature,
   TursunUdur,
 } from "@/components/icons";
-import { GET_ME } from "@/graphql/queries";
-import { buildGraphQLHeaders } from "@/lib/apollo-client";
-import { formatBranch, formatDepartment, formatLevel } from "@/lib/labels";
-import type { Employee } from "@/lib/types";
 
 const TOKEN_STORAGE_KEY = "epas_auth_token";
 
@@ -69,14 +72,24 @@ function getInitials(employee: Employee | null) {
 
 export default function Profile() {
   const router = useRouter();
-  const authToken = useSyncExternalStore(
-    () => () => {},
-    () => window.localStorage.getItem(TOKEN_STORAGE_KEY) ?? "",
-    () => "",
-  );
+  const [authToken, setAuthToken] = useState("");
+  const [hydrated, setHydrated] = useState(false);
+
+  useEffect(() => {
+    const token = window.localStorage.getItem(TOKEN_STORAGE_KEY) ?? "";
+    if (!token) {
+      router.replace("/auth/employee");
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setHydrated(true);
+      return;
+    }
+
+    setAuthToken(token);
+    setHydrated(true);
+  }, [router]);
 
   const { data, loading, error } = useQuery<{ me: Employee | null }>(GET_ME, {
-    skip: !authToken,
+    skip: !hydrated || !authToken,
     context: {
       headers: buildGraphQLHeaders({ authToken }),
     },
@@ -84,25 +97,21 @@ export default function Profile() {
   });
 
   const employee = data?.me ?? null;
-  useEffect(() => {
-    if (!authToken) {
-      router.replace("/auth/employee");
-      return;
-    }
 
-    if (!loading && !employee) {
+  useEffect(() => {
+    if (hydrated && !loading && !employee) {
       window.localStorage.removeItem(TOKEN_STORAGE_KEY);
       router.replace("/auth/employee");
     }
-  }, [authToken, employee, loading, router]);
+  }, [employee, hydrated, loading, router]);
 
-  if (!authToken) {
+  if (!hydrated || !authToken) {
     return null;
   }
 
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-black text-white">
+      <div className="min-h-screen bg-black text-white flex items-center justify-center">
         <div className="flex items-center gap-3 text-sm text-white/70">
           <span className="h-5 w-5 animate-spin rounded-full border-2 border-white/20 border-t-white" />
           Профайл ачаалж байна...
@@ -121,51 +130,19 @@ export default function Profile() {
 
   const workInfo = [
     {
-      icon: <EmployeeCode />,
-      label: "Ажилтны код",
-      value: employee?.employeeCode ?? "Мэдээлэлгүй",
-    },
-
-    {
-      icon: <Signature />,
-      label: "Гарын үсэг харах",
+      icon: <AlbanTushaal />,
+      label: "Албан тушаал",
       value: employee?.jobTitle ?? "Мэдээлэлгүй",
     },
     {
-      icon: <Email />,
-      label: "Имэйл",
-      value: employee?.email ?? "Мэдээлэлгүй",
-    },
-    {
-      icon: <TursunUdur />,
-      label: "Төрсөн өдөр",
-      value: employee?.birthDayAndMonth ?? "Мэдээлэлгүй",
-    },
-    {
-      icon: <Github />,
-      label: "GitHub",
-      value: employee?.github ?? "Мэдээлэлгүй",
-    },
-
-    // {
-    //   icon: <Senior />,
-    //   label: "Зэрэглэл",
-    //   value: employee?.level ? formatLevel(employee.level) : "Мэдээлэлгүй",
-    // },
-  ];
-
-  const personalInfo = [
-    {
-      icon: <AlbanTushaal />,
-      label: "Албан тушаал",
-      value: employee?.department ?? "Мэдээлэлгүй",
+      icon: <Senior />,
+      label: "Зэрэглэл",
+      value: employee?.level ? formatLevel(employee.level) : "Мэдээлэлгүй",
     },
     {
       icon: <Heltes />,
       label: "Хэлтэс",
-      value: employee?.department
-        ? formatDepartment(employee.department)
-        : "Мэдээлэлгүй",
+      value: employee?.department ? formatDepartment(employee.department) : "Мэдээлэлгүй",
     },
     {
       icon: <Salbar />,
@@ -184,17 +161,40 @@ export default function Profile() {
     },
   ];
 
+  const personalInfo = [
+    {
+      icon: <AjiltniiCode />,
+      label: "Ажилтны код",
+      value: employee?.employeeCode ?? "Мэдээлэлгүй",
+    },
+    {
+      icon: <Email />,
+      label: "Имэйл",
+      value: employee?.email ?? "Мэдээлэлгүй",
+    },
+    {
+      icon: <TursunUdur />,
+      label: "Төрсөн өдөр",
+      value: employee?.birthDayAndMonth ?? "Мэдээлэлгүй",
+    },
+    {
+      icon: <Github />,
+      label: "GitHub",
+      value: employee?.github ?? "Мэдээлэлгүй",
+    },
+  ];
+
   return (
-    <div className="min-h-screen bg-black pb-[199px] pt-[33px] font-sans text-white">
-      <div className="mx-auto w-full max-w-[1056px]">
+    <div className="min-h-screen bg-black text-white pt-8.25 pb-49.75 font-sans">
+      <div className="mx-auto w-full max-w-264">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-white">Профайл</h1>
-          <p className="mt-1 text-gray-400">
+          <p className="text-gray-400 mt-1">
             Таны хувийн болон ажлын мэдээлэл.
           </p>
         </div>
 
-        <div className="mb-8 rounded-2xl border border-gray-800 bg-linear-to-r from-gray-900 to-teal-950 p-6">
+        <div className="bg-linear-to-r from-gray-900 to-teal-950 rounded-2xl p-6 mb-8 border border-gray-800">
           <div className="flex items-center gap-5">
             {employee?.imageUrl ? (
               <Image
@@ -202,7 +202,7 @@ export default function Profile() {
                 alt="Профайл"
                 width={112}
                 height={112}
-                className="h-20 w-20 rounded-full border-2 border-teal-500 object-cover"
+                className="w-20 h-20 rounded-full object-cover border-2 border-teal-500"
                 unoptimized
               />
             ) : (
@@ -212,23 +212,17 @@ export default function Profile() {
             )}
             <div>
               <h2 className="text-2xl font-bold text-white">{displayName}</h2>
-              <p className="mb-3 text-sm text-gray-400">{displayNameEng}</p>
-              <div className="flex flex-wrap gap-2">
-                <span className="flex items-center gap-1 rounded-full border border-teal-600 px-3 py-1 text-xs text-teal-400">
-                  <Senior />
-                  {employee?.level
-                    ? formatLevel(employee.level)
-                    : "Мэдээлэлгүй"}
+              <p className="text-gray-400 text-sm mb-3">{displayNameEng}</p>
+              <div className="flex gap-2 flex-wrap">
+                <span className="flex items-center gap-1 text-xs border border-teal-600 text-teal-400 px-3 py-1 rounded-full">
+                  <Senior /> {employee?.level ? formatLevel(employee.level) : "Мэдээлэлгүй"}
                 </span>
-                <span className="flex items-center gap-1 rounded-full border border-gray-700 px-3 py-1 text-xs text-white">
-                  <Engineering />
-                  {employee?.department
-                    ? formatDepartment(employee.department)
-                    : "Мэдээлэлгүй"}
+                <span className="flex items-center gap-1 text-xs border border-gray-700 text-white px-3 py-1 rounded-full">
+                  <Engineering />{" "}
+                  {employee?.department ? formatDepartment(employee.department) : "Мэдээлэлгүй"}
                 </span>
-                <span className="flex items-center gap-1 rounded-full border border-teal-600 px-3 py-1 text-xs text-teal-400">
-                  <Idevhtei />
-                  {employee?.status ?? "Мэдээлэлгүй"}
+                <span className="flex items-center gap-1 text-xs border border-teal-600 text-teal-400 px-3 py-1 rounded-full">
+                  <Idevhtei /> {employee?.status ?? "Мэдээлэлгүй"}
                 </span>
               </div>
               {error ? (
@@ -238,9 +232,9 @@ export default function Profile() {
           </div>
         </div>
 
-        <div className="mb-8 grid min-h-[479px] grid-cols-1 gap-14 md:grid-cols-2">
-          <div className="h-full rounded-2xl border border-gray-800 bg-gray-900 p-6">
-            <h3 className="mb-5 text-lg font-semibold text-white">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-14 mb-8 min-h-119.75">
+          <div className="bg-gray-900 rounded-2xl p-6 border border-gray-800 h-full">
+            <h3 className="text-white font-semibold text-lg mb-5">
               Ажлын мэдээлэл
             </h3>
             <div className="border border-gray-800" />
@@ -248,13 +242,13 @@ export default function Profile() {
               {workInfo.map((item) => (
                 <div
                   key={item.label}
-                  className="flex h-[68px] items-center gap-3">
+                  className="flex h-17 items-center gap-3">
                   <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-teal-900/50 text-sm">
                     {item.icon}
                   </div>
                   <div>
-                    <p className="text-xs text-gray-500">{item.label}</p>
-                    <p className="text-sm font-medium text-white">
+                    <p className="text-gray-500 text-xs">{item.label}</p>
+                    <p className="text-white font-medium text-sm">
                       {item.value}
                     </p>
                   </div>
@@ -263,8 +257,8 @@ export default function Profile() {
             </div>
           </div>
 
-          <div className="relative h-full rounded-2xl border border-gray-800 bg-gray-900 p-6">
-            <h3 className="mb-5 text-lg font-semibold text-white">
+          <div className="bg-gray-900 rounded-2xl p-6 border border-gray-800 relative h-full">
+            <h3 className="text-white font-semibold text-lg mb-5">
               Хувийн мэдээлэл
             </h3>
             <div className="border border-gray-800" />
@@ -272,18 +266,75 @@ export default function Profile() {
               {personalInfo.map((item) => (
                 <div
                   key={item.label}
-                  className="flex h-[68px] items-center gap-3">
+                  className="flex h-17 items-center gap-3">
                   <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-teal-900/50 text-sm">
                     {item.icon}
                   </div>
                   <div>
-                    <p className="text-xs text-gray-500">{item.label}</p>
-                    <p className="text-sm font-medium text-white">
+                    <p className="text-gray-500 text-xs">{item.label}</p>
+                    <p className="text-white font-medium text-sm">
                       {item.value}
                     </p>
                   </div>
                 </div>
               ))}
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-gray-900 rounded-2xl border border-gray-800 overflow-hidden">
+          <div className="h-20.75 flex flex-col pt-4.25 px-6.25">
+            <h3 className="text-white font-semibold text-lg h-7">
+              Нэмэлт мэдээлэл
+            </h3>
+            <p className="text-gray-500 text-sm h-7 flex items-center">
+              Таны гэрээний болон бусад мэдээлэл
+            </p>
+          </div>
+          <div className="border-t border-gray-800" />
+          <div className="px-6.25 pt-6.25 pb-5.75">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="bg-gray-800 rounded-xl p-4 border border-gray-700 h-26.75 flex flex-col">
+                <div className="flex items-center gap-2 h-9">
+                  <div className="w-8 h-8 bg-teal-900/50 rounded-lg flex items-center justify-center text-sm">
+                    <KPI />
+                  </div>
+                  <span className="text-gray-300 text-xs font-semibold uppercase tracking-wider">
+                    KPI тооцоо
+                  </span>
+                </div>
+                <span className="mt-auto text-xs bg-teal-900 text-teal-400 px-2 py-0.5 rounded-full w-fit">
+                  {employee?.isKpi ? "Тийм" : "Үгүй"}
+                </span>
+              </div>
+
+              <div className="bg-gray-800 rounded-xl p-4 border border-gray-700 h-26.75 flex flex-col">
+                <div className="flex items-center gap-2 h-9">
+                  <div className="w-8 h-8 bg-teal-900/50 rounded-lg flex items-center justify-center text-sm">
+                    <CompanyTsalin />
+                  </div>
+                  <span className="text-gray-300 text-xs font-semibold uppercase tracking-wider">
+                    Компанийн цалин
+                  </span>
+                </div>
+                <span className="mt-auto text-xs bg-teal-900 text-teal-400 px-2 py-0.5 rounded-full w-fit">
+                  {employee?.isSalaryCompany ? "Тийм" : "Үгүй"}
+                </span>
+              </div>
+
+              <div className="bg-gray-800 rounded-xl p-4 border border-gray-700 h-26.75 flex flex-col">
+                <div className="flex items-center gap-2 h-9">
+                  <div className="w-8 h-8 bg-teal-900/50 rounded-lg flex items-center justify-center text-sm">
+                    <EntraID />
+                  </div>
+                  <span className="text-gray-300 text-xs font-semibold uppercase tracking-wider">
+                    Entra ID
+                  </span>
+                </div>
+                <span className="mt-4 text-xs text-gray-500">
+                  {employee?.entraId ?? "Мэдээлэлгүй"}
+                </span>
+              </div>
             </div>
           </div>
         </div>

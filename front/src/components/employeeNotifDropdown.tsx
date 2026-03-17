@@ -1,19 +1,26 @@
 "use client";
 
 import { useMutation, useQuery } from "@apollo/client/react";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useState } from "react";
 
 import { GrNotification } from "react-icons/gr";
+
 import { MARK_NOTIFICATION_READ } from "@/graphql/mutations";
 import { GET_MY_NOTIFICATIONS } from "@/graphql/queries";
 import { buildGraphQLHeaders } from "@/lib/apollo-client";
 import type { EmployeeNotification } from "@/lib/types";
 
+import { EmployeeNotifDrawer } from "./employee-notif/EmployeeNotifDrawer";
+import { SAMPLE_EMPLOYEE_NOTIFICATIONS } from "./employee-notif/sampleNotifications";
+
 const TOKEN_KEY = "epas_auth_token";
 
 export const EmployeeNotifDropdown = () => {
   const [open, setOpen] = useState(false);
-  const ref = useRef<HTMLDivElement | null>(null);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [mockNotifications, setMockNotifications] = useState(
+    SAMPLE_EMPLOYEE_NOTIFICATIONS,
+  );
   const token =
     typeof window === "undefined"
       ? ""
@@ -35,32 +42,53 @@ export const EmployeeNotifDropdown = () => {
     },
   });
 
-  const notifications = useMemo(
-    () => data?.myNotifications ?? [],
-    [data],
-  );
+  const liveNotifications = data?.myNotifications ?? [];
+  const useMockNotifications = liveNotifications.length === 0;
+  const notifications = useMockNotifications ? mockNotifications : liveNotifications;
 
   const unreadCount = notifications.filter((n) => n.status === "unread").length;
 
-  useEffect(() => {
-    function handleClick(e: MouseEvent) {
-      if (ref.current && !ref.current.contains(e.target as Node)) {
-        setOpen(false);
-      }
-    }
-    document.addEventListener("mousedown", handleClick);
-    return () => document.removeEventListener("mousedown", handleClick);
-  }, []);
-
   async function handleMarkRead(id: string) {
+    if (useMockNotifications) {
+      setMockNotifications((current) =>
+        current.map((notification) =>
+          notification.id === id
+            ? {
+                ...notification,
+                status: "read",
+                readAt: new Date().toISOString(),
+              }
+            : notification,
+        ),
+      );
+      return;
+    }
+
     await markRead({ variables: { id } });
     await refetch();
   }
 
+  async function handleSelect(notification: EmployeeNotification) {
+    const nextSelectedId = selectedId === notification.id ? null : notification.id;
+    setSelectedId(nextSelectedId);
+
+    if (notification.status === "unread") {
+      await handleMarkRead(notification.id);
+    }
+  } 
+
   return (
-    <div ref={ref} className="relative">
+    <>
       <button
-        onClick={() => setOpen((prev) => !prev)}
+        onClick={() => {
+          setOpen((prev) => {
+            const next = !prev;
+            if (!next) {
+              setSelectedId(null);
+            }
+            return next;
+          });
+        }}
         className="relative flex h-9 w-9 cursor-pointer items-center justify-center text-[#6B6B8A] transition-all duration-200 hover:text-[#00CC99]"
         aria-label="Мэдэгдэл"
       >
@@ -70,55 +98,21 @@ export const EmployeeNotifDropdown = () => {
         ) : null}
       </button>
 
-      {open ? (
-        <div className="absolute right-0 mt-3 w-[320px] rounded-2xl border border-white/10 bg-[#0b111a] shadow-2xl p-3 z-50">
-          <div className="flex items-center justify-between mb-2">
-            <p className="text-sm font-semibold text-white">Мэдэгдэл</p>
-            <button
-              onClick={() => setOpen(false)}
-              className="text-xs text-slate-400 hover:text-white"
-            >
-              Хаах
-            </button>
-          </div>
-          <div className="max-h-[320px] overflow-y-auto flex flex-col gap-2">
-            {loading ? (
-              <div className="text-xs text-slate-500 py-3 text-center">
-                Уншиж байна...
-              </div>
-            ) : notifications.length === 0 ? (
-              <div className="text-xs text-slate-500 py-3 text-center">
-                Одоогоор мэдэгдэл алга байна.
-              </div>
-            ) : (
-              notifications.slice(0, 6).map((item) => (
-                <div
-                  key={item.id}
-                  className="rounded-xl border border-white/5 bg-white/5 px-3 py-2 flex items-start justify-between gap-2"
-                >
-                  <div>
-                    <p className="text-xs font-semibold text-white">
-                      {item.title}
-                    </p>
-                    <p className="text-[11px] text-slate-400">{item.body}</p>
-                    <p className="text-[10px] text-slate-500">
-                      {new Date(item.createdAt).toLocaleDateString("mn-MN")}
-                    </p>
-                  </div>
-                  {item.status === "unread" ? (
-                    <button
-                      onClick={() => handleMarkRead(item.id)}
-                      className="text-[10px] text-emerald-300 hover:text-white"
-                    >
-                      Уншсан
-                    </button>
-                  ) : null}
-                </div>
-              ))
-            )}
-          </div>
-        </div>
-      ) : null}
-    </div>
+      <EmployeeNotifDrawer
+        open={open}
+        loading={loading}
+        notifications={notifications}
+        selectedId={selectedId}
+        onOpenChange={(nextOpen) => {
+          setOpen(nextOpen);
+          if (!nextOpen) {
+            setSelectedId(null);
+          }
+        }}
+        onSelect={(notification) => {
+          void handleSelect(notification);
+        }}
+      />
+    </>
   );
 };

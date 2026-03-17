@@ -61,6 +61,10 @@ const CONTRACT_TEMPLATES = [
   { id: "position_update_order", label: "Албан тушаал өөрчлөх тушаал" },
 ];
 
+// type GraphQLErrorLike = {
+//   graphQLErrors?: Array<{ message?: string | null }>;
+// };
+
 function CloseBtn({ onClick }: { onClick: () => void }) {
   return (
     <button
@@ -452,7 +456,7 @@ export const Request = ({ employee }: { employee?: Employee }) => {
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex h-[50px] items-center justify-between">
+      <div className="flex h-12.5 items-center justify-between">
         <div>
           <h2 className="text-white text-[19.5px] font-semibold">
             Шуурхай үйлдлүүд
@@ -470,14 +474,14 @@ export const Request = ({ employee }: { employee?: Employee }) => {
         {quickActions.map((action) => (
           <div
             key={action.title}
-            className={`${action.bg} flex h-[136px] w-full items-center justify-between gap-3 rounded-[16px] border px-6 py-6 shadow-[0_0_0_1px_rgba(255,255,255,0.03)_inset]`}>
+            className={`${action.bg} flex h-34 w-full items-center justify-between gap-3 rounded-[16px] border px-6 py-6 shadow-[0_0_0_1px_rgba(255,255,255,0.03)_inset]`}>
             <div className="flex items-center gap-4">
               <div
                 className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-[12px] border ${action.iconBg}`}>
                 {action.icon}
               </div>
 
-              <div className="max-w-[260px]">
+              <div className="max-w-65">
                 <p className="text-[16px] font-semibold leading-5 text-white">
                   {action.title}
                 </p>
@@ -499,7 +503,7 @@ export const Request = ({ employee }: { employee?: Employee }) => {
       {submitted && activeTab && (
         <div className="fixed inset-0 flex items-center justify-center bg-black/60 backdrop-blur-sm z-50">
           <div
-            className={`w-[360px] rounded-2xl ${DIALOG_BG} text-white p-8 border ${DIALOG_BORDER} shadow-2xl flex flex-col items-center gap-4`}>
+            className={`w-90 rounded-2xl ${DIALOG_BG} text-white p-8 border ${DIALOG_BORDER} shadow-2xl flex flex-col items-center gap-4`}>
             <div className="w-14 h-14 rounded-full bg-[#00CC99]/15 border border-[#00CC99]/30 flex items-center justify-center">
               <FiCheck className="w-7 h-7 text-[#00CC99]" />
             </div>
@@ -518,7 +522,7 @@ export const Request = ({ employee }: { employee?: Employee }) => {
       {activeTab === "Гэрээний хүсэлт" && !submitted && (
         <div className="fixed inset-0 flex items-center justify-center bg-black/60 backdrop-blur-sm z-50">
           <div
-            className={`w-[560px] max-h-[82vh] overflow-y-auto rounded-2xl ${DIALOG_BG} text-white p-6 border ${DIALOG_BORDER} shadow-2xl flex flex-col gap-4 animate-fade-up`}>
+            className={`w-140 max-h-[82vh] overflow-y-auto rounded-2xl ${DIALOG_BG} text-white p-6 border ${DIALOG_BORDER} shadow-2xl flex flex-col gap-4 animate-fade-up`}>
             <div className="flex justify-between items-start">
               <div>
                 <h2 className="text-xl font-semibold">Гэрээний хүсэлт</h2>
@@ -699,7 +703,7 @@ export const Request = ({ employee }: { employee?: Employee }) => {
                       onPointerMove={handlePointerMove}
                       onPointerUp={handlePointerUp}
                       onPointerLeave={handlePointerUp}
-                      className="h-[120px] w-full cursor-crosshair rounded-md"
+                      className="h-30 w-full cursor-crosshair rounded-md"
                     />
                   </div>
                   <div className="flex items-center justify-between">

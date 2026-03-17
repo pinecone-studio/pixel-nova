@@ -145,7 +145,7 @@ function FilePreviewModal({
       onClick={onClose}
     >
       <div
-        className="relative w-[760px] max-w-[95vw] bg-[#0f1520] rounded-3xl border border-slate-700/50 shadow-2xl overflow-hidden"
+        className="relative w-190 max-w-[95vw] bg-[#0f1520] rounded-3xl border border-slate-700/50 shadow-2xl overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between px-6 py-4 border-b border-slate-700/40">
@@ -581,7 +581,7 @@ export function FilesComponent() {
       )}
 
       {/* Left panel */}
-      <div className="w-[500px] shrink-0 flex flex-col gap-5">
+      <div className="w-125 shrink-0 flex flex-col gap-5">
         <div>
           <p className="text-slate-400 text-lg font-semibold uppercase tracking-widest mb-3">
             Нийт баримт
@@ -610,7 +610,7 @@ export function FilesComponent() {
             {stages.map((stage) => (
               <div
                 key={stage.label}
-                className={`rounded-2xl border w-[415px] h-[88px] ${stage.border} ${stage.bg} p-4 flex items-center justify-between`}
+                className={`rounded-2xl border w-103.75 h-22 ${stage.border} ${stage.bg} p-4 flex items-center justify-between`}
               >
                 <div className="flex items-center gap-3">
                   <div
@@ -638,10 +638,10 @@ export function FilesComponent() {
       <div className="flex-1 flex flex-col">
         <div className="rounded-2xl border border-slate-700/40 bg-[#0a0f18] overflow-auto flex-1">
           <div className="flex items-center gap-3 px-5 py-4 border-b border-slate-700/40 bg-slate-800/20">
-            <div className="flex items-center gap-2 bg-[#0d1117] border border-slate-700/50 rounded-xl px-3 py-2 min-w-[260px]">
+            <div className="flex items-center gap-2 bg-[#0d1117] border border-slate-700/50 rounded-xl px-3 py-2 min-w-65">
               <SearchIcon />
               <input
-                className="bg-transparent text-slate-400 text-sm outline-none placeholder:text-slate-600 w-[250px]"
+                className="bg-transparent text-slate-400 text-sm outline-none placeholder:text-slate-600 w-62.5"
                 placeholder="Баримт, үйлдэл, ажилтнаар хайх"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}

@@ -1,20 +1,13 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { Upload } from "lucide-react";
+import { BiUpload } from "react-icons/bi";
 
 import type { Employee } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 
 import {
   DEPARTMENTS,
@@ -22,6 +15,7 @@ import {
   type EmployeeFormState,
   type ModalMode,
 } from "./shared";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 export function EmployeeModal({
   mode,
@@ -136,7 +130,8 @@ export function EmployeeModal({
             <Label className="text-white text-sm font-medium">Хэлтэс</Label>
             <Select
               value={form.department}
-              onValueChange={(value) => updateField("department", value)}
+              onValueChange={(value: string) => updateField("department", value)}
+              // className="h-11.5 rounded-2xl border border-slate-700/60 bg-transparent px-4 py-3 text-sm text-slate-300 outline-none transition-colors focus:border-slate-500"
             >
               <SelectTrigger className="bg-transparent cursor-pointer border-slate-700/60 rounded-2xl px-4 py-3 h-auto text-slate-300 text-sm focus:ring-0 focus:border-slate-500 [&>svg]:text-slate-400">
                 <SelectValue placeholder="Хэлтэс сонгох" />
@@ -201,7 +196,7 @@ export function EmployeeModal({
                 : "border-slate-700/50 hover:border-slate-600/60"
             }`}
           >
-            <Upload />
+            <BiUpload className="h-6 w-6 text-slate-300" />
             {file ? (
               <p className="text-emerald-400 text-sm font-semibold px-4 text-center">
                 {file.name}

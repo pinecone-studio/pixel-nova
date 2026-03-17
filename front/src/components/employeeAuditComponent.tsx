@@ -621,24 +621,24 @@ export function EmployeeAuditComponent() {
           </p>
         </div>
 
-        <div className="grid w-full grid-cols-1 gap-4 lg:grid-cols-2">
+        <div className="flex w-full flex-col gap-4 lg:flex-row">
           <button
             type="button"
             onClick={() => {
               setSelectedView("newEmployee");
               setListFilter("all");
             }}
-            className={`flex h-[92px] items-center justify-between rounded-[24px] border px-7 text-left transition ${summaryCardTone(selectedView === "newEmployee", "blue")}`}
+            className={`flex h-[92px] min-w-0 items-center justify-between rounded-[24px] border px-7 text-left transition-[flex-basis,background-color,border-color] duration-300 lg:basis-[34%] ${selectedView === "newEmployee" ? "lg:basis-[66%]" : ""} ${summaryCardTone(selectedView === "newEmployee", "blue")}`}
           >
-            <div className="flex items-center gap-5">
+            <div className="flex min-w-0 items-center gap-5">
               <div className="flex h-14 w-14 items-center justify-center rounded-[18px] bg-[#2F7BFF] text-white shadow-[0_10px_30px_rgba(47,123,255,0.35)]">
                 <FiFileText className="h-6 w-6" />
               </div>
-              <div className="flex items-end gap-3">
+              <div className="flex min-w-0 items-end gap-3">
                 <span className="text-[46px] font-semibold leading-none text-white">
                   7
                 </span>
-                <span className="pb-1 text-[14px] text-[#A4AFC0]">
+                <span className="truncate pb-1 text-[14px] text-[#A4AFC0]">
                   Шинэ ажилтаны хүсэлт
                 </span>
               </div>
@@ -652,17 +652,17 @@ export function EmployeeAuditComponent() {
               setSelectedView("documentReview");
               setListFilter("all");
             }}
-            className={`flex h-[92px] items-center justify-between rounded-[24px] border px-7 text-left transition ${summaryCardTone(selectedView === "documentReview", "green")}`}
+            className={`flex h-[92px] min-w-0 items-center justify-between rounded-[24px] border px-7 text-left transition-[flex-basis,background-color,border-color] duration-300 lg:basis-[34%] ${selectedView === "documentReview" ? "lg:basis-[66%]" : ""} ${summaryCardTone(selectedView === "documentReview", "green")}`}
           >
-            <div className="flex items-center gap-5">
+            <div className="flex min-w-0 items-center gap-5">
               <div className="flex h-14 w-14 items-center justify-center rounded-[18px] bg-[#12C95E] text-white shadow-[0_10px_30px_rgba(18,201,94,0.28)]">
                 <FiCheckCircle className="h-6 w-6" />
               </div>
-              <div className="flex items-end gap-3">
+              <div className="flex min-w-0 items-end gap-3">
                 <span className="text-[46px] font-semibold leading-none text-white">
                   2
                 </span>
-                <span className="pb-1 text-[14px] text-[#A4AFC0]">
+                <span className="truncate pb-1 text-[14px] text-[#A4AFC0]">
                   Баримт бичиг баталгаажуулах
                 </span>
               </div>
