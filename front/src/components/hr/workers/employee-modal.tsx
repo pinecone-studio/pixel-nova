@@ -42,12 +42,36 @@ export function EmployeeModal({
   const [form, setForm] = useState<EmployeeFormState>(() =>
     employeeToForm(employee),
   );
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
   function updateField<K extends keyof EmployeeFormState>(
     key: K,
     value: EmployeeFormState[K],
   ) {
     setForm((prev) => ({ ...prev, [key]: value }));
+    setErrors((prev) => {
+      if (!prev[key as string]) return prev;
+      const next = { ...prev };
+      delete next[key as string];
+      return next;
+    });
+  }
+
+  function validate() {
+    const next: Record<string, string> = {};
+    if (!form.lastName.trim()) next.lastName = "Овгоо заавал оруулна уу.";
+    if (!form.firstName.trim()) next.firstName = "Нэрээ заавал оруулна уу.";
+    if (!form.email.trim()) next.email = "Имэйлээ заавал оруулна уу.";
+    if (!form.department.trim()) next.department = "Хэлтэс заавал сонгоно уу.";
+    if (!form.jobTitle.trim()) next.jobTitle = "Албан тушаал заавал оруулна уу.";
+    return next;
+  }
+
+  async function handleSubmit() {
+    const next = validate();
+    setErrors(next);
+    if (Object.keys(next).length > 0) return;
+    await onSave(form);
   }
 
   return (
@@ -76,6 +100,9 @@ export function EmployeeModal({
               placeholder="Дорж"
               className="bg-transparent border-slate-700/60 rounded-2xl px-4 py-3 h-auto text-slate-300 text-sm placeholder:text-slate-600 focus-visible:ring-0 focus-visible:border-slate-500 transition-colors"
             />
+            {errors.lastName ? (
+              <p className="text-xs text-red-400">{errors.lastName}</p>
+            ) : null}
           </div>
           <div className="flex flex-col gap-1.5">
             <Label className="text-white text-sm font-medium">Нэр</Label>
@@ -85,6 +112,9 @@ export function EmployeeModal({
               placeholder="Дуламрагчаа"
               className="bg-transparent border-slate-700/60 rounded-2xl px-4 py-3 h-auto text-slate-300 text-sm placeholder:text-slate-600 focus-visible:ring-0 focus-visible:border-slate-500 transition-colors"
             />
+            {errors.firstName ? (
+              <p className="text-xs text-red-400">{errors.firstName}</p>
+            ) : null}
           </div>
         </div>
 
@@ -96,6 +126,9 @@ export function EmployeeModal({
             placeholder="Dorj@company.com"
             className="bg-transparent border-slate-700/60 rounded-2xl px-4 py-3 h-auto text-slate-300 text-sm placeholder:text-slate-600 focus-visible:ring-0 focus-visible:border-slate-500 transition-colors"
           />
+          {errors.email ? (
+            <p className="text-xs text-red-400">{errors.email}</p>
+          ) : null}
         </div>
 
         <div className="grid grid-cols-2 gap-4 shrink-0">
@@ -120,6 +153,9 @@ export function EmployeeModal({
                 ))}
               </SelectContent>
             </Select>
+            {errors.department ? (
+              <p className="text-xs text-red-400">{errors.department}</p>
+            ) : null}
           </div>
           <div className="flex flex-col gap-1.5">
             <Label className="text-white text-sm font-medium">Албан тушаал</Label>
@@ -129,6 +165,9 @@ export function EmployeeModal({
               placeholder="Junior Engineer"
               className="bg-transparent border-slate-700/60 rounded-2xl px-4 py-3 h-auto text-slate-300 text-sm placeholder:text-slate-600 focus-visible:ring-0 focus-visible:border-slate-500 transition-colors"
             />
+            {errors.jobTitle ? (
+              <p className="text-xs text-red-400">{errors.jobTitle}</p>
+            ) : null}
           </div>
         </div>
 
@@ -199,7 +238,7 @@ export function EmployeeModal({
             Татгалзах
           </Button>
           <Button
-            onClick={() => void onSave(form)}
+            onClick={() => void handleSubmit()}
             disabled={saving}
             className="flex items-center gap-2 px-6 py-2.5 cursor-pointer h-auto rounded-2xl bg-emerald-500 hover:bg-emerald-400 disabled:opacity-60 text-black font-bold shadow-lg shadow-emerald-500/20"
           >

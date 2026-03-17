@@ -1,7 +1,13 @@
 "use client";
 
 import { useLazyQuery, useQuery } from "@apollo/client/react";
-import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
+import {
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  useSyncExternalStore,
+} from "react";
 import { useRouter } from "next/navigation";
 
 import { buildGraphQLHeaders } from "@/lib/apollo-client";
@@ -977,7 +983,9 @@ export default function FilesPage() {
       </div>
 
       {/* Toolbar */}
-      <div style={{ display: "flex", gap: 10, marginBottom: 28, flexWrap: "wrap" }}>
+      <div
+        style={{ display: "flex", gap: 10, marginBottom: 28, flexWrap: "wrap" }}
+      >
         <div style={{ position: "relative", flex: 1 }}>
           <span
             style={{
@@ -1113,42 +1121,40 @@ export default function FilesPage() {
         </div>
       ) : filteredDocuments.length === 0 ? (
         <div style={emptyBoxStyle}>Баримт олдсонгүй.</div>
+      ) : viewMode === "grid" ? (
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))",
+            gap: 14,
+          }}
+        >
+          {filteredDocuments.map((document) => (
+            <DocCard
+              key={document.id}
+              document={document}
+              authToken={authToken}
+            />
+          ))}
+        </div>
       ) : (
-        viewMode === "grid" ? (
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))",
-              gap: 14,
-            }}
-          >
-            {filteredDocuments.map((document) => (
-              <DocCard
-                key={document.id}
-                document={document}
-                authToken={authToken}
-              />
-            ))}
-          </div>
-        ) : (
-          <div
-            style={{
-              borderRadius: 14,
-              overflow: "hidden",
-              border: "1px solid rgba(255,255,255,0.08)",
-              background: "rgba(255,255,255,0.02)",
-            }}
-          >
-            {filteredDocuments.map((document, index) => (
-              <DocRow
-                key={document.id}
-                document={document}
-                authToken={authToken}
-                isLast={index === filteredDocuments.length - 1}
-              />
-            ))}
-          </div>
-        )
+        <div
+          style={{
+            borderRadius: 14,
+            overflow: "hidden",
+            border: "1px solid rgba(255,255,255,0.08)",
+            background: "rgba(255,255,255,0.02)",
+          }}
+        >
+          {filteredDocuments.map((document, index) => (
+            <DocRow
+              key={document.id}
+              document={document}
+              authToken={authToken}
+              isLast={index === filteredDocuments.length - 1}
+            />
+          ))}
+        </div>
       )}
     </div>
   );
