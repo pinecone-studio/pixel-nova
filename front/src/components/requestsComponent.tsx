@@ -85,11 +85,11 @@ const PreviewModal = ({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm"
       onClick={onClose}
     >
       <div
-        className="relative w-[420px] max-w-[95vw] bg-[#0f1520] rounded-3xl border border-slate-700/60 shadow-2xl p-6 flex flex-col gap-5"
+        className="relative w-[420px] max-w-[95vw] bg-white rounded-3xl border border-slate-200 shadow-[0_28px_60px_rgba(15,23,42,0.12)] p-6 flex flex-col gap-5"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-start justify-between">
@@ -103,12 +103,12 @@ const PreviewModal = ({
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <p className="text-white font-bold text-xl">
+                <p className="text-slate-900 font-bold text-xl">
                   {row.employee.lastName} {row.employee.firstName}
                 </p>
                 <StatusBadge status={row.status} />
               </div>
-              <p className="text-slate-400 text-sm mt-0.5">
+              <p className="text-slate-500 text-sm mt-0.5">
                 {row.employee.employeeCode} â€¢{" "}
                 {formatDepartment(row.employee.department)}
               </p>
@@ -116,30 +116,30 @@ const PreviewModal = ({
           </div>
           <button
             onClick={onClose}
-            className="text-slate-400 hover:text-white transition-colors text-xl leading-none mt-1"
+            className="text-slate-400 hover:text-slate-700 transition-colors text-xl leading-none mt-1"
           >
             âœ•
           </button>
         </div>
 
-        <div className="h-px bg-slate-700/50" />
+        <div className="h-px bg-slate-200" />
 
-        <div className="bg-[#161d2b] rounded-2xl p-4 flex flex-col gap-4">
-          <p className="text-white font-semibold text-base">{row.type}</p>
+        <div className="bg-slate-50 rounded-2xl p-4 flex flex-col gap-4 border border-slate-200">
+          <p className="text-slate-900 font-semibold text-base">{row.type}</p>
           <div className="grid grid-cols-2 gap-y-4">
             <div>
               <p className="text-slate-500 text-xs mb-1">Ð­Ñ…Ð»ÑÑ… Ñ†Ð°Ð³</p>
-              <p className="text-white text-sm font-medium">{row.startTime}</p>
+              <p className="text-slate-700 text-sm font-medium">{row.startTime}</p>
             </div>
             <div>
               <p className="text-slate-500 text-xs mb-1">Ð”ÑƒÑƒÑÐ°Ñ… Ñ†Ð°Ð³</p>
-              <p className="text-white text-sm font-medium">{row.endTime}</p>
+              <p className="text-slate-700 text-sm font-medium">{row.endTime}</p>
             </div>
             <div>
               <p className="text-slate-500 text-xs mb-1">
                 Ð˜Ð»Ð³ÑÑÑÑÐ½ Ð¾Ð³Ð½Ð¾Ð¾
               </p>
-              <p className="text-[#0ad4b1] text-sm font-semibold">
+              <p className="text-emerald-600 text-sm font-semibold">
                 {new Date(row.createdAt).toLocaleDateString("mn-MN")}
               </p>
             </div>
@@ -147,21 +147,21 @@ const PreviewModal = ({
               <p className="text-slate-500 text-xs mb-1">
                 ÐÐ»Ð±Ð°Ð½ Ñ‚ÑƒÑˆÐ°Ð°Ð»
               </p>
-              <p className="text-white text-sm font-medium">
+              <p className="text-slate-700 text-sm font-medium">
                 {row.employee.jobTitle}
               </p>
             </div>
             {row.reason && (
               <div className="col-span-2">
                 <p className="text-slate-500 text-xs mb-1">Ð¨Ð°Ð»Ñ‚Ð³Ð°Ð°Ð½</p>
-                <p className="text-white text-sm font-medium">{row.reason}</p>
+                <p className="text-slate-700 text-sm font-medium">{row.reason}</p>
               </div>
             )}
           </div>
         </div>
 
         <div className="flex flex-col gap-2">
-          <p className="text-white font-semibold text-base">
+          <p className="text-slate-900 font-semibold text-base">
             Ð¢Ð°Ð¹Ð»Ð±Ð°Ñ€{" "}
             <span className="text-slate-500 font-normal">
               (Ð—Ð°Ð°Ð²Ð°Ð» Ð±Ð¸Ñˆ)
@@ -172,7 +172,7 @@ const PreviewModal = ({
             onChange={(e) => setNote(e.target.value)}
             placeholder="Ð­Ð½Ð´ Ð±Ð¸Ñ‡Ð½Ñ Ò¯Ò¯..."
             rows={3}
-            className="w-full bg-[#161d2b] border border-slate-700/50 rounded-2xl px-4 py-3 text-slate-300 text-sm placeholder:text-slate-600 outline-none resize-none focus:border-blue-500/50 transition-colors"
+            className="w-full bg-white border border-slate-200 rounded-2xl px-4 py-3 text-slate-700 text-sm placeholder:text-slate-400 outline-none resize-none focus:border-slate-300 transition-colors"
           />
         </div>
 
@@ -181,14 +181,14 @@ const PreviewModal = ({
             <button
               onClick={handleReject}
               disabled={acting}
-              className="flex items-center gap-2 px-5 py-2.5 rounded-xl border border-red-500/50 text-red-400 text-sm font-medium hover:bg-red-500/10 disabled:opacity-50 transition-colors"
+              className="flex items-center gap-2 px-5 py-2.5 rounded-xl border border-red-200 text-red-500 text-sm font-medium hover:bg-red-50 disabled:opacity-50 transition-colors"
             >
               <span>âœ•</span> Ð¢Ð°Ñ‚Ð³Ð°Ð»Ð·Ð°Ñ…
             </button>
             <button
               onClick={handleApprove}
               disabled={acting}
-              className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#0ad4b1] text-black text-sm font-medium hover:bg-[#08bfa0] disabled:opacity-50 transition-colors"
+              className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-slate-900 text-white text-sm font-medium hover:bg-slate-800 disabled:opacity-50 transition-colors"
             >
               <span>âœ“</span>{" "}
               {acting ? "Ð¢Ò¯Ñ€ Ñ…Ò¯Ð»ÑÑÐ½Ñ Ò¯Ò¯..." : "Ð‘Ð°Ñ‚Ð»Ð°Ñ…"}
@@ -227,7 +227,7 @@ const RequestRow = ({
   return (
     <>
       <div
-        className="flex items-center justify-between h-24 p-5 hover:bg-[#101822] transition-colors cursor-pointer"
+        className="flex items-center justify-between h-24 p-5 hover:bg-slate-50 transition-colors cursor-pointer"
         onClick={() => onToggle(row)}
       >
         <div className="flex items-center gap-3">
@@ -237,7 +237,7 @@ const RequestRow = ({
             {initials}
           </div>
           <div className=" flex justify-center flex-col">
-            <p className="text-white font-semibold text-sm h-6">
+            <p className="text-slate-900 font-semibold text-sm h-6">
               {row.employee.lastName} {row.employee.firstName}
             </p>
             <p className="text-slate-500 text-xs">
@@ -247,7 +247,7 @@ const RequestRow = ({
           </div>
         </div>
         <div className="flex items-center gap-3">
-          <span className="text-[#5aa7ff] text-[11px] px-2.5 py-1 rounded-full bg-[#0b2740] border border-[#1c395a] hidden sm:block">
+          <span className="text-blue-600 text-[11px] px-2.5 py-1 rounded-full bg-blue-50 border border-blue-200 hidden sm:block">
             {documentsLoading ? "..." : documentCount} гэрээ
           </span>
           <DownIcon
@@ -261,7 +261,7 @@ const RequestRow = ({
       </div>
       {expanded ? (
         <div className="px-5 pb-4">
-          <div className="rounded-xl border border-[#1f2a38] bg-[#0c121a] overflow-hidden">
+          <div className="rounded-xl border border-slate-200 bg-white overflow-hidden">
             {documentsLoading ? (
               <div className="py-8 flex items-center justify-center gap-3 text-slate-500 text-sm">
                 <span className="w-4 h-4 border-2 border-slate-700 border-t-slate-400 rounded-full animate-spin" />
@@ -275,14 +275,14 @@ const RequestRow = ({
               documents.map((doc, idx) => (
                 <div
                   key={doc.id}
-                  className={`flex items-center justify-between px-4 py-3 ${idx > 0 ? "border-t border-[#1f2a38]" : ""}`}
+                  className={`flex items-center justify-between px-4 py-3 ${idx > 0 ? "border-t border-slate-200" : ""}`}
                 >
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-[#101826] border border-[#1f2a38] flex items-center justify-center text-slate-400">
+                    <div className="w-10 h-10 rounded-xl bg-white border border-slate-200 flex items-center justify-center text-slate-400">
                       <ReqIcon />
                     </div>
                     <div>
-                      <p className="text-white text-sm font-semibold">
+                      <p className="text-slate-900 text-sm font-semibold">
                         {doc.documentName}
                       </p>
                       <p className="text-slate-500 text-xs">{doc.action}</p>
@@ -301,7 +301,7 @@ const RequestRow = ({
           </div>
         </div>
       ) : null}
-      {divider && <div className="h-px bg-[#1a2432]" />}
+      {divider && <div className="h-px bg-slate-200" />}
     </>
   );
 };
@@ -429,7 +429,7 @@ export const RequestsComponent = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[#080c12] text-white font-sans p-6 flex flex-col gap-4 animate-fade-up">
+    <div className="min-h-screen bg-[#F4F5F7] text-slate-900 font-sans p-6 flex flex-col gap-4 animate-fade-up">
       {previewRow && (
         <PreviewModal
           row={previewRow}
@@ -439,12 +439,12 @@ export const RequestsComponent = () => {
         />
       )}
 
-      <div className="rounded-2xl border border-[#1a2432] bg-[#0b1118] overflow-hidden shadow-[0_20px_60px_rgba(0,0,0,0.5)]">
-        <div className="flex items-center justify-between gap-4 px-5 py-4 flex-wrap border-b border-[#1a2432]">
-          <div className="flex items-center gap-2 bg-[#0c131b] border border-[#1a2432] rounded-xl px-3 py-2 min-w-[230px]">
+      <div className="rounded-2xl border border-slate-200 bg-white overflow-hidden shadow-[0_1px_2px_rgba(15,23,42,0.06)]">
+        <div className="flex items-center justify-between gap-4 px-5 py-4 flex-wrap border-b border-slate-200">
+          <div className="flex items-center gap-2 bg-white border border-slate-200 rounded-xl px-3 py-2 min-w-[230px]">
             <SearchIcon />
             <input
-              className="bg-transparent text-slate-300 text-sm outline-none placeholder:text-slate-500 w-full"
+              className="bg-transparent text-slate-600 text-sm outline-none placeholder:text-slate-400 w-full"
               placeholder="Ажилтны кодоор хайх"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
@@ -452,18 +452,18 @@ export const RequestsComponent = () => {
           </div>
 
           <div className="flex items-center gap-2 ml-auto">
-            <button className="flex items-center gap-2 px-3 py-2 rounded-xl bg-[#0c131b] border border-[#1a2432] text-slate-300 text-sm hover:bg-[#141d27] transition-colors">
+            <button className="flex items-center gap-2 px-3 py-2 rounded-xl bg-white border border-slate-200 text-slate-600 text-sm hover:bg-slate-50 transition-colors">
               <FilterIcon />
               Шүүлтүүр
             </button>
-            <button className="flex items-center gap-2 px-3 py-2 rounded-xl bg-[#0c131b] border border-[#1a2432] text-slate-300 text-sm hover:bg-[#141d27] transition-colors">
+            <button className="flex items-center gap-2 px-3 py-2 rounded-xl bg-white border border-slate-200 text-slate-600 text-sm hover:bg-slate-50 transition-colors">
               <DownloadIcon />
               Татах
             </button>
           </div>
         </div>
 
-        <div className="h-px bg-[#1a2432]" />
+        <div className="h-px bg-slate-200" />
 
         <div className="flex flex-col">
           {loading ? (
@@ -473,7 +473,7 @@ export const RequestsComponent = () => {
               <div className="h-3 w-72 rounded-full skeleton" />
             </div>
           ) : filtered.length === 0 ? (
-            <div className="py-12 text-center text-slate-500 text-sm">
+            <div className="py-12 text-center text-slate-400 text-sm">
               Мэдээлэл байхгүй байна
             </div>
           ) : (
