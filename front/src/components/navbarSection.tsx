@@ -4,13 +4,13 @@ import { useQuery } from "@apollo/client/react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { BiHome } from "react-icons/bi";
-import { GrNotification } from "react-icons/gr";
 import { RxAvatar } from "react-icons/rx";
 
 import { buildGraphQLHeaders } from "@/lib/apollo-client";
 import { GET_ME } from "@/graphql/queries";
 import type { Employee } from "@/lib/types";
 
+import { EmployeeNotifDropdown } from "@/components/employeeNotifDropdown";
 import { AuditLog, DownIcon, EpasLogo, FactIcon } from "./icons";
 
 const TOKEN_STORAGE_KEY = "epas_auth_token";
@@ -96,10 +96,7 @@ export function Navbar() {
       </div>
 
       <div className="flex items-center gap-3">
-        <button className="relative flex h-9 w-9 cursor-pointer items-center justify-center text-[#6B6B8A] transition-all duration-200 hover:text-[#00CC99]">
-          <GrNotification className="h-4 w-4" />
-          <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full border-2 border-[#0A0A0F] bg-[#00CC99]" />
-        </button>
+        <EmployeeNotifDropdown />
 
         <button className="group flex cursor-pointer items-center gap-2 px-3 py-1.5 transition-all duration-200 hover:border-[#00CC99]/30">
           <div className="flex h-7 w-7 items-center justify-center bg-linear-to-br from-[#00CC99] to-[#007A5E] text-xs font-bold text-white shadow-sm rounded-full">
