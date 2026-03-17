@@ -138,7 +138,7 @@ export const SettingsComponent = () => {
     <div className="flex flex-col gap-5">
       <div className="flex items-start justify-between gap-4">
         <div>
-          <p className="text-white text-2xl font-bold tracking-tight">Тохиргоо</p>
+          <p className="text-slate-900 text-2xl font-bold tracking-tight">Тохиргоо</p>
           <p className="text-slate-500 text-sm mt-1">
             Системийн ерөнхий тохиргоо болон хувийн сонголтууд
           </p>
@@ -151,21 +151,21 @@ export const SettingsComponent = () => {
       {settingSections.map((section) => (
         <div
           key={section.title}
-          className="rounded-2xl border border-white/8 bg-[#0a0f0e] overflow-hidden"
+          className="rounded-2xl border border-slate-200 bg-white overflow-hidden shadow-[0_1px_2px_rgba(15,23,42,0.06)]"
         >
-          <div className="px-6 py-4 border-b border-white/5">
-            <p className="text-white font-semibold">{section.title}</p>
+          <div className="px-6 py-4 border-b border-slate-200">
+            <p className="text-slate-900 font-semibold">{section.title}</p>
           </div>
 
           {section.items.map((item, index) => (
             <div
               key={item.id}
               className={`flex items-center justify-between px-6 py-4 ${
-                index < section.items.length - 1 ? "border-b border-white/5" : ""
+                index < section.items.length - 1 ? "border-b border-slate-200" : ""
               }`}
             >
               <div>
-                <p className="text-white text-sm font-medium">{item.label}</p>
+                <p className="text-slate-900 text-sm font-medium">{item.label}</p>
                 <p className="text-slate-500 text-xs mt-0.5">{item.desc}</p>
               </div>
               <button onClick={() => toggle(item.id)} className="shrink-0 ml-6">
@@ -180,19 +180,19 @@ export const SettingsComponent = () => {
         </div>
       ))}
 
-      <div className="rounded-2xl border border-red-500/20 bg-red-500/5 p-6">
-        <p className="text-red-400 font-semibold mb-1">Аюултай бүс</p>
+      <div className="rounded-2xl border border-red-200 bg-red-50 p-6">
+        <p className="text-red-600 font-semibold mb-1">Аюултай бүс</p>
         <p className="text-slate-500 text-xs mb-4">
           Доорх үйлдлүүд буцаагдахгүй тул болгоомжтой хэрэглэнэ.
         </p>
         <div className="flex gap-3">
           <button
             onClick={resetSettings}
-            className="h-9 px-4 rounded-lg border border-red-500/30 text-red-400 text-sm hover:bg-red-500/10 transition-colors"
+            className="h-9 px-4 rounded-lg border border-red-200 text-red-600 text-sm hover:bg-red-100 transition-colors"
           >
             Тохиргоог анхдагч болгох
           </button>
-          <button className="h-9 px-4 rounded-lg bg-red-500/20 border border-red-500/30 text-red-400 text-sm hover:bg-red-500/30 transition-colors">
+          <button className="h-9 px-4 rounded-lg bg-red-100 border border-red-200 text-red-600 text-sm hover:bg-red-200 transition-colors">
             Бүртгэл устгах
           </button>
         </div>

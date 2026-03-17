@@ -13,9 +13,9 @@ export function AuditActionCard({
   onSendRequest: (action: ActionConfig) => void;
 }) {
   return (
-    <div className="rounded-2xl border border-slate-700/40 bg-[#0d1117] p-5 flex flex-col gap-4">
+    <div className="rounded-2xl border border-slate-200 bg-white p-5 flex flex-col gap-4 shadow-[0_1px_2px_rgba(15,23,42,0.06)]">
       <div className="flex items-start justify-between">
-        <p className="text-white font-bold text-base tracking-wide uppercase">
+        <p className="text-slate-900 font-bold text-base tracking-wide uppercase">
           {action.name}
         </p>
         <span
@@ -26,19 +26,21 @@ export function AuditActionCard({
       </div>
 
       <div className="flex flex-col gap-2">
-        <p className="text-white text-sm font-semibold">Идэвхлүүлэх нөхцөл</p>
+        <p className="text-slate-700 text-sm font-semibold">
+          Идэвхлүүлэх нөхцөл
+        </p>
         <div className="flex flex-wrap gap-2">
           {action.triggerFields.length > 0 ? (
             action.triggerFields.map((field) => (
               <span
                 key={field}
-                className="px-2.5 py-1 rounded-lg border border-slate-700/50 bg-slate-800/40 text-slate-400 text-xs"
+                className="px-2.5 py-1 rounded-lg border border-slate-200 bg-slate-50 text-slate-500 text-xs"
               >
                 {field}
               </span>
             ))
           ) : action.triggerCondition ? (
-            <span className="px-2.5 py-1 rounded-lg border border-slate-700/50 bg-slate-800/40 text-slate-400 text-xs">
+            <span className="px-2.5 py-1 rounded-lg border border-slate-200 bg-slate-50 text-slate-500 text-xs">
               {action.triggerCondition}
             </span>
           ) : (
@@ -48,13 +50,13 @@ export function AuditActionCard({
       </div>
 
       <div className="flex flex-col gap-2">
-        <p className="text-white text-sm font-semibold">Хүлээн авагч</p>
+        <p className="text-slate-700 text-sm font-semibold">Хүлээн авагч</p>
         <div className="flex flex-wrap gap-2">
           {action.recipients.length > 0 ? (
             action.recipients.map((recipient) => (
               <span
                 key={recipient}
-                className="px-2.5 py-1 rounded-lg border border-slate-700/50 bg-slate-800/40 text-slate-400 text-xs"
+                className="px-2.5 py-1 rounded-lg border border-slate-200 bg-slate-50 text-slate-500 text-xs"
               >
                 {recipient}
               </span>
@@ -66,7 +68,9 @@ export function AuditActionCard({
       </div>
 
       <div className="flex flex-col gap-2">
-        <p className="text-white text-sm font-semibold">Шаардлагатай баримт</p>
+        <p className="text-slate-700 text-sm font-semibold">
+          Шаардлагатай баримт
+        </p>
         <div className="flex flex-col gap-1">
           {action.documents.length > 0 ? (
             [...action.documents]
@@ -74,7 +78,7 @@ export function AuditActionCard({
               .map((doc) => (
                 <div key={doc.id} className="flex items-center gap-2">
                   <DocRowIcon />
-                  <span className="text-slate-400 text-sm">
+                  <span className="text-slate-500 text-sm">
                     {doc.template.replace(/\.html$/, ".pdf")}
                   </span>
                 </div>
@@ -85,19 +89,13 @@ export function AuditActionCard({
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-2 mt-1">
-        <button className="flex items-center justify-center gap-2 py-2.5 rounded-xl border border-red-500/40 text-red-400 text-sm font-medium hover:bg-red-500/10 transition-colors">
-          <TrashIcon />
-          Устгах
-        </button>
-        <button
-          onClick={() => onSendRequest(action)}
-          className="flex items-center justify-center gap-2 py-2.5 rounded-xl border border-slate-700/50 bg-slate-800/30 text-slate-300 text-sm font-medium hover:bg-slate-700/50 transition-colors"
-        >
-          <EditIcon />
-          Хүсэлт илгээх
-        </button>
-      </div>
+      <button
+        onClick={() => onSendRequest(action)}
+        className="flex items-center justify-center gap-2 py-2.5 rounded-xl border border-slate-200 bg-black text-white text-sm font-medium cursor-pointer transition-colors"
+      >
+        <EditIcon />
+        Хүсэлт илгээх
+      </button>
     </div>
   );
 }

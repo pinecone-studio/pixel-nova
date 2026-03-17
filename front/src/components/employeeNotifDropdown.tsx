@@ -24,7 +24,7 @@ export const EmployeeNotifDropdown = () => {
   const token =
     typeof window === "undefined"
       ? ""
-      : window.localStorage.getItem(TOKEN_KEY) ?? "";
+      : (window.localStorage.getItem(TOKEN_KEY) ?? "");
 
   const { data, loading, refetch } = useQuery<{
     myNotifications: EmployeeNotification[];
@@ -44,7 +44,9 @@ export const EmployeeNotifDropdown = () => {
 
   const liveNotifications = data?.myNotifications ?? [];
   const useMockNotifications = liveNotifications.length === 0;
-  const notifications = useMockNotifications ? mockNotifications : liveNotifications;
+  const notifications = useMockNotifications
+    ? mockNotifications
+    : liveNotifications;
 
   const unreadCount = notifications.filter((n) => n.status === "unread").length;
 
@@ -69,13 +71,14 @@ export const EmployeeNotifDropdown = () => {
   }
 
   async function handleSelect(notification: EmployeeNotification) {
-    const nextSelectedId = selectedId === notification.id ? null : notification.id;
+    const nextSelectedId =
+      selectedId === notification.id ? null : notification.id;
     setSelectedId(nextSelectedId);
 
     if (notification.status === "unread") {
       await handleMarkRead(notification.id);
     }
-  } 
+  }
 
   return (
     <>

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useQuery } from "@apollo/client/react";
 import { useEffect, useMemo, useSyncExternalStore } from "react";
@@ -91,9 +91,9 @@ export default function EmployeePage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#0A0A0F] flex items-center justify-center">
-        <div className="flex items-center gap-3 text-white/70 text-sm">
-          <span className="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin" />
+      <div className="min-h-screen bg-[#F5F7FB] flex items-center justify-center">
+        <div className="flex items-center gap-3 text-[#6B7280] text-sm">
+          <span className="w-5 h-5 border-2 border-[#D1D5DB] border-t-[#111827] rounded-full animate-spin" />
           Уншиж байна.....
         </div>
       </div>
@@ -101,77 +101,67 @@ export default function EmployeePage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0A0A0F]">
-      <div className="mx-auto flex w-full max-w-300 flex-col gap-10 px-6 py-10">
-        <div className="mx-auto flex h-66 w-full max-w-264 items-center rounded-2xl bg-[linear-gradient(135deg,#0a0f15_0%,#0b1018_45%,#0a0d12_100%)] p-10 shadow-[0_0_0_1px_rgba(0,153,255,0.2),0_20px_60px_rgba(0,0,0,0.45)]">
-          <div className="flex max-w-160 flex-col gap-3">
-            <p className="text-[#00CC99] text-sm font-medium tracking-widest uppercase">
-              Сайн байна уу?
-            </p>
-            <h1 className="text-white text-[36px] font-semibold leading-[1.1] tracking-[-0.02em]">
-              {displayName}
-            </h1>
-            <p className="text-[#4A4A6A] text-sm leading-relaxed max-w-lg">
-              Та хөдөлмөрийн баримт бичиг болон ажлын түүхээ нэг дороос харах
-              боломжтой. Бүх мэдээлэл backend-аас бодитоор ачааллагдана.
-            </p>
-            <div className="flex gap-2 mt-1 flex-wrap">
-              {employee?.department ? (
-                <span className="flex items-center gap-1.5 rounded-lg border border-[#00CC99]/30 bg-[#00CC99]/15 px-3 py-1.5 text-[13px] font-semibold text-[#00CC99]">
-                  {employee.department}
-                </span>
-              ) : null}
-              {employee?.jobTitle ? (
-                <span className="flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-[13px] font-semibold text-[#94A3B8]">
-                  {employee.jobTitle}
-                </span>
-              ) : null}
-              {employee?.employeeCode ? (
-                <span className="flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-[13px] font-semibold text-[#94A3B8]">
-                  {employee.employeeCode}
-                </span>
-              ) : null}
-              {error ? (
-                <span className="rounded-lg border border-red-500/20 bg-red-500/10 px-3 py-1.5 text-[13px] font-semibold text-red-400">
-                  {error}
-                </span>
-              ) : null}
-            </div>
-          </div>
-        </div>
-
-        <div className="mx-auto w-full max-w-264">
+    <div className="min-h-screen bg-[#F5F7FB]">
+      <div className="mx-auto flex w-[1056px] max-w-full flex-col gap-4 px-0 py-10">
+        <div className="mx-auto w-full max-w-264 mt-[14px]">
           <Request employee={employee ?? undefined} />
         </div>
 
-        <MyContractRequests />
-
-        <section className="mx-auto flex w-full max-w-264 flex-col gap-6 animate-fade-up">
-          <div className="flex items-center gap-4">
-            <h2 className="text-[24px] font-semibold tracking-[-0.02em] text-white">
-              Бичиг Баримтууд
-            </h2>
-            <span className="rounded-full border border-[#233246] bg-[#162130] px-4 py-1 text-[14px] font-medium text-[#94A3B8]">
-              {documents.length} баримт
+        <div className="mt-[18px]">
+          <div className="flex h-[89px] w-[1056px] max-w-full items-center justify-between rounded-[12px] border border-[#E5E7EB] bg-white px-4">
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-[#9BC1FF] bg-[#EEF4FF]">
+                <span className="text-[#2A8CFF] text-sm font-semibold">✈</span>
+              </div>
+              <div className="flex flex-col">
+                <span className="text-[14px] font-semibold text-[#111827]">
+                  {displayName}
+                </span>
+                <span className="text-[12px] text-[#6B7280]">Томилолт</span>
+              </div>
+            </div>
+            <span className="rounded-full border border-[#BFD7FF] bg-[#EAF2FF] px-3 py-1 text-[12px] font-medium text-[#2A8CFF]">
+              Хүлээгдэж буй
             </span>
           </div>
+        </div>
 
-          <div className="flex flex-col divide-y divide-white/10 rounded-xl border border-white/5 bg-[#0B0E14]/40">
+        <section className="mx-auto mt-[16px] flex w-full max-w-264 flex-col gap-4 animate-fade-up">
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex items-center gap-4">
+              <h2 className="text-[18px] font-semibold tracking-[-0.02em] text-[#111827]">
+                Баримт бичиг шинэчлэлт
+              </h2>
+              <span className="rounded-full border border-[#E5E7EB] bg-white px-3 py-1 text-[12px] font-medium text-[#6B7280]">
+                {Math.min(documents.length, 5)} баримт
+              </span>
+            </div>
+            <a
+              href="#"
+              className="text-[13.5px] font-medium hover:text-[#111827] transition-colors"
+            >
+              Бүх баримт бичгүүд →
+            </a>
+          </div>
+
+          <div className="flex flex-col divide-y divide-[#E5E7EB] rounded-2xl border border-[#E5E7EB] mt-2 bg-white">
             {documents.length > 0 ? (
-              documents.map((document) => (
-                <ContractPreview
-                  key={document.id}
-                  document={document}
-                  authToken={authToken}
-                />
-              ))
+              documents
+                .slice(0, 4)
+                .map((document) => (
+                  <ContractPreview
+                    key={document.id}
+                    document={document}
+                    authToken={authToken}
+                  />
+                ))
             ) : (
               <div className="flex flex-col items-center justify-center gap-3 py-10 text-center">
-                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-[18px] border border-[#24374F] bg-[#132131]">
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-[18px] border border-[#E5E7EB] bg-[#F8FAFC]">
                   <FactIcon />
                 </div>
                 <div className="flex flex-col items-center gap-1">
-                  <h3 className="text-[13px] font-semibold text-[#E7EDF5]">
+                  <h3 className="text-[13px] font-semibold text-[#6B7280]">
                     Баримт олдсонгүй
                   </h3>
                 </div>
