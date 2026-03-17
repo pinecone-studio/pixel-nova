@@ -6,9 +6,9 @@ import { useMemo, useState } from "react";
 import { useQuery } from "@apollo/client/react";
 
 import { EpasLogo, NotifIcon } from "@/components/icons";
-import { GET_CONTRACT_REQUESTS, GET_LEAVE_REQUESTS } from "@/graphql/queries";
+import { GET_CONTRACT_REQUESTS } from "@/graphql/queries";
 import { buildGraphQLHeaders } from "@/lib/apollo-client";
-import type { ContractRequest, LeaveRequest } from "@/lib/types";
+import type { ContractRequest } from "@/lib/types";
 
 import { getActiveHrNavItem, HR_NAV_ITEMS } from "./navigation";
 
@@ -26,15 +26,6 @@ export function HrShell({ children }: { children: React.ReactNode }) {
     fetchPolicy: "network-only",
   });
 
-  const { data: leaveData } = useQuery<{
-    leaveRequests: LeaveRequest[];
-  }>(GET_LEAVE_REQUESTS, {
-    context: {
-      headers: buildGraphQLHeaders({ actorRole: "hr" }),
-    },
-    fetchPolicy: "network-only",
-  });
-
   const notifications = useMemo(() => {
     const contracts = (contractData?.contractRequests ?? []).map((row) => ({
       id: `contract-${row.id}`,
@@ -43,20 +34,11 @@ export function HrShell({ children }: { children: React.ReactNode }) {
       status: row.status,
       createdAt: row.createdAt,
     }));
-
-    const leaves = (leaveData?.leaveRequests ?? []).map((row) => ({
-      id: `leave-${row.id}`,
-      title: "Чөлөөний хүсэлт",
-      body: `${row.employee.lastName} ${row.employee.firstName} • ${row.type}`,
-      status: row.status,
-      createdAt: row.createdAt,
-    }));
-
-    return [...contracts, ...leaves].sort(
+    return contracts.sort(
       (a, b) =>
         new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
     );
-  }, [contractData, leaveData]);
+  }, [contractData]);
 
   const unreadCount = notifications.filter((n) => n.status === "pending").length;
 
