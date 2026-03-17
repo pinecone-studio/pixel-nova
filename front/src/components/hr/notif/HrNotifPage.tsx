@@ -3,13 +3,14 @@
 import { useQuery } from "@apollo/client/react";
 import { useMemo, useState } from "react";
 
+import { EmployeeNotifEmptyState } from "@/components/employee-notif/EmployeeNotifEmptyState";
+import { EmployeeNotifPanel } from "@/components/employee-notif/EmployeeNotifPanel";
 import { GET_CONTRACT_REQUESTS } from "@/graphql/queries";
 import { buildGraphQLHeaders } from "@/lib/apollo-client";
 import type { ContractRequest } from "@/lib/types";
 
-import { HrNotifRow } from "./HrNotifRow";
 import { HrNotifStats } from "./HrNotifStats";
-import { mapContractRequestToNotif } from "./hrNotifUtils";
+import { mapContractRequestToEmployeeNotification } from "./hrNotifUtils";
 
 export function HrNotifPage() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -27,14 +28,20 @@ export function HrNotifPage() {
   const items = useMemo(
     () =>
       (data?.contractRequests ?? [])
-        .map(mapContractRequestToNotif)
-        .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()),
+        .map(mapContractRequestToEmployeeNotification)
+        .sort(
+          (a, b) =>
+            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+        ),
     [data],
   );
 
   const totalCount = items.length;
-  const pendingCount = items.filter((item) => item.status === "pending").length;
-  const approvedCount = items.filter((item) => item.status === "approved").length;
+  const sourceRows = data?.contractRequests ?? [];
+  const pendingCount = sourceRows.filter((item) => item.status === "pending").length;
+  const approvedCount = sourceRows.filter(
+    (item) => item.status === "approved",
+  ).length;
 
   return (
     <div className="min-h-screen bg-[#F4F5F7] px-6 pb-16 pt-8 text-slate-900">
@@ -81,22 +88,15 @@ export function HrNotifPage() {
                 ))}
               </div>
             ) : items.length === 0 ? (
-              <div className="flex min-h-[260px] items-center justify-center text-sm text-slate-400">
-                Одоогоор мэдэгдэл алга байна.
-              </div>
+              <EmployeeNotifEmptyState />
             ) : (
-              items.map((item) => (
-                <HrNotifRow
-                  key={item.id}
-                  item={item}
-                  expanded={selectedId === item.id}
-                  onSelect={() =>
-                    setSelectedId((current) =>
-                      current === item.id ? null : item.id,
-                    )
-                  }
-                />
-              ))
+              <EmployeeNotifPanel
+                notifications={items}
+                selectedId={selectedId}
+                onSelect={(item) =>
+                  setSelectedId((current) => (current === item.id ? null : item.id))
+                }
+              />
             )}
           </div>
         </section>

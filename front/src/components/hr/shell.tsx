@@ -5,14 +5,14 @@ import { usePathname } from "next/navigation";
 import { useMemo, useState } from "react";
 import { useQuery } from "@apollo/client/react";
 
+import { EmployeeNotifDrawer } from "@/components/employee-notif/EmployeeNotifDrawer";
 import { EpasLogo, NotifIcon } from "@/components/icons";
 import { GET_CONTRACT_REQUESTS } from "@/graphql/queries";
 import { buildGraphQLHeaders } from "@/lib/apollo-client";
 import type { ContractRequest } from "@/lib/types";
 
 import { getActiveHrNavItem, HR_NAV_ITEMS } from "./navigation";
-import { HrShellNotifRow } from "./notif/HrShellNotifRow";
-import { mapContractRequestToNotif } from "./notif/hrNotifUtils";
+import { mapContractRequestToEmployeeNotification } from "./notif/hrNotifUtils";
 
 export function HrShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -20,7 +20,7 @@ export function HrShell({ children }: { children: React.ReactNode }) {
   const [notifOpen, setNotifOpen] = useState(false);
   const [selectedNotifId, setSelectedNotifId] = useState<string | null>(null);
 
-  const { data: contractData } = useQuery<{
+  const { data: contractData, loading: notificationsLoading } = useQuery<{
     contractRequests: ContractRequest[];
   }>(GET_CONTRACT_REQUESTS, {
     context: {
@@ -31,11 +31,14 @@ export function HrShell({ children }: { children: React.ReactNode }) {
 
   const notifications = useMemo(() => {
     return (contractData?.contractRequests ?? [])
-      .map(mapContractRequestToNotif)
-      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+      .map(mapContractRequestToEmployeeNotification)
+      .sort(
+        (a, b) =>
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+      );
   }, [contractData]);
 
-  const unreadCount = notifications.filter((n) => n.status === "pending").length;
+  const unreadCount = notifications.filter((n) => n.status === "unread").length;
 
   return (
     <div className="h-screen overflow-hidden bg-slate-50">
@@ -173,6 +176,24 @@ export function HrShell({ children }: { children: React.ReactNode }) {
           </div>
         </main>
       </div>
+
+      <EmployeeNotifDrawer
+        open={notifOpen}
+        loading={notificationsLoading}
+        notifications={notifications}
+        selectedId={selectedNotifId}
+        onOpenChange={(nextOpen) => {
+          setNotifOpen(nextOpen);
+          if (!nextOpen) {
+            setSelectedNotifId(null);
+          }
+        }}
+        onSelect={(notification) => {
+          setSelectedNotifId((current) =>
+            current === notification.id ? null : notification.id,
+          );
+        }}
+      />
     </div>
   );
 }

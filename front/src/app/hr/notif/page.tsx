@@ -1,41 +1,4 @@
-"use client";
-
-import { useMutation, useQuery } from "@apollo/client/react";
-import { useMemo, useState } from "react";
-import { FiEdit2, FiPlus, FiSend, FiX } from "react-icons/fi";
-
-import {
-  AcepptedIcon,
-  AnnouncementIcon,
-  CalIcon,
-} from "@/components/icons";
-import {
-  CREATE_ANNOUNCEMENT_DRAFT,
-  PUBLISH_ANNOUNCEMENT,
-  UPDATE_ANNOUNCEMENT_DRAFT,
-} from "@/graphql/mutations";
-import { GET_ANNOUNCEMENTS } from "@/graphql/queries";
-import { buildGraphQLHeaders } from "@/lib/apollo-client";
-import type { Announcement } from "@/lib/types";
-import { Clock, EyeIcon, UsersIcon } from "lucide-react";
-
-type DraftState = {
-  id?: string;
-  title: string;
-  body: string;
-  audience: string;
-};
-
-const STATUS_LABEL: Record<string, string> = {
-  draft: "Ноорог",
-  published: "Нийтлэгдсэн",
-};
-
-const AUDIENCE_LABEL: Record<string, string> = {
-  all: "Бүх ажилчид",
-  hr: "HR хэлтэс",
-  employees: "Зөвхөн ажилтнууд",
-};
+import { HrNotifPage } from "@/components/hr/notif/HrNotifPage";
 
 export default function NotificationsPage() {
   const [drawerOpen, setDrawerOpen] = useState(false);
