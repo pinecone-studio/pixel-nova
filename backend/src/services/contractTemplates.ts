@@ -82,5 +82,5 @@ export function buildContractActionConfig(templateIds: ContractTemplateId[]) {
     requiredEmployeeFields: Array.from(requiredFields),
     recipients: ["hr_team"],
     documents,
-  } as NormalizedActionConfig;
+  } as unknown as NormalizedActionConfig;
 }
