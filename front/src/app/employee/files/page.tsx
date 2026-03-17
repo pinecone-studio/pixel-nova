@@ -11,7 +11,7 @@ import type { Document, DocumentContent, Employee } from "@/lib/types";
 const TOKEN_STORAGE_KEY = "epas_auth_token";
 
 const FILTER_OPTIONS = [
-  { value: "all", label: "Бүгд" },
+  { value: "all", label: "Сонгоно уу" },
   { value: "Баримт бичиг", label: "Баримт бичиг" },
   { value: "Тодорхойлолт", label: "Тодорхойлолт" },
   { value: "Бүх үе шат", label: "Бүх үе шат" },
@@ -75,9 +75,9 @@ function CustomDropdown({
           height: 38,
           padding: "0 14px",
           background: "white",
-          border: "1px solid rgba(255,255,255,0.1)",
+          border: "1px solid #e5e7eb",
           borderRadius: 10,
-          color: "white",
+          color: "black",
           fontSize: 13,
           cursor: "pointer",
           fontFamily: "inherit",
@@ -112,7 +112,7 @@ function CustomDropdown({
             right: 0,
             minWidth: 160,
             background: "white",
-            border: "1px solid rgba(255,255,255,0.1)",
+            border: "1px solid #e5e7eb",
             borderRadius: 10,
             overflow: "hidden",
             zIndex: 50,
@@ -129,10 +129,10 @@ function CustomDropdown({
               style={{
                 width: "100%",
                 padding: "10px 14px",
-                background: filter === value ? "white" : "transparent",
+                background: filter === value ? "#f9f9f9" : "white",
                 border: "none",
-                borderBottom: "1px solid rgba(255,255,255,0.05)",
-                color: filter === value ? "black" : "rgba(148,163,184,0.7)",
+                borderBottom: "1px solid #f1f1f1",
+                color: "black",
                 fontSize: 13,
                 textAlign: "left",
                 cursor: "pointer",
@@ -167,7 +167,7 @@ function ActionBtn({
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       style={{
-        color: hovered ? "rgba(148,163,184,0.85)" : "rgba(148,163,184,0.4)",
+        color: hovered ? "#6b7280" : "#9ca3af",
         cursor: "pointer",
         transition: "color 0.12s",
         display: "flex",
@@ -249,8 +249,8 @@ function DocRow({
           alignItems: "center",
           gap: 14,
           padding: "14px 18px",
-          borderBottom: isLast ? "none" : "1px solid rgba(255,255,255,0.06)",
-          background: hovered ? "rgba(255,255,255,0.04)" : "transparent",
+          borderBottom: isLast ? "none" : "1px solid #e5e7eb",
+          background: hovered ? "#f9f9f9" : "white",
           transition: "background 0.12s",
           cursor: "default",
         }}
@@ -259,7 +259,7 @@ function DocRow({
           style={{
             width: 36,
             height: 36,
-            background: "white",
+            background: "#f3f4f6",
             borderRadius: 8,
             display: "flex",
             alignItems: "center",
@@ -283,13 +283,7 @@ function DocRow({
           <div style={{ color: "black", fontSize: 14, fontWeight: 500 }}>
             {document.documentName}
           </div>
-          <div
-            style={{
-              color: "black",
-              fontSize: 12,
-              marginTop: 2,
-            }}
-          >
+          <div style={{ color: "black", fontSize: 12, marginTop: 2 }}>
             {document.action}
           </div>
         </div>
@@ -342,6 +336,7 @@ function DocRow({
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
+            background: "rgba(255,255,255,0.95)",
           }}
         >
           <button
@@ -350,7 +345,7 @@ function DocRow({
             style={{
               position: "absolute",
               inset: 0,
-              background: "black",
+              background: "transparent",
               border: "none",
               cursor: "pointer",
             }}
@@ -362,11 +357,11 @@ function DocRow({
               width: 900,
               maxWidth: "92vw",
               height: "82vh",
-              background: "black",
-              border: "1px solid rgba(255,255,255,0.10)",
+              background: "white",
+              border: "1px solid #e5e7eb",
               borderRadius: 16,
               overflow: "hidden",
-              boxShadow: "0 25px 60px rgba(0,0,0,0.6)",
+              boxShadow: "0 25px 60px rgba(0,0,0,0.15)",
             }}
           >
             <div
@@ -375,13 +370,13 @@ function DocRow({
                 alignItems: "center",
                 justifyContent: "space-between",
                 padding: "16px 20px",
-                borderBottom: "1px solid rgba(255,255,255,0.10)",
+                borderBottom: "1px solid #e5e7eb",
               }}
             >
               <div>
                 <p
                   style={{
-                    color: "fff",
+                    color: "black",
                     fontSize: 14,
                     fontWeight: 600,
                     margin: 0,
@@ -391,7 +386,7 @@ function DocRow({
                 </p>
                 <p
                   style={{
-                    color: "rgba(148,163,184,0.5)",
+                    color: "#6b7280",
                     fontSize: 12,
                     marginTop: 2,
                   }}
@@ -410,7 +405,7 @@ function DocRow({
                   alignItems: "center",
                   justifyContent: "center",
                   color: "black",
-                  background: "white",
+                  background: "#f3f4f6",
                   border: "none",
                   cursor: "pointer",
                   fontSize: 18,
@@ -433,11 +428,11 @@ function DocRow({
                     width: "100%",
                     height: "100%",
                     borderRadius: 10,
-                    border: "1px solid rgba(255,255,255,0.10)",
+                    border: "1px solid #e5e7eb",
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
-                    color: "rgba(148,163,184,0.5)",
+                    color: "#9ca3af",
                     fontSize: 14,
                   }}
                 >
@@ -449,8 +444,8 @@ function DocRow({
                     width: "100%",
                     height: "100%",
                     borderRadius: 10,
-                    border: "1px solid rgba(239,68,68,0.2)",
-                    background: "white",
+                    border: "1px solid #fca5a5",
+                    background: "#fef2f2",
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
@@ -467,7 +462,7 @@ function DocRow({
                     width: "100%",
                     height: "100%",
                     borderRadius: 10,
-                    border: "1px solid rgba(255,255,255,0.10)",
+                    border: "1px solid #e5e7eb",
                     background: "#fff",
                   }}
                   srcDoc={content.content}
@@ -479,8 +474,8 @@ function DocRow({
                     width: "100%",
                     height: "100%",
                     borderRadius: 10,
-                    border: "1px solid rgba(255,255,255,0.10)",
-                    background: "#f4f4f7",
+                    border: "1px solid #e5e7eb",
+                    background: "#fff",
                   }}
                   src={previewUrl}
                 />
@@ -490,11 +485,11 @@ function DocRow({
                     width: "100%",
                     height: "100%",
                     borderRadius: 10,
-                    border: "1px solid rgba(255,255,255,0.10)",
+                    border: "1px solid #e5e7eb",
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
-                    color: "rgba(148,163,184,0.5)",
+                    color: "#9ca3af",
                     fontSize: 14,
                   }}
                 >
@@ -513,11 +508,11 @@ function DocRow({
 
 const emptyBoxStyle: React.CSSProperties = {
   borderRadius: 14,
-  border: "1px solid rgba(255,255,255,0.08)",
+  border: "1px solid #e5e7eb",
   background: "white",
   padding: "48px 24px",
   textAlign: "center",
-  color: "rgba(148,163,184,0.5)",
+  color: "#9ca3af",
   fontSize: 14,
 };
 
@@ -614,21 +609,13 @@ export default function FilesPage() {
           marginBottom: 28,
         }}
       >
-        <p
-          style={{
-            color: "black",
-            fontSize: 22,
-            fontWeight: 600,
-            letterSpacing: "-0.3px",
-            margin: 0,
-          }}
-        >
+        <p style={{ color: "black", fontSize: 22, fontWeight: 600, margin: 0 }}>
           Миний баримтууд
         </p>
         <p style={{ color: "black", fontSize: 13, margin: 0 }}>
           {employee
             ? `${employee.lastName} ${employee.firstName} ажилтны баримтууд.`
-            : "Таны бүх хөдөлмөрийн баримт бичгийг эндээс харах болон татах боломжтой."}
+            : "Таны бүх баримт бичгийг эндээс харах болон татах боломжтой."}
         </p>
       </div>
 
@@ -641,7 +628,7 @@ export default function FilesPage() {
               left: 11,
               top: "50%",
               transform: "translateY(-50%)",
-              color: "white",
+              color: "gray",
               pointerEvents: "none",
               display: "flex",
             }}
@@ -650,7 +637,7 @@ export default function FilesPage() {
               width="13"
               height="13"
               fill="none"
-              stroke="black"
+              stroke="gray"
               strokeWidth="2"
               viewBox="0 0 24 24"
             >
@@ -667,8 +654,8 @@ export default function FilesPage() {
               width: "100%",
               height: 38,
               padding: "0 12px 0 34px",
-              background: "rgba(255,255,255,0.05)",
-              border: "1px solid black",
+              background: "white",
+              border: "1px solid #ccc",
               borderRadius: 10,
               color: "black",
               fontSize: 13,
@@ -679,34 +666,6 @@ export default function FilesPage() {
         <CustomDropdown filter={filter} setFilter={setFilter} />
       </div>
 
-      {/* Section Label */}
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: 8,
-          marginBottom: 10,
-        }}
-      >
-        <p
-          style={{ color: "#cbd5e1", fontSize: 13, fontWeight: 500, margin: 0 }}
-        >
-          Бичиг Баримтууд
-        </p>
-        <span
-          style={{
-            padding: "2px 8px",
-            background: "black",
-            border: "1px solid rgba(255,255,255,0.1)",
-            borderRadius: 5,
-            fontSize: 11,
-            color: "rgba(148,163,184,0.5)",
-          }}
-        >
-          {filteredDocuments.length} баримт
-        </span>
-      </div>
-
       {/* Document List */}
       {loading ? (
         <div style={emptyBoxStyle}>Баримтуудыг ачаалж байна...</div>
@@ -714,8 +673,8 @@ export default function FilesPage() {
         <div
           style={{
             ...emptyBoxStyle,
-            border: "1px solid rgba(239,68,68,0.2)",
-            background: "rgba(239,68,68,0.05)",
+            border: "1px solid #fca5a5",
+            background: "#fef2f2",
             color: "#f87171",
           }}
         >
@@ -728,7 +687,7 @@ export default function FilesPage() {
           style={{
             borderRadius: 14,
             overflow: "hidden",
-            border: "1px solid rgba(255,255,255,0.08)",
+            border: "1px solid #e5e7eb",
             background: "white",
           }}
         >
