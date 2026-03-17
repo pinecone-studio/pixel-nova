@@ -8,52 +8,15 @@ import {
   GET_AUDIT_LOGS,
   GET_DOCUMENTS,
   GET_EMPLOYEES,
-  GET_LEAVE_REQUESTS,
 } from "@/graphql/queries";
-import type { AuditLog, Document, Employee, LeaveRequest } from "@/lib/types";
+import type { AuditLog, Document, Employee } from "@/lib/types";
 
 export type DashboardStats = {
   totalEmployees: number;
-  pendingRequests: number;
-  approvedRequests: number;
   departmentCount: number;
   documentCount: number;
-  employeesOnLeave: number;
-  approvalRate: number;
-  urgentCount: number;
   monthlyGrowth: number;
 };
-
-export type DashboardRequest = LeaveRequest & {
-  urgent: boolean;
-  elapsedLabel: string;
-  color: string;
-};
-
-const avatarColors = [
-  "bg-red-500",
-  "bg-blue-500",
-  "bg-orange-500",
-  "bg-gradient-to-br from-purple-500 to-pink-500",
-  "bg-gradient-to-br from-teal-400 to-emerald-500",
-  "bg-cyan-500",
-];
-
-function formatElapsed(value: string) {
-  const diff = Date.now() - new Date(value).getTime();
-  const hours = Math.max(1, Math.floor(diff / (1000 * 60 * 60)));
-  if (hours < 24) return `${hours} цагийн өмнө`;
-  const days = Math.floor(hours / 24);
-  if (days < 30) return `${days} өдрийн өмнө`;
-  const months = Math.floor(days / 30);
-  return `${months} сарын өмнө`;
-}
-
-function getApprovalRate(requests: LeaveRequest[]) {
-  if (requests.length === 0) return 0;
-  const approved = requests.filter((request) => request.status === "approved").length;
-  return Math.round((approved / requests.length) * 100);
-}
 
 function getMonthlyGrowth(employees: Employee[]) {
   if (employees.length === 0) return 0;
@@ -70,27 +33,6 @@ function getMonthlyGrowth(employees: Employee[]) {
 
   if (previousNew === 0) return currentNew > 0 ? 100 : 0;
   return Number((((currentNew - previousNew) / previousNew) * 100).toFixed(1));
-}
-
-function isUrgentRequest(request: LeaveRequest) {
-  const ageHours = (Date.now() - new Date(request.createdAt).getTime()) / (1000 * 60 * 60);
-  return request.status === "pending" && ageHours >= 24;
-}
-
-function buildDashboardRequests(requests: LeaveRequest[]): DashboardRequest[] {
-  return requests
-    .filter((request) => request.status === "pending")
-    .sort(
-      (left, right) =>
-        new Date(right.createdAt).getTime() - new Date(left.createdAt).getTime(),
-    )
-    .slice(0, 5)
-    .map((request, index) => ({
-      ...request,
-      urgent: isUrgentRequest(request),
-      elapsedLabel: formatElapsed(request.createdAt),
-      color: avatarColors[index % avatarColors.length],
-    }));
 }
 
 export function useHrDashboardData() {
@@ -113,14 +55,6 @@ export function useHrDashboardData() {
     fetchPolicy: "cache-and-network",
   });
 
-  const { data: leaveRequestsData, loading: leaveRequestsLoading } = useQuery<{
-    leaveRequests: LeaveRequest[];
-  }>(GET_LEAVE_REQUESTS, {
-    variables: { status: null },
-    context: queryContext,
-    fetchPolicy: "cache-and-network",
-  });
-
   const { data: auditLogsData, loading: auditLogsLoading } = useQuery<{
     auditLogs: AuditLog[];
   }>(GET_AUDIT_LOGS, {
@@ -130,13 +64,8 @@ export function useHrDashboardData() {
   });
 
   const employees = useMemo(() => employeesData?.employees ?? [], [employeesData]);
-  const requests = useMemo(
-    () => leaveRequestsData?.leaveRequests ?? [],
-    [leaveRequestsData],
-  );
   const auditLogs = useMemo(() => auditLogsData?.auditLogs ?? [], [auditLogsData]);
-  const loading =
-    employeesLoading || leaveRequestsLoading || auditLogsLoading || documentsLoading;
+  const loading = employeesLoading || auditLogsLoading || documentsLoading;
 
   useEffect(() => {
     let cancelled = false;
@@ -194,30 +123,13 @@ export function useHrDashboardData() {
       employees.map((employee) => employee.department).filter(Boolean),
     ).size;
 
-    const pendingRequests = requests.filter((request) => request.status === "pending").length;
-    const approvedRequests = requests.filter((request) => request.status === "approved").length;
-    const onLeaveStatuses = new Set(["Чөлөөтэй", "Амралттай", "Түр чөлөөтэй"]);
-    const employeesOnLeave = employees.filter((employee) =>
-      onLeaveStatuses.has(employee.status),
-    ).length;
-
     return {
       totalEmployees: employees.length,
-      pendingRequests,
-      approvedRequests,
       departmentCount: departments,
       documentCount,
-      employeesOnLeave,
-      approvalRate: getApprovalRate(requests),
-      urgentCount: requests.filter(isUrgentRequest).length,
       monthlyGrowth: getMonthlyGrowth(employees),
     };
-  }, [documentCount, employees, requests]);
-
-  const dashboardRequests = useMemo(
-    () => buildDashboardRequests(requests),
-    [requests],
-  );
+  }, [documentCount, employees]);
 
   const barData = useMemo(() => {
     const months = Array.from({ length: 12 }, (_, index) => index);
@@ -236,7 +148,6 @@ export function useHrDashboardData() {
   return {
     auditCount: auditLogs.length,
     barData,
-    dashboardRequests,
     loading,
     stats,
   };

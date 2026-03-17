@@ -64,7 +64,6 @@ export function WorkersComponent() {
   );
 
   const totalActive = employees.filter((employee) => employee.status === "Ирсэн").length;
-  const totalOnLeave = employees.filter((employee) => employee.status === "Чөлөөтэй").length;
   const totalNewThisMonth = employees.filter((employee) => {
     const hireDate = new Date(employee.hireDate);
     const now = new Date();
@@ -135,7 +134,6 @@ export function WorkersComponent() {
         totalEmployees={employees.length}
         totalActive={totalActive}
         totalNewThisMonth={totalNewThisMonth}
-        totalOnLeave={totalOnLeave}
       />
 
       <WorkersToolbar search={search} onSearchChange={setSearch} />
