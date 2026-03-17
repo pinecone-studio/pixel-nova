@@ -49,12 +49,6 @@ export {
   markEmployeeNotificationRead,
 } from "./employeeNotification";
 export {
-  insertLeaveRequest,
-  getLeaveRequests,
-  getLeaveRequestById,
-  updateLeaveRequestStatus,
-} from "./leaveRequest";
-export {
   insertContractRequest,
   getContractRequests,
   getContractRequestById,
