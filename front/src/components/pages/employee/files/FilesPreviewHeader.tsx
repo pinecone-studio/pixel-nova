@@ -13,15 +13,16 @@ export function FilesPreviewHeader({
         display: "flex",
         alignItems: "center",
         justifyContent: "space-between",
-        padding: "16px 20px",
-        borderBottom: "1px solid rgba(255,255,255,0.10)",
+        padding: "22px 24px 18px",
+        borderBottom: "1px solid #E5E7EB",
+        background: "#FFFFFF",
       }}
     >
       <div>
         <p
           style={{
-            color: "#fff",
-            fontSize: 14,
+            color: "#111827",
+            fontSize: 18,
             fontWeight: 600,
             margin: 0,
           }}
@@ -30,9 +31,9 @@ export function FilesPreviewHeader({
         </p>
         <p
           style={{
-            color: "rgba(148,163,184,0.5)",
-            fontSize: 12,
-            marginTop: 2,
+            color: "#64748B",
+            fontSize: 14,
+            marginTop: 6,
           }}
         >
           {document.documentName}
@@ -42,17 +43,17 @@ export function FilesPreviewHeader({
         type="button"
         onClick={onClose}
         style={{
-          width: 32,
-          height: 32,
-          borderRadius: 8,
+          width: 40,
+          height: 40,
+          borderRadius: 12,
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          color: "rgba(148,163,184,0.6)",
-          background: "transparent",
-          border: "none",
+          color: "#111827",
+          background: "#F8FAFC",
+          border: "1px solid #E5E7EB",
           cursor: "pointer",
-          fontSize: 18,
+          fontSize: 22,
         }}
       >
         ✕

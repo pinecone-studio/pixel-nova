@@ -20,7 +20,7 @@ export function FilesActionButton({
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       style={{
-        color: hovered ? "rgba(148,163,184,0.85)" : "rgba(148,163,184,0.4)",
+        color: hovered ? "#111827" : "#9CA3AF",
         cursor: "pointer",
         transition: "color 0.12s",
         display: "flex",

@@ -49,7 +49,7 @@ export default function EmployeeFilesPage() {
     <div
       style={{
         minHeight: "100vh",
-        background: "#0a0b0f",
+        background: "#F5F7FB",
         padding: "32px 40px",
         fontFamily: "inherit",
       }}

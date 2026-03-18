@@ -28,7 +28,7 @@ export default function RootLayout({
     <html lang="mn" className={cn("font-sans", manrope.variable)}>
       <body>
         <ApolloAppProvider>
-          <div className="min-h-screen bg-[#0A0A0F]">
+          <div className="min-h-screen bg-[#F5F7FB]">
             <Navbar />
             {children}
             <FooterSection />

@@ -9,18 +9,18 @@ export function FilesSectionHeader({ count }: { count: number }) {
       }}
     >
       <p
-        style={{ color: "#cbd5e1", fontSize: 13, fontWeight: 500, margin: 0 }}
+        style={{ color: "#111827", fontSize: 24, fontWeight: 700, margin: 0 }}
       >
         Бичиг Баримтууд
       </p>
       <span
         style={{
-          padding: "2px 8px",
-          background: "rgba(255,255,255,0.05)",
-          border: "1px solid rgba(255,255,255,0.1)",
-          borderRadius: 5,
-          fontSize: 11,
-          color: "rgba(148,163,184,0.5)",
+          padding: "6px 14px",
+          background: "white",
+          border: "1px solid #E5E7EB",
+          borderRadius: 999,
+          fontSize: 14,
+          color: "#6B7280",
         }}
       >
         {count} баримт

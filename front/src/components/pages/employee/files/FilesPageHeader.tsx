@@ -14,16 +14,16 @@ export function FilesPageHeader({
     >
       <p
         style={{
-          color: "#fff",
-          fontSize: 22,
-          fontWeight: 600,
-          letterSpacing: "-0.3px",
+          color: "#111827",
+          fontSize: 30,
+          fontWeight: 700,
+          letterSpacing: "-0.02em",
           margin: 0,
         }}
       >
         Миний баримтууд
       </p>
-      <p style={{ color: "rgba(148,163,184,0.6)", fontSize: 13, margin: 0 }}>
+      <p style={{ color: "#6B7280", fontSize: 16, margin: 0 }}>
         {employeeName
           ? `${employeeName} ажилтны баримтууд.`
           : "Таны бүх хөдөлмөрийн баримт бичгийг эндээс харах болон татах боломжтой."}

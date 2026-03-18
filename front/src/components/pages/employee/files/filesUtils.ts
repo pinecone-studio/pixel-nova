@@ -24,10 +24,10 @@ export function buildDataUrl(content: DocumentContent) {
 
 export const emptyBoxStyle: CSSProperties = {
   borderRadius: 14,
-  border: "1px solid rgba(255,255,255,0.08)",
-  background: "rgba(255,255,255,0.02)",
+  border: "1px solid #E5E7EB",
+  background: "white",
   padding: "48px 24px",
   textAlign: "center",
-  color: "rgba(148,163,184,0.5)",
+  color: "#6B7280",
   fontSize: 14,
 };

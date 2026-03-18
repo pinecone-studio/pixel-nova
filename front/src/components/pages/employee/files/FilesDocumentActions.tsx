@@ -41,7 +41,7 @@ export function FilesDocumentActions({
       </FilesActionButton>
       <span
         style={{
-          color: "rgba(148,163,184,0.35)",
+          color: "#6B7280",
           fontSize: 12,
           minWidth: 80,
           textAlign: "right",
