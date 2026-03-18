@@ -27,11 +27,11 @@ const navItems = [
     label: "Аудит",
     href: "/employee/audit",
   },
-  {
-    icon: <RxAvatar className="w-4 h-4 text-current" />,
-    label: "Профайл",
-    href: "/profile",
-  },
+  // {
+  //   icon: <RxAvatar className="w-4 h-4 text-current" />,
+  //   label: "Профайл",
+  //   href: "/profile",
+  // },
 ];
 
 function isActivePath(pathname: string, href: string) {
@@ -124,16 +124,17 @@ export function Navbar() {
 
         <div className="flex w-[260px] items-center justify-end gap-2">
           <EmployeeNotifDropdown />
-
-          <button className="group flex h-10 cursor-pointer items-center gap-2 rounded-xl px-3 py-2 text-[#111827] transition-colors hover:bg-[#F7F7F7]">
-            <div className="flex h-7 w-7 items-center justify-center rounded-full bg-[#1F2126] text-xs font-bold text-white shadow-[0px_0px_0px_2px_rgba(0,192,168,0.2)]">
-              {avatarLetter}
-            </div>
-            <span className="text-sm font-semibold tracking-[-0.084px]">
-              {displayName}
-            </span>
-            <DownIcon className="text-[#111827]" />
-          </button>
+          <Link href={"/profile"}>
+            <button className="group flex h-10 cursor-pointer items-center gap-2 rounded-xl px-3 py-2 text-[#111827] transition-colors hover:bg-[#F7F7F7]">
+              <div className="flex h-7 w-7 items-center justify-center rounded-full bg-[#1F2126] text-xs font-bold text-white shadow-[0px_0px_0px_2px_rgba(0,192,168,0.2)]">
+                {avatarLetter}
+              </div>
+              <span className="text-sm font-semibold tracking-[-0.084px]">
+                {displayName}
+              </span>
+              <DownIcon className="text-[#111827]" />
+            </button>
+          </Link>
         </div>
       </div>
     </nav>

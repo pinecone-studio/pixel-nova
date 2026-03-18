@@ -24,17 +24,18 @@ import type {
   EmployeeSignatureStatus,
   LeaveRequest,
 } from "@/lib/types";
+import { Planeicon } from "./icons";
 
 const TOKEN_KEY = "epas_auth_token";
 
 const DIALOG_BG = "bg-[#030810]";
 const DIALOG_BORDER = "border-[#1a2035]";
 const INPUT_CLASS = `w-full bg-[#040d18] border border-[#1a2035] rounded-lg p-2.5 text-sm text-gray-300 focus:outline-none focus:border-[#00CC99]/40 appearance-none`;
-const TEXTAREA_CLASS = `w-full bg-[#040d18] border border-[#1a2035] rounded-lg p-3 text-sm text-gray-300 placeholder-gray-600 resize-none focus:outline-none focus:border-[#00CC99]/40`;
+const TEXTAREA_CLASS = `w-full bg-[#040d18] h-20 border border-[#1a2035] rounded-lg text-sm text-gray-300 placeholder-gray-600 resize-none focus:outline-none focus:border-[#00CC99]/40`;
 const LIGHT_DIALOG_BG = "bg-white";
 const LIGHT_DIALOG_BORDER = "border-[#E5E7EB]";
 const LIGHT_INPUT_CLASS = `w-full bg-white border border-[#E5E7EB] rounded-lg p-2.5 text-sm text-[#111827] focus:outline-none focus:border-[#111827]/30 appearance-none`;
-const LIGHT_TEXTAREA_CLASS = `w-full bg-white border border-[#E5E7EB] rounded-lg p-3 text-sm text-[#111827] placeholder-[#9CA3AF] resize-none focus:outline-none focus:border-[#111827]/30`;
+const LIGHT_TEXTAREA_CLASS = `w-full mt-[10px] h-[74px] bg-white border border-[#E5E7EB] rounded-lg p-3 text-sm text-[#111827] placeholder-[#9CA3AF] resize-none focus:outline-none focus:border-[#111827]/30`;
 const MAX_CONTRACT_SELECTION = 3;
 const PROFILE_REQUIRED_FIELDS: Array<{
   key: keyof EmployeeDocumentProfile;
@@ -82,9 +83,9 @@ function CloseBtn({ onClick }: { onClick: () => void }) {
   return (
     <button
       onClick={onClick}
-      className="text-gray-500 hover:text-white transition-colors"
+      className="text-[#000000] w-6 h-6  hover:text-white transition-colors"
     >
-      <FiX className="w-5 h-5" />
+      <FiX className="w-6 h-6" />
     </button>
   );
 }
@@ -100,10 +101,12 @@ function SendBtn({
     <button
       onClick={onClick}
       disabled={disabled}
-      className="bg-[#111827] hover:bg-[#0b1220] disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-medium px-5 py-2.5 rounded-lg flex items-center gap-2 transition-colors"
+      className="bg-[#111827] hover:bg-[#0b1220] disabled:opacity-50 justify-evenly disabled:cursor-not-allowed text-white text-4 font-medium w-[108px] rounded-lg flex items-center gap-2 transition-colors"
     >
-      <FiSend className="w-4 h-4" />
-      {disabled ? "Илгээж байна..." : "Илгээх"}
+      <FiSend className="w-[18px] h-[18px]" />
+      <span className="flex h-5 w-[54px] items-center justify-center">
+        {disabled ? "Илгээж байна..." : "Илгээх"}
+      </span>
     </button>
   );
 }
@@ -112,7 +115,7 @@ function BackBtn({ onClick }: { onClick: () => void }) {
   return (
     <button
       onClick={onClick}
-      className="border border-[#1a2035] px-5 py-2.5 rounded-lg text-sm text-gray-400 hover:bg-white/5 hover:text-white transition-colors"
+      className="border border-[#1a2035] h-9 w-[78px] rounded-lg text-sm text-gray-400 hover:bg-white/5 hover:text-white transition-colors"
     >
       Буцах
     </button>
@@ -139,14 +142,17 @@ function SelectField({
   inputClassName?: string;
 }) {
   return (
-    <div className="flex flex-col gap-1.5">
-      <label htmlFor={id} className={labelClassName}>
+    <div className="flex h-[69px] w-[477px] flex-col justify-between mt-9">
+      <label
+        htmlFor={id}
+        className={`${labelClassName} w-full h-[24px] text-[18px]`}
+      >
         {label}
       </label>
-      <div className="relative">
+      <div className="relative h-[35px]">
         <select
           id={id}
-          className={inputClassName}
+          className={`${inputClassName} text-[16px]`}
           value={value}
           onChange={(e) => onChange?.(e.target.value)}
         >
@@ -157,7 +163,7 @@ function SelectField({
             </option>
           ))}
         </select>
-        <BiChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 pointer-events-none" />
+        <BiChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 pointer-events-none" />
       </div>
     </div>
   );
@@ -174,36 +180,42 @@ function UploadArea({
 }) {
   const isLight = variant === "light";
   return (
-    <div className="flex flex-col gap-1.5">
+    <div className="flex flex-col gap-1.5 mt-9 w-[477px] h-[202px] justify-between">
       <span
-        className={`text-sm font-medium ${
-          isLight ? "text-[#111827]" : "text-white"
+        className={`text-[18px] h-6 font-medium flex items-center ${
+          isLight ? "text-[#000000]" : "text-white"
         }`}
       >
         {label}
       </span>
       <div
-        className={`border border-dashed rounded-xl p-7 flex flex-col items-center gap-2 transition-colors cursor-pointer ${
+        className={`border border-dashed rounded-xl w-[477px] h-[168px] flex flex-col items-center justify-evenly mt-[10px] transition-colors cursor-pointer ${
           isLight
             ? "border-[#E5E7EB] hover:border-[#111827]/20"
             : "border-[#1a2035] hover:border-[#00CC99]/30"
         }`}
       >
         <FiUploadCloud
-          className={`w-8 h-8 ${isLight ? "text-[#9CA3AF]" : "text-gray-500"}`}
+          className={`w-6 h-6 ${isLight ? "text-[#000000]" : "text-gray-500"}`}
         />
-        <p
-          className={`text-sm font-medium ${
-            isLight ? "text-[#111827]" : "text-white"
-          }`}
-        >
-          {subtitle ?? "Файл хавсаргах (заавал биш)"}
-        </p>
-        <p className={`text-xs ${isLight ? "text-[#9CA3AF]" : "text-gray-500"}`}>
-          JPEG, PNG, PDF, MP4 төрлүүд — 50MB хүртэл
-        </p>
+        <div className="h-10 w-[445px] flex flex-col items-center">
+          {" "}
+          <p
+            className={`text-4 h-5 font-medium flex items-center ${
+              isLight ? "text-[#111827]" : "text-white"
+            }`}
+          >
+            {subtitle ?? "Файл хавсаргах (заавал биш)"}
+          </p>
+          <p
+            className={`text-3 h-5 flex items-center ${isLight ? "text-[#9CA3AF]" : "text-gray-500"}`}
+          >
+            JPEG, PNG, PDF, MP4 төрлүүд — 50MB хүртэл
+          </p>
+        </div>
+
         <button
-          className={`mt-1 border text-xs px-4 py-1.5 rounded-lg transition-colors ${
+          className={` border text-[14px] h-8 w-[105px]  rounded-lg transition-colors ${
             isLight
               ? "border-[#E5E7EB] text-[#6B7280] hover:bg-[#F3F4F6] hover:text-[#111827]"
               : "border-[#1a2035] text-gray-300 hover:bg-white/5"
@@ -606,7 +618,7 @@ export const Request = ({ employee }: { employee?: Employee }) => {
     //   iconBg: "border-[#FFE7A3] bg-[#FFF7E0]",
     // },
     {
-      icon: <BiFile className="w-5 h-5 text-[#2A8CFF]" />,
+      icon: <Planeicon />,
       title: "Томилолт",
       desc: "Томилолт авах хүсэлт",
       iconBg: "border-[#D7E3FF] bg-[#EEF4FF]",
@@ -621,50 +633,46 @@ export const Request = ({ employee }: { employee?: Employee }) => {
 
   return (
     <div className="flex w-[1056px] max-w-full flex-col gap-5">
-      <div className="flex h-[62px] items-center justify-between">
-        <div className="flex flex-col gap-2">
-          <h2 className="h-[30px] text-3xl font-bold text-[#111827]">
+      <div className="flex h-[46px] items-center justify-between">
+        <div className="flex flex-col gap-2 ">
+          <h2 className="h-[24px] w-[190px] text-[20px] font-semibold text-[#111827]">
             Шуурхай үйлдлүүд
           </h2>
-          <p className="h-[24px] text-[#6B7280]">Хүсэлт илгээх</p>
+          <p className="h-[20px] text-[14px] text-[#6B7280] w-[190px] ">
+            Хүсэлт илгээх
+          </p>
         </div>
-        {/* <a
-          href="#"
-          className="flex items-center gap-1 text-[#6B7280] text-[13px] font-medium hover:text-[#111827] transition-colors"
-        >
-          Бүх хүсэлтүүд <BiChevronRight className="w-4 h-4" />
-        </a> */}
       </div>
 
       <div className="grid w-full grid-cols-1 gap-4 md:grid-cols-2">
         {quickActions.map((action) => (
           <div
             key={action.title}
-            className="flex h-[136px] w-full items-center justify-between gap-3 rounded-[16px] border border-[#E5E7EB] bg-white px-5 py-4 shadow-[0_4px_14px_rgba(15,23,42,0.06)]"
+            className="flex h-[136px] w-[520px] rounded-[16px] border border-[#E5E7EB] bg-white p-6 shadow-[0_4px_14px_rgba(15,23,42,0.06)]"
           >
-            <div className="flex items-center gap-3">
+            <div className="relative flex h-[88px] w-[470px] box-border items-center gap-5 p-5">
               <div
-                className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full border ${action.iconBg}`}
+                className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-lg border ${action.iconBg}`}
               >
                 {action.icon}
               </div>
 
-              <div>
-                <p className="text-[15px] font-semibold leading-5 text-[#111827]">
+              <div className="h-[42px] w-[332px] flex flex-col justify-between">
+                <p className="text-[18px] font-semibold h-[24px] leading-5 text-[#111827]">
                   {action.title}
                 </p>
-                <p className="mt-1 text-[12px] leading-4 text-[#6B7280]">
+                <p className=" text-[12px] leading-4 h-[18px] text-[#6B7280]">
                   {action.desc}
                 </p>
               </div>
-            </div>
 
-            <button
-              onClick={() => setActiveTab(action.title)}
-              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-[#E5E7EB] text-[#6B7280] transition-colors hover:bg-[#F3F4F6] hover:text-[#111827]"
-            >
-              <BiPlus className="h-5 w-5" />
-            </button>
+              <button
+                onClick={() => setActiveTab(action.title)}
+                className="absolute right-5 top-1/2 flex h-5 w-5 -translate-y-1/2 items-center justify-center text-[#6B7280] transition-colors hover:bg-[#F3F4F6] hover:text-[#111827]"
+              >
+                <BiPlus className="h-5 w-5" />
+              </button>
+            </div>
           </div>
         ))}
       </div>
@@ -692,14 +700,14 @@ export const Request = ({ employee }: { employee?: Employee }) => {
       {activeTab === "Тойрох хуудас" && !submitted && (
         <div className="fixed inset-0 flex items-center justify-center bg-black/60 backdrop-blur-sm z-50">
           <div
-            className={`w-[460px] rounded-2xl ${LIGHT_DIALOG_BG} text-[#111827] p-7 border ${LIGHT_DIALOG_BORDER} shadow-2xl flex flex-col gap-5`}
+            className={`w-[525px] h-[677px] rounded-2xl ${LIGHT_DIALOG_BG} text-[#111827] px-6 py-[30px] border ${LIGHT_DIALOG_BORDER} shadow-2xl flex flex-col`}
           >
-            <div className="flex justify-between items-start">
-              <div>
-                <h2 className="text-xl font-semibold">
+            <div className="flex justify-between items-start w-[477px] h-[58px]">
+              <div className="w-[453px] h-[58px] flex flex-col justify-between ">
+                <h2 className="text-[20px] font-semibold w-[453px] h-[24px]">
                   Тойрох хуудас авах хүсэлт
                 </h2>
-                <p className="text-sm text-[#6B7280] mt-1">
+                <p className="text-4 text-[#6B7280] h-[24px]">
                   Тойрох хуудас авах шалтгаан болон файл оруулна уу
                 </p>
               </div>
@@ -717,14 +725,14 @@ export const Request = ({ employee }: { employee?: Employee }) => {
               ]}
               value={clearanceType}
               onChange={setClearanceType}
-              labelClassName="text-sm font-medium text-[#111827]"
+              labelClassName="text-[18px] font-medium text-[#000000] w-[186px] h-[24px]"
               inputClassName={LIGHT_INPUT_CLASS}
             />
 
             <UploadArea label="Файл хавсаргах" variant="light" />
 
-            <div className="flex flex-col gap-1.5">
-              <label className="text-sm font-medium text-[#111827]">
+            <div className="w-[477px] h-[108px] flex flex-col mt-9">
+              <label className="text-[18px] flex items-center h-6 w-full font-medium text-[#111827]">
                 Шалтгаан
               </label>
               <textarea
@@ -742,7 +750,7 @@ export const Request = ({ employee }: { employee?: Employee }) => {
               </p>
             )}
 
-            <div className="flex justify-end gap-3">
+            <div className="flex justify-end mt-9 h-9 w-[477px] gap-5">
               <BackBtn onClick={closeDialog} />
               <SendBtn onClick={handleSend} disabled={sending} />
             </div>
@@ -753,12 +761,14 @@ export const Request = ({ employee }: { employee?: Employee }) => {
       {activeTab === "Томилолт" && !submitted && (
         <div className="fixed inset-0 flex items-center justify-center bg-black/60 backdrop-blur-sm z-50">
           <div
-            className={`w-[460px] rounded-2xl ${LIGHT_DIALOG_BG} text-[#111827] p-7 border ${LIGHT_DIALOG_BORDER} shadow-2xl flex flex-col gap-5`}
+            className={`w-[525px] h-[428px] rounded-2xl ${LIGHT_DIALOG_BG} text-[#111827] px-6 py-[30px] border ${LIGHT_DIALOG_BORDER} shadow-2xl flex flex-col`}
           >
-            <div className="flex justify-between items-start">
-              <div>
-                <h2 className="text-xl font-semibold">Томилолтын мэдээлэл</h2>
-                <p className="text-sm text-[#6B7280] mt-1">
+            <div className="flex w-[477px] h-[58px] justify-between ">
+              <div className="w-[453px] h-[58px] flex flex-col justify-between ">
+                <h2 className="text-[20px] w-[453px] h-6 font-semibold flex items-center">
+                  Томилолтын мэдээлэл
+                </h2>
+                <p className="text-[16px] h-6 w-[453px] text-[#6B7280] flex items-center">
                   Томилолтын мэдээллээ оруулна уу.
                 </p>
               </div>
@@ -771,324 +781,19 @@ export const Request = ({ employee }: { employee?: Employee }) => {
               variant="light"
             />
 
-            <div className="flex flex-col gap-1.5">
-              <label className="text-sm font-medium text-[#111827]">
-                Шалтгаан
-              </label>
-              <textarea
-                rows={3}
-                placeholder="Томилолтын шалтгаанаа бичнэ үү..."
-                className={LIGHT_TEXTAREA_CLASS}
-                value={clearanceReason}
-                onChange={(e) => setClearanceReason(e.target.value)}
-              />
-            </div>
-
             {sendError && (
               <p className="text-red-400 text-xs bg-red-500/10 border border-red-500/20 rounded-lg px-3 py-2">
                 {sendError}
               </p>
             )}
 
-            <div className="flex justify-end gap-3">
+            <div className="flex justify-end mt-9 gap-3">
               <BackBtn onClick={closeDialog} />
               <SendBtn onClick={handleSend} disabled={sending} />
             </div>
           </div>
         </div>
       )}
-
-      {activeTab === "Гэрээний хүсэлт" && !submitted && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black/60 backdrop-blur-sm z-50">
-          <div
-            className={`w-140 max-h-[82vh] overflow-y-auto rounded-2xl ${DIALOG_BG} text-white p-6 border ${DIALOG_BORDER} shadow-2xl flex flex-col gap-4 animate-fade-up`}
-          >
-            <div className="flex justify-between items-start">
-              <div>
-                <h2 className="text-xl font-semibold">Гэрээний хүсэлт</h2>
-                <p className="text-sm text-gray-500 mt-1">
-                  Нэг дор 3 хүртэл гэрээ сонгох боломжтой.
-                </p>
-              </div>
-              <CloseBtn onClick={closeDialog} />
-            </div>
-
-            <div className="flex items-center justify-between rounded-lg border border-white/10 bg-white/5 px-3 py-2">
-              <span className="text-xs text-gray-400">
-                Сонгосон: {contractTemplates.length}/3
-              </span>
-              <div className="flex flex-wrap gap-2">
-                {contractTemplates.length > 0 ? (
-                  contractTemplates.map((item) => (
-                    <span
-                      key={item}
-                      className="rounded-full border border-[#00CC99]/30 bg-[#00CC99]/10 px-2.5 py-1 text-[11px] text-[#9BEBD7]"
-                    >
-                      {getTemplateLabel(item)}
-                    </span>
-                  ))
-                ) : (
-                  <span className="text-xs text-gray-500">Сонголт байхгүй</span>
-                )}
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 gap-2">
-              {CONTRACT_TEMPLATES.map((template) => {
-                const selected = contractTemplates.includes(template.id);
-                return (
-                  <button
-                    key={template.id}
-                    type="button"
-                    onClick={() => toggleTemplate(template.id)}
-                    className={`flex items-center justify-between rounded-lg border px-3 py-2 text-sm transition-colors ${
-                      selected
-                        ? "border-[#00CC99]/50 bg-[#00CC99]/15 text-white"
-                        : "border-[#1a2035] bg-[#040d18] text-gray-300 hover:border-[#00CC99]/30"
-                    }`}
-                  >
-                    <span>{template.label}</span>
-                    <span
-                      className={`text-xs ${
-                        selected ? "text-[#00CC99]" : "text-gray-500"
-                      }`}
-                    >
-                      {selected ? "Сонгосон" : "Сонгох"}
-                    </span>
-                  </button>
-                );
-              })}
-            </div>
-
-            <div className="rounded-lg border border-white/10 bg-[#040d18] p-3 flex flex-col gap-3">
-              <div className="flex items-center justify-between">
-                <p className="text-sm font-medium text-white">
-                  Гэрээний шаардлагатай мэдээлэл
-                </p>
-                {profileSaved ? (
-                  <span className="text-xs text-emerald-300">Бүрдсэн</span>
-                ) : (
-                  <span className="text-xs text-amber-300">Бүрдээгүй</span>
-                )}
-              </div>
-
-              {profileSaved ? (
-                <div className="flex flex-wrap gap-3 text-sm text-gray-300">
-                  <label className="flex items-center gap-2">
-                    <input
-                      type="radio"
-                      name="profile-mode"
-                      checked={useSavedProfile}
-                      onChange={() => setUseSavedProfile(true)}
-                      className="h-4 w-4 text-[#00CC99] border-[#1a2035] bg-[#040d18] focus:ring-0"
-                    />
-                    Мэдээллээр үргэлжлүүлэх
-                  </label>
-                  <label className="flex items-center gap-2">
-                    <input
-                      type="radio"
-                      name="profile-mode"
-                      checked={!useSavedProfile}
-                      onChange={() => setUseSavedProfile(false)}
-                      className="h-4 w-4 text-[#00CC99] border-[#1a2035] bg-[#040d18] focus:ring-0"
-                    />
-                    Засварлах
-                  </label>
-                </div>
-              ) : null}
-
-              {!profileSaved || !useSavedProfile ? (
-                <div className="grid grid-cols-1 gap-2">
-                  {PROFILE_REQUIRED_FIELDS.map((field) => (
-                    <div key={field.key} className="flex flex-col gap-1">
-                      <label className="text-xs text-gray-400">
-                        {field.label}
-                      </label>
-                      <input
-                        className={INPUT_CLASS}
-                        value={profileForm[field.key] ?? ""}
-                        onChange={(e) =>
-                          updateProfileField(field.key, e.target.value)
-                        }
-                        placeholder={field.label}
-                      />
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <p className="text-xs text-gray-500">
-                  Мэдээлэл бүрдсэн. Хэрэв өөрчлөх бол “Засварлах”‑ыг сонгоно уу.
-                </p>
-              )}
-
-              {profileError ? (
-                <p className="text-amber-300 text-xs bg-amber-500/10 border border-amber-500/20 rounded-lg px-3 py-2">
-                  {profileError}
-                </p>
-              ) : null}
-
-              {!profileSaved || !useSavedProfile ? (
-                <div className="flex justify-end">
-                  <button
-                    type="button"
-                    onClick={handleSaveProfile}
-                    disabled={savingProfile}
-                    className="border border-[#1a2035] px-4 py-2 rounded-lg text-xs text-gray-300 hover:bg-white/5 hover:text-white transition-colors disabled:opacity-50"
-                  >
-                    {savingProfile ? "Хадгалж байна..." : "Мэдээлэл хадгалах"}
-                  </button>
-                </div>
-              ) : null}
-            </div>
-
-            <div className="rounded-lg border border-white/10 bg-[#040d18] p-3 flex flex-col gap-3">
-              <div className="flex items-center justify-between">
-                <p className="text-sm font-medium text-white">Гарын үсэг</p>
-                {signatureStatusLoading ? (
-                  <span className="text-xs text-gray-500">Уншиж байна...</span>
-                ) : null}
-              </div>
-
-              {signatureStatusLoading ? null : hasSignature ? (
-                <div className="flex flex-wrap gap-3 text-sm text-gray-300">
-                  <label className="flex items-center gap-2">
-                    <input
-                      type="radio"
-                      name="signature-mode"
-                      checked={signatureMode === "reuse"}
-                      onChange={() => setSignatureMode("reuse")}
-                      className="h-4 w-4 text-[#00CC99] border-[#1a2035] bg-[#040d18] focus:ring-0"
-                    />
-                    Өмнөх гарын үсэг ашиглах
-                  </label>
-                  <label className="flex items-center gap-2">
-                    <input
-                      type="radio"
-                      name="signature-mode"
-                      checked={signatureMode === "redraw"}
-                      onChange={() => setSignatureMode("redraw")}
-                      className="h-4 w-4 text-[#00CC99] border-[#1a2035] bg-[#040d18] focus:ring-0"
-                    />
-                    Дахин зурах
-                  </label>
-                </div>
-              ) : (
-                <p className="text-xs text-gray-500">
-                  Эхний удаа гарын үсгээ зурж баталгаажуулна.
-                </p>
-              )}
-
-              {signatureMode === "redraw" ? (
-                <>
-                  <div className="rounded-lg border border-dashed border-[#1a2035] bg-[#020812] p-3">
-                    <canvas
-                      ref={canvasRef}
-                      onPointerDown={handlePointerDown}
-                      onPointerMove={handlePointerMove}
-                      onPointerUp={handlePointerUp}
-                      onPointerLeave={handlePointerUp}
-                      className="h-30 w-full cursor-crosshair rounded-md"
-                    />
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <p className="text-xs text-gray-500">
-                      Хуруу/хулганаар гарын үсгээ зурна уу.
-                    </p>
-                    <button
-                      type="button"
-                      onClick={clearSignature}
-                      className="text-xs text-gray-400 hover:text-white transition-colors"
-                    >
-                      Арилгах
-                    </button>
-                  </div>
-
-                  <div className="flex items-center gap-2">
-                    <input
-                      id="use-passcode"
-                      type="checkbox"
-                      checked={usePasscode}
-                      onChange={(e) => {
-                        setUsePasscode(e.target.checked);
-                        setSendError(null);
-                      }}
-                      className="h-4 w-4 rounded border-[#1a2035] bg-[#040d18] text-[#00CC99] focus:ring-0"
-                    />
-                    <label
-                      htmlFor="use-passcode"
-                      className="text-sm text-gray-300"
-                    >
-                      4 оронтой код тохируулах (заавал биш)
-                    </label>
-                  </div>
-
-                  {usePasscode && (
-                    <div className="flex flex-col gap-1.5">
-                      <label className="text-sm font-medium text-white">
-                        Нууц код
-                      </label>
-                      <input
-                        inputMode="numeric"
-                        pattern="[0-9]*"
-                        maxLength={4}
-                        placeholder="0000"
-                        className={INPUT_CLASS}
-                        value={passcode}
-                        onChange={(e) =>
-                          setPasscode(e.target.value.replace(/\D/g, ""))
-                        }
-                      />
-                    </div>
-                  )}
-                </>
-              ) : (
-                <>
-                  {hasPasscode ? (
-                    <div className="flex flex-col gap-1.5">
-                      <label className="text-sm font-medium text-white">
-                        Код баталгаажуулах
-                      </label>
-                      <input
-                        inputMode="numeric"
-                        pattern="[0-9]*"
-                        maxLength={4}
-                        placeholder="0000"
-                        className={INPUT_CLASS}
-                        value={passcode}
-                        onChange={(e) =>
-                          setPasscode(e.target.value.replace(/\D/g, ""))
-                        }
-                      />
-                    </div>
-                  ) : (
-                    <p className="text-xs text-gray-500">
-                      Танай гарын үсэг хадгалагдсан байна. Код шаардлагагүй.
-                    </p>
-                  )}
-                </>
-              )}
-            </div>
-
-            {contractWarning && (
-              <p className="text-amber-300 text-xs bg-amber-500/10 border border-amber-500/20 rounded-lg px-3 py-2">
-                {contractWarning}
-              </p>
-            )}
-
-            {sendError && (
-              <p className="text-red-400 text-xs bg-red-500/10 border border-red-500/20 rounded-lg px-3 py-2">
-                {sendError}
-              </p>
-            )}
-
-            <div className="flex justify-end gap-3">
-              <BackBtn onClick={closeDialog} />
-              <SendBtn onClick={handleSend} disabled={sendingContract} />
-            </div>
-          </div>
-        </div>
-      )}
-
       {toasts.length > 0 ? (
         <div className="fixed bottom-6 right-6 z-60 flex flex-col gap-2">
           {toasts.map((toast) => (

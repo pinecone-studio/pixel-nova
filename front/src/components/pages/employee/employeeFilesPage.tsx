@@ -50,7 +50,7 @@ export default function EmployeeFilesPage() {
       style={{
         minHeight: "100vh",
         background: "#FAFAFA",
-        padding: "33px 16px 80px",
+        padding: "33px 16px 120px",
         fontFamily: "inherit",
       }}
     >
