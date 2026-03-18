@@ -24,12 +24,25 @@ export function AuditlogComponent() {
   );
 
   const actions = useMemo(() => data?.actions ?? [], [data?.actions]);
+  const actionOrder = useMemo(
+    () => [
+      "add_employee",
+      "promote_employee",
+      "change_position",
+      "offboard_employee",
+    ],
+    [],
+  );
+  const actionOrderMap = useMemo(
+    () => new Map(actionOrder.map((name, index) => [name, index])),
+    [actionOrder],
+  );
   const allowedActionNames = useMemo(
     () =>
       new Set([
         "add_employee",
-        "change_position",
         "promote_employee",
+        "change_position",
         "offboard_employee",
       ]),
     [],
@@ -40,9 +53,16 @@ export function AuditlogComponent() {
   );
 
   const filtered = useMemo(() => {
-    if (!search) return visibleActions;
+    const ordered = [...visibleActions].sort((left, right) => {
+      const leftIndex = actionOrderMap.get(left.name) ?? Number.MAX_SAFE_INTEGER;
+      const rightIndex =
+        actionOrderMap.get(right.name) ?? Number.MAX_SAFE_INTEGER;
+      if (leftIndex !== rightIndex) return leftIndex - rightIndex;
+      return left.name.localeCompare(right.name);
+    });
+    if (!search) return ordered;
     const query = search.toLowerCase();
-    return visibleActions.filter(
+    return ordered.filter(
       (action) =>
         action.name.toLowerCase().includes(query) ||
         action.phase.toLowerCase().includes(query) ||
@@ -50,7 +70,7 @@ export function AuditlogComponent() {
           recipient.toLowerCase().includes(query),
         ),
     );
-  }, [visibleActions, search]);
+  }, [visibleActions, search, actionOrderMap]);
 
   return (
     <div className="min-h-screen bg-[#F4F5F7] text-slate-900 font-sans flex flex-col gap-4 p-0">
