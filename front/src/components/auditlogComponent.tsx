@@ -3,7 +3,6 @@
 import { useQuery } from "@apollo/client/react";
 import { useMemo, useState } from "react";
 
-import { SearchIcon } from "@/components/icons";
 import { AuditActionCard } from "@/components/hr/auditlog/action-card";
 import { AddEmployeeRequestDialog } from "@/components/hr/auditlog/request-dialog";
 import { GET_ACTIONS } from "@/graphql/queries";
@@ -54,7 +53,8 @@ export function AuditlogComponent() {
 
   const filtered = useMemo(() => {
     const ordered = [...visibleActions].sort((left, right) => {
-      const leftIndex = actionOrderMap.get(left.name) ?? Number.MAX_SAFE_INTEGER;
+      const leftIndex =
+        actionOrderMap.get(left.name) ?? Number.MAX_SAFE_INTEGER;
       const rightIndex =
         actionOrderMap.get(right.name) ?? Number.MAX_SAFE_INTEGER;
       if (leftIndex !== rightIndex) return leftIndex - rightIndex;

@@ -3,14 +3,11 @@
 import { useApolloClient, useMutation, useQuery } from "@apollo/client/react";
 import { useMemo, useState } from "react";
 import {
-  AcepptedIcon,
   DownIcon,
   DownloadIcon,
   FilterIcon,
   PreviewIcon,
-  RejectedIcon,
   ReqIcon,
-  ScrollIcon,
   SearchIcon,
 } from "./icons";
 import { buildGraphQLHeaders } from "@/lib/apollo-client";
@@ -30,8 +27,7 @@ const StatusBadge = ({ status }: { status: string }) => {
   };
   return (
     <span
-      className={`text-xs px-3 py-1 rounded-full font-medium whitespace-nowrap ${styles[status] ?? "bg-slate-600/30 text-slate-400"}`}
-    >
+      className={`text-xs px-3 py-1 rounded-full font-medium whitespace-nowrap ${styles[status] ?? "bg-slate-600/30 text-slate-400"}`}>
       {formatLeaveRequestStatus(status) || status}
     </span>
   );
@@ -86,18 +82,15 @@ const PreviewModal = ({
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm"
-      onClick={onClose}
-    >
+      onClick={onClose}>
       <div
         className="relative w-[420px] max-w-[95vw] bg-white rounded-3xl border border-slate-200 shadow-[0_28px_60px_rgba(15,23,42,0.12)] p-6 flex flex-col gap-5"
-        onClick={(e) => e.stopPropagation()}
-      >
+        onClick={(e) => e.stopPropagation()}>
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-3">
             <div className="w-14 h-14 rounded-full overflow-hidden shrink-0">
               <div
-                className={`w-full h-full ${color} flex items-center justify-center text-white font-bold text-lg`}
-              >
+                className={`w-full h-full ${color} flex items-center justify-center text-white font-bold text-lg`}>
                 {initials}
               </div>
             </div>
@@ -116,8 +109,7 @@ const PreviewModal = ({
           </div>
           <button
             onClick={onClose}
-            className="text-slate-400 hover:text-slate-700 transition-colors text-xl leading-none mt-1"
-          >
+            className="text-slate-400 hover:text-slate-700 transition-colors text-xl leading-none mt-1">
             âœ•
           </button>
         </div>
@@ -129,11 +121,15 @@ const PreviewModal = ({
           <div className="grid grid-cols-2 gap-y-4">
             <div>
               <p className="text-slate-500 text-xs mb-1">Ð­Ñ…Ð»ÑÑ… Ñ†Ð°Ð³</p>
-              <p className="text-slate-700 text-sm font-medium">{row.startTime}</p>
+              <p className="text-slate-700 text-sm font-medium">
+                {row.startTime}
+              </p>
             </div>
             <div>
               <p className="text-slate-500 text-xs mb-1">Ð”ÑƒÑƒÑÐ°Ñ… Ñ†Ð°Ð³</p>
-              <p className="text-slate-700 text-sm font-medium">{row.endTime}</p>
+              <p className="text-slate-700 text-sm font-medium">
+                {row.endTime}
+              </p>
             </div>
             <div>
               <p className="text-slate-500 text-xs mb-1">
@@ -154,7 +150,9 @@ const PreviewModal = ({
             {row.reason && (
               <div className="col-span-2">
                 <p className="text-slate-500 text-xs mb-1">Ð¨Ð°Ð»Ñ‚Ð³Ð°Ð°Ð½</p>
-                <p className="text-slate-700 text-sm font-medium">{row.reason}</p>
+                <p className="text-slate-700 text-sm font-medium">
+                  {row.reason}
+                </p>
               </div>
             )}
           </div>
@@ -181,15 +179,13 @@ const PreviewModal = ({
             <button
               onClick={handleReject}
               disabled={acting}
-              className="flex items-center gap-2 px-5 py-2.5 rounded-xl border border-red-200 text-red-500 text-sm font-medium hover:bg-red-50 disabled:opacity-50 transition-colors"
-            >
+              className="flex items-center gap-2 px-5 py-2.5 rounded-xl border border-red-200 text-red-500 text-sm font-medium hover:bg-red-50 disabled:opacity-50 transition-colors">
               <span>âœ•</span> Ð¢Ð°Ñ‚Ð³Ð°Ð»Ð·Ð°Ñ…
             </button>
             <button
               onClick={handleApprove}
               disabled={acting}
-              className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-slate-900 text-white text-sm font-medium hover:bg-slate-800 disabled:opacity-50 transition-colors"
-            >
+              className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-slate-900 text-white text-sm font-medium hover:bg-slate-800 disabled:opacity-50 transition-colors">
               <span>âœ“</span>{" "}
               {acting ? "Ð¢Ò¯Ñ€ Ñ…Ò¯Ð»ÑÑÐ½Ñ Ò¯Ò¯..." : "Ð‘Ð°Ñ‚Ð»Ð°Ñ…"}
             </button>
@@ -228,12 +224,10 @@ const RequestRow = ({
     <>
       <div
         className="flex items-center justify-between h-24 p-5 hover:bg-slate-50 transition-colors cursor-pointer"
-        onClick={() => onToggle(row)}
-      >
+        onClick={() => onToggle(row)}>
         <div className="flex items-center gap-3">
           <div
-            className={`w-11 h-11 rounded-xl ${color} flex items-center justify-center font-bold text-white text-sm shrink-0`}
-          >
+            className={`w-11 h-11 rounded-xl ${color} flex items-center justify-center font-bold text-white text-sm shrink-0`}>
             {initials}
           </div>
           <div className=" flex justify-center flex-col">
@@ -275,8 +269,7 @@ const RequestRow = ({
               documents.map((doc, idx) => (
                 <div
                   key={doc.id}
-                  className={`flex items-center justify-between px-4 py-3 ${idx > 0 ? "border-t border-slate-200" : ""}`}
-                >
+                  className={`flex items-center justify-between px-4 py-3 ${idx > 0 ? "border-t border-slate-200" : ""}`}>
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-xl bg-white border border-slate-200 flex items-center justify-center text-slate-400">
                       <ReqIcon />
@@ -307,7 +300,7 @@ const RequestRow = ({
 };
 
 export const RequestsComponent = () => {
-  const [activeTab, setActiveTab] = useState("Ð‘Ò¯Ð³Ð´");
+  // const [activeTab, setActiveTab] = useState("Ð‘Ò¯Ð³Ð´");
   const [search, setSearch] = useState("");
   const [previewRow, setPreviewRow] = useState<LeaveRequest | null>(null);
   const [expandedId, setExpandedId] = useState<string | null>(null);

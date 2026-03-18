@@ -11,7 +11,6 @@ import type { Document, Employee } from "@/lib/types";
 import { ContractPreview } from "@/components/contractPreview";
 import { FactIcon } from "@/components/icons";
 import { Request } from "@/components/request";
-import { MyContractRequests } from "@/components/myContractRequests";
 
 const TOKEN_STORAGE_KEY = "epas_auth_token";
 
@@ -36,7 +35,7 @@ export default function EmployeePage() {
   const {
     data: meData,
     loading: meLoading,
-    error: meError,
+    // error: meError,
   } = useQuery<{ me: Employee | null }>(GET_ME, {
     skip: !authToken,
     context: {
@@ -50,7 +49,7 @@ export default function EmployeePage() {
   const {
     data: documentsData,
     loading: documentsLoading,
-    error: documentsError,
+    // error: documentsError,
   } = useQuery<{ documents: Document[] }>(GET_DOCUMENTS, {
     skip: !authToken || !employee?.id,
     variables: {
@@ -83,7 +82,7 @@ export default function EmployeePage() {
     return null;
   }
   const loading = meLoading || Boolean(employee?.id && documentsLoading);
-  const error = meError?.message ?? documentsError?.message ?? null;
+  // const error = meError?.message ?? documentsError?.message ?? null;
 
   const displayName = employee
     ? `${employee.lastName} ${employee.firstName}`
@@ -138,8 +137,7 @@ export default function EmployeePage() {
             </div>
             <a
               href="/employee/files"
-              className="text-[13.5px] font-medium hover:text-[#111827] transition-colors"
-            >
+              className="text-[13.5px] font-medium hover:text-[#111827] transition-colors">
               Бүх баримт бичгүүд →
             </a>
           </div>
