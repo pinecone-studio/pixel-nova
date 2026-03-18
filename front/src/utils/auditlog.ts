@@ -22,7 +22,7 @@ export function statusTone(entry: AuditLog) {
   if (entry.notificationError)
     return "bg-red-500/20 text-red-400 border border-red-500/30";
   if (entry.documentsGenerated && entry.recipientsNotified)
-    return "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30";
+    return "bg-emerald-500/20 text-[#1ABA52] border border-emerald-500/30";
   return "bg-yellow-500/20 text-yellow-400 border border-yellow-500/30";
 }
 
@@ -34,7 +34,7 @@ export function statusLabel(entry: AuditLog) {
 
 export function phaseBadge(phase: string) {
   if (phase === "onboarding")
-    return "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30";
+    return "bg-emerald-500/20 text-[#1ABA52] border border-emerald-500/30";
   if (phase === "offboarding")
     return "bg-red-500/20 text-red-400 border border-red-500/30";
   return "bg-blue-500/20 text-blue-400 border border-blue-500/30";

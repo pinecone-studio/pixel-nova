@@ -1,9 +1,11 @@
 "use client";
 
-import { useState } from "react";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
-import { BiBriefcase, BiArrowBack } from "react-icons/bi";
+import { useState } from "react";
+import { BiBriefcase } from "react-icons/bi";
+
+import { AuthShell } from "@/components/auth/AuthShell";
+import { Button } from "@/components/ui/button";
 
 const HR_CODE = "HR2025";
 
@@ -13,8 +15,8 @@ export default function HrAuthPage() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-  function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
+  function handleSubmit(event: React.FormEvent) {
+    event.preventDefault();
     setLoading(true);
     setError(null);
 
@@ -30,65 +32,55 @@ export default function HrAuthPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#060d0c] flex items-center justify-center px-4">
-      <div className="w-full max-w-sm flex flex-col gap-8">
-        {/* Header */}
-        <div className="flex flex-col items-center gap-3">
-          <div className="w-14 h-14 rounded-2xl bg-[#0ad4b1]/10 border border-[#0ad4b1]/20 flex items-center justify-center">
-            <BiBriefcase className="w-7 h-7 text-[#0ad4b1]" />
-          </div>
-          <div className="text-center">
-            <h1 className="text-white text-2xl font-bold">HR нэвтрэх</h1>
-            <p className="text-slate-500 text-sm mt-1">
-              ХН-ийн нийтлэг нэвтрэх кодыг оруулна уу
-            </p>
-          </div>
+    <AuthShell
+      accentLabel="HR access"
+      title="HR нэвтрэх"
+      description="Нийтлэг HR кодоор нэвтрээд ажилтны бүртгэл, хүсэлт, мэдэгдэл, аудитын самбар руу орно."
+      icon={<BiBriefcase className="h-7 w-7" />}
+      sideTitle="HR workspace"
+      sideDescription="Хүний нөөцийн багт зориулсан самбар, жагсаалт, workflow-уудын одоогийн цайвар интерфэйстэй ижил нэвтрэх дэлгэц."
+      sideBadges={["Employee records", "Requests", "Notifications"]}
+    >
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div className="space-y-2">
+          <label
+            htmlFor="hr-code"
+            className="block text-sm font-medium text-[#111827]"
+          >
+            HR код
+          </label>
+          <input
+            id="hr-code"
+            type="password"
+            value={code}
+            onChange={(event) => setCode(event.target.value)}
+            placeholder="••••••"
+            autoFocus
+            className="h-12 w-full rounded-2xl border border-black/10 bg-[#F8FAFC] px-4 text-sm text-[#111827] outline-none transition-colors placeholder:text-[#77818C] focus:border-[#00C0A8] focus:bg-white"
+          />
+          <p className="text-xs leading-5 text-[rgba(63,65,69,0.72)]">
+            HR баг нийтлэг нэвтрэх код ашиглана.
+          </p>
         </div>
 
-        {/* Form */}
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-          <div className="flex flex-col gap-1.5">
-            <label className="text-white/70 text-sm font-medium">HR код</label>
-            <input
-              type="password"
-              value={code}
-              onChange={(e) => setCode(e.target.value)}
-              placeholder="••••••"
-              autoFocus
-              className="w-full h-11 px-4 rounded-xl bg-[#0a0f0e] border border-white/8 text-white placeholder:text-slate-600 focus:outline-none focus:border-[#0ad4b1]/50 transition-colors text-sm"
-            />
-            <p className="text-slate-600 text-xs">
-              HR-ийн бүх гишүүд нэг нийтлэг кодоор нэвтэрнэ
-            </p>
+        {error ? (
+          <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
+            {error}
           </div>
+        ) : null}
 
-          {error && (
-            <div className="px-4 py-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-sm">
-              {error}
-            </div>
-          )}
-
-          <button
-            type="submit"
-            disabled={loading || !code.trim()}
-            className="w-full h-11 rounded-xl bg-[#0ad4b1] hover:bg-[#12e6c0] disabled:opacity-50 disabled:cursor-not-allowed text-[#060d0c] font-semibold text-sm transition-colors flex items-center justify-center gap-2"
-          >
-            {loading ? (
-              <span className="w-4 h-4 border-2 border-[#060d0c]/30 border-t-[#060d0c] rounded-full animate-spin" />
-            ) : null}
-            {loading ? "Шалгаж байна..." : "Нэвтрэх"}
-          </button>
-        </form>
-
-        {/* Back */}
-        <Link
-          href="/"
-          className="flex items-center justify-center gap-1.5 text-slate-600 hover:text-white text-sm transition-colors"
+        <Button
+          type="submit"
+          size="lg"
+          disabled={loading || !code.trim()}
+          className="h-12 w-full rounded-2xl bg-[#111827] text-white hover:bg-[#0f172a]"
         >
-          <BiArrowBack className="w-4 h-4" />
-          Буцах
-        </Link>
-      </div>
-    </div>
+          {loading ? (
+            <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+          ) : null}
+          {loading ? "Шалгаж байна..." : "Нэвтрэх"}
+        </Button>
+      </form>
+    </AuthShell>
   );
 }

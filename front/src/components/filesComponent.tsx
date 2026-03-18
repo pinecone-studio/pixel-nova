@@ -11,18 +11,19 @@ import {
   GET_EMPLOYEES,
 } from "@/graphql/queries";
 import type { Document, DocumentContent, Employee } from "@/lib/types";
+import { buildDocumentTree } from "@/lib/documentTree";
+import { DocumentTreeView } from "@/components/hr/documents/DocumentTreeView";
 import {
   ActiveIcon,
   CalIcon,
   DownloadIcon,
   EyeIcon,
-  OffboardIcon,
   OnboardIcon,
   PlusIcon,
   ReqIcon,
-  SearchIcon,
 } from "./icons";
 import { CiWarning } from "react-icons/ci";
+import { FiList, FiFolder } from "react-icons/fi";
 
 // ── Types ──────────────────────────────────────────────
 type FileRow = {
@@ -91,8 +92,7 @@ function UploadCloudIcon() {
       height="36"
       fill="none"
       viewBox="0 0 24 24"
-      className="text-slate-400"
-    >
+      className="text-slate-400">
       <path
         d="M12 16V8M12 8l-3 3M12 8l3 3"
         stroke="currentColor"
@@ -150,12 +150,10 @@ function FilePreviewModal({
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/45 backdrop-blur-sm"
-      onClick={onClose}
-    >
+      onClick={onClose}>
       <div
         className="relative w-190 max-w-[95vw] bg-white rounded-3xl border border-slate-200 shadow-[0_28px_60px_rgba(15,23,42,0.12)] overflow-hidden"
-        onClick={(e) => e.stopPropagation()}
-      >
+        onClick={(e) => e.stopPropagation()}>
         <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200">
           <div>
             <p className="text-slate-900 font-semibold text-base">
@@ -169,8 +167,7 @@ function FilePreviewModal({
           </div>
           <button
             onClick={onClose}
-            className="text-slate-400 hover:text-slate-700 transition-colors text-lg cursor-pointer"
-          >
+            className="text-slate-400 hover:text-slate-700 transition-colors text-lg cursor-pointer">
             ✕
           </button>
         </div>
@@ -192,8 +189,7 @@ function FilePreviewModal({
               </p>
               <button
                 onClick={handleDownload}
-                className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black font-semibold text-sm transition-colors"
-              >
+                className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black font-semibold text-sm transition-colors">
                 <DownloadIcon />
                 Татах
               </button>
@@ -289,13 +285,11 @@ function NewDocModal({
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/45 backdrop-blur-sm"
-      onClick={onClose}
-    >
+      onClick={onClose}>
       <div
         className="relative bg-white rounded-3xl border border-slate-200 shadow-[0_28px_60px_rgba(15,23,42,0.12)] flex flex-col gap-5 overflow-hidden"
         style={{ width: 520, padding: "28px 28px 24px" }}
-        onClick={(e) => e.stopPropagation()}
-      >
+        onClick={(e) => e.stopPropagation()}>
         {/* Header */}
         <div className="flex items-center justify-between">
           <h2 className="text-slate-900 text-lg font-semibold">
@@ -303,8 +297,7 @@ function NewDocModal({
           </h2>
           <button
             onClick={onClose}
-            className="text-slate-400 hover:text-slate-700 transition-colors cursor-pointer"
-          >
+            className="text-slate-400 hover:text-slate-700 transition-colors cursor-pointer">
             <svg width="22" height="22" fill="none" viewBox="0 0 24 24">
               <path
                 d="M18 6L6 18M6 6l12 12"
@@ -338,13 +331,11 @@ function NewDocModal({
             {recipients.map((r) => (
               <span
                 key={r}
-                className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full border border-slate-200 text-slate-500 text-xs bg-slate-50"
-              >
+                className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full border border-slate-200 text-slate-500 text-xs bg-slate-50">
                 {r}
                 <button
                   onClick={() => removeRecipient(r)}
-                  className="text-slate-400 hover:text-slate-600 transition-colors leading-none ml-0.5 cursor-pointer"
-                >
+                  className="text-slate-400 hover:text-slate-600 transition-colors leading-none ml-0.5 cursor-pointer">
                   ×
                 </button>
               </span>
@@ -380,8 +371,7 @@ function NewDocModal({
               dragging
                 ? "border-emerald-400 bg-emerald-50/60"
                 : "border-slate-200 hover:border-slate-300"
-            }`}
-          >
+            }`}>
             <UploadCloudIcon />
             {file ? (
               <p className="text-emerald-600 text-sm font-semibold text-center">
@@ -400,8 +390,7 @@ function NewDocModal({
                     e.stopPropagation();
                     fileRef.current?.click();
                   }}
-                  className="mt-1 px-5 py-2 rounded-full border border-slate-200 text-slate-600 text-xs hover:border-slate-300 transition-colors bg-white cursor-pointer"
-                >
+                  className="mt-1 px-5 py-2 rounded-full border border-slate-200 text-slate-600 text-xs hover:border-slate-300 transition-colors bg-white cursor-pointer">
                   Оруулах
                 </button>
               </>
@@ -415,15 +404,13 @@ function NewDocModal({
         <div className="flex items-center justify-end gap-3 pt-1">
           <button
             onClick={onClose}
-            className="px-6 py-2.5 rounded-2xl border border-slate-200 text-slate-500 text-sm font-medium hover:bg-slate-50 transition-colors cursor-pointer"
-          >
+            className="px-6 py-2.5 rounded-2xl border border-slate-200 text-slate-500 text-sm font-medium hover:bg-slate-50 transition-colors cursor-pointer">
             Татгалзах
           </button>
           <button
             onClick={handleSubmit}
             disabled={saving}
-            className="flex items-center gap-2 px-6 py-2.5 rounded-2xl bg-[#1F2126] hover:bg-slate-800 disabled:opacity-60 text-white text-sm font-semibold transition-colors shadow-lg cursor-pointer"
-          >
+            className="flex items-center gap-2 px-6 py-2.5 rounded-2xl bg-[#1F2126] hover:bg-slate-800 disabled:opacity-60 text-white text-sm font-semibold transition-colors shadow-lg cursor-pointer">
             <svg width="16" height="16" fill="none" viewBox="0 0 24 24">
               <path
                 d="M12 5v14M5 12h14"
@@ -447,6 +434,7 @@ export function FilesComponent() {
   const [showModal, setShowModal] = useState(false);
   const [previewRow, setPreviewRow] = useState<FileRow | null>(null);
   const [downloadRow, setDownloadRow] = useState<FileRow | null>(null);
+  const [viewMode, setViewMode] = useState<"flat" | "tree">("tree");
   const [rows, setRows] = useState<FileRow[]>([]);
   const [loadingRows, setLoadingRows] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -544,28 +532,36 @@ export function FilesComponent() {
       ? 0
       : Math.round((verifiedCount / filtered.length) * 100);
 
+  const documentTree = useMemo(() => buildDocumentTree(rows), [rows]);
+
   const stages = [
     {
       label: "Ажилд орох үе",
       count: stageCounts.onboarding,
-      icon: <OnboardIcon className="h-5 w-5 text-[#121316]" />,
+      icon: <OnboardIcon className="h-5 w-5 text-[#1ABA52]" />,
+      borderColor: "border-[#1ABA52]",
+      bgColor: "bg-[#1ABA52]/20",
     },
     {
       label: "Ажиллах үе",
       count: stageCounts.active,
-      icon: <ActiveIcon className="h-5 w-5 text-[#121316]" />,
+      icon: <ActiveIcon className="h-5 w-5 text-[#178AFC]" />,
+      borderColor: "border-[#178AFC]",
+      bgColor: "bg-[#178AFC]/20",
     },
     {
       label: "Ажлаас гарах үе",
       count: stageCounts.offboarding,
-      icon: <CiWarning className="h-5 w-5 text-[#121316]" />,
+      icon: <CiWarning className="h-5 w-5 text-[#FC171B]" />,
+      borderColor: "border-[#FC171B]",
+      bgColor: "bg-[#FC171B]/20",
     },
   ];
 
   const isLoading = loading || loadingRows;
 
   return (
-    <div className="flex min-h-full flex-col gap-6 text-slate-900 animate-fade-up xl:flex-row">
+    <div className="flex min-h-full flex-col gap-6 text-slate-900 animate-fade-up xl:h-[calc(100vh-7rem)] xl:min-h-0 xl:overflow-hidden xl:flex-row">
       {showModal && (
         <NewDocModal
           employees={employees}
@@ -589,27 +585,27 @@ export function FilesComponent() {
       )}
 
       <div className="w-full shrink-0 xl:w-[415px]">
-        <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-4 xl:h-full xl:overflow-y-auto xl:pr-1">
           <section>
             <p className="mb-4 text-[16px] font-semibold leading-5 text-[#3f4145]">
               Нийт баримт
             </p>
             <div className="rounded-[24px] border border-black/12 bg-white p-6">
               <div className="flex items-center justify-between">
-                <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-[linear-gradient(135deg,#2b7fff_0%,#00b8db_100%)] text-white shadow-[0_10px_15px_rgba(0,0,0,0.1),0_4px_6px_rgba(0,0,0,0.1)]">
-                  <ReqIcon className="h-7 w-7 text-white" />
-                </div>
                 <p className="text-[56px] font-bold leading-[56px] tracking-[-0.05em] text-[#121316]">
                   {filtered.length}
                 </p>
+                <div className="flex h-14 w-14 items-center border-2 border-[#3F4145CC] justify-center rounded-2xl text-black">
+                  <ReqIcon className="h-7 w-7" />
+                </div>
               </div>
               <div className="mt-4 flex items-center justify-between gap-3">
-                <p className="text-[28px] font-semibold leading-7 text-[#121316]">
-                  Нийт баримт
+                <p className="text-xl font-medium leading-7 text-[#3F4145CC]">
+                  Баримт
                 </p>
-                <div className="flex items-center gap-1 text-[28px] font-semibold leading-7 text-[#1aba52]">
+                <div className="flex items-baseline gap-1 text-xl font-semibold text-[#1aba52]">
                   <span>{verifiedPercent}%</span>
-                  <span className="text-[16px] font-medium leading-5 text-[#3f4145]">
+                  <span className="text-sm font-medium leading-5 text-[#1aba52]/80">
                     Баталгаажсан
                   </span>
                 </div>
@@ -622,126 +618,171 @@ export function FilesComponent() {
               Үе шатаар
             </p>
             <div className="flex flex-col gap-4">
-            {stages.map((stage) => (
-              <div
-                key={stage.label}
-                className="rounded-[24px] border border-black/12 bg-white p-6"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[14px] border border-black/12 bg-white">
-                    {stage.icon}
+              {stages.map((stage) => (
+                <div
+                  key={stage.label}
+                  className="rounded-[24px] border flex justify-between border-black/12 bg-white p-6">
+                  <div className="flex items-center gap-3">
+                    <div
+                      className={`flex h-10 w-10 shrink-0 items-center border justify-center rounded-[14px] ${stage.bgColor} ${stage.borderColor}`}>
+                      {stage.icon}
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-[16px] font-medium leading-10 text-[#121316]">
+                        {stage.label}
+                      </p>
+                    </div>
                   </div>
-                  <div className="min-w-0">
-                    <p className="text-[16px] font-medium leading-10 text-[#121316]">
-                      {stage.label}
-                    </p>
-                  </div>
+                  <span className="text-[30px] font-semibold leading-10 text-[#121316]">
+                    {stage.count}
+                  </span>
                 </div>
-                <span className="text-[30px] font-semibold leading-10 text-[#121316]">
-                  {stage.count}
-                </span>
-              </div>
-            ))}
+              ))}
             </div>
           </section>
         </div>
       </div>
 
-      <div className="flex min-w-0 flex-1 flex-col">
-        <div className="overflow-hidden rounded-[24px] border border-black/12 bg-white">
-          <div
-            className="grid items-center border-b border-black/12 px-3 py-3 text-[14px] text-[#3f4145b3] md:px-5"
-            style={{ gridTemplateColumns: "minmax(220px,2fr) minmax(150px,1.25fr) minmax(140px,1fr) minmax(150px,1fr) 72px" }}
-          >
-            <div className="flex items-center gap-2 px-2 font-medium text-[#121316]">
-              <span>Баримт бичиг</span>
-            </div>
-            <span className="px-2 font-medium">Үе</span>
-            <span className="px-2 font-medium">Огноо</span>
-            <span className="px-2 font-medium">Төлөв</span>
-            <span className="px-2 font-medium">Үйлдэл</span>
+      <div className="flex min-w-0 flex-1 flex-col xl:overflow-hidden">
+        {/* View mode toggle */}
+        <div className="mb-4 flex items-center justify-between">
+          <div className="flex items-center gap-1 rounded-[12px] border border-black/12 bg-white p-1">
+            <button
+              onClick={() => setViewMode("tree")}
+              className={`flex items-center gap-1.5 rounded-[8px] px-3 py-1.5 text-[13px] font-medium transition-colors ${
+                viewMode === "tree"
+                  ? "bg-[#121316] text-white"
+                  : "text-[#3f4145] hover:bg-[#f5f5f5]"
+              }`}>
+              <FiFolder className="h-3.5 w-3.5" />
+              Хавтас
+            </button>
+            <button
+              onClick={() => setViewMode("flat")}
+              className={`flex items-center gap-1.5 rounded-[8px] px-3 py-1.5 text-[13px] font-medium transition-colors ${
+                viewMode === "flat"
+                  ? "bg-[#121316] text-white"
+                  : "text-[#3f4145] hover:bg-[#f5f5f5]"
+              }`}>
+              <FiList className="h-3.5 w-3.5" />
+              Жагсаалт
+            </button>
           </div>
 
-          {isLoading ? (
-            <div className="flex flex-col gap-3 px-5 py-8">
-              <div className="h-4 w-56 rounded-full skeleton" />
-              <div className="h-3 w-80 rounded-full skeleton" />
-              <div className="h-3 w-72 rounded-full skeleton" />
-            </div>
-          ) : error ? (
-            <div className="py-12 text-center text-red-400 text-sm">
-              {error}
-            </div>
-          ) : filtered.length === 0 ? (
-            <div className="py-12 text-center text-slate-400 text-sm">
-              Баримт олдсонгүй
-            </div>
-          ) : (
-            filtered.map((row) => (
-              <div
-                key={row.document.id}
-                className="grid items-center border-b border-black/12 px-3 py-3 transition-colors hover:bg-[#fafafa] md:px-5"
-                style={{ gridTemplateColumns: "minmax(220px,2fr) minmax(150px,1.25fr) minmax(140px,1fr) minmax(150px,1fr) 72px" }}
-              >
-                <div className="flex items-center gap-2.5 px-2">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-[14px] border border-black/12 bg-white text-[#121316]">
-                    <ReqIcon className="h-4 w-4 text-[#121316]" />
-                  </div>
-                  <div>
-                    <p className="text-[14px] font-medium text-[#121316]">
-                      {row.document.documentName}
-                    </p>
-                    <p className="text-[12px] text-[#3f4145b3]">
-                      {row.document.action}
-                    </p>
-                  </div>
-                </div>
-                <div className="px-2">
-                  <div className="inline-flex items-center rounded-full border border-black/12 px-3 py-1 text-[12px] text-[#3f4145]">
-                    {stageLabel(row.employee)}
-                  </div>
-                </div>
-                <div className="flex items-center gap-2 px-2">
-                  <CalIcon className="h-4 w-4 text-[#77818c]" />
-                  <span className="text-[14px] text-[#3f4145]">
-                    {formatDate(row.document.createdAt)}
-                  </span>
-                </div>
-                <div className="px-2">
-                  <span className="inline-flex items-center gap-1.5 rounded-full border border-[#1aba5280] px-3 py-1 text-[12px] font-medium text-[#1aba52]">
-                    {statusLabel(row.document)}
-                  </span>
-                </div>
-                <div className="flex items-center gap-0">
-                  <button
-                    onClick={() => setPreviewRow(row)}
-                    className="flex h-8 w-8 items-center justify-center rounded-[10px] text-[#77818c] transition-colors hover:bg-[#f5f5f5] hover:text-[#121316]"
-                    aria-label="Урьдчилж харах"
-                  >
-                    <EyeIcon />
-                  </button>
-                  <button
-                    onClick={() => setDownloadRow(row)}
-                    className="flex h-8 w-8 items-center justify-center rounded-[10px] text-[#77818c] transition-colors hover:bg-[#f5f5f5] hover:text-[#121316]"
-                    aria-label="Татах"
-                  >
-                    <DownloadIcon />
-                  </button>
-                </div>
-              </div>
-            ))
-          )}
-        </div>
-
-        <div className="mt-4 flex justify-end">
           <button
             onClick={() => setShowModal(true)}
-            className="flex items-center gap-2 rounded-[10px] bg-[#121316] px-4 py-2.5 text-[14px] font-medium text-white transition-colors hover:bg-[#1f2126]"
-          >
+            className="flex items-center gap-2 rounded-[10px] bg-[#121316] px-4 py-2.5 text-[14px] font-medium text-white transition-colors hover:bg-[#1f2126]">
             <PlusIcon />
             Шинэ баримт
           </button>
         </div>
+
+        {/* Tree view */}
+        {viewMode === "tree" ? (
+          <div className="xl:min-h-0 xl:flex-1 xl:overflow-y-auto xl:pr-1">
+            <DocumentTreeView
+              tree={documentTree}
+              onPreview={(doc, emp) =>
+                setPreviewRow({ document: doc, employee: emp })
+              }
+              onDownload={(doc, emp) =>
+                setDownloadRow({ document: doc, employee: emp })
+              }
+              loading={isLoading}
+              error={error}
+            />
+          </div>
+        ) : (
+          /* Flat list view (existing) */
+          <div className="flex flex-col overflow-hidden rounded-[24px] border border-black/12 bg-white xl:min-h-0 xl:flex-1">
+            <div
+              className="grid shrink-0 items-center border-b border-black/12 px-3 py-3 text-[14px] text-[#3f4145b3] md:px-5"
+              style={{
+                gridTemplateColumns:
+                  "minmax(220px,2fr) minmax(150px,1.25fr) minmax(140px,1fr) minmax(150px,1fr) 72px",
+              }}>
+              <div className="flex items-center gap-2 px-2 font-medium text-[#121316]">
+                <span>Баримт бичиг</span>
+              </div>
+              <span className="px-2 font-medium">Үе</span>
+              <span className="px-2 font-medium">Огноо</span>
+              <span className="px-2 font-medium">Төлөв</span>
+              <span className="px-2 font-medium">Үйлдэл</span>
+            </div>
+
+            <div className="xl:min-h-0 xl:flex-1 xl:overflow-y-auto">
+              {isLoading ? (
+                <div className="flex flex-col gap-3 px-5 py-8">
+                  <div className="h-4 w-56 rounded-full skeleton" />
+                  <div className="h-3 w-80 rounded-full skeleton" />
+                  <div className="h-3 w-72 rounded-full skeleton" />
+                </div>
+              ) : error ? (
+                <div className="py-12 text-center text-red-400 text-sm">
+                  {error}
+                </div>
+              ) : filtered.length === 0 ? (
+                <div className="py-12 text-center text-slate-400 text-sm">
+                  Баримт олдсонгүй
+                </div>
+              ) : (
+                filtered.map((row) => (
+                  <div
+                    key={row.document.id}
+                    className="grid items-center border-b border-black/12 px-3 py-3 transition-colors hover:bg-[#fafafa] md:px-5"
+                    style={{
+                      gridTemplateColumns:
+                        "minmax(220px,2fr) minmax(150px,1.25fr) minmax(140px,1fr) minmax(150px,1fr) 72px",
+                    }}>
+                    <div className="flex items-center gap-2.5 px-2">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-[14px] border border-black/12 bg-white text-[#121316]">
+                        <ReqIcon className="h-4 w-4 text-[#121316]" />
+                      </div>
+                      <div>
+                        <p className="text-[14px] font-medium text-[#121316]">
+                          {row.document.documentName}
+                        </p>
+                        <p className="text-[12px] text-[#3f4145b3]">
+                          {row.document.action}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="px-2">
+                      <div className="inline-flex items-center rounded-full border border-black/12 px-3 py-1 text-[12px] text-[#3f4145]">
+                        {stageLabel(row.employee)}
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2 px-2">
+                      <CalIcon className="h-4 w-4 text-[#77818c]" />
+                      <span className="text-[14px] text-[#3f4145]">
+                        {formatDate(row.document.createdAt)}
+                      </span>
+                    </div>
+                    <div className="px-2">
+                      <span className="inline-flex items-center gap-1.5 rounded-full border border-[#1aba5280] px-3 py-1 text-[12px] font-medium text-[#1aba52]">
+                        {statusLabel(row.document)}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-0">
+                      <button
+                        onClick={() => setPreviewRow(row)}
+                        className="flex h-8 w-8 items-center justify-center rounded-[10px] text-[#77818c] transition-colors hover:bg-[#f5f5f5] hover:text-[#121316]"
+                        aria-label="Урьдчилж харах">
+                        <EyeIcon />
+                      </button>
+                      <button
+                        onClick={() => setDownloadRow(row)}
+                        className="flex h-8 w-8 items-center justify-center rounded-[10px] text-[#77818c] transition-colors hover:bg-[#f5f5f5] hover:text-[#121316]"
+                        aria-label="Татах">
+                        <DownloadIcon />
+                      </button>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
