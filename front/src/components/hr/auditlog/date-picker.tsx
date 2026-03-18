@@ -56,10 +56,6 @@ export function DatePickerField({
   const wrapperRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
-    if (selectedDate) setViewDate(selectedDate);
-  }, [selectedDate]);
-
-  useEffect(() => {
     if (!open) return;
     const handleClick = (event: MouseEvent) => {
       if (!wrapperRef.current) return;
@@ -79,13 +75,17 @@ export function DatePickerField({
   const selectedDay = selectedDate?.getDate();
   const selectedMonth = selectedDate?.getMonth();
   const selectedYear = selectedDate?.getFullYear();
+  const handleOpen = () => {
+    setViewDate(selectedDate ?? new Date());
+    setOpen(true);
+  };
 
   return (
     <div ref={wrapperRef} className="relative">
       <input
         value={value}
         onChange={(event) => onChange(event.target.value)}
-        onFocus={() => setOpen(true)}
+        onFocus={handleOpen}
         placeholder={placeholder}
         className={inputClass}
       />

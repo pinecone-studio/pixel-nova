@@ -1,8 +1,12 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { FiEye, FiFileText, FiX } from "react-icons/fi";
-import { useLazyQuery, useMutation, useQuery } from "@apollo/client/react";
+import {
+  useApolloClient,
+  useLazyQuery,
+  useMutation,
+} from "@apollo/client/react";
 import {
   Dialog,
   DialogContent,
@@ -66,8 +70,7 @@ const SelectWrapper = ({
     <select
       value={value}
       onChange={onChange}
-      className={hasError ? errorSelectClass : selectClass}
-    >
+      className={hasError ? errorSelectClass : selectClass}>
       {children}
     </select>
     <div className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2">
@@ -130,6 +133,9 @@ export function AddEmployeeRequestDialog({
     ActionConfig["documents"][number] | null
   >(null);
   const [previewError, setPreviewError] = useState<string | null>(null);
+  const [matchedEmployee, setMatchedEmployee] = useState<Employee | null>(null);
+  const apolloClient = useApolloClient();
+  const latestLookupRef = useRef(0);
 
   const documents = action?.documents ?? [];
   const actionKey = action?.name?.toLowerCase() ?? "";
@@ -157,54 +163,61 @@ export function AddEmployeeRequestDialog({
     setRecipients((prev) => prev.filter((v) => v !== recipient));
   };
 
-  const searchKey = employeeCode.trim();
+  async function lookupEmployee(nextCode: string) {
+    const nextSearchKey = nextCode.trim();
+    const requestId = latestLookupRef.current + 1;
+    latestLookupRef.current = requestId;
 
-  const { data: employeesData } = useQuery<{ employees: Employee[] }>(
-    GET_EMPLOYEES,
-    {
-      variables: { search: searchKey || null, status: null, department: null },
-      skip: !searchKey,
-      context: { headers: buildGraphQLHeaders({ actorRole: "hr" }) },
-      fetchPolicy: "network-only",
-    },
-  );
+    if (!nextSearchKey) {
+      setMatchedEmployee(null);
+      return;
+    }
 
-  const matchedEmployee = useMemo(() => {
-    if (!searchKey || !employeesData?.employees?.length) return null;
-    const lower = searchKey.toLowerCase();
-    return (
-      employeesData.employees.find(
-        (emp) => emp.employeeCode?.toLowerCase() === lower,
-      ) ?? employeesData.employees[0]
-    );
-  }, [employeesData, searchKey]);
+    try {
+      const { data } = await apolloClient.query<{ employees: Employee[] }>({
+        query: GET_EMPLOYEES,
+        variables: {
+          search: nextSearchKey,
+          status: null,
+          department: null,
+        },
+        context: { headers: buildGraphQLHeaders({ actorRole: "hr" }) },
+        fetchPolicy: "network-only",
+      });
 
-  useEffect(() => {
-    if (!action) return;
-    setEmployeeCode("");
-    setRecipients(
-      action.recipients.length ? [...action.recipients] : ["hr_manager"],
-    );
-    setRecipientInput("");
-    setTab("hr");
-    setSalaryStep("person");
-    setErrors({});
-    setSubmitError(null);
-  }, [action]);
+      if (latestLookupRef.current !== requestId) return;
 
-  useEffect(() => {
-    if (!matchedEmployee) return;
-    setLastName(matchedEmployee.lastName ?? "");
-    setFirstName(matchedEmployee.firstName ?? "");
-    setEmail(matchedEmployee.email ?? "");
-    setBranch(matchedEmployee.branch ?? "");
-    setDept(matchedEmployee.department ?? "Engineering");
-    setJobTitle(matchedEmployee.jobTitle ?? "");
-    setCurrentDept(matchedEmployee.department ?? "Engineering");
-    setCurrentPosition(matchedEmployee.jobTitle ?? "");
-    setHireDate(matchedEmployee.hireDate ?? "");
-    setTerminationDate(matchedEmployee.terminationDate ?? "");
-  }, [matchedEmployee]);
+      const employees = data?.employees ?? [];
+      const lower = nextSearchKey.toLowerCase();
+      const employee =
+        employees.find(
+          (candidate) => candidate.employeeCode?.toLowerCase() === lower,
+        ) ?? employees[0] ?? null;
+
+      setMatchedEmployee(employee);
+      if (!employee) return;
+
+      setLastName(employee.lastName ?? "");
+      setFirstName(employee.firstName ?? "");
+      setEmail(employee.email ?? "");
+      setBranch(employee.branch ?? "");
+      setDept(employee.department ?? "Engineering");
+      setJobTitle(employee.jobTitle ?? "");
+      setCurrentDept(employee.department ?? "Engineering");
+      setCurrentPosition(employee.jobTitle ?? "");
+      setHireDate(employee.hireDate ?? "");
+      setTerminationDate(employee.terminationDate ?? "");
+    } catch {
+      if (latestLookupRef.current === requestId) {
+        setMatchedEmployee(null);
+      }
+    }
+  }
+
+  const handleEmployeeCodeChange = (value: string) => {
+    setEmployeeCode(value);
+    void lookupEmployee(value);
+  };
 
   const [triggerAction, { loading: submitting }] = useMutation(TRIGGER_ACTION, {
     context: { headers: buildGraphQLHeaders({ actorRole: "hr" }) },
@@ -435,13 +448,11 @@ export function AddEmployeeRequestDialog({
         {recipients.map((recipient) => (
           <span
             key={recipient}
-            className="inline-flex max-w-full items-center gap-1 rounded-[10px] border border-slate-200 px-[9px] py-[3px] text-slate-500 text-[12px] leading-[20px] bg-slate-50"
-          >
+            className="inline-flex max-w-full items-center gap-1 rounded-[10px] border border-slate-200 px-[9px] py-[3px] text-slate-500 text-[12px] leading-[20px] bg-slate-50">
             {recipient}
             <button
               onClick={() => removeRecipient(recipient)}
-              className="text-slate-400 hover:text-slate-700 transition-colors leading-none"
-            >
+              className="text-slate-400 hover:text-slate-700 transition-colors leading-none">
               <FiX className="h-3 w-3" />
             </button>
           </span>
@@ -464,8 +475,7 @@ export function AddEmployeeRequestDialog({
         documents.map((doc) => (
           <div
             key={doc.id}
-            className="bg-white flex min-w-0 items-center justify-between gap-[12px] rounded-[12px] px-[6px] py-[8px] border border-slate-200"
-          >
+            className="bg-white flex min-w-0 items-center justify-between gap-[12px] rounded-[12px] px-[6px] py-[8px] border border-slate-200">
             <div className="flex min-w-0 items-center gap-[16px]">
               <div className="bg-white border border-slate-200 rounded-[16px] size-[40px] flex items-center justify-center shrink-0">
                 <FiFileText className="h-[18px] w-[18px] text-slate-500" />
@@ -482,8 +492,7 @@ export function AddEmployeeRequestDialog({
             <button
               onClick={() => void handlePreview(doc)}
               className="text-slate-400 hover:text-slate-700 transition-colors size-[40px] flex items-center justify-center"
-              aria-label="Preview template"
-            >
+              aria-label="Preview template">
               <FiEye className="h-5 w-5" />
             </button>
           </div>
@@ -508,7 +517,7 @@ export function AddEmployeeRequestDialog({
           <SalaryChangeForm
             salaryStep={salaryStep}
             employeeCode={employeeCode}
-            setEmployeeCode={setEmployeeCode}
+            setEmployeeCode={handleEmployeeCodeChange}
             lastName={lastName}
             setLastName={setLastName}
             firstName={firstName}
@@ -548,7 +557,7 @@ export function AddEmployeeRequestDialog({
         ) : useChangePositionLayout ? (
           <ChangePositionForm
             employeeCode={employeeCode}
-            setEmployeeCode={setEmployeeCode}
+            setEmployeeCode={handleEmployeeCodeChange}
             lastName={lastName}
             setLastName={setLastName}
             firstName={firstName}
@@ -574,7 +583,7 @@ export function AddEmployeeRequestDialog({
         ) : useOffboardLayout ? (
           <OffboardForm
             employeeCode={employeeCode}
-            setEmployeeCode={setEmployeeCode}
+            setEmployeeCode={handleEmployeeCodeChange}
             lastName={lastName}
             setLastName={setLastName}
             firstName={firstName}
@@ -610,7 +619,7 @@ export function AddEmployeeRequestDialog({
             companyName={companyName}
             setCompanyName={setCompanyName}
             employeeCode={employeeCode}
-            setEmployeeCode={setEmployeeCode}
+            setEmployeeCode={handleEmployeeCodeChange}
             branch={branch}
             setBranch={setBranch}
             lastName={lastName}
@@ -653,26 +662,28 @@ export function AddEmployeeRequestDialog({
           </div>
         )}
         {/* ── Товчлуурууд ── */}
+        {submitError ? (
+          <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
+            {submitError}
+          </div>
+        ) : null}
         <div className="flex flex-nowrap items-center gap-[20px] justify-end shrink-0">
           <button
             onClick={() => onOpenChange(false)}
-            className="border border-slate-200 px-[20px] py-[10px] rounded-[12px] text-slate-500 text-[16px] hover:bg-slate-50 transition-colors cursor-pointer whitespace-nowrap"
-          >
+            className="border border-slate-200 px-[20px] py-[10px] rounded-[12px] text-slate-500 text-[16px] hover:bg-slate-50 transition-colors cursor-pointer whitespace-nowrap">
             Болих
           </button>
           {useSalaryChangeLayout && salaryStep === "person" ? (
             <button
               onClick={() => setSalaryStep("salary")}
-              className="bg-slate-900 px-[20px] py-[10px] rounded-[12px] text-white text-[16px] hover:bg-slate-800 transition-colors cursor-pointer whitespace-nowrap"
-            >
+              className="bg-slate-900 px-[20px] py-[10px] rounded-[12px] text-white text-[16px] hover:bg-slate-800 transition-colors cursor-pointer whitespace-nowrap">
               Цааш
             </button>
           ) : (
             <button
               onClick={handleSubmit}
               disabled={submitting}
-              className="bg-slate-900 px-[20px] py-[10px] rounded-[12px] text-white text-[16px] hover:bg-slate-800 transition-colors cursor-pointer disabled:opacity-60 whitespace-nowrap"
-            >
+              className="bg-slate-900 px-[20px] py-[10px] rounded-[12px] text-white text-[16px] hover:bg-slate-800 transition-colors cursor-pointer disabled:opacity-60 whitespace-nowrap">
               {submitting ? "Илгээж байна..." : "Илгээх"}
             </button>
           )}
@@ -681,7 +692,7 @@ export function AddEmployeeRequestDialog({
 
       {previewOpen ? (
         <DialogPortal>
-          <div className="fixed inset-0 z-[120] flex items-center justify-center ">
+          <div className="fixed inset-0 z-120 flex items-center justify-center ">
             <button
               type="button"
               aria-label="Preview close overlay"
@@ -699,8 +710,7 @@ export function AddEmployeeRequestDialog({
                 <button
                   type="button"
                   onClick={() => setPreviewOpen(false)}
-                  className="w-8 h-8 rounded-lg flex items-center justify-center text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors"
-                >
+                  className="w-8 h-8 rounded-lg flex items-center justify-center text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors">
                   <FiX className="text-lg" />
                 </button>
               </div>

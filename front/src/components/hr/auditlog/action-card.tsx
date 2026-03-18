@@ -3,7 +3,7 @@
 import type { ActionConfig } from "@/lib/types";
 import { phaseBadge } from "@/utils/auditlog";
 
-import { DocRowIcon, EditIcon, TrashIcon } from "@/components/icons";
+import { DocRowIcon, EditIcon } from "@/components/icons";
 
 export function AuditActionCard({
   action,
@@ -27,8 +27,7 @@ export function AuditActionCard({
           {actionLabel}
         </p>
         <span
-          className={`text-xs px-2.5 py-1 rounded-full font-medium ${phaseBadge(action.phase)}`}
-        >
+          className={`text-xs px-2.5 py-1 rounded-full font-medium ${phaseBadge(action.phase)}`}>
           {action.phase}
         </span>
       </div>
@@ -42,8 +41,7 @@ export function AuditActionCard({
             action.triggerFields.map((field) => (
               <span
                 key={field}
-                className="px-2.5 py-1 rounded-lg border border-slate-200 bg-slate-50 text-slate-500 text-xs"
-              >
+                className="px-2.5 py-1 rounded-lg border border-slate-200 bg-slate-50 text-slate-500 text-xs">
                 {field}
               </span>
             ))
@@ -64,8 +62,7 @@ export function AuditActionCard({
             action.recipients.map((recipient) => (
               <span
                 key={recipient}
-                className="px-2.5 py-1 rounded-lg border border-slate-200 bg-slate-50 text-slate-500 text-xs"
-              >
+                className="px-2.5 py-1 rounded-lg border border-slate-200 bg-slate-50 text-slate-500 text-xs">
                 {recipient}
               </span>
             ))
@@ -99,8 +96,7 @@ export function AuditActionCard({
 
       <button
         onClick={() => onSendRequest(action)}
-        className="mt-auto flex items-center justify-center gap-2 py-2.5 rounded-xl border border-slate-200 bg-black text-white text-sm font-medium cursor-pointer transition-colors"
-      >
+        className="mt-auto flex items-center justify-center gap-2 py-2.5 rounded-xl border border-slate-200 bg-black text-white text-sm font-medium cursor-pointer transition-colors">
         <EditIcon />
         Хүсэлт илгээх
       </button>

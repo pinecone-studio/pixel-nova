@@ -10,7 +10,6 @@ import {
   BiLineChart,
   BiLockAlt,
   BiSearch,
-  BiSolidBadgeCheck,
   BiUserPlus,
 } from "react-icons/bi";
 import {
@@ -44,7 +43,7 @@ import {
 } from "react-icons/hi";
 import { LuWalletCards } from "react-icons/lu";
 import { MdApartment } from "react-icons/md";
-import { PiMedal, PiWarningCircleBold } from "react-icons/pi";
+import { PiWarningCircleBold } from "react-icons/pi";
 import { TbFileAnalytics } from "react-icons/tb";
 
 type IconProps = {
@@ -74,6 +73,10 @@ export const Heltes = withDefaults(MdApartment, "h-5 w-5 text-[#111827]");
 export const Salbar = withDefaults(FiMapPin, "h-5 w-5 text-[#111827]");
 export const AjildOrson = withDefaults(FiCalendar, "h-5 w-5 text-[#111827]");
 export const Ajillasan = withDefaults(FiClock, "h-5 w-5 text-[#111827]");
+export const AjiltniiCode = withDefaults(
+  HiOutlineIdentification,
+  "h-5 w-5 text-[#00C0A8]",
+);
 
 export const Email = withDefaults(FiMail, "h-5 w-5 text-[#111827]");
 export const TursunUdur = withDefaults(FiCalendar, "h-5 w-5 text-[#111827]");
@@ -91,8 +94,7 @@ export const Senior = () => {
       height="12"
       viewBox="0 0 12 12"
       fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-    >
+      xmlns="http://www.w3.org/2000/svg">
       <path
         d="M8 10V2C8 1.73478 7.89464 1.48043 7.70711 1.29289C7.51957 1.10536 7.26522 1 7 1H5C4.73478 1 4.48043 1.10536 4.29289 1.29289C4.10536 1.48043 4 1.73478 4 2V10"
         stroke="black"
@@ -118,8 +120,7 @@ export const Idevhtei = () => {
       height="12"
       viewBox="0 0 12 12"
       fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-    >
+      xmlns="http://www.w3.org/2000/svg">
       <g clipPath="url(#clip0_588_2600)">
         <path
           d="M6 11C8.76142 11 11 8.76142 11 6C11 3.23858 8.76142 1 6 1C3.23858 1 1 3.23858 1 6C1 8.76142 3.23858 11 6 11Z"
@@ -166,8 +167,7 @@ export const Signature = () => {
       height="44"
       viewBox="0 0 44 44"
       fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-    >
+      xmlns="http://www.w3.org/2000/svg">
       <mask id="path-1-inside-1_785_1485" fill="white">
         <path d="M0 16C0 7.16344 7.16344 0 16 0H28C36.8366 0 44 7.16344 44 16V28C44 36.8366 36.8366 44 28 44H16C7.16344 44 0 36.8366 0 28V16Z" />
       </mask>
@@ -199,8 +199,7 @@ export const EmployeeCode = () => {
       height="44"
       viewBox="0 0 44 44"
       fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-    >
+      xmlns="http://www.w3.org/2000/svg">
       <mask id="path-1-inside-1_588_2667" fill="white">
         <path d="M0 16C0 7.16344 7.16344 0 16 0H28C36.8366 0 44 7.16344 44 16V28C44 36.8366 36.8366 44 28 44H16C7.16344 44 0 36.8366 0 28V16Z" />
       </mask>
@@ -369,8 +368,7 @@ export function EpasLogo({ className = "h-9 w-9" }: { className?: string }) {
       height="36"
       viewBox="0 0 36 36"
       fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-    >
+      xmlns="http://www.w3.org/2000/svg">
       <mask id="path-1-inside-1_985_4405" fill="white">
         <path d="M0 12C0 5.37258 5.37258 0 12 0H24C30.6274 0 36 5.37258 36 12V24C36 30.6274 30.6274 36 24 36H12C5.37258 36 0 30.6274 0 24V12Z" />
       </mask>
@@ -446,8 +444,7 @@ export const AnnouncementIcon = () => {
       height="20"
       viewBox="0 0 20 20"
       fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-    >
+      xmlns="http://www.w3.org/2000/svg">
       <path
         d="M9.16667 5C11.7011 5.06529 14.1783 4.23959 16.1667 2.66667C16.2905 2.57381 16.4377 2.51727 16.5918 2.50337C16.746 2.48947 16.9009 2.51877 17.0393 2.58798C17.1778 2.65719 17.2942 2.76358 17.3755 2.89522C17.4569 3.02687 17.5 3.17857 17.5 3.33333V13.3333C17.5 13.4881 17.4569 13.6398 17.3755 13.7714C17.2942 13.9031 17.1778 14.0095 17.0393 14.0787C16.9009 14.1479 16.746 14.1772 16.5918 14.1633C16.4377 14.1494 16.2905 14.0929 16.1667 14C14.1783 12.4271 11.7011 11.6014 9.16667 11.6667H4.16667C3.72464 11.6667 3.30072 11.4911 2.98816 11.1785C2.67559 10.866 2.5 10.442 2.5 10V6.66667C2.5 6.22464 2.67559 5.80072 2.98816 5.48816C3.30072 5.17559 3.72464 5 4.16667 5H9.16667Z"
         stroke="#00C0A8"
