@@ -11,6 +11,12 @@ export function EmployeeDocumentsSection({
   documents: Document[];
   authToken: string;
 }) {
+  const recentDocuments = [...documents]
+    .sort(
+      (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+    )
+    .slice(0, 5);
+
   return (
     <section className="mx-auto flex w-full max-w-[1056px] flex-col gap-6">
       <div className="flex items-center gap-4">
@@ -18,13 +24,13 @@ export function EmployeeDocumentsSection({
           Бичиг Баримтууд
         </h2>
         <span className="rounded-full border border-[#233246] bg-[#162130] px-4 py-1 text-[14px] font-medium text-[#94A3B8]">
-          {documents.length} баримт
+          {recentDocuments.length} баримт
         </span>
       </div>
 
       <div className="flex flex-col divide-y divide-white/10 rounded-xl border border-white/5 bg-[#0B0E14]/40">
-        {documents.length > 0 ? (
-          documents.map((document) => (
+        {recentDocuments.length > 0 ? (
+          recentDocuments.map((document) => (
             <ContractPreview
               key={document.id}
               document={document}

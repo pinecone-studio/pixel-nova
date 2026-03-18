@@ -4,7 +4,6 @@ import type { PointerEvent } from "react";
 import {
   BiCalendar,
   BiChevronDown,
-  BiChevronRight,
   BiFile,
   BiPlus,
 } from "react-icons/bi";
@@ -173,12 +172,21 @@ function UploadArea({
   label,
   subtitle,
   variant = "dark",
+  value,
+  onChange,
+  error,
+  disabled,
 }: {
   label: string;
   subtitle?: string;
   variant?: "dark" | "light";
+  value?: File | null;
+  onChange?: (file: File | null) => void;
+  error?: string;
+  disabled?: boolean;
 }) {
   const isLight = variant === "light";
+  const inputId = `upload-${label.replace(/\s+/g, "-").toLowerCase()}`;
   return (
     <div className="flex flex-col gap-1.5 mt-9 w-[477px] h-[202px] justify-between">
       <span
@@ -188,6 +196,16 @@ function UploadArea({
       >
         {label}
       </span>
+      <input
+        id={inputId}
+        type="file"
+        className="hidden"
+        disabled={disabled}
+        onChange={(event) => {
+          const file = event.target.files?.[0] ?? null;
+          onChange?.(file);
+        }}
+      />
       <div
         className={`border border-dashed rounded-xl w-[477px] h-[168px] flex flex-col items-center justify-evenly mt-[10px] transition-colors cursor-pointer ${
           isLight
@@ -224,6 +242,9 @@ function UploadArea({
           Оруулах
         </button>
       </div>
+      {error ? (
+        <p className="text-xs text-red-500">{error}</p>
+      ) : null}
     </div>
   );
 }
@@ -232,9 +253,12 @@ export const Request = ({ employee }: { employee?: Employee }) => {
   const [activeTab, setActiveTab] = useState<string | null>(null);
   const [submitted, setSubmitted] = useState(false);
   const [sendError, setSendError] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
   const [clearanceType, setClearanceType] = useState("");
   const [clearanceReason, setClearanceReason] = useState("");
+  const [clearanceFile, setClearanceFile] = useState<File | null>(null);
+  const [tripFile, setTripFile] = useState<File | null>(null);
 
   const [contractTemplates, setContractTemplates] = useState<string[]>([]);
   const [contractWarning, setContractWarning] = useState<string | null>(null);
@@ -428,9 +452,12 @@ export const Request = ({ employee }: { employee?: Employee }) => {
   function resetForm() {
     setSubmitted(false);
     setSendError(null);
+    setFieldErrors({});
     setActiveTab(null);
     setClearanceType("");
     setClearanceReason("");
+    setClearanceFile(null);
+    setTripFile(null);
     setContractTemplates([]);
     setContractWarning(null);
     setSignatureMode("redraw");
@@ -520,6 +547,7 @@ export const Request = ({ employee }: { employee?: Employee }) => {
   async function handleSend() {
     setSendError(null);
     setContractWarning(null);
+    setFieldErrors({});
 
     try {
       if (activeTab === "Гэрээний хүсэлт") {
@@ -573,6 +601,15 @@ export const Request = ({ employee }: { employee?: Employee }) => {
         });
         pushToast("Гэрээний хүсэлт амжилттай илгээгдлээ.");
       } else if (activeTab === "Тойрох хуудас") {
+        const nextErrors: Record<string, string> = {};
+        if (!clearanceType.trim()) nextErrors.clearanceType = "Заавал бөглөнө.";
+        if (!clearanceFile) nextErrors.clearanceFile = "Файл хавсаргана уу.";
+        if (!clearanceReason.trim())
+          nextErrors.clearanceReason = "Заавал бөглөнө.";
+        if (Object.keys(nextErrors).length > 0) {
+          setFieldErrors(nextErrors);
+          return;
+        }
         await sendRequest({
           type: `Тойрох хуудас${clearanceType ? ` - ${clearanceType}` : ""}`,
           startTime: new Date().toISOString(),
@@ -580,6 +617,14 @@ export const Request = ({ employee }: { employee?: Employee }) => {
           reason: clearanceReason,
         });
       } else if (activeTab === "Томилолт") {
+        const nextErrors: Record<string, string> = {};
+        if (!tripFile) nextErrors.tripFile = "Файл хавсаргана уу.";
+        if (!clearanceReason.trim())
+          nextErrors.clearanceReason = "Заавал бөглөнө.";
+        if (Object.keys(nextErrors).length > 0) {
+          setFieldErrors(nextErrors);
+          return;
+        }
         await sendRequest({
           type: "Томилолт",
           startTime: new Date().toISOString(),
@@ -680,16 +725,16 @@ export const Request = ({ employee }: { employee?: Employee }) => {
       {submitted && activeTab && (
         <div className="fixed inset-0 flex items-center justify-center bg-black/60 backdrop-blur-sm z-50">
           <div
-            className={`w-90 rounded-2xl ${DIALOG_BG} text-white p-8 border ${DIALOG_BORDER} shadow-2xl flex flex-col items-center gap-4`}
+            className={`w-90 rounded-2xl bg-white text-[#111827] p-8 border border-[#E5E7EB] shadow-2xl flex flex-col items-center gap-4`}
           >
             <div className="w-14 h-14 rounded-full bg-[#00CC99]/15 border border-[#00CC99]/30 flex items-center justify-center">
               <FiCheck className="w-7 h-7 text-[#00CC99]" />
             </div>
             <div className="text-center">
-              <p className="text-white font-semibold text-lg">
+              <p className="text-[#111827] font-semibold text-lg">
                 Хүсэлт амжилттай илгээгдлээ
               </p>
-              <p className="text-gray-500 text-sm mt-1">
+              <p className="text-[#6B7280] text-sm mt-1">
                 Таны хүсэлтийг хянаж үзнэ
               </p>
             </div>
@@ -728,8 +773,22 @@ export const Request = ({ employee }: { employee?: Employee }) => {
               labelClassName="text-[18px] font-medium text-[#000000] w-[186px] h-[24px]"
               inputClassName={LIGHT_INPUT_CLASS}
             />
+            {fieldErrors.clearanceType ? (
+              <p className="text-xs text-red-500">
+                {fieldErrors.clearanceType}
+              </p>
+            ) : null}
 
-            <UploadArea label="Файл хавсаргах" variant="light" />
+            <UploadArea
+              label="Файл хавсаргах"
+              variant="light"
+              value={clearanceFile}
+              onChange={(file) => {
+                setClearanceFile(file);
+                setFieldErrors((prev) => ({ ...prev, clearanceFile: "" }));
+              }}
+              error={fieldErrors.clearanceFile}
+            />
 
             <div className="w-[477px] h-[108px] flex flex-col mt-9">
               <label className="text-[18px] flex items-center h-6 w-full font-medium text-[#111827]">
@@ -738,10 +797,18 @@ export const Request = ({ employee }: { employee?: Employee }) => {
               <textarea
                 rows={3}
                 placeholder="Шалтгаанаа бичнэ үү..."
-                className={LIGHT_TEXTAREA_CLASS}
+                className={`${LIGHT_TEXTAREA_CLASS} ${fieldErrors.clearanceReason ? "border-red-400 focus:border-red-500" : ""}`}
                 value={clearanceReason}
-                onChange={(e) => setClearanceReason(e.target.value)}
+                onChange={(e) => {
+                  setClearanceReason(e.target.value);
+                  setFieldErrors((prev) => ({ ...prev, clearanceReason: "" }));
+                }}
               />
+              {fieldErrors.clearanceReason ? (
+                <p className="text-xs text-red-500">
+                  {fieldErrors.clearanceReason}
+                </p>
+              ) : null}
             </div>
 
             {sendError && (
@@ -779,6 +846,12 @@ export const Request = ({ employee }: { employee?: Employee }) => {
               label="Файл хавсаргах"
               subtitle="Файл хавсаргана уу."
               variant="light"
+              value={tripFile}
+              onChange={(file) => {
+                setTripFile(file);
+                setFieldErrors((prev) => ({ ...prev, tripFile: "" }));
+              }}
+              error={fieldErrors.tripFile}
             />
 
             {sendError && (

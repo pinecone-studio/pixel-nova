@@ -1,11 +1,12 @@
 "use client";
 
 import { useMutation } from "@apollo/client/react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { BiArrowBack, BiUser } from "react-icons/bi";
+import { BiUser } from "react-icons/bi";
 
+import { AuthShell } from "@/components/auth/AuthShell";
+import { Button } from "@/components/ui/button";
 import { LOGIN_WITH_CODE } from "@/graphql/mutations";
 import type { AuthSession } from "@/lib/types";
 
@@ -19,8 +20,8 @@ export default function EmployeeAuthPage() {
     loginWithCode: AuthSession;
   }>(LOGIN_WITH_CODE);
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
+  async function handleSubmit(event: React.FormEvent) {
+    event.preventDefault();
     const code = employeeCode.trim().toUpperCase();
     if (!code) return;
 
@@ -40,78 +41,73 @@ export default function EmployeeAuthPage() {
       localStorage.setItem("epas_employee_code", code);
       router.push("/employee");
     } catch (err) {
-      const msg =
+      const message =
         err instanceof Error ? err.message : "Нэвтрэхэд алдаа гарлаа.";
+
       if (
-        msg.toLowerCase().includes("fetch") ||
-        msg.toLowerCase().includes("network") ||
-        msg.toLowerCase().includes("failed")
+        message.toLowerCase().includes("fetch") ||
+        message.toLowerCase().includes("network") ||
+        message.toLowerCase().includes("failed")
       ) {
         setError(
           "Backend-т холбогдож чадсангүй. API ажиллаж байгаа эсэхийг шалгана уу.",
         );
       } else {
-        setError(msg);
+        setError(message);
       }
     }
   }
 
   return (
-    <div className="min-h-screen bg-[#0A0A0F] flex items-center justify-center px-4">
-      <div className="w-full max-w-sm flex flex-col gap-8">
-        <div className="flex flex-col items-center gap-3">
-          <div className="w-14 h-14 rounded-2xl bg-[#00CC99]/10 border border-[#00CC99]/20 flex items-center justify-center">
-            <BiUser className="w-7 h-7 text-[#00CC99]" />
-          </div>
-          <div className="text-center">
-            <h1 className="text-white text-2xl font-bold">Ажилтны нэвтрэх</h1>
-            <p className="text-[#4A4A6A] text-sm mt-1">
-              Ажилтны кодоо оруулаад үргэлжлүүлнэ үү
-            </p>
-          </div>
+    <AuthShell
+      accentLabel="Employee access"
+      title="Ажилтны нэвтрэх"
+      description="Ажилтны кодоо оруулаад өөрийн профайл, баримт бичиг, аудитын түүх рүү орно."
+      icon={<BiUser className="h-7 w-7" />}
+      sideTitle="Employee workspace"
+      sideDescription="Ажилтан өөрийн материал руу илүү шууд, вебийн бусад хуудсуудтай ижил хэмнэлтэйгээр нэвтрэхээр шинэчилсэн."
+      sideBadges={["Documents", "Profile", "Audit history"]}
+    >
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div className="space-y-2">
+          <label
+            htmlFor="employee-code"
+            className="block text-sm font-medium text-[#111827]"
+          >
+            Ажилтны код
+          </label>
+          <input
+            id="employee-code"
+            type="text"
+            value={employeeCode}
+            onChange={(event) => setEmployeeCode(event.target.value)}
+            placeholder="Жишээ: EMP-0042"
+            autoFocus
+            className="h-12 w-full rounded-2xl border border-black/10 bg-[#F8FAFC] px-4 text-sm text-[#111827] outline-none transition-colors placeholder:text-[#77818C] focus:border-[#00C0A8] focus:bg-white"
+          />
+          <p className="text-xs leading-5 text-[rgba(63,65,69,0.72)]">
+            Кодыг том, жижиг үсэг ялгахгүйгээр шалгана.
+          </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-          <div className="flex flex-col gap-1.5">
-            <label className="text-white/70 text-sm font-medium">
-              Ажилтны код
-            </label>
-            <input
-              type="text"
-              value={employeeCode}
-              onChange={(e) => setEmployeeCode(e.target.value)}
-              placeholder="Жишээ: EMP-0042"
-              autoFocus
-              className="w-full h-11 px-4 rounded-xl bg-[#0d0d1a] border border-[#1a1a30] text-white placeholder:text-[#4A4A6A] focus:outline-none focus:border-[#00CC99]/50 transition-colors text-sm"
-            />
+        {error ? (
+          <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
+            {error}
           </div>
+        ) : null}
 
-          {error && (
-            <div className="px-4 py-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-sm">
-              {error}
-            </div>
-          )}
-
-          <button
-            type="submit"
-            disabled={loading || !employeeCode.trim()}
-            className="w-full h-11 rounded-xl bg-[#00CC99] hover:bg-[#00b386] disabled:opacity-50 disabled:cursor-not-allowed text-[#0A0A0F] font-semibold text-sm transition-colors flex items-center justify-center gap-2"
-          >
-            {loading ? (
-              <span className="w-4 h-4 border-2 border-[#0A0A0F]/30 border-t-[#0A0A0F] rounded-full animate-spin" />
-            ) : null}
-            {loading ? "Шалгаж байна..." : "Нэвтрэх"}
-          </button>
-        </form>
-
-        <Link
-          href="/"
-          className="flex items-center justify-center gap-1.5 text-[#4A4A6A] hover:text-white text-sm transition-colors"
+        <Button
+          type="submit"
+          size="lg"
+          disabled={loading || !employeeCode.trim()}
+          className="h-12 w-full rounded-2xl bg-[#111827] text-white hover:bg-[#0f172a]"
         >
-          <BiArrowBack className="w-4 h-4" />
-          Буцах
-        </Link>
-      </div>
-    </div>
+          {loading ? (
+            <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+          ) : null}
+          {loading ? "Шалгаж байна..." : "Нэвтрэх"}
+        </Button>
+      </form>
+    </AuthShell>
   );
 }

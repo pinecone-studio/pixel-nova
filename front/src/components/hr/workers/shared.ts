@@ -9,13 +9,19 @@ export type EmployeeFormState = {
   employeeCode: string;
   firstName: string;
   lastName: string;
+  firstNameEng: string;
+  lastNameEng: string;
   email: string;
   department: string;
   branch: string;
   jobTitle: string;
   level: string;
   hireDate: string;
+  terminationDate: string;
   status: string;
+  birthDayAndMonth: string;
+  entraId: string;
+  github: string;
 };
 
 export const DEPARTMENTS = [
@@ -67,6 +73,8 @@ export function employeeToForm(employee?: Employee | null): EmployeeFormState {
     employeeCode: employee?.employeeCode ?? "",
     firstName: employee?.firstName ?? "",
     lastName: employee?.lastName ?? "",
+    firstNameEng: employee?.firstNameEng ?? "",
+    lastNameEng: employee?.lastNameEng ?? "",
     email: employee?.email ?? "",
     department: employee?.department ?? DEPARTMENTS[0],
     branch: employee?.branch ?? BRANCHES[0],
@@ -74,6 +82,10 @@ export function employeeToForm(employee?: Employee | null): EmployeeFormState {
     level: employee?.level ?? LEVELS[0],
     hireDate:
       employee?.hireDate?.slice(0, 10) ?? new Date().toISOString().slice(0, 10),
+    terminationDate: employee?.terminationDate?.slice(0, 10) ?? "",
     status: employee?.status ?? STATUSES[0],
+    birthDayAndMonth: employee?.birthDayAndMonth ?? "",
+    entraId: employee?.entraId ?? "",
+    github: employee?.github ?? "",
   };
 }
