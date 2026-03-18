@@ -1,4 +1,5 @@
 import type { ChangeEvent, JSX, ReactNode } from "react";
+import { DatePickerField } from "@/components/hr/auditlog/date-picker";
 import { FieldError } from "./FieldError";
 
 export type SalaryChangeFormProps = {
@@ -11,12 +12,6 @@ export type SalaryChangeFormProps = {
   setFirstName: (v: string) => void;
   email: string;
   setEmail: (v: string) => void;
-  registerNo: string;
-  setRegisterNo: (v: string) => void;
-  phone: string;
-  setPhone: (v: string) => void;
-  branch: string;
-  setBranch: (v: string) => void;
   dept: string;
   setDept: (v: string) => void;
   currentPosition: string;
@@ -62,12 +57,6 @@ export function SalaryChangeForm({
   setFirstName,
   email,
   setEmail,
-  registerNo,
-  setRegisterNo,
-  phone,
-  setPhone,
-  branch,
-  setBranch,
   workStartDate,
   setWorkStartDate,
   workTotalDuration,
@@ -141,19 +130,18 @@ export function SalaryChangeForm({
           <div className="grid min-w-0 grid-cols-2 gap-[16px]">
             <div className="flex min-w-0 flex-col gap-[8px]">
               <label className={labelClass}>Ажиллаж эхэлсэн хугацаа</label>
-              <input
-                value={registerNo}
-                onChange={(e) => setRegisterNo(e.target.value)}
-                placeholder="Хугацаа оруулах"
-                className={getInputClass("workStartDate")}
+              <DatePickerField
+                value={workStartDate}
+                onChange={setWorkStartDate}
+                inputClass={getInputClass("workStartDate")}
               />
               <FieldError message={errors.workStartDate} />
             </div>
             <div className="flex min-w-0 flex-col gap-[8px]">
               <label className={labelClass}>Ажилласан нийт хугацаа</label>
               <input
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
+                value={workTotalDuration}
+                onChange={(e) => setWorkTotalDuration(e.target.value)}
                 placeholder="Хугацаа оруулах"
                 className={getInputClass("workTotalDuration")}
               />
@@ -164,8 +152,8 @@ export function SalaryChangeForm({
             <div className="flex min-w-0 flex-col gap-[8px]">
               <label className={labelClass}>Өмнөх цалин</label>
               <input
-                value={registerNo}
-                onChange={(e) => setRegisterNo(e.target.value)}
+                value={prevSalary}
+                onChange={(e) => setPrevSalary(e.target.value)}
                 placeholder="9999999"
                 className={getInputClass("prevSalary")}
               />
@@ -174,8 +162,8 @@ export function SalaryChangeForm({
             <div className="flex min-w-0 flex-col gap-[8px]">
               <label className={labelClass}>Шинэ цалин</label>
               <input
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
+                value={nextSalary}
+                onChange={(e) => setNextSalary(e.target.value)}
                 placeholder="9999999"
                 className={getInputClass("nextSalary")}
               />
@@ -185,8 +173,8 @@ export function SalaryChangeForm({
           <div className="flex min-w-0 flex-col gap-[8px]">
             <label className={labelClass}>Цалин өөрчлөгдсөн дүн</label>
             <input
-              value={branch}
-              onChange={(e) => setBranch(e.target.value)}
+              value={salaryDelta}
+              onChange={(e) => setSalaryDelta(e.target.value)}
               placeholder="9999999"
               className={getInputClass("salaryDelta")}
             />
@@ -233,11 +221,10 @@ export function SalaryChangeForm({
           <div className="grid min-w-0 grid-cols-2 gap-[16px]">
             <div className="flex min-w-0 flex-col gap-[8px]">
               <label className={labelClass}>Ажиллаж эхэлсэн хугацаа</label>
-              <input
+              <DatePickerField
                 value={workStartDate}
-                onChange={(e) => setWorkStartDate(e.target.value)}
-                placeholder="Хугацаа оруулах"
-                className={getInputClass("workStartDate")}
+                onChange={setWorkStartDate}
+                inputClass={getInputClass("workStartDate")}
               />
               <FieldError message={errors.workStartDate} />
             </div>
