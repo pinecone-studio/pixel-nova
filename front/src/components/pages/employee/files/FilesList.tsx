@@ -42,10 +42,12 @@ export function FilesList({
   return (
     <div
       style={{
-        borderRadius: 14,
+        borderRadius: 16,
         overflow: "hidden",
-        border: "1px solid #E5E7EB",
+        border: "1px solid #DFDFDF",
         background: "white",
+        boxShadow:
+          "0px 1px 3px 0px rgba(0,0,0,0.08), 0px 1px 2px -1px rgba(0,0,0,0.08)",
       }}
     >
       {documents.map((document, index) => (

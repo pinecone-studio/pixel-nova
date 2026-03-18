@@ -49,28 +49,36 @@ export default function EmployeeFilesPage() {
     <div
       style={{
         minHeight: "100vh",
-        background: "#F5F7FB",
-        padding: "32px 40px",
+        background: "#FAFAFA",
+        padding: "33px 16px 80px",
         fontFamily: "inherit",
       }}
     >
-      <FilesPageHeader employeeName={employeeName} />
+      <div
+        style={{
+          width: "100%",
+          maxWidth: 1056,
+          margin: "0 auto",
+        }}
+      >
+        <FilesPageHeader employeeName={employeeName} />
 
-      <FilesToolbar
-        search={search}
-        filter={filter}
-        onSearchChange={setSearch}
-        onFilterChange={setFilter}
-      />
+        <FilesToolbar
+          search={search}
+          filter={filter}
+          onSearchChange={setSearch}
+          onFilterChange={setFilter}
+        />
 
-      <FilesSectionHeader count={filteredDocuments.length} />
+        <FilesSectionHeader count={filteredDocuments.length} />
 
-      <FilesList
-        loading={loading}
-        error={error}
-        documents={filteredDocuments}
-        authToken={authToken}
-      />
+        <FilesList
+          loading={loading}
+          error={error}
+          documents={filteredDocuments}
+          authToken={authToken}
+        />
+      </div>
     </div>
   );
 }

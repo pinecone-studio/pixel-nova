@@ -8,7 +8,7 @@ import { useEffect, useState } from "react";
 import { buildGraphQLHeaders } from "@/lib/apollo-client";
 import { GET_ME } from "@/graphql/queries";
 import type { Employee } from "@/lib/types";
-import { formatBranch, formatDepartment, formatLevel } from "@/lib/labels";
+import { formatBranch, formatDepartment } from "@/lib/labels";
 
 import {
   AjildOrson,
@@ -109,7 +109,7 @@ export default function Profile() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#F5F7FB] text-[#111827] flex items-center justify-center">
+      <div className="flex min-h-screen items-center justify-center bg-[#FAFAFA] text-[#111827]">
         <div className="flex items-center gap-3 text-sm text-[#6B7280]">
           <span className="h-5 w-5 animate-spin rounded-full border-2 border-[#D1D5DB] border-t-[#111827]" />
           Профайл ачаалж байна...
@@ -126,16 +126,18 @@ export default function Profile() {
       ? `${employee.lastNameEng ?? ""} ${employee.firstNameEng ?? ""}`.trim()
       : "Ажилтан";
 
-  const workInfo = [
+  const personalInfo = [
     {
       icon: <EmployeeCode />,
       label: "Ажилтны код",
       value: employee?.employeeCode ?? "Мэдээлэлгүй",
+      selfContainedIcon: true,
     },
     {
       icon: <Signature />,
-      label: "Гарын үсэг",
-      value: employee?.firstName ? formatLevel(employee.level) : "Мэдээлэлгүй",
+      label: "Гарын үсэг харах",
+      value: employee ? "******" : "Мэдээлэлгүй",
+      selfContainedIcon: true,
     },
     {
       icon: <Email />,
@@ -154,11 +156,11 @@ export default function Profile() {
     },
   ];
 
-  const personalInfo = [
+  const workInfo = [
     {
       icon: <AlbanTushaal />,
       label: "Албан тушаал",
-      value: employee?.department ?? "Мэдээлэлгүй",
+      value: employee?.jobTitle ?? "Мэдээлэлгүй",
     },
     {
       icon: <Heltes />,
@@ -185,113 +187,121 @@ export default function Profile() {
   ];
 
   return (
-    <div className="min-h-screen bg-[#F5F7FB] text-[#111827] pt-[32px] pb-30 font-sans">
-      <div className="mx-auto w-[1056px] max-w-full">
-        <div className="flex h-[62px] w-[1056px] flex-col gap-2">
-          <h1 className="h-[30px] text-3xl font-bold text-[#111827]">
+    <div className="min-h-screen bg-[#FAFAFA] px-4 pb-[80px] pt-[33px] font-sans text-[#111827]">
+      <div className="mx-auto w-full max-w-[1056px]">
+        <div className="flex min-h-[62px] flex-col gap-2">
+          <h1 className="text-[28px] font-semibold leading-[30px] tracking-[-0.28px] text-[#121316]">
             Профайл
           </h1>
-          <p className="h-[24px] text-[#6B7280]">
+          <p className="text-[16px] leading-6 tracking-[-0.16px] text-black/70">
             Таны хувийн болон ажлын мэдээлэл.
           </p>
         </div>
 
-        <div className="mt-[32px] flex h-[168px] w-[1056px] items-center rounded-2xl border border-[#E5E7EB] bg-white p-6">
-          <div className="flex items-center gap-6">
+        <div className="relative mt-8 overflow-hidden rounded-2xl border border-[#DFDFDF] bg-white shadow-[0px_1px_3px_0px_rgba(0,0,0,0.08),0px_1px_2px_-1px_rgba(0,0,0,0.08)] md:h-[168px]">
+          <div className="h-28 bg-[linear-gradient(90deg,rgba(248,241,232,0.88)_0%,rgba(246,243,237,0.72)_52%,rgba(255,255,255,0.94)_100%)] md:h-36" />
+          <div className="-mt-14 flex flex-col gap-5 px-5 pb-5 md:absolute md:inset-x-0 md:top-8 md:mt-0 md:flex-row md:items-center md:gap-6 md:px-10 md:pb-0">
             {employee?.imageUrl ? (
               <Image
                 src={employee.imageUrl}
                 alt="Профайл"
                 width={112}
                 height={112}
-                className="h-28 w-28 rounded-full border-2 border-[#E5E7EB] object-cover"
+                className="h-28 w-28 rounded-full border border-white object-cover shadow-[0px_10px_24px_rgba(0,0,0,0.12)]"
                 unoptimized
               />
             ) : (
-              <div className="flex h-28 w-28 items-center justify-center rounded-full border-2 border-[#E5E7EB] bg-[#F3F4F6] text-xl font-semibold text-[#111827]">
+              <div className="flex h-28 w-28 items-center justify-center rounded-full border border-white bg-[#1F2126] text-[28px] font-semibold text-white shadow-[0px_10px_24px_rgba(0,0,0,0.12)]">
                 {getInitials(employee)}
               </div>
             )}
-            <div className="h-[100px] w-[840px]">
-              <h2 className="h-[30px] text-2xl font-bold text-[#111827]">
+            <div className="min-w-0 flex-1 md:pb-1">
+              <h2 className="text-[22px] font-semibold leading-[30px] tracking-[-0.088px] text-[#121316]">
                 {displayName}
               </h2>
-              <p className="h-[24px] text-sm text-[#6B7280]">
+              <p className="text-[16px] leading-6 tracking-[-0.16px] text-black/70">
                 {displayNameEng}
               </p>
-              <div className="flex items-end gap-2 flex-wrap">
-                <span className="flex h-[38px] items-center gap-1 rounded-full border border-[#E5E7EB] bg-[#F8FAFC] px-3 text-xs text-[#111827]">
-                  <Senior />{" "}
-                  {employee?.department
-                    ? formatLevel(employee.department)
-                    : "Мэдээлэлгүй"}
+              <div className="flex flex-wrap items-center gap-2 pt-[10px]">
+                <span className="flex items-center gap-1 rounded-[10px] border border-black/12 px-[13px] py-[5px] text-center text-[12px] font-medium leading-[18px] text-black/70">
+                  <Senior />
+                  {employee?.jobTitle ?? "Мэдээлэлгүй"}
                 </span>
-                <span className="flex h-[38px] items-center gap-1 rounded-full border border-[#E5E7EB] bg-[#F8FAFC] px-3 text-xs text-[#111827]">
-                  <Engineering />{" "}
+                <span className="flex items-center gap-1 rounded-[10px] border border-black/12 px-[13px] py-[5px] text-center text-[12px] font-medium leading-[18px] text-black/70">
+                  <Engineering className="h-3 w-3 text-black/70" />
                   {employee?.department
                     ? formatDepartment(employee.department)
                     : "Мэдээлэлгүй"}
                 </span>
-                <span className="flex h-[38px] items-center gap-1 rounded-full border border-[#E5E7EB] bg-[#F8FAFC] px-3 text-xs text-[#111827]">
-                  <Idevhtei /> {"Идэвхтэй"}
+                <span className="flex items-center gap-1 rounded-[10px] border border-black/12 px-[13px] py-[5px] text-center text-[12px] font-medium leading-[18px] text-black/70">
+                  <Idevhtei />
+                  {employee?.status ?? "Мэдээлэлгүй"}
                 </span>
               </div>
               {error ? (
-                <p className="mt-3 text-sm text-red-400">{error.message}</p>
+                <p className="mt-3 text-sm text-[#DC2626]">{error.message}</p>
               ) : null}
             </div>
           </div>
         </div>
 
-        <div className="mt-[32px] flex h-[475px] w-[1056px] justify-between">
-          <div className="flex w-[500px] flex-col justify-evenly rounded-2xl border border-[#E5E7EB] bg-white p-6">
-            <div className="flex h-[45px] items-center">
-              <h3 className="flex h-[24px] items-center text-lg font-semibold text-[#111827]">
+        <div className="mt-8 grid gap-8 md:grid-cols-[500px_500px] md:justify-between md:gap-[56px]">
+          <div className="overflow-hidden rounded-2xl border border-[#DFDFDF] bg-white shadow-[0px_1px_3px_0px_rgba(0,0,0,0.1),0px_1px_2px_-1px_rgba(0,0,0,0.1)] md:h-[475px] md:w-[500px]">
+            <div className="border-b border-[#DFDFDF] px-6 pb-[21px] pt-[25px]">
+              <h3 className="text-[20px] font-semibold leading-6 text-[#121316]">
                 Хувийн мэдээлэл
               </h3>
             </div>
-            <div className="h-[356px] flex flex-col justify-between">
-              {workInfo.map((item) => (
+            <div className="flex flex-col gap-1 px-6 py-6 md:h-[380px]">
+              {personalInfo.map((item) => (
                 <div
                   key={item.label}
-                  className="flex h-[68px] w-[450px] items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[#F3F4F6] text-sm text-[#111827]">
+                  className="flex min-h-[68px] items-center gap-4 rounded-2xl p-3"
+                >
+                  {item.selfContainedIcon ? (
+                    <div className="flex h-11 w-11 shrink-0 items-center justify-center">
                       {item.icon}
                     </div>
-                    <div>
-                      <p className="text-xs text-[#6B7280]">{item.label}</p>
-                      <p className="text-sm font-medium text-[#111827]">
-                        {item.value}
-                      </p>
+                  ) : (
+                    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border-2 border-black/12 bg-white text-[#111827]">
+                      {item.icon}
                     </div>
+                  )}
+                  <div className="min-w-0">
+                    <p className="text-[12px] font-medium leading-[18px] text-[#77818C]">
+                      {item.label}
+                    </p>
+                    <p className="text-[16px] font-bold leading-5 tracking-[-0.096px] text-black/90">
+                      {item.value}
+                    </p>
                   </div>
                 </div>
               ))}
             </div>
           </div>
 
-          <div className="flex w-[500px] flex-col justify-evenly rounded-2xl border border-[#E5E7EB] bg-white p-6">
-            <div className="flex h-[45px] items-center">
-              <h3 className="flex h-[24px] items-center text-lg font-semibold text-[#111827]">
+          <div className="overflow-hidden rounded-2xl border border-[#DFDFDF] bg-white shadow-[0px_1px_3px_0px_rgba(0,0,0,0.1),0px_1px_2px_-1px_rgba(0,0,0,0.1)] md:h-[475px] md:w-[500px]">
+            <div className="border-b border-[#DFDFDF] px-6 pb-[21px] pt-[25px]">
+              <h3 className="text-[20px] font-semibold leading-6 text-[#121316]">
                 Ажлын мэдээлэл
               </h3>
             </div>
-            <div className="h-[356px] flex flex-col justify-between">
-              {personalInfo.map((item) => (
+            <div className="flex flex-col gap-1 px-6 py-6 md:h-[380px]">
+              {workInfo.map((item) => (
                 <div
                   key={item.label}
-                  className="flex h-[68px] w-[450px] items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[#F3F4F6] text-sm text-[#111827]">
-                      {item.icon}
-                    </div>
-                    <div>
-                      <p className="text-xs text-[#6B7280]">{item.label}</p>
-                      <p className="text-sm font-medium text-[#111827]">
-                        {item.value}
-                      </p>
-                    </div>
+                  className="flex min-h-[68px] items-center gap-4 rounded-2xl p-3"
+                >
+                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border-2 border-black/12 bg-white text-[#111827]">
+                    {item.icon}
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-[12px] font-medium leading-[18px] text-[#77818C]">
+                      {item.label}
+                    </p>
+                    <p className="text-[16px] font-bold leading-5 tracking-[-0.096px] text-black/90">
+                      {item.value}
+                    </p>
                   </div>
                 </div>
               ))}

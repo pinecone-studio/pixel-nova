@@ -8,22 +8,31 @@ export function FilesPageHeader({
       style={{
         display: "flex",
         flexDirection: "column",
-        gap: 4,
-        marginBottom: 28,
+        gap: 8,
+        marginBottom: 32,
       }}
     >
       <p
         style={{
-          color: "#111827",
-          fontSize: 30,
-          fontWeight: 700,
-          letterSpacing: "-0.02em",
+          color: "#121316",
+          fontSize: 28,
+          lineHeight: "30px",
+          fontWeight: 600,
+          letterSpacing: "-0.28px",
           margin: 0,
         }}
       >
         Миний баримтууд
       </p>
-      <p style={{ color: "#6B7280", fontSize: 16, margin: 0 }}>
+      <p
+        style={{
+          color: "rgba(0,0,0,0.7)",
+          fontSize: 16,
+          lineHeight: "24px",
+          letterSpacing: "-0.16px",
+          margin: 0,
+        }}
+      >
         {employeeName
           ? `${employeeName} ажилтны баримтууд.`
           : "Таны бүх хөдөлмөрийн баримт бичгийг эндээс харах болон татах боломжтой."}
