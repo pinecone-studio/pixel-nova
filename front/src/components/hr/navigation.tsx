@@ -29,7 +29,7 @@ export type HrNavItem = {
 export const HR_NAV_ITEMS: HrNavItem[] = [
   {
     key: "dashboard",
-    label: "Хянах самбар",
+    label: "Хянах хэсэг",
     href: "/hr",
     icon: <GrDocument />,
   },

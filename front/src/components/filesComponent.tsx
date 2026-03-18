@@ -58,6 +58,13 @@ function stageKeyForEmployee(employee?: Employee) {
   return "onboarding";
 }
 
+function stageLabel(employee?: Employee) {
+  const key = stageKeyForEmployee(employee);
+  if (key === "offboarding") return "Ажлаас гарах үе";
+  if (key === "active") return "Ажиллах үе";
+  return "Ажилд орох үе";
+}
+
 function statusLabel(document: Document) {
   return document.storageUrl ? "Баталгаажсан" : "Ноорог";
 }
@@ -527,40 +534,38 @@ export function FilesComponent() {
     );
   }, [filtered]);
 
+  const verifiedCount = useMemo(
+    () => filtered.filter((row) => Boolean(row.document.storageUrl)).length,
+    [filtered],
+  );
+
+  const verifiedPercent =
+    filtered.length === 0
+      ? 0
+      : Math.round((verifiedCount / filtered.length) * 100);
+
   const stages = [
     {
       label: "Ажилд орох үе",
-      sub: "Онбординг",
       count: stageCounts.onboarding,
-      icon: <OnboardIcon />,
-      iconBg: "bg-emerald-500",
-      border: "border-emerald-600/40",
-      bg: "bg-linear-to-br from-emerald-100 to-white",
+      icon: <OnboardIcon className="h-5 w-5 text-[#121316]" />,
     },
     {
       label: "Ажиллах үе",
-      sub: "Идэвхтэй",
       count: stageCounts.active,
-      icon: <ActiveIcon />,
-      iconBg: "bg-cyan-500",
-      border: "border-cyan-600/40",
-      bg: "bg-linear-to-br from-cyan-100 to-white",
+      icon: <ActiveIcon className="h-5 w-5 text-[#121316]" />,
     },
     {
       label: "Ажлаас гарах үе",
-      sub: "Оффбординг",
       count: stageCounts.offboarding,
-      icon: <CiWarning className="w-6 h-6" />,
-      iconBg: "bg-red-500",
-      border: "border-red-600/40",
-      bg: "bg-linear-to-br from-red-100 to-white",
+      icon: <CiWarning className="h-5 w-5 text-[#121316]" />,
     },
   ];
 
   const isLoading = loading || loadingRows;
 
   return (
-    <div className="flex gap-5 min-h-screen bg-[#F4F5F7] text-slate-900 font-sans p-0 animate-fade-up">
+    <div className="flex min-h-full flex-col gap-6 text-slate-900 animate-fade-up xl:flex-row">
       {showModal && (
         <NewDocModal
           employees={employees}
@@ -583,88 +588,82 @@ export function FilesComponent() {
         />
       )}
 
-      {/* Left panel */}
-      <div className="w-125 shrink-0 flex flex-col gap-5">
-        <div>
-          <p className="text-slate-700 text-sm font-semibold mb-3">
-            Нийт баримт бичиг
-          </p>
-          <div className="rounded-2xl border border-slate-200 bg-white p-5 flex flex-col justify-between h-44 shadow-[0_1px_2px_rgba(15,23,42,0.06)]">
-            <div className="w-12 h-12 rounded-2xl border border-[#3F4145CC] bg-white flex items-center justify-center text-slate-600">
-              <ReqIcon className="w-7 h-7" />
-            </div>
-            <div>
-              <p className="text-5xl font-semibold text-slate-900">
-                {filtered.length}
-              </p>
-              <div className="flex items-center justify-between mt-1">
-                <p className="text-slate-400 text-sm">Нийт баримт</p>
-                <p className="text-emerald-500 text-sm font-semibold">
-                  100% Баталгаажсан
+      <div className="w-full shrink-0 xl:w-[415px]">
+        <div className="flex flex-col gap-4">
+          <section>
+            <p className="mb-4 text-[16px] font-semibold leading-5 text-[#3f4145]">
+              Нийт баримт
+            </p>
+            <div className="rounded-[24px] border border-black/12 bg-white p-6">
+              <div className="flex items-center justify-between">
+                <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-[linear-gradient(135deg,#2b7fff_0%,#00b8db_100%)] text-white shadow-[0_10px_15px_rgba(0,0,0,0.1),0_4px_6px_rgba(0,0,0,0.1)]">
+                  <ReqIcon className="h-7 w-7 text-white" />
+                </div>
+                <p className="text-[56px] font-bold leading-[56px] tracking-[-0.05em] text-[#121316]">
+                  {filtered.length}
                 </p>
               </div>
+              <div className="mt-4 flex items-center justify-between gap-3">
+                <p className="text-[28px] font-semibold leading-7 text-[#121316]">
+                  Нийт баримт
+                </p>
+                <div className="flex items-center gap-1 text-[28px] font-semibold leading-7 text-[#1aba52]">
+                  <span>{verifiedPercent}%</span>
+                  <span className="text-[16px] font-medium leading-5 text-[#3f4145]">
+                    Баталгаажсан
+                  </span>
+                </div>
+              </div>
             </div>
-          </div>
-        </div>
+          </section>
 
-        <div>
-          <p className="text-slate-700 text-sm font-semibold uppercase tracking-widest mb-3">
-            ҮЕ ШАТААР
-          </p>
-          <div className="flex flex-col gap-4">
+          <section>
+            <p className="mb-4 text-[16px] font-semibold leading-5 text-[#3f4145]">
+              Үе шатаар
+            </p>
+            <div className="flex flex-col gap-4">
             {stages.map((stage) => (
               <div
                 key={stage.label}
-                className="rounded-2xl border border-slate-200 bg-white p-4 flex items-center justify-between shadow-[0_1px_2px_rgba(15,23,42,0.06)]"
+                className="rounded-[24px] border border-black/12 bg-white p-6"
               >
                 <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-xl border border-slate-200 bg-white flex items-center justify-center shrink-0 text-slate-600">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[14px] border border-black/12 bg-white">
                     {stage.icon}
                   </div>
-                  <div>
-                    <p className="text-slate-900 text-sm font-semibold">
+                  <div className="min-w-0">
+                    <p className="text-[16px] font-medium leading-10 text-[#121316]">
                       {stage.label}
                     </p>
-                    <p className="text-slate-400 text-xs">{stage.sub}</p>
                   </div>
                 </div>
-                <span className="text-slate-900 text-xl font-semibold">
+                <span className="text-[30px] font-semibold leading-10 text-[#121316]">
                   {stage.count}
                 </span>
               </div>
             ))}
-          </div>
+            </div>
+          </section>
         </div>
       </div>
 
-      {/* Right panel */}
-      <div className="flex-1 flex flex-col">
-        <div className="rounded-2xl border border-slate-200 bg-white overflow-auto flex-1 shadow-[0_1px_2px_rgba(15,23,42,0.06)]">
-          <div className="flex items-center gap-3 px-5 py-4 border-b border-slate-200 bg-white">
-            <div className="flex items-center gap-2 bg-white border border-slate-200 rounded-full px-3 py-2 min-w-65">
-              <SearchIcon />
-              <input
-                className="bg-transparent text-slate-500 text-sm outline-none placeholder:text-slate-400 w-62.5"
-                placeholder="Хайх..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-              />
-            </div>
-          </div>
-
+      <div className="flex min-w-0 flex-1 flex-col">
+        <div className="overflow-hidden rounded-[24px] border border-black/12 bg-white">
           <div
-            className="grid items-center px-5 py-3.5 border-b border-slate-200 bg-white text-slate-500 text-sm"
-            style={{ gridTemplateColumns: "2fr 1.3fr 1fr 1fr 0.9fr" }}
+            className="grid items-center border-b border-black/12 px-3 py-3 text-[14px] text-[#3f4145b3] md:px-5"
+            style={{ gridTemplateColumns: "minmax(220px,2fr) minmax(150px,1.25fr) minmax(140px,1fr) minmax(150px,1fr) 72px" }}
           >
-            <span className="font-medium">Баримт бичиг</span>
-            <span className="font-medium">Үе</span>
-            <span className="font-medium">Огноо</span>
-            <span className="font-medium">Төлөв</span>
-            <span className="font-medium">Үйлдэл</span>
+            <div className="flex items-center gap-2 px-2 font-medium text-[#121316]">
+              <span>Баримт бичиг</span>
+            </div>
+            <span className="px-2 font-medium">Үе</span>
+            <span className="px-2 font-medium">Огноо</span>
+            <span className="px-2 font-medium">Төлөв</span>
+            <span className="px-2 font-medium">Үйлдэл</span>
           </div>
 
           {isLoading ? (
-            <div className="py-8 px-5 flex flex-col gap-3">
+            <div className="flex flex-col gap-3 px-5 py-8">
               <div className="h-4 w-56 rounded-full skeleton" />
               <div className="h-3 w-80 rounded-full skeleton" />
               <div className="h-3 w-72 rounded-full skeleton" />
@@ -681,52 +680,50 @@ export function FilesComponent() {
             filtered.map((row) => (
               <div
                 key={row.document.id}
-                className="grid items-center px-5 py-3.5 border-b border-slate-200 hover:bg-slate-50 transition-colors"
-                style={{ gridTemplateColumns: "2fr 1.3fr 1fr 1fr 0.9fr" }}
+                className="grid items-center border-b border-black/12 px-3 py-3 transition-colors hover:bg-[#fafafa] md:px-5"
+                style={{ gridTemplateColumns: "minmax(220px,2fr) minmax(150px,1.25fr) minmax(140px,1fr) minmax(150px,1fr) 72px" }}
               >
-                <div className="flex items-center gap-2.5">
-                  <div className="h-9 w-9 rounded-xl border border-slate-200 bg-white flex items-center justify-center text-slate-600">
-                    <ReqIcon />
+                <div className="flex items-center gap-2.5 px-2">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-[14px] border border-black/12 bg-white text-[#121316]">
+                    <ReqIcon className="h-4 w-4 text-[#121316]" />
                   </div>
                   <div>
-                    <p className="text-slate-900 text-sm font-medium">
+                    <p className="text-[14px] font-medium text-[#121316]">
                       {row.document.documentName}
                     </p>
-                    <p className="text-slate-400 text-xs">
+                    <p className="text-[12px] text-[#3f4145b3]">
                       {row.document.action}
                     </p>
                   </div>
                 </div>
-                <div>
-                  <div className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1 text-xs text-slate-500">
-                    {row.employee?.status === "Тасалсан"
-                      ? "Ажлаас гарах үе"
-                      : row.employee?.status === "Ирсэн"
-                        ? "Ажиллах үе"
-                        : "Ажилд орох үе"}
+                <div className="px-2">
+                  <div className="inline-flex items-center rounded-full border border-black/12 px-3 py-1 text-[12px] text-[#3f4145]">
+                    {stageLabel(row.employee)}
                   </div>
                 </div>
-                <div className="flex items-center gap-1.5">
-                  <CalIcon />
-                  <span className="text-slate-500 text-sm">
+                <div className="flex items-center gap-2 px-2">
+                  <CalIcon className="h-4 w-4 text-[#77818c]" />
+                  <span className="text-[14px] text-[#3f4145]">
                     {formatDate(row.document.createdAt)}
                   </span>
                 </div>
-                <div>
-                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-600 text-xs font-medium">
+                <div className="px-2">
+                  <span className="inline-flex items-center gap-1.5 rounded-full border border-[#1aba5280] px-3 py-1 text-[12px] font-medium text-[#1aba52]">
                     {statusLabel(row.document)}
                   </span>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-0">
                   <button
                     onClick={() => setPreviewRow(row)}
-                    className="w-7 h-7 flex items-center justify-center rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors"
+                    className="flex h-8 w-8 items-center justify-center rounded-[10px] text-[#77818c] transition-colors hover:bg-[#f5f5f5] hover:text-[#121316]"
+                    aria-label="Урьдчилж харах"
                   >
                     <EyeIcon />
                   </button>
                   <button
                     onClick={() => setDownloadRow(row)}
-                    className="w-7 h-7 flex items-center justify-center rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors"
+                    className="flex h-8 w-8 items-center justify-center rounded-[10px] text-[#77818c] transition-colors hover:bg-[#f5f5f5] hover:text-[#121316]"
+                    aria-label="Татах"
                   >
                     <DownloadIcon />
                   </button>
@@ -734,18 +731,12 @@ export function FilesComponent() {
               </div>
             ))
           )}
-
-          <div className="px-5 py-3.5">
-            <span className="text-slate-500 text-sm">
-              Нийт {filtered.length} баримт
-            </span>
-          </div>
         </div>
 
-        <div className="flex justify-end mt-4">
+        <div className="mt-4 flex justify-end">
           <button
             onClick={() => setShowModal(true)}
-            className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-emerald-200 hover:bg-emerald-300 text-emerald-800 font-semibold text-sm transition-colors border border-emerald-200"
+            className="flex items-center gap-2 rounded-[10px] bg-[#121316] px-4 py-2.5 text-[14px] font-medium text-white transition-colors hover:bg-[#1f2126]"
           >
             <PlusIcon />
             Шинэ баримт
