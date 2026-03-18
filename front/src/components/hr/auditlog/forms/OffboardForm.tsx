@@ -1,4 +1,8 @@
+"use client";
+
 import type { ReactNode } from "react";
+import { DatePickerField } from "@/components/hr/auditlog/date-picker";
+import { FieldError } from "./FieldError";
 
 export type OffboardFormProps = {
   employeeCode: string;
@@ -21,6 +25,7 @@ export type OffboardFormProps = {
   setContractNo: (v: string) => void;
   terminationReason: string;
   setTerminationReason: (v: string) => void;
+  errors: Record<string, string>;
   labelClass: string;
   inputClass: string;
   RecipientsSection: ReactNode;
@@ -48,11 +53,15 @@ export function OffboardForm({
   setContractNo,
   terminationReason,
   setTerminationReason,
+  errors,
   labelClass,
   inputClass,
   RecipientsSection,
   DocumentsSection,
 }: OffboardFormProps) {
+  const getInputClass = (key: keyof typeof errors) =>
+    errors[key] ? `${inputClass} border-red-300 focus:border-red-400` : inputClass;
+
   return (
     <div className="flex min-w-0 flex-col gap-[16px]">
       <div className="flex min-w-0 flex-col gap-[8px]">
@@ -66,8 +75,9 @@ export function OffboardForm({
           autoCorrect="off"
           autoCapitalize="off"
           spellCheck={false}
-          className={inputClass}
+          className={getInputClass("employeeCode")}
         />
+        <FieldError message={errors.employeeCode} />
       </div>
       <div className="grid min-w-0 grid-cols-2 gap-[16px]">
         <div className="flex min-w-0 flex-col gap-[8px]">
@@ -76,8 +86,9 @@ export function OffboardForm({
             value={lastName}
             onChange={(e) => setLastName(e.target.value)}
             placeholder="Дорж"
-            className={inputClass}
+            className={getInputClass("lastName")}
           />
+          <FieldError message={errors.lastName} />
         </div>
         <div className="flex min-w-0 flex-col gap-[8px]">
           <label className={labelClass}>Нэр</label>
@@ -85,8 +96,9 @@ export function OffboardForm({
             value={firstName}
             onChange={(e) => setFirstName(e.target.value)}
             placeholder="Дуламрагчаа"
-            className={inputClass}
+            className={getInputClass("firstName")}
           />
+          <FieldError message={errors.firstName} />
         </div>
       </div>
 
@@ -97,8 +109,9 @@ export function OffboardForm({
             value={registerNo}
             onChange={(e) => setRegisterNo(e.target.value)}
             placeholder="УХ04272036"
-            className={inputClass}
+            className={getInputClass("registerNo")}
           />
+          <FieldError message={errors.registerNo} />
         </div>
         <div className="flex min-w-0 flex-col gap-[8px]">
           <label className={labelClass}>Утасны дугаар</label>
@@ -106,59 +119,62 @@ export function OffboardForm({
             value={phone}
             onChange={(e) => setPhone(e.target.value)}
             placeholder="99999999"
-            className={inputClass}
+            className={getInputClass("phone")}
           />
+          <FieldError message={errors.phone} />
         </div>
       </div>
 
       <div className="flex min-w-0 flex-col gap-[8px]">
         <label className={labelClass}>Албан тушаал</label>
-        <input
-          value={jobTitle}
-          onChange={(e) => setJobTitle(e.target.value)}
-          placeholder="Junior Engineer"
-          className={inputClass}
-        />
-      </div>
+      <input
+        value={jobTitle}
+        onChange={(e) => setJobTitle(e.target.value)}
+        placeholder="Junior Engineer"
+        className={getInputClass("jobTitle")}
+      />
+      <FieldError message={errors.jobTitle} />
+    </div>
 
       <div className="grid min-w-0 grid-cols-2 gap-[16px]">
         <div className="flex min-w-0 flex-col gap-[8px]">
           <label className={labelClass}>Ажилд орсон огноо</label>
-          <input
-            type="date"
+          <DatePickerField
             value={hireDate}
-            onChange={(e) => setHireDate(e.target.value)}
-            className={inputClass}
+            onChange={setHireDate}
+            inputClass={getInputClass("hireDate")}
           />
+          <FieldError message={errors.hireDate} />
         </div>
         <div className="flex min-w-0 flex-col gap-[8px]">
           <label className={labelClass}>Ажлаас чөлөөлөх огноо</label>
-          <input
-            type="date"
+          <DatePickerField
             value={terminationDate}
-            onChange={(e) => setTerminationDate(e.target.value)}
-            className={inputClass}
+            onChange={setTerminationDate}
+            inputClass={getInputClass("terminationDate")}
           />
+          <FieldError message={errors.terminationDate} />
         </div>
       </div>
 
       <div className="flex min-w-0 flex-col gap-[8px]">
         <label className={labelClass}>Хөдөлмөрийн гэрээний дугаар</label>
-        <input
-          value={contractNo}
-          onChange={(e) => setContractNo(e.target.value)}
-          placeholder="2345678987"
-          className={inputClass}
-        />
-      </div>
+      <input
+        value={contractNo}
+        onChange={(e) => setContractNo(e.target.value)}
+        placeholder="2345678987"
+        className={getInputClass("contractNo")}
+      />
+      <FieldError message={errors.contractNo} />
+    </div>
 
       <div className="flex min-w-0 flex-col gap-[8px]">
         <label className={labelClass}>Чөлөөлөх үндэслэл</label>
-        <select
-          value={terminationReason}
-          onChange={(e) => setTerminationReason(e.target.value)}
-          className={inputClass}
-        >
+      <select
+        value={terminationReason}
+        onChange={(e) => setTerminationReason(e.target.value)}
+        className={getInputClass("terminationReason")}
+      >
           <option value="">Сонгох</option>
           <option value="Ажилтны өөрийн хүсэлтээр">
             Ажилтны өөрийн хүсэлтээр
@@ -177,6 +193,7 @@ export function OffboardForm({
           </option>
           <option value="Бусад">Бусад</option>
         </select>
+        <FieldError message={errors.terminationReason} />
       </div>
 
       {RecipientsSection}
