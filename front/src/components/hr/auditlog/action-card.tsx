@@ -34,8 +34,8 @@ export function AuditActionCard({
         </p>
       </div>
 
-      <div className="flex flex-col gap-2">
-        <p className="text-slate-700 text-sm font-semibold">
+      <div className="flex flex-col gap-3">
+        <p className="text-[11px] uppercase tracking-[0.2em] text-slate-400">
           Идэвхлүүлэх нөхцөл
         </p>
         <div className="flex flex-wrap gap-2">
@@ -43,12 +43,12 @@ export function AuditActionCard({
             action.triggerFields.map((field) => (
               <span
                 key={field}
-                className="px-2.5 py-1 rounded-lg border border-slate-200 bg-slate-50 text-slate-500 text-xs">
+                className="px-2.5 py-1 rounded-full border border-slate-200 bg-slate-50 text-slate-600 text-xs">
                 {field}
               </span>
             ))
           ) : action.triggerCondition ? (
-            <span className="px-2.5 py-1 rounded-lg border border-slate-200 bg-slate-50 text-slate-500 text-xs">
+            <span className="px-2.5 py-1 rounded-full border border-slate-200 bg-slate-50 text-slate-600 text-xs">
               {action.triggerCondition}
             </span>
           ) : (
@@ -57,14 +57,16 @@ export function AuditActionCard({
         </div>
       </div>
 
-      <div className="flex flex-col gap-2">
-        <p className="text-slate-700 text-sm font-semibold">Хүлээн авагч</p>
+      <div className="flex flex-col gap-3">
+        <p className="text-[11px] uppercase tracking-[0.2em] text-slate-400">
+          Хүлээн авагч
+        </p>
         <div className="flex flex-wrap gap-2">
           {action.recipients.length > 0 ? (
             action.recipients.map((recipient) => (
               <span
                 key={recipient}
-                className="px-2.5 py-1 rounded-lg border border-slate-200 bg-slate-50 text-slate-500 text-xs">
+                className="px-2.5 py-1 rounded-full border border-slate-200 bg-slate-50 text-slate-600 text-xs">
                 {recipient}
               </span>
             ))
@@ -78,14 +80,16 @@ export function AuditActionCard({
         <p className="text-slate-700 text-sm font-semibold">
           Шаардлагатай баримт
         </p>
-        <div className="flex flex-col gap-1">
+        <div className="flex flex-col gap-2">
           {action.documents.length > 0 ? (
             [...action.documents]
               .sort((left, right) => left.order - right.order)
               .map((doc) => (
-                <div key={doc.id} className="flex items-center gap-2">
+                <div
+                  key={doc.id}
+                  className="flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2">
                   <DocRowIcon />
-                  <span className="text-slate-500 text-sm">
+                  <span className="text-slate-600 text-xs">
                     {doc.template.replace(/\.html$/, ".pdf")}
                   </span>
                 </div>
@@ -98,7 +102,7 @@ export function AuditActionCard({
 
       <button
         onClick={() => onSendRequest(action)}
-        className="mt-auto flex items-center justify-center gap-2 py-2.5 rounded-xl border border-slate-200 bg-black text-white text-sm font-medium cursor-pointer transition-colors">
+        className="mt-auto flex items-center justify-center gap-2 py-2.5 rounded-xl bg-slate-900 text-white text-sm font-medium transition-colors hover:bg-slate-800">
         <EditIcon />
         Хүсэлт илгээх
       </button>

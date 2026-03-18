@@ -33,12 +33,6 @@ const StatusBadge = ({ status }: { status: string }) => {
   );
 };
 
-const eyeStyleMap: Record<string, string> = {
-  pending: "border-yellow-600/40 text-yellow-500 bg-yellow-500/10",
-  approved: "border-green-500/40 text-green-400 bg-green-500/10",
-  rejected: "border-red-500/40 text-red-400 bg-red-500/10",
-};
-
 function getInitials(firstName: string, lastName: string) {
   return `${lastName.charAt(0)}${firstName.charAt(0)}`;
 }

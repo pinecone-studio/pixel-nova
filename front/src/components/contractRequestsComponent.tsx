@@ -1,7 +1,8 @@
 "use client";
 
 import { useLazyQuery, useMutation, useQuery } from "@apollo/client/react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { createPortal } from "react-dom";
 import {
   FiChevronDown,
   FiChevronUp,
@@ -24,6 +25,7 @@ import {
 import { buildGraphQLHeaders } from "@/lib/apollo-client";
 import type { ContractRequest, Document, DocumentContent } from "@/lib/types";
 import { formatDepartment } from "@/lib/labels";
+import { useHrOverlay } from "@/components/hr/overlay-context";
 
 const StatusBadge = ({ status }: { status: string }) => {
   const styles: Record<string, string> = {
@@ -263,6 +265,12 @@ export const ContractRequestsComponent = () => {
   );
   const [previewError, setPreviewError] = useState<string | null>(null);
   const [previewLoading, setPreviewLoading] = useState(false);
+  const { setBlurred } = useHrOverlay();
+
+  useEffect(() => {
+    setBlurred(Boolean(selected || previewOpen));
+    return () => setBlurred(false);
+  }, [selected, previewOpen, setBlurred]);
 
   const { data, loading, error, refetch } = useQuery<{
     contractRequests: ContractRequest[];
@@ -299,6 +307,7 @@ export const ContractRequestsComponent = () => {
   });
 
   const rows = useMemo(() => data?.contractRequests ?? [], [data]);
+  const totalCount = rows.length;
   const pendingCount = rows.filter((row) => row.status === "pending").length;
   const approvedCount = rows.filter((row) => row.status === "approved").length;
   const rejectedCount = rows.filter((row) => row.status === "rejected").length;
@@ -423,6 +432,26 @@ export const ContractRequestsComponent = () => {
 
   return (
     <div className="flex flex-col gap-6 animate-fade-up">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex items-center gap-3">
+          <h1 className="text-xl font-semibold tracking-tight text-slate-900">
+            Гэрээний хүсэлтүүд
+          </h1>
+          <span className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-medium text-slate-500">
+            Нийт {totalCount}
+          </span>
+        </div>
+        <div className="flex items-center gap-2">
+          {filters.map((filter) => (
+            <span
+              key={filter.key}
+              className="rounded-full border border-slate-200 bg-white px-3 py-1 text-[11px] font-medium text-slate-500"
+            >
+              {filter.label} {filter.count}
+            </span>
+          ))}
+        </div>
+      </div>
       {successMessage ? (
         <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-600">
           {successMessage}
@@ -605,72 +634,80 @@ export const ContractRequestsComponent = () => {
         )}
       </div>
 
-      {selected ? (
-        <RequestModal
-          row={selected}
-          onClose={() => setSelected(null)}
-          onApprove={handleApprove}
-          onReject={handleReject}
-        />
-      ) : null}
+      {typeof document !== "undefined" && selected
+        ? createPortal(
+            <RequestModal
+              row={selected}
+              onClose={() => setSelected(null)}
+              onApprove={handleApprove}
+              onReject={handleReject}
+            />,
+            document.body,
+          )
+        : null}
 
-      {previewOpen ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
-          <div
-            aria-label="Close preview"
-            className="absolute inset-0"
-            onClick={() => {
-              setPreviewOpen(false);
-              setPreviewContent(null);
-              setPreviewError(null);
-            }}
-          />
-          <div className="relative w-[920px] max-w-[95vw] h-[82vh] bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-[0_28px_60px_rgba(15,23,42,0.12)]">
-            <div className="flex items-center justify-between px-5 py-4 border-b border-slate-200">
-              <p className="text-sm text-slate-900 font-semibold">Inline Preview</p>
-              <button
+      {typeof document !== "undefined" && previewOpen
+        ? createPortal(
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+              <div
+                aria-label="Close preview"
+                className="absolute inset-0"
                 onClick={() => {
                   setPreviewOpen(false);
                   setPreviewContent(null);
                   setPreviewError(null);
                 }}
-                className="text-slate-400 hover:text-slate-700"
-              >
-                ✕
-              </button>
-            </div>
-            <div className="h-[calc(100%-56px)] bg-slate-50 p-4">
-              {previewLoading ? (
-                <div className="h-full flex items-center justify-center text-slate-500">
-                  Ачаалж байна...
+              />
+              <div className="relative w-[920px] max-w-[95vw] h-[82vh] bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-[0_28px_60px_rgba(15,23,42,0.12)]">
+                <div className="flex items-center justify-between px-5 py-4 border-b border-slate-200">
+                  <p className="text-sm text-slate-900 font-semibold">
+                    Inline Preview
+                  </p>
+                  <button
+                    onClick={() => {
+                      setPreviewOpen(false);
+                      setPreviewContent(null);
+                      setPreviewError(null);
+                    }}
+                    className="text-slate-400 hover:text-slate-700"
+                  >
+                    ✕
+                  </button>
                 </div>
-              ) : previewError ? (
-                <div className="h-full flex items-center justify-center text-red-500">
-                  {previewError}
+                <div className="h-[calc(100%-56px)] bg-slate-50 p-4">
+                  {previewLoading ? (
+                    <div className="h-full flex items-center justify-center text-slate-500">
+                      Ачаалж байна...
+                    </div>
+                  ) : previewError ? (
+                    <div className="h-full flex items-center justify-center text-red-500">
+                      {previewError}
+                    </div>
+                  ) : previewContent ? (
+                    previewContent.contentType === "text/html" ? (
+                      <iframe
+                        title={previewContent.documentName}
+                        className="w-full h-full rounded-xl bg-white"
+                        srcDoc={previewContent.content}
+                      />
+                    ) : (
+                      <iframe
+                        title={previewContent.documentName}
+                        className="w-full h-full rounded-xl bg-white"
+                        src={buildDataUrl(previewContent)}
+                      />
+                    )
+                  ) : (
+                    <div className="h-full flex items-center justify-center text-slate-500">
+                      Preview бэлэн биш байна.
+                    </div>
+                  )}
                 </div>
-              ) : previewContent ? (
-                previewContent.contentType === "text/html" ? (
-                  <iframe
-                    title={previewContent.documentName}
-                    className="w-full h-full rounded-xl bg-white"
-                    srcDoc={previewContent.content}
-                  />
-                ) : (
-                  <iframe
-                    title={previewContent.documentName}
-                    className="w-full h-full rounded-xl bg-white"
-                    src={buildDataUrl(previewContent)}
-                  />
-                )
-              ) : (
-                <div className="h-full flex items-center justify-center text-slate-500">
-                  Preview бэлэн биш байна.
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      ) : null}
+              </div>
+            </div>,
+            document.body,
+          )
+        : null}
     </div>
   );
 };

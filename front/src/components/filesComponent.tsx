@@ -2,6 +2,7 @@
 
 import { useApolloClient, useMutation, useQuery } from "@apollo/client/react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 
 import { buildGraphQLHeaders } from "@/lib/apollo-client";
 import { UPLOAD_HR_DOCUMENT } from "@/graphql/mutations";
@@ -24,6 +25,7 @@ import {
 } from "./icons";
 import { CiWarning } from "react-icons/ci";
 import { FiList, FiFolder } from "react-icons/fi";
+import { useHrOverlay } from "./hr/overlay-context";
 
 // ── Types ──────────────────────────────────────────────
 type FileRow = {
@@ -435,6 +437,12 @@ export function FilesComponent() {
   const [previewRow, setPreviewRow] = useState<FileRow | null>(null);
   const [downloadRow, setDownloadRow] = useState<FileRow | null>(null);
   const [viewMode, setViewMode] = useState<"flat" | "tree">("tree");
+  const { setBlurred } = useHrOverlay();
+
+  useEffect(() => {
+    setBlurred(Boolean(previewRow || downloadRow));
+    return () => setBlurred(false);
+  }, [previewRow, downloadRow, setBlurred]);
   const [rows, setRows] = useState<FileRow[]>([]);
   const [loadingRows, setLoadingRows] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -569,49 +577,53 @@ export function FilesComponent() {
           onUploaded={loadRows}
         />
       )}
-      {previewRow && (
-        <FilePreviewModal
-          row={previewRow}
-          mode="preview"
-          onClose={() => setPreviewRow(null)}
-        />
-      )}
-      {downloadRow && (
-        <FilePreviewModal
-          row={downloadRow}
-          mode="download"
-          onClose={() => setDownloadRow(null)}
-        />
-      )}
+      {typeof document !== "undefined" && previewRow
+        ? createPortal(
+            <FilePreviewModal
+              row={previewRow}
+              mode="preview"
+              onClose={() => setPreviewRow(null)}
+            />,
+            document.body,
+          )
+        : null}
+      {typeof document !== "undefined" && downloadRow
+        ? createPortal(
+            <FilePreviewModal
+              row={downloadRow}
+              mode="download"
+              onClose={() => setDownloadRow(null)}
+            />,
+            document.body,
+          )
+        : null}
 
       <div className="w-full shrink-0 xl:w-[415px]">
         <div className="flex flex-col gap-4 xl:h-full xl:overflow-y-auto xl:pr-1">
-          <section>
-            <p className="mb-4 text-[16px] font-semibold leading-5 text-[#3f4145]">
-              Нийт баримт
-            </p>
-            <div className="rounded-[24px] border border-black/12 bg-white p-6">
-              <div className="flex items-center justify-between">
-                <p className="text-[56px] font-bold leading-[56px] tracking-[-0.05em] text-[#121316]">
-                  {filtered.length}
-                </p>
-                <div className="flex h-14 w-14 items-center border-2 border-[#3F4145CC] justify-center rounded-2xl text-black">
-                  <ReqIcon className="h-7 w-7" />
-                </div>
-              </div>
-              <div className="mt-4 flex items-center justify-between gap-3">
-                <p className="text-xl font-medium leading-7 text-[#3F4145CC]">
-                  Баримт
-                </p>
-                <div className="flex items-baseline gap-1 text-xl font-semibold text-[#1aba52]">
-                  <span>{verifiedPercent}%</span>
-                  <span className="text-sm font-medium leading-5 text-[#1aba52]/80">
-                    Баталгаажсан
-                  </span>
-                </div>
+          <p className="mb-4 text-[16px] font-semibold leading-5 text-[#3f4145]">
+            Нийт баримт
+          </p>
+          <div className="rounded-[24px] border border-black/12 bg-white p-6">
+            <div className="flex items-center justify-between">
+              <p className="text-[56px] font-bold leading-[56px] tracking-[-0.05em] text-[#121316]">
+                {filtered.length}
+              </p>
+              <div className="flex h-14 w-14 items-center border-2 border-[#3F4145CC] justify-center rounded-2xl text-black">
+                <ReqIcon className="h-7 w-7" />
               </div>
             </div>
-          </section>
+            <div className="mt-4 flex items-center justify-between gap-3">
+              <p className="text-xl font-medium leading-7 text-[#3F4145CC]">
+                Баримт
+              </p>
+              <div className="flex items-baseline gap-1 text-xl font-semibold text-[#1aba52]">
+                <span>{verifiedPercent}%</span>
+                <span className="text-sm font-medium leading-5 text-[#1aba52]/80">
+                  Баталгаажсан
+                </span>
+              </div>
+            </div>
+          </div>
 
           <section>
             <p className="mb-4 text-[16px] font-semibold leading-5 text-[#3f4145]">

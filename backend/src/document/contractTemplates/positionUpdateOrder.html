@@ -102,7 +102,7 @@
         letter-spacing: 0.5px;
       }
       .d {
-        display: inline-block;
+        display: inline;
         vertical-align: bottom;
         overflow: hidden;
         white-space: nowrap;
@@ -170,9 +170,7 @@
             "<span class="d dlg">{{company_name}}</span>" ХХК
           </div>
           <div>УБД: <span class="d dmd">{{company_register_no}}</span></div>
-          <div>
-            Хаяг: <span class="d dxl">{{company_address}}</span>
-          </div>
+          <div>Хаяг: <span class="d dxl">{{company_address}}</span></div>
         </div>
         <div class="org-right">
           <div>Улаанбаатар хот</div>
@@ -248,13 +246,12 @@
         <span class="d dxl">{{employee_last_name}}</span> овогтой
         <span class="d dlg">{{employee_first_name}}</span>-г
         <span class="d dlg">{{from_department}}</span> нэгжийн
-        <span class="d dlg">{{from_position}}</span> албан тушаалаас
-        чөлөөлж, 20<span class="d dxs">{{transfer_date_year_short}}</span> оны
+        <span class="d dlg">{{from_position}}</span> албан тушаалаас чөлөөлж,
+        20<span class="d dxs">{{transfer_date_year_short}}</span> оны
         <span class="d dxs">{{transfer_date_month}}</span> дугаар сарын
         <span class="d dxs">{{transfer_date_day}}</span>-ний өдрөөс эхлэн
         <span class="d dlg">{{to_department}}</span> нэгжийн
-        <span class="d dlg">{{to_position}}</span> албан тушаалд
-        томилсугай.
+        <span class="d dlg">{{to_position}}</span> албан тушаалд томилсугай.
       </p>
 
       <p class="ind1"><b>2.</b> Албан тушаал өөрчилсөн үндэслэл:</p>
@@ -279,7 +276,8 @@
       <p class="ind1">
         <b>4.</b> Хөдөлмөрийн гэрээний нэмэлт өөрчлөлтийг үйлдэж, талууд гарын
         үсэг зурж баталгаажуулахыг Хүний нөөцийн алба
-        <span class="d dlg">{{contract_addendum_assignee}}</span>-д үүрэг болгосугай.
+        <span class="d dlg">{{contract_addendum_assignee}}</span>-д үүрэг
+        болгосугай.
       </p>
 
       <p class="ind1">
@@ -294,9 +292,7 @@
             <div class="sig-line"></div>
             <p class="sig-hint">(гарын үсэг, тамга)</p>
             <div style="margin-top: 10px; line-height: 2">
-              <div>
-                Нэр: <span class="d dlg">{{ceo_name}}</span>
-              </div>
+              <div>Нэр: <span class="d dlg">{{ceo_name}}</span></div>
             </div>
           </div>
           <div>
@@ -304,10 +300,10 @@
             <div class="sig-line">{{employee_sign_line}}</div>
             <p class="sig-hint">(гарын үсэг)</p>
             <div style="margin-top: 10px; line-height: 2">
+              <div>Нэр: <span class="d dlg">{{employee_ack_name}}</span></div>
               <div>
-                Нэр: <span class="d dlg">{{employee_ack_name}}</span>
+                Огноо: <span class="d dmd">{{employee_sign_date}}</span>
               </div>
-              <div>Огноо: <span class="d dmd">{{employee_sign_date}}</span></div>
             </div>
           </div>
         </div>
