@@ -16,7 +16,7 @@ function PreviewState({
       style={{
         width: "100%",
         height: "100%",
-        borderRadius: 10,
+        borderRadius: 24,
         border,
         background,
         display: "flex",
@@ -46,8 +46,8 @@ function PreviewFrame({
       style={{
         width: "100%",
         height: "100%",
-        borderRadius: 10,
-        border: "1px solid rgba(255,255,255,0.10)",
+        borderRadius: 24,
+        border: "none",
         background: "#fff",
       }}
       src={previewUrl}
@@ -72,34 +72,58 @@ export function FilesPreviewContent({
   return (
     <div
       style={{
-        height: "calc(100% - 65px)",
-        background: "#0a0b0f",
-        padding: 24,
+        height: "calc(100% - 85px)",
+        background: "#FFFFFF",
+        padding: "24px 28px 28px",
       }}
     >
       {loading ? (
         <PreviewState
-          border="1px solid rgba(255,255,255,0.10)"
-          color="rgba(148,163,184,0.5)"
+          border="1px solid #E5E7EB"
+          background="#F8FAFC"
+          color="#64748B"
         >
           Баримт ачаалж байна...
         </PreviewState>
       ) : error ? (
         <PreviewState
-          border="1px solid rgba(239,68,68,0.2)"
-          background="rgba(239,68,68,0.05)"
-          color="#f87171"
+          border="1px solid #FECACA"
+          background="#FEF2F2"
+          color="#DC2626"
         >
           {error}
         </PreviewState>
       ) : content?.contentType === "text/html" ? (
-        <PreviewFrame document={document} srcDoc={content.content} />
+        <div
+          style={{
+            width: "100%",
+            height: "100%",
+            borderRadius: 24,
+            background: "#E5E7EB",
+            padding: 28,
+            boxShadow: "inset 0 1px 2px rgba(255,255,255,0.8)",
+          }}
+        >
+          <PreviewFrame document={document} srcDoc={content.content} />
+        </div>
       ) : previewUrl ? (
-        <PreviewFrame document={document} previewUrl={previewUrl} />
+        <div
+          style={{
+            width: "100%",
+            height: "100%",
+            borderRadius: 24,
+            background: "#E5E7EB",
+            padding: 28,
+            boxShadow: "inset 0 1px 2px rgba(255,255,255,0.8)",
+          }}
+        >
+          <PreviewFrame document={document} previewUrl={previewUrl} />
+        </div>
       ) : (
         <PreviewState
-          border="1px solid rgba(255,255,255,0.10)"
-          color="rgba(148,163,184,0.5)"
+          border="1px solid #E5E7EB"
+          background="#F8FAFC"
+          color="#64748B"
         >
           Preview бэлэн биш байна.
         </PreviewState>

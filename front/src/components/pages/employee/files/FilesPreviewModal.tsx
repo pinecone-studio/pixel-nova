@@ -1,3 +1,5 @@
+import { createPortal } from "react-dom";
+
 import type { Document, DocumentContent } from "@/lib/types";
 
 import { FilesPreviewContent } from "./FilesPreviewContent";
@@ -18,15 +20,20 @@ export function FilesPreviewModal({
   error: string | null;
   onClose: () => void;
 }) {
-  return (
+  if (typeof window === "undefined") {
+    return null;
+  }
+
+  return createPortal(
     <div
       style={{
         position: "fixed",
         inset: 0,
-        zIndex: 60,
+        zIndex: 9999,
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
+        padding: "24px 16px",
       }}
     >
       <button
@@ -35,23 +42,25 @@ export function FilesPreviewModal({
         style={{
           position: "absolute",
           inset: 0,
-          background: "rgba(0,0,0,0.70)",
+          background:
+            "linear-gradient(180deg, rgba(255,255,255,0.96) 0%, rgba(255,255,255,0.98) 100%)",
           border: "none",
           cursor: "pointer",
+          backdropFilter: "blur(12px)",
         }}
         onClick={onClose}
       />
       <div
         style={{
           position: "relative",
-          width: 900,
-          maxWidth: "92vw",
-          height: "82vh",
-          background: "#111318",
-          border: "1px solid rgba(255,255,255,0.10)",
-          borderRadius: 16,
+          width: 1080,
+          maxWidth: "min(1080px, 92vw)",
+          height: "min(860px, calc(100vh - 48px))",
+          background: "#FFFFFF",
+          border: "1px solid #E5E7EB",
+          borderRadius: 28,
           overflow: "hidden",
-          boxShadow: "0 25px 60px rgba(0,0,0,0.6)",
+          boxShadow: "0 24px 80px rgba(15, 23, 42, 0.12)",
         }}
       >
         <FilesPreviewHeader document={document} onClose={onClose} />
@@ -63,6 +72,7 @@ export function FilesPreviewModal({
           error={error}
         />
       </div>
-    </div>
+    </div>,
+    window.document.body,
   );
 }

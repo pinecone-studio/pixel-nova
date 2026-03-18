@@ -25,9 +25,9 @@ export function FilesList({
       <div
         style={{
           ...emptyBoxStyle,
-          border: "1px solid rgba(239,68,68,0.2)",
-          background: "rgba(239,68,68,0.05)",
-          color: "#f87171",
+          border: "1px solid #FECACA",
+          background: "#FEF2F2",
+          color: "#DC2626",
         }}
       >
         {error}
@@ -44,8 +44,8 @@ export function FilesList({
       style={{
         borderRadius: 14,
         overflow: "hidden",
-        border: "1px solid rgba(255,255,255,0.08)",
-        background: "rgba(255,255,255,0.02)",
+        border: "1px solid #E5E7EB",
+        background: "white",
       }}
     >
       {documents.map((document, index) => (

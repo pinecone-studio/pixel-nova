@@ -2,7 +2,7 @@
 
 import { useQuery } from "@apollo/client/react";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useSyncExternalStore } from "react";
 
 import { GET_ME } from "@/graphql/queries";
 import { buildGraphQLHeaders } from "@/lib/apollo-client";
@@ -12,10 +12,17 @@ export const TOKEN_STORAGE_KEY = "epas_auth_token";
 
 export function useEmployeeSession() {
   const router = useRouter();
-  const [authToken] = useState(() =>
-    typeof window === "undefined"
-      ? ""
-      : (window.localStorage.getItem(TOKEN_STORAGE_KEY) ?? ""),
+  const authToken = useSyncExternalStore(
+    (callback) => {
+      if (typeof window === "undefined") {
+        return () => {};
+      }
+      const handler = () => callback();
+      window.addEventListener("storage", handler);
+      return () => window.removeEventListener("storage", handler);
+    },
+    () => window.localStorage.getItem(TOKEN_STORAGE_KEY) ?? "",
+    () => "",
   );
 
   const { data, loading, error } = useQuery<{ me: Employee | null }>(GET_ME, {

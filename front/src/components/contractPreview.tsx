@@ -3,13 +3,14 @@
 import { useLazyQuery } from "@apollo/client/react";
 import { useMemo, useState } from "react";
 import { VscPreview } from "react-icons/vsc";
-import { BiDownload, BiX } from "react-icons/bi";
+import { BiDownload } from "react-icons/bi";
 
 import { buildGraphQLHeaders } from "@/lib/apollo-client";
 import { GET_DOCUMENT_CONTENT } from "@/graphql/queries";
 import type { Document, DocumentContent } from "@/lib/types";
 
 import { DocumentIcon } from "./icons";
+import { FilesPreviewModal } from "./pages/employee/files/FilesPreviewModal";
 
 type ContractPreviewProps = {
   document: Document;
@@ -148,62 +149,16 @@ export const ContractPreview = ({
         <p className="px-4 pb-3 text-[12px] text-red-400">{error}</p>
       ) : null}
 
-      {previewOpen && (
-        <div className="fixed inset-0 z-60 flex items-center justify-center">
-          <button
-            type="button"
-            aria-label="Preview close overlay"
-            className="absolute inset-0 bg-black/70"
-            onClick={() => setPreviewOpen(false)}
-          />
-          <div className="relative w-225 max-w-[92vw] h-[82vh] bg-[#111318] border border-white/10 rounded-2xl shadow-2xl shadow-black/60 overflow-hidden">
-            <div className="flex items-center justify-between px-5 py-4 border-b border-white/10">
-              <div className="flex flex-col">
-                <p className="text-white text-sm font-semibold">
-                  {document.action}
-                </p>
-                <p className="text-slate-500 text-xs mt-0.5">
-                  {document.documentName}
-                </p>
-              </div>
-              <button
-                type="button"
-                onClick={() => setPreviewOpen(false)}
-                className="w-8 h-8 rounded-lg flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/10 transition-colors"
-              >
-                <BiX className="text-lg" />
-              </button>
-            </div>
-            <div className="h-full bg-[#0a0b0f] p-6">
-              {loading ? (
-                <div className="w-full h-full rounded-xl border border-white/10 flex items-center justify-center text-sm text-slate-400">
-                  Уншиж байна...
-                </div>
-              ) : error ? (
-                <div className="w-full h-full rounded-xl border border-red-500/20 bg-red-500/5 flex items-center justify-center text-sm text-red-400">
-                  {error}
-                </div>
-              ) : content?.contentType === "text/html" ? (
-                <iframe
-                  title={document.documentName}
-                  className="w-full h-full rounded-xl border border-white/10 bg-white"
-                  srcDoc={content.content}
-                />
-              ) : previewUrl ? (
-                <iframe
-                  title={document.documentName}
-                  className="w-full h-full rounded-xl border border-white/10 bg-white"
-                  src={previewUrl}
-                />
-              ) : (
-                <div className="w-full h-full rounded-xl border border-white/10 flex items-center justify-center text-sm text-slate-400">
-                  Preview ????? ??? ?????.
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
+      {previewOpen ? (
+        <FilesPreviewModal
+          document={document}
+          content={content}
+          previewUrl={previewUrl}
+          loading={loading}
+          error={error}
+          onClose={() => setPreviewOpen(false)}
+        />
+      ) : null}
     </>
   );
 };

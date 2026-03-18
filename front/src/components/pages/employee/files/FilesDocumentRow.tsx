@@ -81,8 +81,8 @@ export function FilesDocumentRow({
           alignItems: "center",
           gap: 14,
           padding: "14px 18px",
-          borderBottom: isLast ? "none" : "1px solid rgba(255,255,255,0.06)",
-          background: hovered ? "rgba(255,255,255,0.04)" : "transparent",
+          borderBottom: isLast ? "none" : "1px solid #E5E7EB",
+          background: hovered ? "#F8FAFC" : "white",
           transition: "background 0.12s",
           cursor: "default",
         }}
