@@ -17,7 +17,7 @@ import type {
   DocTreeEvent,
   BreadcrumbPath,
 } from "@/lib/documentTree";
-import { employeeFolderName } from "@/lib/documentTree";
+import { employeeFolderName, getUrlTtlStatus, getUrlRemainingDays, urlTtlLabel } from "@/lib/documentTree";
 import {
   EyeIcon,
   DownloadIcon,
@@ -57,12 +57,19 @@ function formatDate(value: string) {
   });
 }
 
-function statusLabel(doc: Document): { text: string; verified: boolean } {
-  const verified = Boolean(doc.storageUrl);
-  return {
-    text: verified ? "Баталгаажсан" : "Ноорог",
-    verified,
+function docStatusInfo(doc: Document) {
+  const ttlStatus = getUrlTtlStatus(doc);
+  const remainingDays = getUrlRemainingDays(doc);
+  const label = urlTtlLabel(ttlStatus, remainingDays);
+
+  const colorMap = {
+    valid: "text-[#1aba52]",
+    expiring: "text-amber-500",
+    expired: "text-red-500",
+    none: "text-[#77818c]",
   };
+
+  return { label, color: colorMap[ttlStatus], ttlStatus };
 }
 
 function nodeId(empId: string, phase?: string, eventKey?: string): string {
@@ -102,7 +109,7 @@ function DocumentRow({
   onPreview: (doc: Document, employee?: Employee) => void;
   onDownload: (doc: Document, employee?: Employee) => void;
 }) {
-  const status = statusLabel(doc);
+  const status = docStatusInfo(doc);
 
   return (
     <div className="flex items-center justify-between gap-3 rounded-[14px] px-3 py-2.5 pl-16 transition-colors hover:bg-[#fafafa]">
@@ -117,9 +124,9 @@ function DocumentRow({
           <div className="flex items-center gap-2 text-[12px] text-[#3f4145]">
             <span>{formatDate(doc.createdAt)}</span>
             <span className="text-black/20">|</span>
-            <span
-              className={status.verified ? "text-[#1aba52]" : "text-[#77818c]"}>
-              {status.text}
+            <span className={status.color}>
+              {status.ttlStatus === "expiring" || status.ttlStatus === "expired" ? "⚠ " : ""}
+              {status.label}
             </span>
           </div>
         </div>

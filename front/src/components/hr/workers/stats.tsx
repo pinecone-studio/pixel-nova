@@ -3,15 +3,32 @@
 import { ActiveIconn, HiredIcon } from "@/components/icons";
 import { CgPerformance } from "react-icons/cg";
 
+interface WorkersStatsProps {
+  totalEmployees: number;
+  totalActive: number;
+  totalNewThisMonth: number;
+  lastSyncTime?: string | null;
+  syncSource?: string | null;
+}
+
+function relativeTime(iso: string): string {
+  const diff = Date.now() - new Date(iso).getTime();
+  const mins = Math.floor(diff / 60000);
+  if (mins < 1) return "Дөнгөж сая";
+  if (mins < 60) return `${mins} минутын өмнө`;
+  const hours = Math.floor(mins / 60);
+  if (hours < 24) return `${hours} цагийн өмнө`;
+  const days = Math.floor(hours / 24);
+  return `${days} өдрийн өмнө`;
+}
+
 export function WorkersStats({
   totalEmployees,
   totalActive,
   totalNewThisMonth,
-}: {
-  totalEmployees: number;
-  totalActive: number;
-  totalNewThisMonth: number;
-}) {
+  lastSyncTime,
+  syncSource,
+}: WorkersStatsProps) {
   return (
     <div className="grid gap-4 md:grid-cols-[1.4fr_1fr_1fr]">
       <div className="rounded-3xl border border-slate-200 bg-white/85 p-5 shadow-[0_16px_40px_rgba(15,23,42,0.08)]">
@@ -29,12 +46,20 @@ export function WorkersStats({
               <p className="text-5xl font-semibold text-slate-900">
                 {totalEmployees}
               </p>
-              <span className="px-2 py-1 rounded-lg bg-emerald-50 text-emerald-600 text-[11px] font-semibold border border-emerald-200">
-                Бодит өгөгдөл
-              </span>
+              {lastSyncTime ? (
+                <span className="px-2 py-1 rounded-lg bg-emerald-50 text-emerald-600 text-[11px] font-semibold border border-emerald-200">
+                  Синк: {relativeTime(lastSyncTime)}
+                </span>
+              ) : (
+                <span className="px-2 py-1 rounded-lg bg-amber-50 text-amber-600 text-[11px] font-semibold border border-amber-200">
+                  Синк хийгдээгүй
+                </span>
+              )}
             </div>
             <p className="text-slate-500 text-sm mt-1">
-              Backend ажилтны жагсаалт
+              {lastSyncTime && syncSource
+                ? `${syncSource} эх үүсвэр`
+                : "Гар аргаар нэмсэн"}
             </p>
           </div>
         </div>
