@@ -40,7 +40,11 @@ export default function ProfilePage() {
   }
 
   const workInfo: ProfileInfoItem[] = [
-    { icon: <AlbanTushaal />, label: "Албан тушаал", value: employee?.jobTitle ?? "Мэдээлэлгүй" },
+    {
+      icon: <AlbanTushaal />,
+      label: "Албан тушаал",
+      value: employee?.jobTitle ?? "Мэдээлэлгүй",
+    },
     {
       icon: <Senior />,
       label: "Зэрэглэл",
@@ -49,15 +53,25 @@ export default function ProfilePage() {
     {
       icon: <Heltes />,
       label: "Хэлтэс",
-      value: employee?.department ? formatDepartment(employee.department) : "Мэдээлэлгүй",
+      value: employee?.department
+        ? formatDepartment(employee.department)
+        : "Мэдээлэлгүй",
     },
     {
       icon: <Salbar />,
       label: "Салбар",
       value: employee?.branch ? formatBranch(employee.branch) : "Мэдээлэлгүй",
     },
-    { icon: <AjildOrson />, label: "Ажилд орсон", value: formatHireDate(employee?.hireDate) },
-    { icon: <Ajillasan />, label: "Ажилласан хугацаа", value: getTenure(employee?.hireDate) },
+    {
+      icon: <AjildOrson />,
+      label: "Ажилд орсон",
+      value: formatHireDate(employee?.hireDate),
+    },
+    {
+      icon: <Ajillasan />,
+      label: "Ажилласан хугацаа",
+      value: getTenure(employee?.hireDate),
+    },
   ];
 
   const personalInfo: ProfileInfoItem[] = [
@@ -66,13 +80,21 @@ export default function ProfilePage() {
       label: "Ажилтны код",
       value: employee?.employeeCode ?? "Мэдээлэлгүй",
     },
-    { icon: <Email />, label: "Имэйл", value: employee?.email ?? "Мэдээлэлгүй" },
+    {
+      icon: <Email />,
+      label: "Имэйл",
+      value: employee?.email ?? "Мэдээлэлгүй",
+    },
     {
       icon: <TursunUdur />,
       label: "Төрсөн өдөр",
       value: employee?.birthDayAndMonth ?? "Мэдээлэлгүй",
     },
-    { icon: <Github />, label: "GitHub", value: employee?.github ?? "Мэдээлэлгүй" },
+    {
+      icon: <Github />,
+      label: "GitHub",
+      value: employee?.github ?? "Мэдээлэлгүй",
+    },
   ];
 
   return (
@@ -80,7 +102,9 @@ export default function ProfilePage() {
       <div className="mx-auto w-full max-w-[1056px]">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-white">Профайл</h1>
-          <p className="mt-1 text-gray-400">Таны хувийн болон ажлын мэдээлэл.</p>
+          <p className="mt-1 text-gray-400">
+            Таны хувийн болон ажлын мэдээлэл.
+          </p>
         </div>
 
         <ProfileHero employee={employee} errorMessage={errorMessage} />

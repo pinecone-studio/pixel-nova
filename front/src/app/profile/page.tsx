@@ -14,15 +14,12 @@ import {
   AjildOrson,
   Ajillasan,
   AlbanTushaal,
-  CompanyTsalin,
   Email,
   EmployeeCode,
   Engineering,
-  EntraID,
   Github,
   Heltes,
   Idevhtei,
-  KPI,
   Salbar,
   Senior,
   Signature,
@@ -257,8 +254,7 @@ export default function Profile() {
               {workInfo.map((item) => (
                 <div
                   key={item.label}
-                  className="flex h-[68px] w-[450px] items-center justify-between"
-                >
+                  className="flex h-[68px] w-[450px] items-center justify-between">
                   <div className="flex items-center gap-3">
                     <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[#F3F4F6] text-sm text-[#111827]">
                       {item.icon}
@@ -285,8 +281,7 @@ export default function Profile() {
               {personalInfo.map((item) => (
                 <div
                   key={item.label}
-                  className="flex h-[68px] w-[450px] items-center justify-between"
-                >
+                  className="flex h-[68px] w-[450px] items-center justify-between">
                   <div className="flex items-center gap-3">
                     <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[#F3F4F6] text-sm text-[#111827]">
                       {item.icon}

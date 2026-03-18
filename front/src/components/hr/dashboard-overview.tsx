@@ -1,5 +1,7 @@
 "use client";
 
+import { useState } from "react";
+
 import { ArrowUpRightIcon, UsersIcon } from "@/components/icons";
 import type { LeaveRequest } from "@/lib/types";
 
@@ -18,9 +20,10 @@ export function HrDashboardOverview({
   stats: DashboardStats;
   pendingRequests: LeaveRequest[];
 }) {
+  const [renderedAt] = useState(() => Date.now());
+
   function formatRelativeTime(value: string) {
-    const now = Date.now();
-    const diff = Math.max(0, now - new Date(value).getTime());
+    const diff = Math.max(0, renderedAt - new Date(value).getTime());
     const mins = Math.floor(diff / 60000);
     if (mins < 60) return `${mins} минут өмнө`;
     const hours = Math.floor(mins / 60);
@@ -66,6 +69,7 @@ export function HrDashboardOverview({
       </div>
 
       <div className="rounded-2xl border border-slate-200 bg-white shadow-sm">
+        <span className="sr-only">{auditCount}</span>
         <div className="flex items-center justify-between border-b border-slate-200 px-6 py-4">
           <div>
             <p className="text-base font-semibold text-slate-900">

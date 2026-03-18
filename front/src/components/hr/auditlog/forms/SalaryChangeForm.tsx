@@ -68,12 +68,6 @@ export function SalaryChangeForm({
   setPhone,
   branch,
   setBranch,
-  dept,
-  setDept,
-  currentPosition,
-  setCurrentPosition,
-  nextPosition,
-  setNextPosition,
   workStartDate,
   setWorkStartDate,
   workTotalDuration,
@@ -84,16 +78,16 @@ export function SalaryChangeForm({
   setNextSalary,
   salaryDelta,
   setSalaryDelta,
-  departments,
   errors,
   labelClass,
   inputClass,
-  SelectWrapper,
   RecipientsSection,
   DocumentsSection,
 }: SalaryChangeFormProps) {
   const getInputClass = (key: keyof typeof errors) =>
-    errors[key] ? `${inputClass} border-red-300 focus:border-red-400` : inputClass;
+    errors[key]
+      ? `${inputClass} border-red-300 focus:border-red-400`
+      : inputClass;
 
   return (
     <div className="flex min-w-0 flex-col gap-[16px]">
