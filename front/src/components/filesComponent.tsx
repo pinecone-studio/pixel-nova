@@ -2,6 +2,7 @@
 
 import { useApolloClient, useMutation, useQuery } from "@apollo/client/react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 
 import { buildGraphQLHeaders } from "@/lib/apollo-client";
 import { UPLOAD_HR_DOCUMENT } from "@/graphql/mutations";
@@ -16,13 +17,13 @@ import {
   CalIcon,
   DownloadIcon,
   EyeIcon,
-  OffboardIcon,
   OnboardIcon,
   PlusIcon,
   ReqIcon,
   SearchIcon,
 } from "./icons";
 import { CiWarning } from "react-icons/ci";
+import { useHrOverlay } from "./hr/overlay-context";
 
 // ── Types ──────────────────────────────────────────────
 type FileRow = {
@@ -142,7 +143,7 @@ function FilePreviewModal({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/45 backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/45"
       onClick={onClose}
     >
       <div
@@ -440,6 +441,12 @@ export function FilesComponent() {
   const [showModal, setShowModal] = useState(false);
   const [previewRow, setPreviewRow] = useState<FileRow | null>(null);
   const [downloadRow, setDownloadRow] = useState<FileRow | null>(null);
+  const { setBlurred } = useHrOverlay();
+
+  useEffect(() => {
+    setBlurred(Boolean(previewRow || downloadRow));
+    return () => setBlurred(false);
+  }, [previewRow, downloadRow, setBlurred]);
   const [rows, setRows] = useState<FileRow[]>([]);
   const [loadingRows, setLoadingRows] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -560,7 +567,7 @@ export function FilesComponent() {
   const isLoading = loading || loadingRows;
 
   return (
-    <div className="flex gap-5 min-h-screen bg-[#F4F5F7] text-slate-900 font-sans p-0 animate-fade-up">
+    <div className="grid gap-6 xl:grid-cols-[320px_1fr] items-start">
       {showModal && (
         <NewDocModal
           employees={employees}
@@ -568,29 +575,35 @@ export function FilesComponent() {
           onUploaded={loadRows}
         />
       )}
-      {previewRow && (
-        <FilePreviewModal
-          row={previewRow}
-          mode="preview"
-          onClose={() => setPreviewRow(null)}
-        />
-      )}
-      {downloadRow && (
-        <FilePreviewModal
-          row={downloadRow}
-          mode="download"
-          onClose={() => setDownloadRow(null)}
-        />
-      )}
+      {typeof document !== "undefined" && previewRow
+        ? createPortal(
+            <FilePreviewModal
+              row={previewRow}
+              mode="preview"
+              onClose={() => setPreviewRow(null)}
+            />,
+            document.body,
+          )
+        : null}
+      {typeof document !== "undefined" && downloadRow
+        ? createPortal(
+            <FilePreviewModal
+              row={downloadRow}
+              mode="download"
+              onClose={() => setDownloadRow(null)}
+            />,
+            document.body,
+          )
+        : null}
 
       {/* Left panel */}
-      <div className="w-125 shrink-0 flex flex-col gap-5">
+      <div className="flex flex-col gap-6">
         <div>
           <p className="text-slate-700 text-sm font-semibold mb-3">
             Нийт баримт бичиг
           </p>
-          <div className="rounded-2xl border border-slate-200 bg-white p-5 flex flex-col justify-between h-44 shadow-[0_1px_2px_rgba(15,23,42,0.06)]">
-            <div className="w-12 h-12 rounded-2xl border border-[#3F4145CC] bg-white flex items-center justify-center text-slate-600">
+          <div className="rounded-3xl border border-slate-200 bg-white/90 p-5 flex flex-col justify-between h-44 shadow-[0_16px_40px_rgba(15,23,42,0.08)]">
+            <div className="w-11 h-11 rounded-2xl border border-slate-200 bg-white flex items-center justify-center text-slate-600">
               <ReqIcon className="w-7 h-7" />
             </div>
             <div>
@@ -608,14 +621,14 @@ export function FilesComponent() {
         </div>
 
         <div>
-          <p className="text-slate-700 text-sm font-semibold uppercase tracking-widest mb-3">
+          <p className="text-slate-700 text-sm font-semibold uppercase tracking-[0.2em] mb-3">
             ҮЕ ШАТААР
           </p>
           <div className="flex flex-col gap-4">
             {stages.map((stage) => (
               <div
                 key={stage.label}
-                className="rounded-2xl border border-slate-200 bg-white p-4 flex items-center justify-between shadow-[0_1px_2px_rgba(15,23,42,0.06)]"
+                className="rounded-3xl border border-slate-200 bg-white/90 p-4 flex items-center justify-between shadow-[0_12px_30px_rgba(15,23,42,0.06)]"
               >
                 <div className="flex items-center gap-3">
                   <div className="w-9 h-9 rounded-xl border border-slate-200 bg-white flex items-center justify-center shrink-0 text-slate-600">
@@ -639,12 +652,12 @@ export function FilesComponent() {
 
       {/* Right panel */}
       <div className="flex-1 flex flex-col">
-        <div className="rounded-2xl border border-slate-200 bg-white overflow-auto flex-1 shadow-[0_1px_2px_rgba(15,23,42,0.06)]">
-          <div className="flex items-center gap-3 px-5 py-4 border-b border-slate-200 bg-white">
-            <div className="flex items-center gap-2 bg-white border border-slate-200 rounded-full px-3 py-2 min-w-65">
-              <SearchIcon />
+        <div className="rounded-3xl border border-slate-200 bg-white/90 overflow-auto flex-1 shadow-[0_18px_40px_rgba(15,23,42,0.08)]">
+          <div className="flex items-center gap-3 px-6 py-4 border-b border-slate-200 bg-white/80">
+            <div className="relative w-full max-w-sm">
+              <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
               <input
-                className="bg-transparent text-slate-500 text-sm outline-none placeholder:text-slate-400 w-62.5"
+                className="w-full bg-white border border-slate-200 rounded-xl pl-10 pr-3 py-2 text-slate-600 text-sm outline-none placeholder:text-slate-400 focus:border-slate-300"
                 placeholder="Хайх..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
@@ -653,7 +666,7 @@ export function FilesComponent() {
           </div>
 
           <div
-            className="grid items-center px-5 py-3.5 border-b border-slate-200 bg-white text-slate-500 text-sm"
+            className="grid items-center px-6 py-3.5 border-b border-slate-200 bg-white text-slate-500 text-sm"
             style={{ gridTemplateColumns: "2fr 1.3fr 1fr 1fr 0.9fr" }}
           >
             <span className="font-medium">Баримт бичиг</span>
@@ -664,7 +677,7 @@ export function FilesComponent() {
           </div>
 
           {isLoading ? (
-            <div className="py-8 px-5 flex flex-col gap-3">
+            <div className="py-8 px-6 flex flex-col gap-3">
               <div className="h-4 w-56 rounded-full skeleton" />
               <div className="h-3 w-80 rounded-full skeleton" />
               <div className="h-3 w-72 rounded-full skeleton" />
@@ -681,7 +694,7 @@ export function FilesComponent() {
             filtered.map((row) => (
               <div
                 key={row.document.id}
-                className="grid items-center px-5 py-3.5 border-b border-slate-200 hover:bg-slate-50 transition-colors"
+                className="grid items-center px-6 py-3.5 border-b border-slate-200 hover:bg-slate-50 transition-colors"
                 style={{ gridTemplateColumns: "2fr 1.3fr 1fr 1fr 0.9fr" }}
               >
                 <div className="flex items-center gap-2.5">
@@ -735,7 +748,7 @@ export function FilesComponent() {
             ))
           )}
 
-          <div className="px-5 py-3.5">
+          <div className="px-6 py-3.5">
             <span className="text-slate-500 text-sm">
               Нийт {filtered.length} баримт
             </span>
@@ -745,7 +758,7 @@ export function FilesComponent() {
         <div className="flex justify-end mt-4">
           <button
             onClick={() => setShowModal(true)}
-            className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-emerald-200 hover:bg-emerald-300 text-emerald-800 font-semibold text-sm transition-colors border border-emerald-200"
+            className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-semibold text-sm transition-colors border border-slate-900 cursor-pointer"
           >
             <PlusIcon />
             Шинэ баримт

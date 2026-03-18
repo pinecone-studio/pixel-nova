@@ -13,8 +13,10 @@ import type { ContractRequest } from "@/lib/types";
 
 import { getActiveHrNavItem, HR_NAV_ITEMS } from "./navigation";
 import { mapContractRequestToEmployeeNotification } from "./notif/hrNotifUtils";
+import { HrOverlayProvider, useHrOverlay } from "./overlay-context";
 
-export function HrShell({ children }: { children: React.ReactNode }) {
+function HrShellInner({ children }: { children: React.ReactNode }) {
+  const { blurred } = useHrOverlay();
   const pathname = usePathname();
   const activeItem = getActiveHrNavItem(pathname);
   const [notifOpen, setNotifOpen] = useState(false);
@@ -42,7 +44,9 @@ export function HrShell({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="hr-scope h-screen overflow-hidden bg-slate-50">
-      <div className="flex h-full overflow-hidden">
+      <div
+        className={`flex h-full overflow-hidden transition-[filter] duration-200 ${blurred ? "blur-sm pointer-events-none select-none" : ""}`}
+      >
         <aside className="scrollbar-hidden group sticky top-0 h-screen overflow-y-auto overflow-x-hidden w-17 hover:w-60 transition-[width] duration-300 border-r border-slate-200 bg-white flex flex-col py-4 px-2 shrink-0">
           <div className="mb-8 flex items-center gap-3 px-2">
             <EpasLogo className="w-9 h-9 rounded-xl shrink-0" />
@@ -157,5 +161,13 @@ export function HrShell({ children }: { children: React.ReactNode }) {
         }}
       />
     </div>
+  );
+}
+
+export function HrShell({ children }: { children: React.ReactNode }) {
+  return (
+    <HrOverlayProvider>
+      <HrShellInner>{children}</HrShellInner>
+    </HrOverlayProvider>
   );
 }
