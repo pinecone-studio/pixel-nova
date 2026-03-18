@@ -19,3 +19,12 @@ export const GET_DOCUMENT_CONTENT = gql`
   }
   ${DOCUMENT_CONTENT_FIELDS}
 `;
+
+export const GET_CONTRACT_TEMPLATE = gql`
+  query GetContractTemplate($templateId: String!) {
+    contractTemplate(templateId: $templateId) {
+      ...DocumentContentFields
+    }
+  }
+  ${DOCUMENT_CONTENT_FIELDS}
+`;

@@ -1,4 +1,5 @@
 import type { ChangeEvent, JSX, ReactNode } from "react";
+import { FieldError } from "./FieldError";
 
 export type SalaryChangeFormProps = {
   salaryStep: "person" | "salary";
@@ -33,16 +34,19 @@ export type SalaryChangeFormProps = {
   salaryDelta: string;
   setSalaryDelta: (v: string) => void;
   departments: string[];
+  errors: Record<string, string>;
   labelClass: string;
   inputClass: string;
   SelectWrapper: ({
     value,
     onChange,
     children,
+    hasError,
   }: {
     value: string;
     onChange: (e: ChangeEvent<HTMLSelectElement>) => void;
     children: ReactNode;
+    hasError?: boolean;
   }) => JSX.Element;
   RecipientsSection: ReactNode;
   DocumentsSection: ReactNode;
@@ -81,12 +85,16 @@ export function SalaryChangeForm({
   salaryDelta,
   setSalaryDelta,
   departments,
+  errors,
   labelClass,
   inputClass,
   SelectWrapper,
   RecipientsSection,
   DocumentsSection,
 }: SalaryChangeFormProps) {
+  const getInputClass = (key: keyof typeof errors) =>
+    errors[key] ? `${inputClass} border-red-300 focus:border-red-400` : inputClass;
+
   return (
     <div className="flex min-w-0 flex-col gap-[16px]">
       {salaryStep === "person" ? (
@@ -96,14 +104,15 @@ export function SalaryChangeForm({
             <input
               value={employeeCode}
               onChange={(e) => setEmployeeCode(e.target.value)}
-              placeholder="EMP001"
+              placeholder="EMP-0001"
               name="employee_code"
               autoComplete="off"
               autoCorrect="off"
               autoCapitalize="off"
               spellCheck={false}
-              className={inputClass}
+              className={getInputClass("employeeCode")}
             />
+            <FieldError message={errors.employeeCode} />
           </div>
           <div className="flex min-w-0 flex-col gap-[8px]">
             <label className={labelClass}>Овог</label>
@@ -111,8 +120,9 @@ export function SalaryChangeForm({
               value={lastName}
               onChange={(e) => setLastName(e.target.value)}
               placeholder="Дорж"
-              className={inputClass}
+              className={getInputClass("lastName")}
             />
+            <FieldError message={errors.lastName} />
           </div>
           <div className="flex min-w-0 flex-col gap-[8px]">
             <label className={labelClass}>Нэр</label>
@@ -120,8 +130,9 @@ export function SalaryChangeForm({
               value={firstName}
               onChange={(e) => setFirstName(e.target.value)}
               placeholder="Дуламрагчаа"
-              className={inputClass}
+              className={getInputClass("firstName")}
             />
+            <FieldError message={errors.firstName} />
           </div>
           <div className="flex min-w-0 flex-col gap-[8px]">
             <label className={labelClass}>Имэйл</label>
@@ -129,70 +140,63 @@ export function SalaryChangeForm({
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="dorj@company.com"
-              className={inputClass}
+              className={getInputClass("email")}
             />
+            <FieldError message={errors.email} />
           </div>
           <div className="grid min-w-0 grid-cols-2 gap-[16px]">
             <div className="flex min-w-0 flex-col gap-[8px]">
-              <label className={labelClass}>Регистрийн дугаар</label>
+              <label className={labelClass}>Ажиллаж эхэлсэн хугацаа</label>
               <input
                 value={registerNo}
                 onChange={(e) => setRegisterNo(e.target.value)}
-                placeholder="УХ04272036"
-                className={inputClass}
+                placeholder="Хугацаа оруулах"
+                className={getInputClass("workStartDate")}
               />
+              <FieldError message={errors.workStartDate} />
             </div>
             <div className="flex min-w-0 flex-col gap-[8px]">
-              <label className={labelClass}>Утасны дугаар</label>
+              <label className={labelClass}>Ажилласан нийт хугацаа</label>
               <input
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
-                placeholder="99999999"
-                className={inputClass}
+                placeholder="Хугацаа оруулах"
+                className={getInputClass("workTotalDuration")}
               />
+              <FieldError message={errors.workTotalDuration} />
             </div>
-          </div>
-          <div className="flex min-w-0 flex-col gap-[8px]">
-            <label className={labelClass}>Салбар</label>
-            <input
-              value={branch}
-              onChange={(e) => setBranch(e.target.value)}
-              placeholder="Гурван гол"
-              className={inputClass}
-            />
-          </div>
-          <div className="flex min-w-0 flex-col gap-[8px]">
-            <label className={labelClass}>Хэлтэс</label>
-            <SelectWrapper
-              value={dept}
-              onChange={(e) => setDept(e.target.value)}
-            >
-              {departments.map((d) => (
-                <option key={d} value={d}>
-                  {d}
-                </option>
-              ))}
-            </SelectWrapper>
           </div>
           <div className="grid min-w-0 grid-cols-2 gap-[16px]">
             <div className="flex min-w-0 flex-col gap-[8px]">
-              <label className={labelClass}>Одоогийн албан тушаал</label>
+              <label className={labelClass}>Өмнөх цалин</label>
               <input
-                value={currentPosition}
-                onChange={(e) => setCurrentPosition(e.target.value)}
-                placeholder="Junior Engineer"
-                className={inputClass}
+                value={registerNo}
+                onChange={(e) => setRegisterNo(e.target.value)}
+                placeholder="9999999"
+                className={getInputClass("prevSalary")}
               />
+              <FieldError message={errors.prevSalary} />
             </div>
             <div className="flex min-w-0 flex-col gap-[8px]">
-              <label className={labelClass}>Дэвших албан тушаал</label>
+              <label className={labelClass}>Шинэ цалин</label>
               <input
-                value={nextPosition}
-                onChange={(e) => setNextPosition(e.target.value)}
-                placeholder="Senior Engineer"
-                className={inputClass}
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                placeholder="9999999"
+                className={getInputClass("nextSalary")}
               />
+              <FieldError message={errors.nextSalary} />
             </div>
+          </div>
+          <div className="flex min-w-0 flex-col gap-[8px]">
+            <label className={labelClass}>Цалин өөрчлөгдсөн дүн</label>
+            <input
+              value={branch}
+              onChange={(e) => setBranch(e.target.value)}
+              placeholder="9999999"
+              className={getInputClass("salaryDelta")}
+            />
+            <FieldError message={errors.salaryDelta} />
           </div>
         </>
       ) : (
@@ -208,8 +212,9 @@ export function SalaryChangeForm({
               autoCorrect="off"
               autoCapitalize="off"
               spellCheck={false}
-              className={inputClass}
+              className={getInputClass("employeeCode")}
             />
+            <FieldError message={errors.employeeCode} />
           </div>
           <div className="flex min-w-0 flex-col gap-[8px]">
             <label className={labelClass}>Овог</label>
@@ -217,8 +222,9 @@ export function SalaryChangeForm({
               value={lastName}
               onChange={(e) => setLastName(e.target.value)}
               placeholder="Дорж"
-              className={inputClass}
+              className={getInputClass("lastName")}
             />
+            <FieldError message={errors.lastName} />
           </div>
           <div className="flex min-w-0 flex-col gap-[8px]">
             <label className={labelClass}>Нэр</label>
@@ -226,8 +232,9 @@ export function SalaryChangeForm({
               value={firstName}
               onChange={(e) => setFirstName(e.target.value)}
               placeholder="Дуламрагчаа"
-              className={inputClass}
+              className={getInputClass("firstName")}
             />
+            <FieldError message={errors.firstName} />
           </div>
           <div className="grid min-w-0 grid-cols-2 gap-[16px]">
             <div className="flex min-w-0 flex-col gap-[8px]">
@@ -236,8 +243,9 @@ export function SalaryChangeForm({
                 value={workStartDate}
                 onChange={(e) => setWorkStartDate(e.target.value)}
                 placeholder="Хугацаа оруулах"
-                className={inputClass}
+                className={getInputClass("workStartDate")}
               />
+              <FieldError message={errors.workStartDate} />
             </div>
             <div className="flex min-w-0 flex-col gap-[8px]">
               <label className={labelClass}>Ажилласан нийт хугацаа</label>
@@ -245,8 +253,9 @@ export function SalaryChangeForm({
                 value={workTotalDuration}
                 onChange={(e) => setWorkTotalDuration(e.target.value)}
                 placeholder="Хугацаа оруулах"
-                className={inputClass}
+                className={getInputClass("workTotalDuration")}
               />
+              <FieldError message={errors.workTotalDuration} />
             </div>
           </div>
           <div className="grid min-w-0 grid-cols-2 gap-[16px]">
@@ -256,8 +265,9 @@ export function SalaryChangeForm({
                 value={prevSalary}
                 onChange={(e) => setPrevSalary(e.target.value)}
                 placeholder="9999999"
-                className={inputClass}
+                className={getInputClass("prevSalary")}
               />
+              <FieldError message={errors.prevSalary} />
             </div>
             <div className="flex min-w-0 flex-col gap-[8px]">
               <label className={labelClass}>Шинэ цалин</label>
@@ -265,8 +275,9 @@ export function SalaryChangeForm({
                 value={nextSalary}
                 onChange={(e) => setNextSalary(e.target.value)}
                 placeholder="9999999"
-                className={inputClass}
+                className={getInputClass("nextSalary")}
               />
+              <FieldError message={errors.nextSalary} />
             </div>
           </div>
           <div className="flex min-w-0 flex-col gap-[8px]">
@@ -275,8 +286,9 @@ export function SalaryChangeForm({
               value={salaryDelta}
               onChange={(e) => setSalaryDelta(e.target.value)}
               placeholder="9999999"
-              className={inputClass}
+              className={getInputClass("salaryDelta")}
             />
+            <FieldError message={errors.salaryDelta} />
           </div>
         </>
       )}

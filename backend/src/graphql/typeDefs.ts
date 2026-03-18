@@ -234,6 +234,7 @@ export const typeDefs = /* GraphQL */ `
     auditLogs(employeeId: ID, action: String, fromDate: String, toDate: String): [AuditLog!]!
     actions: [ActionConfig!]!
     documentContent(documentId: ID!): DocumentContent
+    contractTemplate(templateId: String!): DocumentContent
     leaveRequests(status: String): [LeaveRequest!]!
     myLeaveRequests: [LeaveRequest!]!
     contractRequests(status: String): [ContractRequest!]!

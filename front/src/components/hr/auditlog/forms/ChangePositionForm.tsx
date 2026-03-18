@@ -1,9 +1,11 @@
 import type { ChangeEvent, JSX, ReactNode } from "react";
+import { FieldError } from "./FieldError";
 
 type SelectWrapperProps = {
   value: string;
   onChange: (e: ChangeEvent<HTMLSelectElement>) => void;
   children: ReactNode;
+  hasError?: boolean;
 };
 
 export type ChangePositionFormProps = {
@@ -24,6 +26,7 @@ export type ChangePositionFormProps = {
   changeReason: string;
   setChangeReason: (v: string) => void;
   departments: string[];
+  errors: Record<string, string>;
   labelClass: string;
   inputClass: string;
   SelectWrapper: (props: SelectWrapperProps) => JSX.Element;
@@ -49,12 +52,16 @@ export function ChangePositionForm({
   changeReason,
   setChangeReason,
   departments,
+  errors,
   labelClass,
   inputClass,
   SelectWrapper,
   RecipientsSection,
   DocumentsSection,
 }: ChangePositionFormProps) {
+  const getInputClass = (key: keyof typeof errors) =>
+    errors[key] ? `${inputClass} border-red-300 focus:border-red-400` : inputClass;
+
   return (
     <div className="flex min-w-0 flex-col gap-[16px]">
       <div className="flex min-w-0 flex-col gap-[8px]">
@@ -68,8 +75,9 @@ export function ChangePositionForm({
           autoCorrect="off"
           autoCapitalize="off"
           spellCheck={false}
-          className={inputClass}
+          className={getInputClass("employeeCode")}
         />
+        <FieldError message={errors.employeeCode} />
       </div>
       <div className="flex min-w-0 flex-col gap-[8px]">
         <label className={labelClass}>Овог</label>
@@ -77,8 +85,9 @@ export function ChangePositionForm({
           value={lastName}
           onChange={(e) => setLastName(e.target.value)}
           placeholder="Дорж"
-          className={inputClass}
+          className={getInputClass("lastName")}
         />
+        <FieldError message={errors.lastName} />
       </div>
       <div className="flex min-w-0 flex-col gap-[8px]">
         <label className={labelClass}>Нэр</label>
@@ -86,8 +95,9 @@ export function ChangePositionForm({
           value={firstName}
           onChange={(e) => setFirstName(e.target.value)}
           placeholder="Дуламрагчаа"
-          className={inputClass}
+          className={getInputClass("firstName")}
         />
+        <FieldError message={errors.firstName} />
       </div>
 
       <div className="grid min-w-0 grid-cols-2 gap-[16px]">
@@ -96,6 +106,7 @@ export function ChangePositionForm({
           <SelectWrapper
             value={currentDept}
             onChange={(e) => setCurrentDept(e.target.value)}
+            hasError={!!errors.currentDept}
           >
             {departments.map((d) => (
               <option key={d} value={d}>
@@ -103,6 +114,7 @@ export function ChangePositionForm({
               </option>
             ))}
           </SelectWrapper>
+          <FieldError message={errors.currentDept} />
         </div>
         <div className="flex min-w-0 flex-col gap-[8px]">
           <label className={labelClass}>Одоогийн албан тушаал</label>
@@ -110,8 +122,9 @@ export function ChangePositionForm({
             value={currentPosition}
             onChange={(e) => setCurrentPosition(e.target.value)}
             placeholder="Junior Engineer"
-            className={inputClass}
+            className={getInputClass("currentPosition")}
           />
+          <FieldError message={errors.currentPosition} />
         </div>
       </div>
 
@@ -121,6 +134,7 @@ export function ChangePositionForm({
           <SelectWrapper
             value={nextDept}
             onChange={(e) => setNextDept(e.target.value)}
+            hasError={!!errors.nextDept}
           >
             {departments.map((d) => (
               <option key={d} value={d}>
@@ -128,6 +142,7 @@ export function ChangePositionForm({
               </option>
             ))}
           </SelectWrapper>
+          <FieldError message={errors.nextDept} />
         </div>
         <div className="flex min-w-0 flex-col gap-[8px]">
           <label className={labelClass}>Шилжих буй албан тушаал</label>
@@ -135,8 +150,9 @@ export function ChangePositionForm({
             value={nextPosition}
             onChange={(e) => setNextPosition(e.target.value)}
             placeholder="Junior Engineer"
-            className={inputClass}
+            className={getInputClass("nextPosition")}
           />
+          <FieldError message={errors.nextPosition} />
         </div>
       </div>
 
@@ -145,6 +161,7 @@ export function ChangePositionForm({
         <SelectWrapper
           value={changeReason}
           onChange={(e) => setChangeReason(e.target.value)}
+          hasError={!!errors.changeReason}
         >
           <option value="">Сонгох</option>
           <option value="Ажлын шаардлага">Ажлын шаардлага</option>
@@ -152,6 +169,7 @@ export function ChangePositionForm({
           <option value="Дотоод шилжилт">Дотоод шилжилт</option>
           <option value="Бусад">Бусад</option>
         </SelectWrapper>
+        <FieldError message={errors.changeReason} />
       </div>
 
       {RecipientsSection}

@@ -21,7 +21,7 @@ export function AuditActionCard({
   const actionLabel = actionLabelMap[action.name] ?? action.name;
 
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-5 flex flex-col gap-4 shadow-[0_1px_2px_rgba(15,23,42,0.06)]">
+    <div className="rounded-2xl border border-slate-200 bg-white p-5 flex h-full flex-col gap-4 shadow-[0_1px_2px_rgba(15,23,42,0.06)]">
       <div className="flex items-start justify-between">
         <p className="text-slate-900 font-bold text-base tracking-wide uppercase">
           {actionLabel}
@@ -99,7 +99,7 @@ export function AuditActionCard({
 
       <button
         onClick={() => onSendRequest(action)}
-        className="flex items-center justify-center gap-2 py-2.5 rounded-xl border border-slate-200 bg-black text-white text-sm font-medium cursor-pointer transition-colors"
+        className="mt-auto flex items-center justify-center gap-2 py-2.5 rounded-xl border border-slate-200 bg-black text-white text-sm font-medium cursor-pointer transition-colors"
       >
         <EditIcon />
         Хүсэлт илгээх

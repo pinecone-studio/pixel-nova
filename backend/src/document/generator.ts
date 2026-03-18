@@ -23,6 +23,10 @@ const TEMPLATE_MAP: Record<string, string> = {
   "handover_sheet.html": handoverSheetHtml,
 };
 
+export function getTemplateHtml(templateFile: string): string | null {
+  return TEMPLATE_MAP[templateFile] ?? null;
+}
+
 export interface GenerateDocumentInput {
   employee: Employee;
   action: string;

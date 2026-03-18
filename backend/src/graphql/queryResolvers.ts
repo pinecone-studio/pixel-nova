@@ -11,6 +11,8 @@ import {
   listEmployees,
   listActionConfigs,
 } from "../db/queries";
+import { getTemplateFileById } from "../services/contractTemplates";
+import { getTemplateHtml } from "../document/generator";
 import type { GraphQLContext } from "./schema";
 
 type Ctx = GraphQLContext;
@@ -171,5 +173,25 @@ export const queryResolvers = {
     }
 
     return null;
+  },
+
+  contractTemplate: async (
+    _: unknown,
+    args: { templateId: string },
+    ctx: Ctx,
+  ) => {
+    if (ctx.actor.role !== "hr" && ctx.actor.role !== "admin") {
+      throw new Error("Unauthorized");
+    }
+    const templateFile = getTemplateFileById(args.templateId);
+    if (!templateFile) return null;
+    const templateHtml = getTemplateHtml(templateFile);
+    if (!templateHtml) return null;
+    return {
+      id: args.templateId,
+      documentName: templateFile,
+      contentType: "text/html",
+      content: templateHtml,
+    };
   },
 };

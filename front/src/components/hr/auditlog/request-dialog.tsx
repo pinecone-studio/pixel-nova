@@ -2,17 +2,18 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { FiEye, FiFileText, FiX } from "react-icons/fi";
-import { useMutation, useQuery } from "@apollo/client/react";
+import { useLazyQuery, useMutation, useQuery } from "@apollo/client/react";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
+  DialogPortal,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { GET_EMPLOYEES } from "@/graphql/queries";
+import { GET_CONTRACT_TEMPLATE, GET_EMPLOYEES } from "@/graphql/queries";
 import { TRIGGER_ACTION } from "@/graphql/mutations";
 import { buildGraphQLHeaders } from "@/lib/apollo-client";
-import type { ActionConfig, Employee } from "@/lib/types";
+import type { ActionConfig, DocumentContent, Employee } from "@/lib/types";
 import { ChangePositionForm } from "./forms/ChangePositionForm";
 import { NewEmployeeForm } from "./forms/NewEmployeeForm";
 import { OffboardForm } from "./forms/OffboardForm";
@@ -42,6 +43,7 @@ const ChevronDown = () => (
 
 const selectClass =
   "w-full appearance-none bg-white border border-slate-200 rounded-[8px] px-[16px] py-[8px] text-slate-700 text-[16px] outline-none pr-8 cursor-pointer focus:border-slate-300";
+const errorSelectClass = `${selectClass} border-red-300 focus:border-red-400`;
 
 const inputClass =
   "border border-slate-200 rounded-[8px] px-[12px] py-[8px] bg-white text-slate-700 text-[16px] placeholder:text-slate-400 outline-none focus:border-slate-300 tracking-[-0.16px]";
@@ -53,13 +55,19 @@ const SelectWrapper = ({
   value,
   onChange,
   children,
+  hasError,
 }: {
   value: string;
   onChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
   children: React.ReactNode;
+  hasError?: boolean;
 }) => (
   <div className="relative">
-    <select value={value} onChange={onChange} className={selectClass}>
+    <select
+      value={value}
+      onChange={onChange}
+      className={hasError ? errorSelectClass : selectClass}
+    >
       {children}
     </select>
     <div className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2">
@@ -107,6 +115,7 @@ export function AddEmployeeRequestDialog({
   const [contractNo, setContractNo] = useState("");
   const [terminationReason, setTerminationReason] = useState("");
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [errors, setErrors] = useState<Record<string, string>>({});
   const [currentDept, setCurrentDept] = useState("Engineering");
   const [currentPosition, setCurrentPosition] = useState("");
   const [nextDept, setNextDept] = useState("Engineering");
@@ -116,16 +125,22 @@ export function AddEmployeeRequestDialog({
     action?.recipients.length ? [...action.recipients] : ["hr_manager"],
   );
   const [recipientInput, setRecipientInput] = useState("");
+  const [previewOpen, setPreviewOpen] = useState(false);
+  const [previewDoc, setPreviewDoc] = useState<
+    ActionConfig["documents"][number] | null
+  >(null);
+  const [previewError, setPreviewError] = useState<string | null>(null);
 
   const documents = action?.documents ?? [];
   const actionKey = action?.name?.toLowerCase() ?? "";
   const actionLabelMap: Record<string, string> = {
-    add_employee: "Шинэ ажилтан",
-    change_position: "Албан тушаал өөрчлөх",
-    promote_employee: "Ажилтан дэвшүүлэх",
-    offboard_employee: "Ажлаас чөлөөлөх",
+    add_employee: "ADD EMPLOYEE",
+    change_position: "CHANGE POSITION",
+    promote_employee: "PROMOTE EMPLOYEE",
+    offboard_employee: "OFFBOARD EMPLOYEE",
   };
-  const actionLabel = actionLabelMap[actionKey] ?? action?.name ?? "Шинэ ажилтан";
+  const actionLabel =
+    actionLabelMap[actionKey] ?? action?.name ?? "ADD EMPLOYEE";
   const useAddEmployeeLayout = actionKey === "add_employee";
   const useChangePositionLayout = actionKey === "change_position";
   const useSalaryChangeLayout = actionKey === "promote_employee";
@@ -173,6 +188,8 @@ export function AddEmployeeRequestDialog({
     setRecipientInput("");
     setTab("hr");
     setSalaryStep("person");
+    setErrors({});
+    setSubmitError(null);
   }, [action]);
 
   useEffect(() => {
@@ -193,8 +210,199 @@ export function AddEmployeeRequestDialog({
     context: { headers: buildGraphQLHeaders({ actorRole: "hr" }) },
   });
 
+  const [loadTemplate, { data: previewData, loading: previewLoading }] =
+    useLazyQuery<{ contractTemplate: DocumentContent | null }>(
+      GET_CONTRACT_TEMPLATE,
+      {
+        fetchPolicy: "network-only",
+      },
+    );
+
+  const previewContent = previewData?.contractTemplate ?? null;
+  const previewUrl = useMemo(() => {
+    if (!previewContent) return null;
+    if (previewContent.contentType === "text/html") return null;
+    if (previewContent.contentType === "application/pdf") {
+      return `data:${previewContent.contentType};base64,${previewContent.content}`;
+    }
+    if (previewContent.contentType.startsWith("text/")) {
+      return `data:${previewContent.contentType};charset=utf-8,${encodeURIComponent(
+        previewContent.content,
+      )}`;
+    }
+    return `data:${previewContent.contentType};base64,${previewContent.content}`;
+  }, [previewContent]);
+
+  async function handlePreview(doc: ActionConfig["documents"][number]) {
+    setPreviewOpen(true);
+    setPreviewDoc(doc);
+    setPreviewError(null);
+    try {
+      const result = await loadTemplate({
+        variables: { templateId: doc.id },
+        context: { headers: buildGraphQLHeaders({ actorRole: "hr" }) },
+      });
+      if (!result.data?.contractTemplate) {
+        setPreviewError("Баримтын загвар олдсонгүй.");
+      }
+    } catch (err) {
+      setPreviewError(
+        err instanceof Error ? err.message : "Preview ачааллахад алдаа гарлаа.",
+      );
+    }
+  }
+
+  const requiredMessage = "Заавал бөглөнө.";
+  const numberOnlyRegex = /^\d+$/;
+  const emailRegex = /^[^\s@]+@gmail\.com$/i;
+  const employeeCodeRegex = /^EMP-?\d{3,4}$/i;
+
+  const validateForm = () => {
+    const nextErrors: Record<string, string> = {};
+    const isBlank = (value: string) => !value || !value.trim();
+    const requireValue = (value: string, key: string, message?: string) => {
+      if (isBlank(value)) nextErrors[key] = message ?? requiredMessage;
+    };
+    const requirePattern = (
+      value: string,
+      key: string,
+      regex: RegExp,
+      message: string,
+    ) => {
+      if (isBlank(value)) {
+        nextErrors[key] = requiredMessage;
+        return;
+      }
+      if (!regex.test(value.trim())) nextErrors[key] = message;
+    };
+
+    if (useAddEmployeeLayout) {
+      if (tab === "hr") {
+        requireValue(companyAddress, "companyAddress");
+        requirePattern(
+          companyRegisterNo,
+          "companyRegisterNo",
+          numberOnlyRegex,
+          "Зөвхөн тоо оруулна уу.",
+        );
+        requireValue(companyName, "companyName");
+      } else {
+        requirePattern(
+          employeeCode,
+          "employeeCode",
+          employeeCodeRegex,
+          "EMP0001 хэлбэрээр оруулна уу.",
+        );
+        requireValue(branch, "branch");
+        requireValue(lastName, "lastName");
+        requireValue(firstName, "firstName");
+        requirePattern(email, "email", emailRegex, "@gmail.com-оор төгсөнө.");
+        requireValue(registerNo, "registerNo");
+        requirePattern(
+          phone,
+          "phone",
+          numberOnlyRegex,
+          "Зөвхөн тоо оруулна уу.",
+        );
+        requireValue(dept, "dept");
+        requireValue(jobTitle, "jobTitle");
+        requireValue(workSchedule, "workSchedule");
+        requireValue(workdays, "workdays");
+        requirePattern(
+          salaryAmount,
+          "salaryAmount",
+          numberOnlyRegex,
+          "Зөвхөн тоо оруулна уу.",
+        );
+        requireValue(contractStart, "contractStart");
+        requireValue(contractEnd, "contractEnd");
+        requireValue(contractDuration, "contractDuration");
+      }
+    }
+
+    if (useChangePositionLayout) {
+      requirePattern(
+        employeeCode,
+        "employeeCode",
+        employeeCodeRegex,
+        "EMP0001 хэлбэрээр оруулна уу.",
+      );
+      requireValue(lastName, "lastName");
+      requireValue(firstName, "firstName");
+      requireValue(currentDept, "currentDept");
+      requireValue(currentPosition, "currentPosition");
+      requireValue(nextDept, "nextDept");
+      requireValue(nextPosition, "nextPosition");
+      requireValue(changeReason, "changeReason");
+    }
+
+    if (useSalaryChangeLayout) {
+      requirePattern(
+        employeeCode,
+        "employeeCode",
+        employeeCodeRegex,
+        "EMP0001 хэлбэрээр оруулна уу.",
+      );
+      requireValue(lastName, "lastName");
+      requireValue(firstName, "firstName");
+
+      if (salaryStep === "person") {
+        requirePattern(email, "email", emailRegex, "@gmail.com-оор төгсөнө.");
+      } else {
+        requireValue(workStartDate, "workStartDate");
+        requireValue(workTotalDuration, "workTotalDuration");
+        requirePattern(
+          prevSalary,
+          "prevSalary",
+          numberOnlyRegex,
+          "Зөвхөн тоо оруулна уу.",
+        );
+        requirePattern(
+          nextSalary,
+          "nextSalary",
+          numberOnlyRegex,
+          "Зөвхөн тоо оруулна уу.",
+        );
+        requirePattern(
+          salaryDelta,
+          "salaryDelta",
+          numberOnlyRegex,
+          "Зөвхөн тоо оруулна уу.",
+        );
+      }
+    }
+
+    if (useOffboardLayout) {
+      requirePattern(
+        employeeCode,
+        "employeeCode",
+        employeeCodeRegex,
+        "EMP0001 хэлбэрээр оруулна уу.",
+      );
+      requireValue(lastName, "lastName");
+      requireValue(firstName, "firstName");
+      requireValue(registerNo, "registerNo");
+      requirePattern(phone, "phone", numberOnlyRegex, "Зөвхөн тоо оруулна уу.");
+      requireValue(jobTitle, "jobTitle");
+      requireValue(hireDate, "hireDate");
+      requireValue(terminationDate, "terminationDate");
+      requirePattern(
+        contractNo,
+        "contractNo",
+        numberOnlyRegex,
+        "Зөвхөн тоо оруулна уу.",
+      );
+      requireValue(terminationReason, "terminationReason");
+    }
+
+    return nextErrors;
+  };
+
   async function handleSubmit() {
     setSubmitError(null);
+    const nextErrors = validateForm();
+    setErrors(nextErrors);
+    if (Object.keys(nextErrors).length > 0) return;
     if (!action?.name) {
       setSubmitError("Үйлдлийн нэр олдсонгүй.");
       return;
@@ -221,13 +429,13 @@ export function AddEmployeeRequestDialog({
 
   // ── Хүлээн авагчид + файл (хоёр section-д хуваалцана) ──
   const RecipientsSection = (
-    <div className="flex flex-col gap-[8px]">
+    <div className="flex flex-col gap-4">
       <label className={labelClass}>Хүлээн авагчид</label>
-      <div className="mb-1 flex min-w-0 flex-wrap gap-[6px]">
+      <div className="mb-1 flex min-w-0 flex-wrap gap-1.5">
         {recipients.map((recipient) => (
           <span
             key={recipient}
-            className="inline-flex max-w-full items-center gap-[4px] rounded-[10px] border border-slate-200 px-[9px] py-[3px] text-slate-500 text-[12px] leading-[20px] bg-slate-50"
+            className="inline-flex max-w-full items-center gap-1 rounded-[10px] border border-slate-200 px-[9px] py-[3px] text-slate-500 text-[12px] leading-[20px] bg-slate-50"
           >
             {recipient}
             <button
@@ -271,7 +479,11 @@ export function AddEmployeeRequestDialog({
                 </p>
               </div>
             </div>
-            <button className="text-slate-400 hover:text-slate-700 transition-colors size-[40px] flex items-center justify-center">
+            <button
+              onClick={() => void handlePreview(doc)}
+              className="text-slate-400 hover:text-slate-700 transition-colors size-[40px] flex items-center justify-center"
+              aria-label="Preview template"
+            >
               <FiEye className="h-5 w-5" />
             </button>
           </div>
@@ -284,9 +496,9 @@ export function AddEmployeeRequestDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-white border border-slate-200 rounded-[16px] flex w-full max-w-[calc(100vw-2rem)] sm:max-w-xl flex-col gap-[16px] p-[24px] max-h-[92vh] overflow-y-auto overflow-x-hidden ring-0 scrollbar-hidden">
+      <DialogContent className="bg-white border border-slate-200 rounded-[16px] flex min-h-0 w-full max-w-[calc(100vw-2rem)] sm:max-w-xl flex-col gap-[16px] p-[24px] max-h-[calc(100vh-2rem)] overflow-y-auto overflow-x-hidden overscroll-contain ring-0 scrollbar-hidden pointer-events-auto">
         <DialogHeader>
-          <DialogTitle className="text-slate-900 font-semibold text-[20px] leading-[24px]">
+          <DialogTitle className="text-slate-900 font-semibold text-[20px] leading-6">
             {actionLabel}
           </DialogTitle>
         </DialogHeader>
@@ -326,6 +538,7 @@ export function AddEmployeeRequestDialog({
             salaryDelta={salaryDelta}
             setSalaryDelta={setSalaryDelta}
             departments={DEPARTMENTS}
+            errors={errors}
             labelClass={labelClass}
             inputClass={inputClass}
             SelectWrapper={SelectWrapper}
@@ -351,6 +564,7 @@ export function AddEmployeeRequestDialog({
             changeReason={changeReason}
             setChangeReason={setChangeReason}
             departments={DEPARTMENTS}
+            errors={errors}
             labelClass={labelClass}
             inputClass={inputClass}
             SelectWrapper={SelectWrapper}
@@ -379,6 +593,7 @@ export function AddEmployeeRequestDialog({
             setContractNo={setContractNo}
             terminationReason={terminationReason}
             setTerminationReason={setTerminationReason}
+            errors={errors}
             labelClass={labelClass}
             inputClass={inputClass}
             RecipientsSection={RecipientsSection}
@@ -425,6 +640,7 @@ export function AddEmployeeRequestDialog({
             contractDuration={contractDuration}
             setContractDuration={setContractDuration}
             departments={DEPARTMENTS}
+            errors={errors}
             labelClass={labelClass}
             inputClass={inputClass}
             SelectWrapper={SelectWrapper}
@@ -437,17 +653,17 @@ export function AddEmployeeRequestDialog({
           </div>
         )}
         {/* ── Товчлуурууд ── */}
-        <div className="flex items-center gap-[20px] justify-end shrink-0">
+        <div className="flex flex-nowrap items-center gap-[20px] justify-end shrink-0">
           <button
             onClick={() => onOpenChange(false)}
-            className="border border-slate-200 px-[20px] py-[10px] rounded-[12px] text-slate-500 text-[16px] hover:bg-slate-50 transition-colors cursor-pointer"
+            className="border border-slate-200 px-[20px] py-[10px] rounded-[12px] text-slate-500 text-[16px] hover:bg-slate-50 transition-colors cursor-pointer whitespace-nowrap"
           >
             Болих
           </button>
           {useSalaryChangeLayout && salaryStep === "person" ? (
             <button
               onClick={() => setSalaryStep("salary")}
-              className="bg-slate-900 px-[20px] py-[10px] rounded-[12px] text-white text-[16px] hover:bg-slate-800 transition-colors cursor-pointer"
+              className="bg-slate-900 px-[20px] py-[10px] rounded-[12px] text-white text-[16px] hover:bg-slate-800 transition-colors cursor-pointer whitespace-nowrap"
             >
               Цааш
             </button>
@@ -455,13 +671,70 @@ export function AddEmployeeRequestDialog({
             <button
               onClick={handleSubmit}
               disabled={submitting}
-              className="bg-slate-900 px-[20px] py-[10px] rounded-[12px] text-white text-[16px] hover:bg-slate-800 transition-colors cursor-pointer disabled:opacity-60"
+              className="bg-slate-900 px-[20px] py-[10px] rounded-[12px] text-white text-[16px] hover:bg-slate-800 transition-colors cursor-pointer disabled:opacity-60 whitespace-nowrap"
             >
               {submitting ? "Илгээж байна..." : "Илгээх"}
             </button>
           )}
         </div>
       </DialogContent>
+
+      {previewOpen ? (
+        <DialogPortal>
+          <div className="fixed inset-0 z-[120] flex items-center justify-center ">
+            <button
+              type="button"
+              aria-label="Preview close overlay"
+              className="absolute inset-0 bg-black/60"
+              onClick={() => setPreviewOpen(false)}
+            />
+            <div className="relative w-[860px] max-w-[92vw] h-[82vh] bg-white border border-slate-200 rounded-2xl shadow-2xl overflow-auto">
+              <div className="flex items-center justify-between px-5 py-4 border-b border-slate-200">
+                <div className="flex flex-col">
+                  <p className="text-slate-900 text-sm font-semibold">
+                    {previewDoc?.template ?? "Баримт"}
+                  </p>
+                  <p className="text-slate-500 text-xs mt-0.5">Preview</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setPreviewOpen(false)}
+                  className="w-8 h-8 rounded-lg flex items-center justify-center text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors"
+                >
+                  <FiX className="text-lg" />
+                </button>
+              </div>
+              <div className="h-full bg-slate-50 p-4">
+                {previewLoading ? (
+                  <div className="w-full h-full rounded-xl border border-slate-200 flex items-center justify-center text-sm text-slate-400">
+                    Уншиж байна...
+                  </div>
+                ) : previewError ? (
+                  <div className="w-full h-full rounded-xl border border-red-200 bg-red-50 flex items-center justify-center text-sm text-red-500">
+                    {previewError}
+                  </div>
+                ) : previewContent?.contentType === "text/html" ? (
+                  <iframe
+                    title={previewDoc?.template ?? "Template preview"}
+                    className="w-full h-full rounded-xl border border-slate-200 bg-white"
+                    srcDoc={previewContent.content}
+                  />
+                ) : previewUrl ? (
+                  <iframe
+                    title={previewDoc?.template ?? "Template preview"}
+                    className="w-full h-full rounded-xl border border-slate-200 bg-white"
+                    src={previewUrl}
+                  />
+                ) : (
+                  <div className="w-full h-full rounded-xl border border-slate-200 flex items-center justify-center text-sm text-slate-400">
+                    Preview бэлэн биш байна.
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </DialogPortal>
+      ) : null}
     </Dialog>
   );
 }
