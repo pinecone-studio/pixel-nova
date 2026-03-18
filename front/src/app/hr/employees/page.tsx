@@ -132,10 +132,10 @@ export default function HrEmployeesPage() {
       ) : null}
 
       <div className="flex flex-col gap-2">
-        <h1 className="text-[28px] font-semibold leading-8 tracking-[-0.02em] text-slate-950">
+        <h1 className="text-[20px] font-semibold leading-6 tracking-[-0.096px] text-black">
           Ажилтнууд
         </h1>
-        <p className="text-sm leading-6 text-slate-500">
+        <p className="text-[14px] leading-5 text-[#3f4145b3]">
           Байгууллагын бүх ажилтны мэдээлэл, төлөв болон үндсэн дэлгэрэнгүй.
         </p>
       </div>
@@ -155,12 +155,12 @@ export default function HrEmployeesPage() {
       ) : null}
 
       <div className="flex items-center justify-between gap-4">
-        <p className="text-sm font-medium text-slate-500">
+        <p className="text-[14px] font-medium text-[#3f4145b3]">
           Нийт {filtered.length} ажилтан
         </p>
         <button
           onClick={() => setShowAdd(true)}
-          className="inline-flex h-11 items-center gap-2 rounded-2xl bg-slate-950 px-5 text-sm font-semibold text-white transition-colors hover:bg-slate-800"
+          className="inline-flex h-10 items-center gap-2 rounded-[10px] bg-[#1f2126] px-5 text-[14px] font-semibold text-white transition-colors hover:bg-[#121316]"
         >
           <PlusIcon />
           Ажилтан нэмэх
