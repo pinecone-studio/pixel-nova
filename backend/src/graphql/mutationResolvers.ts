@@ -22,6 +22,7 @@ import {
   upsertActionConfig,
   upsertEmployeeRecord,
   upsertEmployeeSignature,
+  getEmployeeSignatureStatus,
   verifyEmployeeSignaturePasscode,
   verifyEmployeeOtp,
   markEmployeeNotificationRead,
@@ -366,6 +367,33 @@ export const mutationResolvers = {
     const full = await getContractRequestById(ctx.db, inserted.id);
     if (!full) throw new Error("Failed to load contract request");
     return full;
+  },
+
+  saveMySignature: async (
+    _: unknown,
+    args: { signatureData: string; passcode?: string | null },
+    ctx: Ctx,
+  ) => {
+    if (ctx.actor.role !== "employee" || !ctx.actor.id) {
+      throw new Error("Unauthorized");
+    }
+
+    const signatureData = args.signatureData?.trim() ?? "";
+    const passcode = args.passcode?.trim() ?? "";
+    if (!signatureData) {
+      throw new Error("Гарын үсгээ зурна уу.");
+    }
+    if (passcode && !/^[0-9]{4}$/.test(passcode)) {
+      throw new Error("4 оронтой код шаардлагатай.");
+    }
+
+    await upsertEmployeeSignature(ctx.db, {
+      employeeId: ctx.actor.id,
+      signatureData,
+      passcode: passcode || undefined,
+    });
+
+    return getEmployeeSignatureStatus(ctx.db, ctx.actor.id);
   },
 
   approveContractRequest: async (
