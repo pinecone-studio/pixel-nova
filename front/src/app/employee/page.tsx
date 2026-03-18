@@ -9,7 +9,7 @@ import { GET_DOCUMENTS, GET_ME } from "@/graphql/queries";
 import type { Document, Employee } from "@/lib/types";
 
 import { ContractPreview } from "@/components/contractPreview";
-import { FactIcon } from "@/components/icons";
+import { FactIcon, Planeicon, Righticon } from "@/components/icons";
 import { Request } from "@/components/request";
 
 const TOKEN_STORAGE_KEY = "epas_auth_token";
@@ -100,49 +100,58 @@ export default function EmployeePage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#F5F7FB]">
-      <div className="mx-auto flex w-[1056px] max-w-full flex-col gap-4 px-0 py-10">
+    <div className="bg-[#F5F7FB]">
+      <div className="mx-auto flex w-[1056px] max-w-full flex-col mt-[71px] pb-[11px]">
         <div className="mx-auto w-full max-w-264">
           <Request employee={employee ?? undefined} />
         </div>
 
-        <div className="mt-[18px]">
-          <div className="flex h-[89px] w-[1056px] max-w-full items-center justify-between rounded-[12px] border border-[#E5E7EB] bg-white px-4">
-            <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-[#9BC1FF] bg-[#EEF4FF]">
-                <span className="text-[#2A8CFF] text-sm font-semibold">✈</span>
+        <div className="mt-9">
+          <div
+            className="flex max-w-full items-center justify-between rounded-[12px] border border-[#E5E7EB] bg-white p-5 box-border"
+            style={{ width: 1056, height: 89 }}
+          >
+            <div className="flex items-center gap-4 h-[48px]">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg border border-[#9BC1FF] bg-[#EEF4FF]">
+                <Planeicon />
               </div>
-              <div className="flex flex-col">
-                <span className="text-[14px] font-semibold text-[#111827]">
+              <div className="flex flex-col h-10 justify-between">
+                <span className="text-[16px] w-[200px] h-[20px] font-semibold text-[#111827]">
                   {displayName}
                 </span>
-                <span className="text-[12px] text-[#6B7280]">Томилолт</span>
+                <span className="text-[14px] text-[#6B7280] w-[64px] h-[16px]">
+                  Томилолт
+                </span>
               </div>
             </div>
-            <span className="rounded-full border border-[#BFD7FF] bg-[#EAF2FF] px-3 py-1 text-[12px] font-medium text-[#2A8CFF]">
+            <span className="rounded-full w-[113px] h-[24px] border border-[#BFD7FF] bg-[#EAF2FF] px-3 py-1 text-[12px] font-semibold text-[#2A8CFF]">
               Хүлээгдэж буй
             </span>
           </div>
         </div>
 
-        <section className="mx-auto mt-[16px] flex w-full max-w-264 flex-col gap-4 animate-fade-up">
-          <div className="flex items-center justify-between gap-4">
-            <div className="flex items-center gap-4">
-              <h2 className="text-[18px] font-semibold tracking-[-0.02em] text-[#111827]">
+        <section className="mx-auto mt-9 flex w-full max-w-264 flex-col gap-4 animate-fade-up">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center w-[365px] justify-between h-8">
+              <h2 className="text-[20px] w-[246px] h-8 font-semibold tracking-[-0.02em] text-[#111827]">
                 Баримт бичиг шинэчлэлт
               </h2>
-              <span className="rounded-full border border-[#E5E7EB] bg-white px-3 py-1 text-[12px] font-medium text-[#6B7280]">
+              <span className="rounded-full border w-[79px] h-[24px] border-[#E5E7EB] bg-white px-3 py-1 text-[12px] font-medium text-[#6B7280]">
                 {Math.min(documents.length)} баримт
               </span>
             </div>
             <a
               href="/employee/files"
-              className="text-[13.5px] font-medium hover:text-[#111827] transition-colors">
-              Бүх баримт бичгүүд →
+              className="text-[14px] w-[175px] justify-evenly h-8 font-medium hover:text-[#111827] transition-colors flex items-center"
+            >
+              <span className="w-[133px] h-5">Бүх баримт бичгүүд</span>{" "}
+              <span className="h-5 items-end flex">
+                <Righticon />
+              </span>
             </a>
           </div>
 
-          <div className="flex flex-col divide-y divide-[#E5E7EB] rounded-2xl border border-[#E5E7EB] mt-2 bg-white">
+          <div className="flex flex-col  divide-y divide-[#E5E7EB] w-[1056px] h-[356px] rounded-2xl border border-[#E5E7EB] bg-white">
             {documents.length > 0 ? (
               documents
                 .slice(0, 4)

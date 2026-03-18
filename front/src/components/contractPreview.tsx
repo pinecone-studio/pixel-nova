@@ -9,7 +9,7 @@ import { buildGraphQLHeaders } from "@/lib/apollo-client";
 import { GET_DOCUMENT_CONTENT } from "@/graphql/queries";
 import type { Document, DocumentContent } from "@/lib/types";
 
-import { DocumentIcon } from "./icons";
+import { DocumentIcon, FilesEyeIcon } from "./icons";
 import { FilesPreviewModal } from "./pages/employee/files/FilesPreviewModal";
 
 type ContractPreviewProps = {
@@ -104,44 +104,48 @@ export const ContractPreview = ({
 
   return (
     <>
-      <div className="flex h-[76px] w-full items-center justify-between px-4">
-        <div className="flex min-w-0 items-center gap-3">
-          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-[#E5E7EB] bg-[#F8FAFC] text-slate-500">
-            <DocumentIcon />
+      <div className="flex h-[88px] w-full items-center justify-between w-[1054px] px-4 py-[20px]">
+        <div className="flex min-w-0 items-center justify-between w-[990px] gap-4 h-[48px]">
+          <div className="flex gap-4">
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg border border-[#E5E7EB] bg-[#F8FAFC] text-slate-500">
+              <DocumentIcon />
+            </div>
+
+            <div className="min-w-0">
+              <p className="truncate text-[16px] font-semibold text-[#111827]">
+                {document.action}
+              </p>
+              <p className="truncate text-[14px] text-[#6B7280]">
+                {document.documentName}
+              </p>
+            </div>
           </div>
 
-          <div className="min-w-0">
-            <p className="truncate text-[14px] font-semibold text-[#111827]">
-              {document.action}
-            </p>
-            <p className="truncate text-[12px] text-[#6B7280]">
-              {document.documentName}
-            </p>
+          <div className="flex items-center justify-between gap-3 text-[12px] w-[191.8px] h-10 text-[#6B7280]">
+            <div className="w-[88px] h-10 flex justify-between">
+              {" "}
+              <button
+                type="button"
+                onClick={() => void handlePreview()}
+                className="flex h-10 w-10 items-center justify-center rounded-full bg-white text-[#111827] transition-colors hover:bg-[#F3F4F6]"
+                aria-label="Preview"
+              >
+                <FilesEyeIcon />
+              </button>
+              <button
+                type="button"
+                onClick={() => void handleDownload()}
+                className="flex h-10 w-10 items-center justify-center rounded-full bg-white text-[#111827] transition-colors hover:bg-[#F3F4F6]"
+                aria-label="Download"
+              >
+                <BiDownload className="text-sm text-[#000000] w-[20px] h-[20px]" />
+              </button>
+            </div>
+
+            <span className="text-[#111827] text-[14px] w-[73.8] h-5">
+              {formatDate(document.createdAt)}
+            </span>
           </div>
-        </div>
-
-        <div className="flex items-center gap-3 text-[12px] text-[#6B7280]">
-          <button
-            type="button"
-            onClick={() => void handlePreview()}
-            className="flex h-8 w-8 items-center justify-center rounded-full border border-[#E5E7EB] bg-white text-[#6B7280] transition-colors hover:bg-[#F3F4F6] hover:text-[#111827]"
-            aria-label="Preview"
-          >
-            <VscPreview className="text-sm" />
-          </button>
-
-          <button
-            type="button"
-            onClick={() => void handleDownload()}
-            className="flex h-8 w-8 items-center justify-center rounded-full border border-[#E5E7EB] bg-white text-[#6B7280] transition-colors hover:bg-[#F3F4F6] hover:text-[#111827]"
-            aria-label="Download"
-          >
-            <BiDownload className="text-sm" />
-          </button>
-
-          <span className="text-[#6B7280]">
-            {formatDate(document.createdAt)}
-          </span>
         </div>
       </div>
 

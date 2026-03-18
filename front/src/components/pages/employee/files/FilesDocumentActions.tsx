@@ -1,5 +1,6 @@
 import type { Document } from "@/lib/types";
 
+import { FilesEyeIcon } from "@/components/icons";
 import { FilesActionButton } from "./FilesActionButton";
 import { formatDate } from "./filesUtils";
 
@@ -15,17 +16,7 @@ export function FilesDocumentActions({
   return (
     <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
       <FilesActionButton title="Харах" onClick={onPreview}>
-        <svg
-          width="15"
-          height="15"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="1.5"
-          viewBox="0 0 24 24"
-        >
-          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-          <circle cx="12" cy="12" r="3" />
-        </svg>
+        <FilesEyeIcon />
       </FilesActionButton>
       <FilesActionButton title="Татах" onClick={onDownload}>
         <svg
@@ -41,7 +32,7 @@ export function FilesDocumentActions({
       </FilesActionButton>
       <span
         style={{
-          color: "#6B7280",
+          color: "#111827",
           fontSize: 12,
           minWidth: 80,
           textAlign: "right",
@@ -52,3 +43,4 @@ export function FilesDocumentActions({
     </div>
   );
 }
+

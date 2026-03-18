@@ -187,19 +187,19 @@ export default function Profile() {
   ];
 
   return (
-    <div className="min-h-screen bg-[#FAFAFA] px-4 pb-[80px] pt-[33px] font-sans text-[#111827]">
-      <div className="mx-auto w-full max-w-[1056px]">
-        <div className="flex min-h-[62px] flex-col gap-2">
-          <h1 className="text-[28px] font-semibold leading-[30px] tracking-[-0.28px] text-[#121316]">
+    <div className="bg-[#F5F7FB]">
+      <div className="mx-auto flex w-[1056px] max-w-full flex-col mt-[42px] pb-[103px]">
+        <div className="flex h-[62px] w-full flex-col justify-between">
+          <h1 className="text-[28px] h-[30px] flex items-center font-semibold leading-[30px] tracking-[-0.28px] text-[#121316]">
             Профайл
           </h1>
-          <p className="text-[16px] leading-6 tracking-[-0.16px] text-black/70">
+          <p className="text-[16px] h-6 leading-6 flex items-center tracking-[-0.16px] text-black/70">
             Таны хувийн болон ажлын мэдээлэл.
           </p>
         </div>
 
         <div className="relative mt-8 overflow-hidden rounded-2xl border border-[#DFDFDF] bg-white shadow-[0px_1px_3px_0px_rgba(0,0,0,0.08),0px_1px_2px_-1px_rgba(0,0,0,0.08)] md:h-[168px]">
-          <div className="h-28 bg-[linear-gradient(90deg,rgba(248,241,232,0.88)_0%,rgba(246,243,237,0.72)_52%,rgba(255,255,255,0.94)_100%)] md:h-36" />
+          <div className="h-28 bg-white md:h-36" />
           <div className="-mt-14 flex flex-col gap-5 px-5 pb-5 md:absolute md:inset-x-0 md:top-8 md:mt-0 md:flex-row md:items-center md:gap-6 md:px-10 md:pb-0">
             {employee?.imageUrl ? (
               <Image
@@ -245,7 +245,7 @@ export default function Profile() {
           </div>
         </div>
 
-        <div className="mt-8 grid gap-8 md:grid-cols-[500px_500px] md:justify-between md:gap-[56px]">
+        <div className="mt-8 grid md:grid-cols-[500px_500px] md:justify-between gap-[56px]">
           <div className="overflow-hidden rounded-2xl border border-[#DFDFDF] bg-white shadow-[0px_1px_3px_0px_rgba(0,0,0,0.1),0px_1px_2px_-1px_rgba(0,0,0,0.1)] md:h-[475px] md:w-[500px]">
             <div className="border-b border-[#DFDFDF] px-6 pb-[21px] pt-[25px]">
               <h3 className="text-[20px] font-semibold leading-6 text-[#121316]">
