@@ -17,10 +17,18 @@ const TOKEN_STORAGE_KEY = "epas_auth_token";
 
 const navItems = [
   { icon: <BiHome className="w-4 h-4" />, label: "Нүүр", href: "/employee" },
-  { icon: <FactIcon className="text-current" />, label: "Баримтууд", href: "/employee/files" },
-  { icon: <AuditLog className="text-current" />, label: "Аудит", href: "/employee/audit" },
   {
-    icon: <RxAvatar className="w-4 h-4" />,
+    icon: <FactIcon className="text-current" />,
+    label: "Бичиг баримт",
+    href: "/employee/files",
+  },
+  {
+    icon: <AuditLog className="text-current" />,
+    label: "Аудит",
+    href: "/employee/audit",
+  },
+  {
+    icon: <RxAvatar className="w-4 h-4 text-current" />,
     label: "Профайл",
     href: "/profile",
   },
@@ -128,6 +136,4 @@ export function Navbar() {
     </nav>
   );
 }
-
-
 

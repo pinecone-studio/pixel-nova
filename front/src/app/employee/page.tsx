@@ -103,7 +103,7 @@ export default function EmployeePage() {
   return (
     <div className="min-h-screen bg-[#F5F7FB]">
       <div className="mx-auto flex w-[1056px] max-w-full flex-col gap-4 px-0 py-10">
-        <div className="mx-auto w-full max-w-264 mt-[14px]">
+        <div className="mx-auto w-full max-w-264">
           <Request employee={employee ?? undefined} />
         </div>
 
@@ -133,11 +133,11 @@ export default function EmployeePage() {
                 Баримт бичиг шинэчлэлт
               </h2>
               <span className="rounded-full border border-[#E5E7EB] bg-white px-3 py-1 text-[12px] font-medium text-[#6B7280]">
-                {Math.min(documents.length, 5)} баримт
+                {Math.min(documents.length)} баримт
               </span>
             </div>
             <a
-              href="#"
+              href="/employee/files"
               className="text-[13.5px] font-medium hover:text-[#111827] transition-colors"
             >
               Бүх баримт бичгүүд →

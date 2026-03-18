@@ -31,6 +31,10 @@ const DIALOG_BG = "bg-[#030810]";
 const DIALOG_BORDER = "border-[#1a2035]";
 const INPUT_CLASS = `w-full bg-[#040d18] border border-[#1a2035] rounded-lg p-2.5 text-sm text-gray-300 focus:outline-none focus:border-[#00CC99]/40 appearance-none`;
 const TEXTAREA_CLASS = `w-full bg-[#040d18] border border-[#1a2035] rounded-lg p-3 text-sm text-gray-300 placeholder-gray-600 resize-none focus:outline-none focus:border-[#00CC99]/40`;
+const LIGHT_DIALOG_BG = "bg-white";
+const LIGHT_DIALOG_BORDER = "border-[#E5E7EB]";
+const LIGHT_INPUT_CLASS = `w-full bg-white border border-[#E5E7EB] rounded-lg p-2.5 text-sm text-[#111827] focus:outline-none focus:border-[#111827]/30 appearance-none`;
+const LIGHT_TEXTAREA_CLASS = `w-full bg-white border border-[#E5E7EB] rounded-lg p-3 text-sm text-[#111827] placeholder-[#9CA3AF] resize-none focus:outline-none focus:border-[#111827]/30`;
 const MAX_CONTRACT_SELECTION = 3;
 const PROFILE_REQUIRED_FIELDS: Array<{
   key: keyof EmployeeDocumentProfile;
@@ -96,7 +100,7 @@ function SendBtn({
     <button
       onClick={onClick}
       disabled={disabled}
-      className="bg-[#00CC99] hover:bg-[#00b388] disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-medium px-5 py-2.5 rounded-lg flex items-center gap-2 transition-colors"
+      className="bg-[#111827] hover:bg-[#0b1220] disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-medium px-5 py-2.5 rounded-lg flex items-center gap-2 transition-colors"
     >
       <FiSend className="w-4 h-4" />
       {disabled ? "Илгээж байна..." : "Илгээх"}
@@ -122,6 +126,8 @@ function SelectField({
   placeholder = "Сонгоно уу",
   value,
   onChange,
+  labelClassName = "text-sm font-medium text-white",
+  inputClassName = INPUT_CLASS,
 }: {
   label: string;
   id: string;
@@ -129,16 +135,18 @@ function SelectField({
   placeholder?: string;
   value?: string;
   onChange?: (v: string) => void;
+  labelClassName?: string;
+  inputClassName?: string;
 }) {
   return (
     <div className="flex flex-col gap-1.5">
-      <label htmlFor={id} className="text-sm font-medium text-white">
+      <label htmlFor={id} className={labelClassName}>
         {label}
       </label>
       <div className="relative">
         <select
           id={id}
-          className={INPUT_CLASS}
+          className={inputClassName}
           value={value}
           onChange={(e) => onChange?.(e.target.value)}
         >
@@ -155,19 +163,52 @@ function SelectField({
   );
 }
 
-function UploadArea({ label, subtitle }: { label: string; subtitle?: string }) {
+function UploadArea({
+  label,
+  subtitle,
+  variant = "dark",
+}: {
+  label: string;
+  subtitle?: string;
+  variant?: "dark" | "light";
+}) {
+  const isLight = variant === "light";
   return (
     <div className="flex flex-col gap-1.5">
-      <span className="text-sm font-medium text-white">{label}</span>
-      <div className="border border-dashed border-[#1a2035] rounded-xl p-7 flex flex-col items-center gap-2 hover:border-[#00CC99]/30 transition-colors cursor-pointer">
-        <FiUploadCloud className="w-8 h-8 text-gray-500" />
-        <p className="text-sm font-medium text-white">
+      <span
+        className={`text-sm font-medium ${
+          isLight ? "text-[#111827]" : "text-white"
+        }`}
+      >
+        {label}
+      </span>
+      <div
+        className={`border border-dashed rounded-xl p-7 flex flex-col items-center gap-2 transition-colors cursor-pointer ${
+          isLight
+            ? "border-[#E5E7EB] hover:border-[#111827]/20"
+            : "border-[#1a2035] hover:border-[#00CC99]/30"
+        }`}
+      >
+        <FiUploadCloud
+          className={`w-8 h-8 ${isLight ? "text-[#9CA3AF]" : "text-gray-500"}`}
+        />
+        <p
+          className={`text-sm font-medium ${
+            isLight ? "text-[#111827]" : "text-white"
+          }`}
+        >
           {subtitle ?? "Файл хавсаргах (заавал биш)"}
         </p>
-        <p className="text-xs text-gray-500">
+        <p className={`text-xs ${isLight ? "text-[#9CA3AF]" : "text-gray-500"}`}>
           JPEG, PNG, PDF, MP4 төрлүүд — 50MB хүртэл
         </p>
-        <button className="mt-1 border border-[#1a2035] text-xs text-gray-300 px-4 py-1.5 rounded-lg hover:bg-white/5 transition-colors">
+        <button
+          className={`mt-1 border text-xs px-4 py-1.5 rounded-lg transition-colors ${
+            isLight
+              ? "border-[#E5E7EB] text-[#6B7280] hover:bg-[#F3F4F6] hover:text-[#111827]"
+              : "border-[#1a2035] text-gray-300 hover:bg-white/5"
+          }`}
+        >
           Оруулах
         </button>
       </div>
@@ -580,12 +621,12 @@ export const Request = ({ employee }: { employee?: Employee }) => {
 
   return (
     <div className="flex w-[1056px] max-w-full flex-col gap-5">
-      <div className="flex h-[46px] items-center justify-between">
-        <div>
-          <h2 className="text-[16px] font-semibold text-[#111827]">
+      <div className="flex h-[62px] items-center justify-between">
+        <div className="flex flex-col gap-2">
+          <h2 className="h-[30px] text-3xl font-bold text-[#111827]">
             Шуурхай үйлдлүүд
           </h2>
-          <p className="text-[#6B7280] text-[12px] mt-0.5">Хүсэлт илгээх</p>
+          <p className="h-[24px] text-[#6B7280]">Хүсэлт илгээх</p>
         </div>
         {/* <a
           href="#"
@@ -651,14 +692,14 @@ export const Request = ({ employee }: { employee?: Employee }) => {
       {activeTab === "Тойрох хуудас" && !submitted && (
         <div className="fixed inset-0 flex items-center justify-center bg-black/60 backdrop-blur-sm z-50">
           <div
-            className={`w-[460px] rounded-2xl ${DIALOG_BG} text-white p-7 border ${DIALOG_BORDER} shadow-2xl flex flex-col gap-5`}
+            className={`w-[460px] rounded-2xl ${LIGHT_DIALOG_BG} text-[#111827] p-7 border ${LIGHT_DIALOG_BORDER} shadow-2xl flex flex-col gap-5`}
           >
             <div className="flex justify-between items-start">
               <div>
                 <h2 className="text-xl font-semibold">
                   Тойрох хуудас авах хүсэлт
                 </h2>
-                <p className="text-sm text-gray-500 mt-1">
+                <p className="text-sm text-[#6B7280] mt-1">
                   Тойрох хуудас авах шалтгаан болон файл оруулна уу
                 </p>
               </div>
@@ -676,16 +717,20 @@ export const Request = ({ employee }: { employee?: Employee }) => {
               ]}
               value={clearanceType}
               onChange={setClearanceType}
+              labelClassName="text-sm font-medium text-[#111827]"
+              inputClassName={LIGHT_INPUT_CLASS}
             />
 
-            <UploadArea label="Файл хавсаргах" />
+            <UploadArea label="Файл хавсаргах" variant="light" />
 
             <div className="flex flex-col gap-1.5">
-              <label className="text-sm font-medium text-white">Шалтгаан</label>
+              <label className="text-sm font-medium text-[#111827]">
+                Шалтгаан
+              </label>
               <textarea
                 rows={3}
                 placeholder="Шалтгаанаа бичнэ үү..."
-                className={TEXTAREA_CLASS}
+                className={LIGHT_TEXTAREA_CLASS}
                 value={clearanceReason}
                 onChange={(e) => setClearanceReason(e.target.value)}
               />
@@ -708,26 +753,32 @@ export const Request = ({ employee }: { employee?: Employee }) => {
       {activeTab === "Томилолт" && !submitted && (
         <div className="fixed inset-0 flex items-center justify-center bg-black/60 backdrop-blur-sm z-50">
           <div
-            className={`w-[460px] rounded-2xl ${DIALOG_BG} text-white p-7 border ${DIALOG_BORDER} shadow-2xl flex flex-col gap-5`}
+            className={`w-[460px] rounded-2xl ${LIGHT_DIALOG_BG} text-[#111827] p-7 border ${LIGHT_DIALOG_BORDER} shadow-2xl flex flex-col gap-5`}
           >
             <div className="flex justify-between items-start">
               <div>
                 <h2 className="text-xl font-semibold">Томилолтын мэдээлэл</h2>
-                <p className="text-sm text-gray-500 mt-1">
+                <p className="text-sm text-[#6B7280] mt-1">
                   Томилолтын мэдээллээ оруулна уу.
                 </p>
               </div>
               <CloseBtn onClick={closeDialog} />
             </div>
 
-            <UploadArea label="Файл хавсаргах" subtitle="Файл хавсаргана уу." />
+            <UploadArea
+              label="Файл хавсаргах"
+              subtitle="Файл хавсаргана уу."
+              variant="light"
+            />
 
             <div className="flex flex-col gap-1.5">
-              <label className="text-sm font-medium text-white">Шалтгаан</label>
+              <label className="text-sm font-medium text-[#111827]">
+                Шалтгаан
+              </label>
               <textarea
                 rows={3}
                 placeholder="Томилолтын шалтгаанаа бичнэ үү..."
-                className={TEXTAREA_CLASS}
+                className={LIGHT_TEXTAREA_CLASS}
                 value={clearanceReason}
                 onChange={(e) => setClearanceReason(e.target.value)}
               />

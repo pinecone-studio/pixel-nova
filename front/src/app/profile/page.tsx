@@ -13,10 +13,10 @@ import { formatBranch, formatDepartment, formatLevel } from "@/lib/labels";
 import {
   AjildOrson,
   Ajillasan,
-  AjiltniiCode,
   AlbanTushaal,
   CompanyTsalin,
   Email,
+  EmployeeCode,
   Engineering,
   EntraID,
   Github,
@@ -25,6 +25,7 @@ import {
   KPI,
   Salbar,
   Senior,
+  Signature,
   TursunUdur,
 } from "@/components/icons";
 
@@ -111,9 +112,9 @@ export default function Profile() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-black text-white flex items-center justify-center">
-        <div className="flex items-center gap-3 text-sm text-white/70">
-          <span className="h-5 w-5 animate-spin rounded-full border-2 border-white/20 border-t-white" />
+      <div className="min-h-screen bg-[#F5F7FB] text-[#111827] flex items-center justify-center">
+        <div className="flex items-center gap-3 text-sm text-[#6B7280]">
+          <span className="h-5 w-5 animate-spin rounded-full border-2 border-[#D1D5DB] border-t-[#111827]" />
           Профайл ачаалж байна...
         </div>
       </div>
@@ -130,42 +131,14 @@ export default function Profile() {
 
   const workInfo = [
     {
-      icon: <AlbanTushaal />,
-      label: "Албан тушаал",
-      value: employee?.jobTitle ?? "Мэдээлэлгүй",
-    },
-    {
-      icon: <Senior />,
-      label: "Зэрэглэл",
-      value: employee?.level ? formatLevel(employee.level) : "Мэдээлэлгүй",
-    },
-    {
-      icon: <Heltes />,
-      label: "Хэлтэс",
-      value: employee?.department ? formatDepartment(employee.department) : "Мэдээлэлгүй",
-    },
-    {
-      icon: <Salbar />,
-      label: "Салбар",
-      value: employee?.branch ? formatBranch(employee.branch) : "Мэдээлэлгүй",
-    },
-    {
-      icon: <AjildOrson />,
-      label: "Ажилд орсон",
-      value: formatHireDate(employee?.hireDate),
-    },
-    {
-      icon: <Ajillasan />,
-      label: "Ажилласан хугацаа",
-      value: getTenure(employee?.hireDate),
-    },
-  ];
-
-  const personalInfo = [
-    {
-      icon: <AjiltniiCode />,
+      icon: <EmployeeCode />,
       label: "Ажилтны код",
       value: employee?.employeeCode ?? "Мэдээлэлгүй",
+    },
+    {
+      icon: <Signature />,
+      label: "Гарын үсэг",
+      value: employee?.firstName ? formatLevel(employee.level) : "Мэдээлэлгүй",
     },
     {
       icon: <Email />,
@@ -184,45 +157,86 @@ export default function Profile() {
     },
   ];
 
+  const personalInfo = [
+    {
+      icon: <AlbanTushaal />,
+      label: "Албан тушаал",
+      value: employee?.department ?? "Мэдээлэлгүй",
+    },
+    {
+      icon: <Heltes />,
+      label: "Хэлтэс",
+      value: employee?.department
+        ? formatDepartment(employee.department)
+        : "Мэдээлэлгүй",
+    },
+    {
+      icon: <Salbar />,
+      label: "Салбар",
+      value: employee?.branch ? formatBranch(employee.branch) : "Мэдээлэлгүй",
+    },
+    {
+      icon: <AjildOrson />,
+      label: "Ажилд орсон",
+      value: formatHireDate(employee?.hireDate),
+    },
+    {
+      icon: <Ajillasan />,
+      label: "Ажилласан хугацаа",
+      value: getTenure(employee?.hireDate),
+    },
+  ];
+
   return (
-    <div className="min-h-screen bg-black text-white pt-8.25 pb-49.75 font-sans">
-      <div className="mx-auto w-full max-w-264">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-white">Профайл</h1>
-          <p className="text-gray-400 mt-1">
+    <div className="min-h-screen bg-[#F5F7FB] text-[#111827] pt-[32px] pb-30 font-sans">
+      <div className="mx-auto w-[1056px] max-w-full">
+        <div className="flex h-[62px] w-[1056px] flex-col gap-2">
+          <h1 className="h-[30px] text-3xl font-bold text-[#111827]">
+            Профайл
+          </h1>
+          <p className="h-[24px] text-[#6B7280]">
             Таны хувийн болон ажлын мэдээлэл.
           </p>
         </div>
 
-        <div className="bg-linear-to-r from-gray-900 to-teal-950 rounded-2xl p-6 mb-8 border border-gray-800">
-          <div className="flex items-center gap-5">
+        <div className="mt-[32px] flex h-[168px] w-[1056px] items-center rounded-2xl border border-[#E5E7EB] bg-white p-6">
+          <div className="flex items-center gap-6">
             {employee?.imageUrl ? (
               <Image
                 src={employee.imageUrl}
                 alt="Профайл"
                 width={112}
                 height={112}
-                className="w-20 h-20 rounded-full object-cover border-2 border-teal-500"
+                className="h-28 w-28 rounded-full border-2 border-[#E5E7EB] object-cover"
                 unoptimized
               />
             ) : (
-              <div className="flex h-20 w-20 items-center justify-center rounded-full border-2 border-teal-500 bg-teal-950 text-xl font-semibold text-teal-200">
+              <div className="flex h-28 w-28 items-center justify-center rounded-full border-2 border-[#E5E7EB] bg-[#F3F4F6] text-xl font-semibold text-[#111827]">
                 {getInitials(employee)}
               </div>
             )}
-            <div>
-              <h2 className="text-2xl font-bold text-white">{displayName}</h2>
-              <p className="text-gray-400 text-sm mb-3">{displayNameEng}</p>
-              <div className="flex gap-2 flex-wrap">
-                <span className="flex items-center gap-1 text-xs border border-teal-600 text-teal-400 px-3 py-1 rounded-full">
-                  <Senior /> {employee?.level ? formatLevel(employee.level) : "Мэдээлэлгүй"}
+            <div className="h-[100px] w-[840px]">
+              <h2 className="h-[30px] text-2xl font-bold text-[#111827]">
+                {displayName}
+              </h2>
+              <p className="h-[24px] text-sm text-[#6B7280]">
+                {displayNameEng}
+              </p>
+              <div className="flex items-end gap-2 flex-wrap">
+                <span className="flex h-[38px] items-center gap-1 rounded-full border border-[#E5E7EB] bg-[#F8FAFC] px-3 text-xs text-[#111827]">
+                  <Senior />{" "}
+                  {employee?.department
+                    ? formatLevel(employee.department)
+                    : "Мэдээлэлгүй"}
                 </span>
-                <span className="flex items-center gap-1 text-xs border border-gray-700 text-white px-3 py-1 rounded-full">
+                <span className="flex h-[38px] items-center gap-1 rounded-full border border-[#E5E7EB] bg-[#F8FAFC] px-3 text-xs text-[#111827]">
                   <Engineering />{" "}
-                  {employee?.department ? formatDepartment(employee.department) : "Мэдээлэлгүй"}
+                  {employee?.department
+                    ? formatDepartment(employee.department)
+                    : "Мэдээлэлгүй"}
                 </span>
-                <span className="flex items-center gap-1 text-xs border border-teal-600 text-teal-400 px-3 py-1 rounded-full">
-                  <Idevhtei /> {employee?.status ?? "Мэдээлэлгүй"}
+                <span className="flex h-[38px] items-center gap-1 rounded-full border border-[#E5E7EB] bg-[#F8FAFC] px-3 text-xs text-[#111827]">
+                  <Idevhtei /> {"Идэвхтэй"}
                 </span>
               </div>
               {error ? (
@@ -232,49 +246,57 @@ export default function Profile() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-14 mb-8 min-h-119.75">
-          <div className="bg-gray-900 rounded-2xl p-6 border border-gray-800 h-full">
-            <h3 className="text-white font-semibold text-lg mb-5">
-              Ажлын мэдээлэл
-            </h3>
-            <div className="border border-gray-800" />
-            <div className="mt-5">
+        <div className="mt-[32px] flex h-[475px] w-[1056px] justify-between">
+          <div className="flex w-[500px] flex-col justify-evenly rounded-2xl border border-[#E5E7EB] bg-white p-6">
+            <div className="flex h-[45px] items-center">
+              <h3 className="flex h-[24px] items-center text-lg font-semibold text-[#111827]">
+                Хувийн мэдээлэл
+              </h3>
+            </div>
+            <div className="h-[356px] flex flex-col justify-between">
               {workInfo.map((item) => (
                 <div
                   key={item.label}
-                  className="flex h-17 items-center gap-3">
-                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-teal-900/50 text-sm">
-                    {item.icon}
-                  </div>
-                  <div>
-                    <p className="text-gray-500 text-xs">{item.label}</p>
-                    <p className="text-white font-medium text-sm">
-                      {item.value}
-                    </p>
+                  className="flex h-[68px] w-[450px] items-center justify-between"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[#F3F4F6] text-sm text-[#111827]">
+                      {item.icon}
+                    </div>
+                    <div>
+                      <p className="text-xs text-[#6B7280]">{item.label}</p>
+                      <p className="text-sm font-medium text-[#111827]">
+                        {item.value}
+                      </p>
+                    </div>
                   </div>
                 </div>
               ))}
             </div>
           </div>
 
-          <div className="bg-gray-900 rounded-2xl p-6 border border-gray-800 relative h-full">
-            <h3 className="text-white font-semibold text-lg mb-5">
-              Хувийн мэдээлэл
-            </h3>
-            <div className="border border-gray-800" />
-            <div className="mt-5">
+          <div className="flex w-[500px] flex-col justify-evenly rounded-2xl border border-[#E5E7EB] bg-white p-6">
+            <div className="flex h-[45px] items-center">
+              <h3 className="flex h-[24px] items-center text-lg font-semibold text-[#111827]">
+                Ажлын мэдээлэл
+              </h3>
+            </div>
+            <div className="h-[356px] flex flex-col justify-between">
               {personalInfo.map((item) => (
                 <div
                   key={item.label}
-                  className="flex h-17 items-center gap-3">
-                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-teal-900/50 text-sm">
-                    {item.icon}
-                  </div>
-                  <div>
-                    <p className="text-gray-500 text-xs">{item.label}</p>
-                    <p className="text-white font-medium text-sm">
-                      {item.value}
-                    </p>
+                  className="flex h-[68px] w-[450px] items-center justify-between"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[#F3F4F6] text-sm text-[#111827]">
+                      {item.icon}
+                    </div>
+                    <div>
+                      <p className="text-xs text-[#6B7280]">{item.label}</p>
+                      <p className="text-sm font-medium text-[#111827]">
+                        {item.value}
+                      </p>
+                    </div>
                   </div>
                 </div>
               ))}
@@ -282,62 +304,7 @@ export default function Profile() {
           </div>
         </div>
 
-        <div className="bg-gray-900 rounded-2xl border border-gray-800 overflow-hidden">
-          <div className="h-20.75 flex flex-col pt-4.25 px-6.25">
-            <h3 className="text-white font-semibold text-lg h-7">
-              Нэмэлт мэдээлэл
-            </h3>
-            <p className="text-gray-500 text-sm h-7 flex items-center">
-              Таны гэрээний болон бусад мэдээлэл
-            </p>
-          </div>
-          <div className="border-t border-gray-800" />
-          <div className="px-6.25 pt-6.25 pb-5.75">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="bg-gray-800 rounded-xl p-4 border border-gray-700 h-26.75 flex flex-col">
-                <div className="flex items-center gap-2 h-9">
-                  <div className="w-8 h-8 bg-teal-900/50 rounded-lg flex items-center justify-center text-sm">
-                    <KPI />
-                  </div>
-                  <span className="text-gray-300 text-xs font-semibold uppercase tracking-wider">
-                    KPI тооцоо
-                  </span>
-                </div>
-                <span className="mt-auto text-xs bg-teal-900 text-teal-400 px-2 py-0.5 rounded-full w-fit">
-                  {employee?.isKpi ? "Тийм" : "Үгүй"}
-                </span>
-              </div>
-
-              <div className="bg-gray-800 rounded-xl p-4 border border-gray-700 h-26.75 flex flex-col">
-                <div className="flex items-center gap-2 h-9">
-                  <div className="w-8 h-8 bg-teal-900/50 rounded-lg flex items-center justify-center text-sm">
-                    <CompanyTsalin />
-                  </div>
-                  <span className="text-gray-300 text-xs font-semibold uppercase tracking-wider">
-                    Компанийн цалин
-                  </span>
-                </div>
-                <span className="mt-auto text-xs bg-teal-900 text-teal-400 px-2 py-0.5 rounded-full w-fit">
-                  {employee?.isSalaryCompany ? "Тийм" : "Үгүй"}
-                </span>
-              </div>
-
-              <div className="bg-gray-800 rounded-xl p-4 border border-gray-700 h-26.75 flex flex-col">
-                <div className="flex items-center gap-2 h-9">
-                  <div className="w-8 h-8 bg-teal-900/50 rounded-lg flex items-center justify-center text-sm">
-                    <EntraID />
-                  </div>
-                  <span className="text-gray-300 text-xs font-semibold uppercase tracking-wider">
-                    Entra ID
-                  </span>
-                </div>
-                <span className="mt-4 text-xs text-gray-500">
-                  {employee?.entraId ?? "Мэдээлэлгүй"}
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
+        {/* legacy blocks removed */}
       </div>
     </div>
   );

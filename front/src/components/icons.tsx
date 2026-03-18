@@ -69,27 +69,81 @@ export const RequestIcon = withDefaults(
 export const FactIcon = withDefaults(FiFileText, "h-4 w-4 text-[#77818C]");
 export const DownIcon = withDefaults(BiChevronDown, "h-4 w-4 text-[#77818C]");
 
-export const AlbanTushaal = withDefaults(BiBriefcase, "h-5 w-5 text-[#00C0A8]");
-export const Heltes = withDefaults(MdApartment, "h-5 w-5 text-[#00C0A8]");
-export const Salbar = withDefaults(FiMapPin, "h-5 w-5 text-[#00C0A8]");
-export const AjildOrson = withDefaults(FiCalendar, "h-5 w-5 text-[#00C0A8]");
-export const Ajillasan = withDefaults(FiClock, "h-5 w-5 text-[#00C0A8]");
-export const AjiltniiCode = withDefaults(
-  HiOutlineIdentification,
-  "h-5 w-5 text-[#00C0A8]",
-);
-export const Email = withDefaults(FiMail, "h-5 w-5 text-[#00C0A8]");
-export const TursunUdur = withDefaults(FiCalendar, "h-5 w-5 text-[#00C0A8]");
-export const Github = withDefaults(FiGithub, "h-5 w-5 text-[#00C0A8]");
+export const AlbanTushaal = withDefaults(BiBriefcase, "h-5 w-5 text-[#111827]");
+export const Heltes = withDefaults(MdApartment, "h-5 w-5 text-[#111827]");
+export const Salbar = withDefaults(FiMapPin, "h-5 w-5 text-[#111827]");
+export const AjildOrson = withDefaults(FiCalendar, "h-5 w-5 text-[#111827]");
+export const Ajillasan = withDefaults(FiClock, "h-5 w-5 text-[#111827]");
+
+export const Email = withDefaults(FiMail, "h-5 w-5 text-[#111827]");
+export const TursunUdur = withDefaults(FiCalendar, "h-5 w-5 text-[#111827]");
+export const Github = withDefaults(FiGithub, "h-5 w-5 text-[#111827]");
 export const CompanyTsalin = withDefaults(
   LuWalletCards,
   "h-5 w-5 text-[#00C0A8]",
 );
 export const EntraID = withDefaults(FiKey, "h-5 w-5 text-[#00C0A8]");
 export const KPI = withDefaults(FiTrendingUp, "h-5 w-5 text-[#00C0A8]");
-export const Senior = withDefaults(PiMedal, "h-5 w-5 text-[#00C0A8]");
+export const Senior = () => {
+  return (
+    <svg
+      width="12"
+      height="12"
+      viewBox="0 0 12 12"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        d="M8 10V2C8 1.73478 7.89464 1.48043 7.70711 1.29289C7.51957 1.10536 7.26522 1 7 1H5C4.73478 1 4.48043 1.10536 4.29289 1.29289C4.10536 1.48043 4 1.73478 4 2V10"
+        stroke="black"
+        strokeOpacity="0.7"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M10 3H2C1.44772 3 1 3.44772 1 4V9C1 9.55228 1.44772 10 2 10H10C10.5523 10 11 9.55228 11 9V4C11 3.44772 10.5523 3 10 3Z"
+        stroke="black"
+        strokeOpacity="0.7"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+};
 export const Engineering = withDefaults(HiOutlineOfficeBuilding, "h-4 w-4");
-export const Idevhtei = withDefaults(BiSolidBadgeCheck, "h-4 w-4");
+export const Idevhtei = () => {
+  return (
+    <svg
+      width="12"
+      height="12"
+      viewBox="0 0 12 12"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <g clipPath="url(#clip0_588_2600)">
+        <path
+          d="M6 11C8.76142 11 11 8.76142 11 6C11 3.23858 8.76142 1 6 1C3.23858 1 1 3.23858 1 6C1 8.76142 3.23858 11 6 11Z"
+          stroke="black"
+          strokeOpacity="0.7"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+        <path
+          d="M4.5 6L5.5 7L7.5 5"
+          stroke="black"
+          strokeOpacity="0.7"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </g>
+      <defs>
+        <clipPath id="clip0_588_2600">
+          <rect width="12" height="12" fill="white" />
+        </clipPath>
+      </defs>
+    </svg>
+  );
+};
 
 export const AuditLog = withDefaults(TbFileAnalytics, "h-5 w-5");
 export const ArrowUpRightIcon = withDefaults(FiArrowUpRight, "h-4 w-4");
@@ -119,18 +173,18 @@ export const Signature = () => {
       </mask>
       <path
         d="M0 16C0 7.16344 7.16344 0 16 0H28C36.8366 0 44 7.16344 44 16V28C44 36.8366 36.8366 44 28 44H16C7.16344 44 0 36.8366 0 28V16Z"
-        fill="#00C0A8"
+        fill="#111827"
         fillOpacity="0.1"
       />
       <path
         d="M16 0V1H28V0V-1H16V0ZM44 16H43V28H44H45V16H44ZM28 44V43H16V44V45H28V44ZM0 28H1V16H0H-1V28H0ZM16 44V43C7.71573 43 1 36.2843 1 28H0H-1C-1 37.3888 6.61116 45 16 45V44ZM44 28H43C43 36.2843 36.2843 43 28 43V44V45C37.3888 45 45 37.3888 45 28H44ZM28 0V1C36.2843 1 43 7.71573 43 16H44H45C45 6.61116 37.3888 -1 28 -1V0ZM16 0V-1C6.61116 -1 -1 6.61116 -1 16H0H1C1 7.71573 7.71573 1 16 1V0Z"
-        fill="#00C0A8"
+        fill="#111827"
         fillOpacity="0.2"
         mask="url(#path-1-inside-1_785_1485)"
       />
       <path
         d="M31 27L28.844 25.132C28.7727 25.0645 28.6832 25.0194 28.5864 25.0024C28.4897 24.9854 28.3901 24.9973 28.3001 25.0365C28.2101 25.0758 28.1337 25.1407 28.0803 25.2231C28.0269 25.3055 27.999 25.4018 28 25.5V26C28 26.2652 27.8946 26.5196 27.7071 26.7071C27.5196 26.8947 27.2652 27 27 27H25C24.7348 27 24.4804 26.8947 24.2929 26.7071C24.1054 26.5196 24 26.2652 24 26C24 23.455 20.009 22.03 15.5 22C14.837 22 14.2011 22.2634 13.7322 22.7322C13.2634 23.2011 13 23.837 13 24.5C13 25.1631 13.2634 25.7989 13.7322 26.2678C14.2011 26.7366 14.837 27 15.5 27C19.653 27 20.245 15.705 21.208 13.5C21.3707 13.1278 21.6216 12.8008 21.9391 12.5474C22.2565 12.294 22.6309 12.1218 23.0299 12.0456C23.4289 11.9694 23.8405 11.9916 24.229 12.1102C24.6175 12.2289 24.9712 12.4404 25.2595 12.7265C25.5479 13.0126 25.7622 13.3646 25.8839 13.7522C26.0056 14.1397 26.0311 14.5511 25.958 14.9507C25.885 15.3503 25.7157 15.726 25.4648 16.0455C25.2139 16.3649 24.8889 16.6184 24.518 16.784M13 31H31"
-        stroke="#00C0A8"
+        stroke="#111827"
         strokeWidth="2"
         strokeLinecap="round"
         strokeLinejoin="round"
@@ -152,39 +206,39 @@ export const EmployeeCode = () => {
       </mask>
       <path
         d="M0 16C0 7.16344 7.16344 0 16 0H28C36.8366 0 44 7.16344 44 16V28C44 36.8366 36.8366 44 28 44H16C7.16344 44 0 36.8366 0 28V16Z"
-        fill="#00C0A8"
+        fill="#111827"
         fillOpacity="0.1"
       />
       <path
         d="M16 0V1H28V0V-1H16V0ZM44 16H43V28H44H45V16H44ZM28 44V43H16V44V45H28V44ZM0 28H1V16H0H-1V28H0ZM16 44V43C7.71573 43 1 36.2843 1 28H0H-1C-1 37.3888 6.61116 45 16 45V44ZM44 28H43C43 36.2843 36.2843 43 28 43V44V45C37.3888 45 45 37.3888 45 28H44ZM28 0V1C36.2843 1 43 7.71573 43 16H44H45C45 6.61116 37.3888 -1 28 -1V0ZM16 0V-1C6.61116 -1 -1 6.61116 -1 16H0H1C1 7.71573 7.71573 1 16 1V0Z"
-        fill="#00C0A8"
+        fill="#111827"
         fillOpacity="0.2"
         mask="url(#path-1-inside-1_588_2667)"
       />
       <path
         d="M15.333 19.5H28.6663"
-        stroke="#00C0A8"
+        stroke="#111827"
         strokeWidth="1.66667"
         strokeLinecap="round"
         strokeLinejoin="round"
       />
       <path
         d="M15.333 24.5H28.6663"
-        stroke="#00C0A8"
+        stroke="#111827"
         strokeWidth="1.66667"
         strokeLinecap="round"
         strokeLinejoin="round"
       />
       <path
         d="M20.3337 14.5L18.667 29.5"
-        stroke="#00C0A8"
+        stroke="#111827"
         strokeWidth="1.66667"
         strokeLinecap="round"
         strokeLinejoin="round"
       />
       <path
         d="M25.3337 14.5L23.667 29.5"
-        stroke="#00C0A8"
+        stroke="#111827"
         strokeWidth="1.66667"
         strokeLinecap="round"
         strokeLinejoin="round"

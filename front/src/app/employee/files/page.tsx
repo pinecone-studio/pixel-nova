@@ -22,13 +22,12 @@ type FilterValue = (typeof FILTER_OPTIONS)[number]["value"];
 // ─── helpers ────────────────────────────────────────────────────────────────
 
 function formatDate(value: string) {
-  return new Date(value)
-    .toLocaleDateString("mn-MN", {
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit",
-    })
-    .replace(/\./g, "/");
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "—";
+  const year = String(date.getFullYear());
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}/${month}/${day}`;
 }
 
 function buildDataUrl(content: DocumentContent) {
@@ -77,7 +76,7 @@ function CustomDropdown({
           background: "white",
           border: "1px solid #e5e7eb",
           borderRadius: 10,
-          color: "black",
+          color: filter !== "all" ? "#111827" : "#6b7280",
           fontSize: 13,
           cursor: "pointer",
           fontFamily: "inherit",
@@ -87,7 +86,9 @@ function CustomDropdown({
           whiteSpace: "nowrap",
         }}
       >
-        {selectedLabel}
+        <span style={{ color: filter === "all" ? "#6b7280" : "#111827" }}>
+          {selectedLabel}
+        </span>
         <svg
           width="12"
           height="12"
@@ -129,14 +130,21 @@ function CustomDropdown({
               style={{
                 width: "100%",
                 padding: "10px 14px",
-                background: filter === value ? "#f9f9f9" : "white",
+                background: "white",
                 border: "none",
                 borderBottom: "1px solid #f1f1f1",
-                color: "black",
+                color: filter === value ? "#111827" : "#6b7280",
                 fontSize: 13,
                 textAlign: "left",
                 cursor: "pointer",
                 fontFamily: "inherit",
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.color = "#111827";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.color =
+                  filter === value ? "#111827" : "#6b7280";
               }}
             >
               {label}
@@ -588,119 +596,128 @@ export default function FilesPage() {
   if (!authToken) return null;
 
   return (
-    <div
-      style={{
-        width: 1056,
-        height: 724,
-        background: "white",
-        padding: "32px 40px",
-        fontFamily: "inherit",
-        boxSizing: "border-box",
-        overflow: "hidden",
-        margin: "0 auto",
-      }}
-    >
-      {/* Page Header */}
+    <div className="min-h-screen bg-[#F5F7FB]">
       <div
         style={{
-          display: "flex",
-          flexDirection: "column",
-          gap: 4,
-          marginBottom: 28,
+          width: 1056,
+          background: "#F5F7FB",
+          padding: "32px 40px",
+          fontFamily: "inherit",
+          boxSizing: "border-box",
+          margin: "0 auto",
         }}
       >
-        <p style={{ color: "black", fontSize: 22, fontWeight: 600, margin: 0 }}>
-          Миний баримтууд
-        </p>
-        <p style={{ color: "black", fontSize: 13, margin: 0 }}>
-          {employee
-            ? `${employee.lastName} ${employee.firstName} ажилтны баримтууд.`
-            : "Таны бүх баримт бичгийг эндээс харах болон татах боломжтой."}
-        </p>
-      </div>
-
-      {/* Toolbar */}
-      <div style={{ display: "flex", gap: 10, marginBottom: 28 }}>
-        <div style={{ position: "relative", flex: 1 }}>
-          <span
+        {/* Page Header */}
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            gap: 8,
+            height: 62,
+            marginBottom: 28,
+          }}
+        >
+          <p
             style={{
-              position: "absolute",
-              left: 11,
-              top: "50%",
-              transform: "translateY(-50%)",
-              color: "gray",
-              pointerEvents: "none",
-              display: "flex",
+              color: "black",
+              fontSize: 30,
+              fontWeight: 700,
+              height: 30,
+              margin: 0,
             }}
           >
-            <svg
-              width="13"
-              height="13"
-              fill="none"
-              stroke="gray"
-              strokeWidth="2"
-              viewBox="0 0 24 24"
-            >
-              <circle cx="11" cy="11" r="8" />
-              <path d="m21 21-4.35-4.35" />
-            </svg>
-          </span>
-          <input
-            type="search"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Баримт хайх..."
-            style={{
-              width: "100%",
-              height: 38,
-              padding: "0 12px 0 34px",
-              background: "white",
-              border: "1px solid #ccc",
-              borderRadius: 10,
-              color: "black",
-              fontSize: 13,
-              outline: "none",
-            }}
-          />
+            Миний баримтууд
+          </p>
+          <p style={{ color: "#6B7280", fontSize: 16, height: 24, margin: 0 }}>
+            {employee
+              ? `Таны компанид хадгалагдаж буй бүх баримт бичгүүд.`
+              : "Таны бүх баримт бичгийг эндээс харах болон татах боломжтой."}
+          </p>
         </div>
-        <CustomDropdown filter={filter} setFilter={setFilter} />
-      </div>
 
-      {/* Document List */}
-      {loading ? (
-        <div style={emptyBoxStyle}>Баримтуудыг ачаалж байна...</div>
-      ) : error ? (
-        <div
-          style={{
-            ...emptyBoxStyle,
-            border: "1px solid #fca5a5",
-            background: "#fef2f2",
-            color: "#f87171",
-          }}
-        >
-          {error}
-        </div>
-      ) : filteredDocuments.length === 0 ? (
-        <div style={emptyBoxStyle}>Баримт олдсонгүй.</div>
-      ) : (
-        <div
-          style={{
-            borderRadius: 14,
-            overflow: "hidden",
-            border: "1px solid #e5e7eb",
-            background: "white",
-          }}
-        >
-          {filteredDocuments.map((document, index) => (
-            <DocRow
-              key={document.id}
-              document={document}
-              authToken={authToken}
-              isLast={index === filteredDocuments.length - 1}
+        {/* Toolbar */}
+        <div style={{ display: "flex", gap: 10, marginBottom: 28 }}>
+          <div style={{ position: "relative", flex: 1 }}>
+            <span
+              style={{
+                position: "absolute",
+                left: 11,
+                top: "50%",
+                transform: "translateY(-50%)",
+                color: "gray",
+                pointerEvents: "none",
+                display: "flex",
+              }}
+            >
+              <svg
+                width="13"
+                height="13"
+                fill="none"
+                stroke="gray"
+                strokeWidth="2"
+                viewBox="0 0 24 24"
+              >
+                <circle cx="11" cy="11" r="8" />
+                <path d="m21 21-4.35-4.35" />
+              </svg>
+            </span>
+            <input
+              type="search"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Баримт хайх..."
+              style={{
+                width: "100%",
+                height: 38,
+                padding: "0 12px 0 34px",
+                background: "white",
+                border: "1px solid #ccc",
+                borderRadius: 10,
+                color: "black",
+                fontSize: 13,
+                outline: "none",
+              }}
             />
-          ))}
+          </div>
+          <CustomDropdown filter={filter} setFilter={setFilter} />
         </div>
-      )}
+
+        {/* Document List */}
+        {loading ? (
+          <div style={emptyBoxStyle}>Баримтуудыг ачаалж байна...</div>
+        ) : error ? (
+          <div
+            style={{
+              ...emptyBoxStyle,
+              border: "1px solid #fca5a5",
+              background: "#fef2f2",
+              color: "#f87171",
+            }}
+          >
+            {error}
+          </div>
+        ) : filteredDocuments.length === 0 ? (
+          <div style={emptyBoxStyle}>Баримт олдсонгүй.</div>
+        ) : (
+          <div
+            style={{
+              borderRadius: 14,
+              overflow: "hidden",
+              border: "1px solid #e5e7eb",
+              background: "white",
+            }}
+          >
+            {filteredDocuments.map((document, index) => (
+              <DocRow
+                key={document.id}
+                document={document}
+                authToken={authToken}
+                isLast={index === filteredDocuments.length - 1}
+              />
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
