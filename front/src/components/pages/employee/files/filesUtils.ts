@@ -12,6 +12,13 @@ export function formatDate(value: string) {
     .replace(/\./g, "/");
 }
 
+export function formatMonthLabel(value: string) {
+  return new Date(value).toLocaleDateString("mn-MN", {
+    year: "numeric",
+    month: "long",
+  });
+}
+
 export function buildDataUrl(content: DocumentContent) {
   if (content.contentType === "application/pdf") {
     return `data:${content.contentType};base64,${content.content}`;
