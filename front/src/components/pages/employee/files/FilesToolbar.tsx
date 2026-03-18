@@ -12,12 +12,12 @@ export function FilesToolbar({
   onFilterChange: (value: string) => void;
 }) {
   return (
-    <div style={{ display: "flex", gap: 10, marginBottom: 28 }}>
+    <div style={{ display: "flex", gap: 12, marginBottom: 24 }}>
       <div style={{ position: "relative", flex: 1 }}>
         <span
           style={{
             position: "absolute",
-            left: 11,
+            left: 12,
             top: "50%",
             transform: "translateY(-50%)",
             color: "#9CA3AF",
@@ -44,13 +44,13 @@ export function FilesToolbar({
           placeholder="Баримт хайх..."
           style={{
             width: "100%",
-            height: 38,
-            padding: "0 12px 0 34px",
+            height: 40,
+            padding: "0 12px 0 36px",
             background: "white",
             border: "1px solid #E5E7EB",
-            borderRadius: 10,
-            color: "#111827",
-            fontSize: 13,
+            borderRadius: 12,
+            color: "#121316",
+            fontSize: 14,
             outline: "none",
           }}
         />
@@ -59,13 +59,13 @@ export function FilesToolbar({
         value={filter}
         onChange={(event) => onFilterChange(event.target.value)}
         style={{
-          height: 38,
+          height: 40,
           padding: "0 14px",
           background: "white",
           border: "1px solid #E5E7EB",
-          borderRadius: 10,
+          borderRadius: 12,
           color: "#6B7280",
-          fontSize: 13,
+          fontSize: 14,
           outline: "none",
           cursor: "pointer",
         }}
