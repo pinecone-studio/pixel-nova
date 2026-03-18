@@ -14,11 +14,11 @@ export function EmployeeCard({
   onEdit: (employee: Employee) => void;
 }) {
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-5 flex flex-col gap-3 hover:border-slate-300 transition-colors shadow-[0_1px_2px_rgba(15,23,42,0.06)]">
+    <div className="rounded-3xl border border-slate-200 bg-white/90 p-5 flex flex-col gap-4 hover:border-slate-300 transition-colors shadow-[0_16px_40px_rgba(15,23,42,0.08)]">
       <div className="flex items-start justify-between">
         <div className="flex items-center gap-3">
           <div
-            className={`w-11 h-11 rounded-xl ${avatarColor(employee.id)} flex items-center justify-center text-white font-bold text-sm shrink-0`}
+            className={`w-11 h-11 rounded-2xl ${avatarColor(employee.id)} flex items-center justify-center text-white font-bold text-sm shrink-0`}
           >
             {getInitials(employee)}
           </div>
@@ -42,34 +42,36 @@ export function EmployeeCard({
       <div className="flex flex-col gap-1.5">
         <div className="flex items-center gap-2">
           <MailIcon />
-            <span className="text-slate-500 text-xs">
-              {employee.email || "Имэйл байхгүй"}
-            </span>
-          </div>
-          <div className="flex items-center gap-2">
-            <BuildingIcon />
-            <span className="px-2 py-0.5 rounded-md bg-slate-100 text-slate-600 text-xs">
-              {formatDepartment(employee.department)}
-            </span>
-          </div>
-          <div className="flex items-center gap-2">
-            <LockIcon />
-            <span className="text-slate-500 text-xs">
-              {formatBranch(employee.branch)}
-            </span>
-          </div>
+          <span className="text-slate-500 text-xs">
+            {employee.email || "Имэйл байхгүй"}
+          </span>
         </div>
+        <div className="flex items-center gap-2">
+          <BuildingIcon />
+          <span className="px-2 py-0.5 rounded-md bg-slate-100 text-slate-600 text-xs">
+            {formatDepartment(employee.department)}
+          </span>
+        </div>
+        <div className="flex items-center gap-2">
+          <LockIcon />
+          <span className="text-slate-500 text-xs">
+            {formatBranch(employee.branch)}
+          </span>
+        </div>
+      </div>
 
       <div className="h-px bg-slate-200" />
 
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-1.5">
           <CalIcon />
-          <span className="text-slate-500 text-xs">Орсон: {employee.hireDate}</span>
+          <span className="text-slate-500 text-xs">
+            Орсон: {employee.hireDate}
+          </span>
         </div>
         <button
           onClick={() => onEdit(employee)}
-          className="h-7 px-3 rounded-lg border border-slate-200 text-slate-500 text-xs hover:text-slate-900 hover:border-slate-300 transition-colors"
+          className="h-7 px-3 rounded-lg border border-slate-200 text-slate-500 text-xs hover:text-slate-900 hover:border-slate-300 transition-colors cursor-pointer"
         >
           Засах
         </button>

@@ -110,7 +110,7 @@ export function WorkersComponent() {
   }
 
   return (
-    <div className="min-h-screen bg-[#F4F5F7] text-slate-900 font-sans flex flex-col gap-5 p-0 animate-fade-up">
+    <div className="flex flex-col gap-6">
       {showAdd && (
         <EmployeeModal
           mode="add"
@@ -144,7 +144,18 @@ export function WorkersComponent() {
         </div>
       )}
 
-      <p className="text-slate-500 text-sm">Нийт {filtered.length} ажилтан</p>
+      <div className="flex items-center justify-between">
+        <p className="text-slate-500 text-sm">
+          Нийт {filtered.length} ажилтан
+        </p>
+        <button
+          onClick={() => setShowAdd(true)}
+          className="flex items-center cursor-pointer gap-2 px-5 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-semibold text-sm transition-colors shadow-lg shadow-slate-900/10"
+        >
+          <PlusIcon />
+          Ажилтан нэмэх
+        </button>
+      </div>
 
       {loading ? (
         <div className="py-8 flex flex-col gap-3">
@@ -153,7 +164,7 @@ export function WorkersComponent() {
           <div className="h-3 w-72 rounded-full skeleton" />
         </div>
       ) : (
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
           {filtered.map((employee) => (
             <EmployeeCard
               key={employee.id}
@@ -163,16 +174,6 @@ export function WorkersComponent() {
           ))}
         </div>
       )}
-
-      <div className="flex justify-end mt-2">
-        <button
-          onClick={() => setShowAdd(true)}
-          className="flex items-center cursor-pointer gap-2 px-5 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black font-semibold text-sm transition-colors shadow-lg shadow-emerald-500/20"
-        >
-          <PlusIcon />
-          Ажилтан нэмэх
-        </button>
-      </div>
     </div>
   );
 }
