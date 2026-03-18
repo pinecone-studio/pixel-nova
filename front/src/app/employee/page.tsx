@@ -92,8 +92,8 @@ export default function EmployeePage() {
   if (loading) {
     return (
       <div className="min-h-screen bg-[#F5F7FB] flex items-center justify-center">
-        <div className="flex items-center gap-3 text-[#6B7280] text-sm">
-          <span className="w-5 h-5 border-2 border-[#D1D5DB] border-t-[#111827] rounded-full animate-spin" />
+        <div className="flex items-center gap-3 text-white text-sm">
+          <span className="w-5 h-5 border-2 border-white border-t-white rounded-full animate-spin" />
           Уншиж байна.....
         </div>
       </div>
