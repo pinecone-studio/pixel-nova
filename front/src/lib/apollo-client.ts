@@ -1,7 +1,7 @@
 import { ApolloClient, HttpLink, InMemoryCache } from "@apollo/client";
 
 export const API_URL = (
-  process.env.NEXT_PUBLIC_API_URL || "http://localhost:8787"
+  process.env.NEXT_PUBLIC_API_URL || "https://backend.pixel-nova.workers.dev"
 ).replace(/\/$/, "");
 
 export interface GraphQLRequestOptions {
