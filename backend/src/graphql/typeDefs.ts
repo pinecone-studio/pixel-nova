@@ -263,6 +263,7 @@ export const typeDefs = /* GraphQL */ `
       passcode: String
       signatureData: String
     ): ContractRequest!
+    saveMySignature(signatureData: String!, passcode: String): EmployeeSignatureStatus!
     approveContractRequest(id: ID!, note: String): ContractRequest!
     rejectContractRequest(id: ID!, note: String): ContractRequest!
     markNotificationRead(id: ID!): EmployeeNotification!

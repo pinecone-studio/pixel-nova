@@ -368,6 +368,7 @@ export function EpasLogo({ className = "h-9 w-9" }: { className?: string }) {
       height="36"
       viewBox="0 0 36 36"
       fill="none"
+      className={className}
       xmlns="http://www.w3.org/2000/svg">
       <mask id="path-1-inside-1_985_4405" fill="white">
         <path d="M0 12C0 5.37258 5.37258 0 12 0H24C30.6274 0 36 5.37258 36 12V24C36 30.6274 30.6274 36 24 36H12C5.37258 36 0 30.6274 0 24V12Z" />

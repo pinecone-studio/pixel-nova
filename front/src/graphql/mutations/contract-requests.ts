@@ -38,3 +38,13 @@ export const REJECT_CONTRACT_REQUEST = gql`
   }
   ${CONTRACT_REQUEST_FIELDS}
 `;
+
+export const SAVE_MY_SIGNATURE = gql`
+  mutation SaveMySignature($signatureData: String!, $passcode: String) {
+    saveMySignature(signatureData: $signatureData, passcode: $passcode) {
+      hasSignature
+      hasPasscode
+      updatedAt
+    }
+  }
+`;

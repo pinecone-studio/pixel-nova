@@ -3,7 +3,7 @@
 import type { Document } from "@/lib/types";
 
 import { FilesDocumentRow } from "./FilesDocumentRow";
-import { emptyBoxStyle } from "./filesUtils";
+import { emptyBoxStyle, formatMonthLabel } from "./filesUtils";
 
 export function FilesList({
   loading,
@@ -39,24 +39,41 @@ export function FilesList({
     return <div style={emptyBoxStyle}>Баримт олдсонгүй.</div>;
   }
 
+  const sorted = [...documents].sort(
+    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+  );
+  const grouped = sorted.reduce<Map<string, Document[]>>((acc, doc) => {
+    const key = formatMonthLabel(doc.createdAt);
+    if (!acc.has(key)) acc.set(key, []);
+    acc.get(key)?.push(doc);
+    return acc;
+  }, new Map());
+
   return (
-    <div
-      style={{
-        borderRadius: 16,
-        overflow: "hidden",
-        border: "1px solid #DFDFDF",
-        background: "white",
-        boxShadow:
-          "0px 1px 3px 0px rgba(0,0,0,0.08), 0px 1px 2px -1px rgba(0,0,0,0.08)",
-      }}
-    >
-      {documents.map((document, index) => (
-        <FilesDocumentRow
-          key={document.id}
-          document={document}
-          authToken={authToken}
-          isLast={index === documents.length - 1}
-        />
+    <div className="flex flex-col gap-4">
+      {[...grouped.entries()].map(([month, docs]) => (
+        <div key={month} className="flex flex-col gap-2">
+          <div className="text-xs font-semibold text-slate-500 uppercase tracking-[0.18em]">
+            {month}
+          </div>
+          <div
+            style={{
+              borderRadius: 14,
+              overflow: "hidden",
+              border: "1px solid #E5E7EB",
+              background: "white",
+            }}
+          >
+            {docs.map((document, index) => (
+              <FilesDocumentRow
+                key={document.id}
+                document={document}
+                authToken={authToken}
+                isLast={index === docs.length - 1}
+              />
+            ))}
+          </div>
+        </div>
       ))}
     </div>
   );

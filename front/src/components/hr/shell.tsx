@@ -14,8 +14,10 @@ import type { ContractRequest } from "@/lib/types";
 
 import { getActiveHrNavItem, HR_NAV_ITEMS } from "./navigation";
 import { mapContractRequestToEmployeeNotification } from "./notif/hrNotifUtils";
+import { HrOverlayProvider, useHrOverlay } from "./overlay-context";
 
-export function HrShell({ children }: { children: React.ReactNode }) {
+function HrShellInner({ children }: { children: React.ReactNode }) {
+  const { blurred } = useHrOverlay();
   const pathname = usePathname();
   const activeItem = getActiveHrNavItem(pathname);
   const [notifOpen, setNotifOpen] = useState(false);
@@ -43,7 +45,9 @@ export function HrShell({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="hr-scope h-screen overflow-hidden bg-[#fafafa]">
-      <div className="flex h-full overflow-hidden">
+      <div
+        className={`flex h-full overflow-hidden transition-[filter] duration-200 ${blurred ? "blur-sm pointer-events-none select-none" : ""}`}
+      >
         <aside className="scrollbar-hidden group sticky top-0 h-screen overflow-y-auto overflow-x-hidden w-20 hover:w-[232px] transition-[width] duration-300 border-r border-black/12 bg-white flex flex-col py-4 px-2 shrink-0">
           <div className="mb-8 flex min-h-[48px] items-center gap-3 px-2">
             <EpasLogo className="w-9 h-9 rounded-xl shrink-0" />
@@ -53,34 +57,34 @@ export function HrShell({ children }: { children: React.ReactNode }) {
           </div>
 
           <div className="flex flex-1 flex-col gap-2">
-              {HR_NAV_ITEMS.map((item) => {
-                const active = activeItem.key === item.key;
+            {HR_NAV_ITEMS.map((item) => {
+              const active = activeItem.key === item.key;
 
-                return (
-                  <Link
-                    key={item.key}
-                    href={item.href}
-                    className={`relative flex h-14 items-center gap-3 rounded-[14px] px-2 transition-all duration-200 text-left w-full ${
-                      active
-                        ? "bg-white text-slate-900 border border-[#111827]/20 shadow-[0_8px_20px_rgba(17,24,39,0.12)]"
-                        : "text-slate-500 hover:text-slate-700 hover:bg-slate-100 border border-transparent"
-                    }`}
-                    aria-label={item.label}
+              return (
+                <Link
+                  key={item.key}
+                  href={item.href}
+                  className={`relative flex h-14 items-center gap-3 rounded-[14px] px-2 transition-all duration-200 text-left w-full ${
+                    active
+                      ? "bg-white text-slate-900 border border-[#111827]/20 shadow-[0_8px_20px_rgba(17,24,39,0.12)]"
+                      : "text-slate-500 hover:text-slate-700 hover:bg-slate-100 border border-transparent"
+                  }`}
+                  aria-label={item.label}
+                >
+                  {active ? (
+                    <span className="absolute left-0 top-1/2 h-8 w-1 -translate-y-1/2 rounded-r bg-[rgba(63,65,69,0.9)]" />
+                  ) : null}
+                  <span
+                    className={`flex h-10 w-10 items-center justify-center rounded-[12px] shrink-0 transition-all ${active ? "bg-linear-to-b from-white/25 to-black/60 text-black" : ""}`}
                   >
-                    {active ? (
-                      <span className="absolute left-0 top-1/2 h-8 w-1 -translate-y-1/2 rounded-r bg-[rgba(63,65,69,0.9)]" />
-                    ) : null}
-                    <span
-                      className={`flex h-10 w-10 items-center justify-center rounded-[12px] shrink-0 transition-all ${active ? "bg-linear-to-b from-white/25 to-black/60 text-black" : ""}`}
-                    >
-                      {item.icon}
-                    </span>
-                    <span className="whitespace-nowrap text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                      {item.label}
-                    </span>
-                  </Link>
-                );
-              })}
+                    {item.icon}
+                  </span>
+                  <span className="whitespace-nowrap text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                    {item.label}
+                  </span>
+                </Link>
+              );
+            })}
           </div>
           <div className="mt-2 flex min-h-[48px] items-center gap-3 rounded-xl px-2 py-2">
             <span className="flex h-10 w-10 items-center justify-center rounded-full bg-[linear-gradient(135deg,#ad46ff_0%,#f6339a_100%)] text-white text-xs font-bold shrink-0 shadow-[0_10px_15px_rgba(0,0,0,0.1),0_4px_6px_rgba(0,0,0,0.1)]">
@@ -159,5 +163,13 @@ export function HrShell({ children }: { children: React.ReactNode }) {
         }}
       />
     </div>
+  );
+}
+
+export function HrShell({ children }: { children: React.ReactNode }) {
+  return (
+    <HrOverlayProvider>
+      <HrShellInner>{children}</HrShellInner>
+    </HrOverlayProvider>
   );
 }

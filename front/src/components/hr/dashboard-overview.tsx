@@ -1,10 +1,14 @@
 "use client";
 
-import { useState } from "react";
-import { FiArrowRight, FiBriefcase, FiPaperclip, FiSliders } from "react-icons/fi";
+import { useEffect, useMemo, useState } from "react";
+import { useMutation } from "@apollo/client/react";
+import { createPortal } from "react-dom";
 
 import { ArrowUpRightIcon, UsersIcon } from "@/components/icons";
 import type { LeaveRequest } from "@/lib/types";
+import { APPROVE_LEAVE_REQUEST, REJECT_LEAVE_REQUEST } from "@/graphql/mutations";
+import { buildGraphQLHeaders } from "@/lib/apollo-client";
+import { useHrOverlay } from "./overlay-context";
 
 import type { DashboardStats } from "./dashboard-data";
 
@@ -22,20 +26,68 @@ export function HrDashboardOverview({
   pendingRequests: LeaveRequest[];
 }) {
   const [renderedAt] = useState(() => Date.now());
-  const overviewCards = [
-    {
-      title: "PROMOTE EMPLOYEE",
-      status: "working",
-      description: "Шаардлагатай баримт",
-      items: ["Үндсэн цалин нэмэх тушаал"],
-    },
-    {
-      title: "CHANGE POSITION",
-      status: "working",
-      description: "Шаардлагатай баримт",
-      items: ["Ажлын байрны тодорхойлолт", "Ажлын байр шинэчлэх тушаал"],
-    },
-  ];
+  const [selected, setSelected] = useState<LeaveRequest | null>(null);
+  const [note, setNote] = useState("");
+  const [acting, setActing] = useState(false);
+  const [localRequests, setLocalRequests] = useState<LeaveRequest[]>(
+    pendingRequests,
+  );
+  const { setBlurred } = useHrOverlay();
+
+  useEffect(() => {
+    setLocalRequests(pendingRequests);
+  }, [pendingRequests]);
+
+  useEffect(() => {
+    setBlurred(Boolean(selected));
+    return () => setBlurred(false);
+  }, [selected, setBlurred]);
+
+  const [approveLeaveRequest] = useMutation(APPROVE_LEAVE_REQUEST, {
+    context: { headers: buildGraphQLHeaders({ actorRole: "hr" }) },
+  });
+  const [rejectLeaveRequest] = useMutation(REJECT_LEAVE_REQUEST, {
+    context: { headers: buildGraphQLHeaders({ actorRole: "hr" }) },
+  });
+
+  const selectedMeta = useMemo(() => {
+    if (!selected) return null;
+    const start = new Date(selected.startTime);
+    const end = new Date(selected.endTime);
+    const diffMs = end.getTime() - start.getTime();
+    const days = Math.max(1, Math.ceil(diffMs / 86400000) + 0);
+    return {
+      startLabel: start.toLocaleDateString("mn-MN"),
+      endLabel: end.toLocaleDateString("mn-MN"),
+      totalDays: days,
+    };
+  }, [selected]);
+
+  async function handleApprove() {
+    if (!selected) return;
+    setActing(true);
+    try {
+      await approveLeaveRequest({ variables: { id: selected.id, note } });
+      setLocalRequests((prev) => prev.filter((req) => req.id !== selected.id));
+      setSelected(null);
+      setNote("");
+    } finally {
+      setActing(false);
+    }
+  }
+
+  async function handleReject() {
+    if (!selected) return;
+    setActing(true);
+    try {
+      await rejectLeaveRequest({ variables: { id: selected.id, note } });
+      setLocalRequests((prev) => prev.filter((req) => req.id !== selected.id));
+      setSelected(null);
+      setNote("");
+    } finally {
+      setActing(false);
+    }
+  }
 
   function formatRelativeTime(value: string) {
     const diff = Math.max(0, renderedAt - new Date(value).getTime());
@@ -47,138 +99,206 @@ export function HrDashboardOverview({
     return `${days} өдөр өмнө`;
   }
 
-  function getEmployeeInitial(request: LeaveRequest) {
-    return request.employee.firstName?.[0] ?? request.employee.lastName?.[0] ?? "А";
-  }
-
   return (
-    <div className="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1fr)_680px]">
-      <div className="flex min-w-0 flex-col gap-3">
-        <div className="rounded-[24px] border border-black/12 bg-white px-6 py-8">
+    <div className="grid grid-cols-1 gap-6 lg:grid-cols-[680px_1fr]">
+      <div className="flex flex-col gap-6">
+        <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-[0_10px_30px_rgba(15,23,42,0.06)]">
           <div className="flex items-start justify-between gap-4">
-            <div className="min-w-0">
-              <p className="text-[16px] font-bold leading-5 tracking-[-0.096px] text-[#121316]">
-                Нийт ажилчид
+            <div>
+              <p className="text-xs uppercase tracking-[0.2em] text-slate-400">
+                Нийт ажилтан
               </p>
-              <div className="mt-2 flex flex-wrap items-center gap-3">
-                <p className="text-[64px] font-bold leading-[70px] tracking-[-0.04em] text-[#3f4145cc]">
+              <div className="mt-3 flex items-center gap-3">
+                <p className="text-4xl font-semibold text-slate-900">
                   {loading ? "..." : stats.totalEmployees}
                 </p>
-                <span className="mt-5 flex h-7 items-center gap-1 rounded-full border border-[#1aba5280] px-3 text-[14px] font-semibold text-[#1aba52]">
+                <span className="flex items-center gap-1 rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-600">
                   <ArrowUpRightIcon className="h-3.5 w-3.5" />
                   {stats.monthlyGrowth >= 0 ? "+" : ""}
                   {stats.monthlyGrowth}%
                 </span>
               </div>
-              <p className="text-[14px] font-medium text-[#3f414599]">
+              <p className="mt-2 text-xs text-slate-500">
                 Өмнө сар: {loading ? "..." : stats.totalEmployees - 6}
               </p>
             </div>
-            <div className="flex h-[54px] w-[54px] items-center justify-center rounded-2xl bg-[#121316]">
-              <UsersIcon className="h-8 w-8 text-white" />
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-900">
+              <UsersIcon className="text-white" />
             </div>
           </div>
-          <div className="mt-6 flex h-[36px] items-end gap-1">
-            {barData.slice(-7).map((height, index) => (
+          <div className="mt-6 flex items-end gap-2 h-12">
+            {barData.slice(0, 8).map((height, index) => (
               <div
                 key={index}
-                className="min-w-0 flex-1 rounded-t-[4px] bg-[#3f4145]"
-                style={{ height: `${Math.max(20, Math.round((height / 88) * 36))}px` }}
+                className="flex-1 rounded-lg bg-slate-900/80"
+                style={{ height: `${(height / 88) * 200}%` }}
               />
             ))}
           </div>
         </div>
-
-        <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-          {overviewCards.map((card) => (
-            <button
-              key={card.title}
-              className="flex min-h-[136px] flex-col items-start rounded-[16px] border border-black/12 bg-white p-[25px] text-left"
-              type="button"
-            >
-              <div className="flex w-full items-start justify-between gap-3">
-                <p className="text-[16px] font-bold leading-5 tracking-[-0.096px] text-[#3f4145]">
-                  {card.title}
-                </p>
-                <span className="flex items-center gap-1 rounded-[10px] border border-[#121316] px-[9px] py-[3px] text-[12px] leading-5 text-[#121316]">
-                  <FiBriefcase className="h-3 w-3" />
-                  {card.status}
-                </span>
-              </div>
-
-              <div className="mt-3 flex flex-col gap-2">
-                <p className="text-[14px] font-semibold leading-5 tracking-[-0.084px] text-[#77818c]">
-                  {card.description}
-                </p>
-                {card.items.map((item) => (
-                  <div key={item} className="flex items-center gap-2 text-[14px] leading-4 text-[#3f414599]">
-                    <FiPaperclip className="h-[14px] w-[14px] shrink-0" />
-                    <span>{item}</span>
-                  </div>
-                ))}
-              </div>
-
-              <div className="mt-auto flex w-full justify-center pt-4">
-                <span className="flex h-8 w-full items-center justify-center gap-2 rounded-[10px] bg-[#121316] px-3 text-[14px] leading-4 text-white">
-                  <FiPaperclip className="h-4 w-4" />
-                  Хүсэлт илгээх
-                </span>
-              </div>
-            </button>
-          ))}
-        </div>
       </div>
 
-      <div className="overflow-hidden rounded-[24px] border border-[#dfdfdf] bg-white">
+      <div className="rounded-3xl border border-slate-200 bg-white shadow-[0_10px_30px_rgba(15,23,42,0.06)]">
         <span className="sr-only">{auditCount}</span>
-        <div className="flex flex-wrap items-center justify-between gap-4 border-b border-black/12 px-6 py-4">
+        <div className="flex items-center justify-between border-b border-slate-200 px-6 py-4">
           <div>
-            <p className="text-[20px] font-semibold leading-7 text-black">
+            <p className="text-base font-semibold text-slate-900">
               Хүлээгдэж буй хүсэлтүүд
             </p>
-            <p className="text-[14px] text-[#3f4145b3]">
+            <p className="text-xs text-slate-500">
               Шинээр ирсэн хүсэлтүүдийг хянах
             </p>
           </div>
           <div className="flex items-center gap-2">
-            <button className="flex h-10 items-center gap-2 rounded-[10px] border border-black/12 px-4 text-[14px] text-black">
-              <FiSliders className="h-4 w-4" />
+            <button className="rounded-xl border border-slate-200 px-3 py-2 text-xs text-slate-600 hover:bg-slate-50">
               Шүүх
             </button>
-            <button className="flex h-10 items-center gap-2 rounded-[10px] bg-[#1f2126] px-4 text-[14px] text-white">
-              Бүгдийг харах
-              <FiArrowRight className="h-4 w-4" />
+            <button className="rounded-xl bg-slate-900 px-3 py-2 text-xs text-white hover:bg-slate-800">
+              Бүгдийг харах ↗
             </button>
           </div>
         </div>
-        <div className="divide-y divide-black/12">
-          {(pendingRequests.length > 0 ? pendingRequests.slice(0, 5) : []).map(
+        <div className="divide-y divide-slate-200">
+          {(localRequests.length > 0 ? localRequests.slice(0, 5) : []).map(
             (req) => (
-              <div key={req.id} className="flex items-center gap-4 px-5 py-4">
-                <div className="flex h-12 w-12 items-center justify-center rounded-[14px] bg-[linear-gradient(135deg,#2b7fff_0%,#00b8db_100%)] text-[18px] font-bold text-white shadow-[0_10px_15px_rgba(0,0,0,0.1),0_4px_6px_rgba(0,0,0,0.1)]">
-                  {getEmployeeInitial(req)}
+              <button
+                type="button"
+                key={req.id}
+                onClick={() => {
+                  setSelected(req);
+                  setNote(req.note ?? "");
+                }}
+                className="w-full text-left flex items-center gap-3 px-6 py-4 hover:bg-slate-50 transition-colors cursor-pointer"
+              >
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-600 text-white text-sm font-semibold">
+                  {req.employee.firstName?.[0] ?? "А"}
                 </div>
                 <div className="flex-1">
-                  <p className="text-[16px] font-bold tracking-[-0.096px] text-black">
+                  <p className="text-sm font-semibold text-slate-900">
                     {req.employee.lastName} {req.employee.firstName}
                   </p>
-                  <p className="text-[14px] tracking-[-0.14px] text-[#3f4145b3]">
+                  <p className="text-xs text-slate-500">
                     {req.type ?? "Хүсэлт"}
                   </p>
                 </div>
-                <p className="text-[14px] font-medium text-[#3f4145b3]">
+                <p className="text-xs text-slate-400">
                   {formatRelativeTime(req.createdAt)}
                 </p>
-              </div>
+              </button>
             ),
           )}
-          {pendingRequests.length === 0 ? (
+          {localRequests.length === 0 ? (
             <div className="px-6 py-6 text-sm text-slate-500">
               Одоогоор хүлээгдэж буй хүсэлт алга байна.
             </div>
           ) : null}
         </div>
       </div>
+
+      {selected
+        ? createPortal(
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+              <div
+                className="absolute inset-0"
+                onClick={() => setSelected(null)}
+              />
+              <div className="relative w-[520px] max-w-[95vw] bg-white rounded-3xl border border-slate-200 shadow-[0_30px_70px_rgba(15,23,42,0.2)] p-6 flex flex-col gap-5">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex items-center gap-3">
+                    <div className="w-14 h-14 rounded-full overflow-hidden border border-slate-200">
+                      <div className="w-full h-full bg-slate-200 flex items-center justify-center text-slate-600 font-semibold">
+                        {selected.employee.firstName?.[0] ?? "А"}
+                      </div>
+                    </div>
+                    <div>
+                      <p className="text-slate-900 font-bold text-xl leading-6">
+                        {selected.employee.lastName} {selected.employee.firstName}
+                      </p>
+                      <p className="text-slate-500 text-sm mt-1">
+                        {selected.employee.employeeCode} •{" "}
+                        {selected.employee.department}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <span className="rounded-full border border-red-200 bg-red-50 px-3 py-1 text-xs font-semibold text-red-500">
+                      Яаралтай
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setSelected(null)}
+                      className="text-slate-400 hover:text-slate-700 transition-colors text-xl leading-none"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                </div>
+
+                <div className="h-px bg-slate-200" />
+
+                <div className="rounded-2xl border border-slate-200 p-4">
+                  <p className="text-slate-900 font-semibold text-base">
+                    {selected.type ?? "Хүсэлт"}
+                  </p>
+                  <div className="mt-3 grid grid-cols-2 gap-4 text-sm text-slate-600">
+                    <div>
+                      <p className="text-xs text-slate-500">Эхлэх өдөр</p>
+                      <p className="font-medium">{selectedMeta?.startLabel}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-slate-500">Дуусах өдөр</p>
+                      <p className="font-medium">{selectedMeta?.endLabel}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-slate-500">Нийт өдөр</p>
+                      <p className="font-medium text-emerald-600">
+                        {selectedMeta?.totalDays ?? 0} хоног
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-slate-500">Шалтгаан</p>
+                      <p className="font-medium">{selected.reason}</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex flex-col gap-2">
+                  <p className="text-slate-900 font-semibold text-base">
+                    Тайлбар{" "}
+                    <span className="text-slate-500 font-normal">(Заавал биш)</span>
+                  </p>
+                  <textarea
+                    value={note}
+                    onChange={(event) => setNote(event.target.value)}
+                    placeholder="Энд бичнэ үү..."
+                    rows={3}
+                    className="w-full bg-white border border-slate-200 rounded-2xl px-4 py-3 text-slate-700 text-sm placeholder:text-slate-400 outline-none resize-none focus:border-slate-300 transition-colors"
+                  />
+                </div>
+
+                <div className="flex items-center justify-end gap-3">
+                  <button
+                    type="button"
+                    onClick={handleReject}
+                    disabled={acting}
+                    className="flex items-center gap-2 px-5 py-2.5 rounded-xl border border-red-200 text-red-500 text-sm font-medium hover:bg-red-50 disabled:opacity-50 transition-colors"
+                  >
+                    <span>✕</span> Татгалзах
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleApprove}
+                    disabled={acting}
+                    className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-slate-900 text-white text-sm font-medium hover:bg-slate-800 disabled:opacity-50 transition-colors"
+                  >
+                    <span>✓</span> {acting ? "Түр хүлээнэ үү..." : "Батлах"}
+                  </button>
+                </div>
+              </div>
+            </div>,
+            document.body,
+          )
+        : null}
     </div>
   );
 }
