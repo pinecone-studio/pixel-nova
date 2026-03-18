@@ -84,3 +84,8 @@ export function buildContractActionConfig(templateIds: ContractTemplateId[]) {
     documents,
   } as unknown as NormalizedActionConfig;
 }
+
+export function getTemplateFileById(templateId: string): string | null {
+  if (!(templateId in CONTRACT_TEMPLATE_CONFIG)) return null;
+  return CONTRACT_TEMPLATE_CONFIG[templateId as ContractTemplateId].template;
+}
