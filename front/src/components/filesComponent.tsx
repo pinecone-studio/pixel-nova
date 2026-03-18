@@ -59,6 +59,13 @@ function stageKeyForEmployee(employee?: Employee) {
   return "onboarding";
 }
 
+function stageLabel(employee?: Employee) {
+  const key = stageKeyForEmployee(employee);
+  if (key === "offboarding") return "Ажлаас гарах үе";
+  if (key === "active") return "Ажиллах үе";
+  return "Ажилд орох үе";
+}
+
 function statusLabel(document: Document) {
   return document.storageUrl ? "Баталгаажсан" : "Ноорог";
 }
@@ -534,33 +541,31 @@ export function FilesComponent() {
     );
   }, [filtered]);
 
+  const verifiedCount = useMemo(
+    () => filtered.filter((row) => Boolean(row.document.storageUrl)).length,
+    [filtered],
+  );
+
+  const verifiedPercent =
+    filtered.length === 0
+      ? 0
+      : Math.round((verifiedCount / filtered.length) * 100);
+
   const stages = [
     {
       label: "Ажилд орох үе",
-      sub: "Онбординг",
       count: stageCounts.onboarding,
-      icon: <OnboardIcon />,
-      iconBg: "bg-emerald-500",
-      border: "border-emerald-600/40",
-      bg: "bg-linear-to-br from-emerald-100 to-white",
+      icon: <OnboardIcon className="h-5 w-5 text-[#121316]" />,
     },
     {
       label: "Ажиллах үе",
-      sub: "Идэвхтэй",
       count: stageCounts.active,
-      icon: <ActiveIcon />,
-      iconBg: "bg-cyan-500",
-      border: "border-cyan-600/40",
-      bg: "bg-linear-to-br from-cyan-100 to-white",
+      icon: <ActiveIcon className="h-5 w-5 text-[#121316]" />,
     },
     {
       label: "Ажлаас гарах үе",
-      sub: "Оффбординг",
       count: stageCounts.offboarding,
-      icon: <CiWarning className="w-6 h-6" />,
-      iconBg: "bg-red-500",
-      border: "border-red-600/40",
-      bg: "bg-linear-to-br from-red-100 to-white",
+      icon: <CiWarning className="h-5 w-5 text-[#121316]" />,
     },
   ];
 
@@ -596,7 +601,6 @@ export function FilesComponent() {
           )
         : null}
 
-      {/* Left panel */}
       <div className="flex flex-col gap-6">
         <div>
           <p className="text-slate-700 text-sm font-semibold mb-3">
@@ -613,7 +617,7 @@ export function FilesComponent() {
               <div className="flex items-center justify-between mt-1">
                 <p className="text-slate-400 text-sm">Нийт баримт</p>
                 <p className="text-emerald-500 text-sm font-semibold">
-                  100% Баталгаажсан
+                  {verifiedPercent}% Баталгаажсан
                 </p>
               </div>
             </div>
@@ -631,17 +635,16 @@ export function FilesComponent() {
                 className="rounded-3xl border border-slate-200 bg-white/90 p-4 flex items-center justify-between shadow-[0_12px_30px_rgba(15,23,42,0.06)]"
               >
                 <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-xl border border-slate-200 bg-white flex items-center justify-center shrink-0 text-slate-600">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[14px] border border-slate-200 bg-white">
                     {stage.icon}
                   </div>
-                  <div>
-                    <p className="text-slate-900 text-sm font-semibold">
+                  <div className="min-w-0">
+                    <p className="text-[16px] font-medium leading-10 text-[#121316]">
                       {stage.label}
                     </p>
-                    <p className="text-slate-400 text-xs">{stage.sub}</p>
                   </div>
                 </div>
-                <span className="text-slate-900 text-xl font-semibold">
+                <span className="text-[30px] font-semibold leading-10 text-[#121316]">
                   {stage.count}
                 </span>
               </div>
@@ -650,7 +653,6 @@ export function FilesComponent() {
         </div>
       </div>
 
-      {/* Right panel */}
       <div className="flex-1 flex flex-col">
         <div className="rounded-3xl border border-slate-200 bg-white/90 overflow-auto flex-1 shadow-[0_18px_40px_rgba(15,23,42,0.08)]">
           <div className="flex items-center gap-3 px-6 py-4 border-b border-slate-200 bg-white/80">
@@ -712,11 +714,7 @@ export function FilesComponent() {
                 </div>
                 <div>
                   <div className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1 text-xs text-slate-500">
-                    {row.employee?.status === "Тасалсан"
-                      ? "Ажлаас гарах үе"
-                      : row.employee?.status === "Ирсэн"
-                        ? "Ажиллах үе"
-                        : "Ажилд орох үе"}
+                    {stageLabel(row.employee)}
                   </div>
                 </div>
                 <div className="flex items-center gap-1.5">
