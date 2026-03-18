@@ -98,6 +98,59 @@ export function employeeFolderName(employee: Employee): string {
 }
 
 // ---------------------------------------------------------------------------
+// URL TTL helpers
+// ---------------------------------------------------------------------------
+
+const DOCUMENT_URL_TTL_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
+const EXPIRY_WARNING_MS = 2 * 24 * 60 * 60 * 1000; // warn when ≤2 days left
+
+export type UrlTtlStatus = "valid" | "expiring" | "expired" | "none";
+
+/**
+ * Returns the TTL status for a document's signed URL based on createdAt.
+ * - "none"     — no storageUrl (draft)
+ * - "expired"  — older than 7 days
+ * - "expiring" — 5–7 days old (≤2 days remaining)
+ * - "valid"    — less than 5 days old
+ */
+export function getUrlTtlStatus(doc: Document): UrlTtlStatus {
+  if (!doc.storageUrl) return "none";
+
+  const created = new Date(doc.createdAt).getTime();
+  const now = Date.now();
+  const elapsed = now - created;
+  const remaining = DOCUMENT_URL_TTL_MS - elapsed;
+
+  if (remaining <= 0) return "expired";
+  if (remaining <= EXPIRY_WARNING_MS) return "expiring";
+  return "valid";
+}
+
+/**
+ * Returns remaining days for the signed URL.
+ */
+export function getUrlRemainingDays(doc: Document): number | null {
+  if (!doc.storageUrl) return null;
+
+  const created = new Date(doc.createdAt).getTime();
+  const remaining = DOCUMENT_URL_TTL_MS - (Date.now() - created);
+  if (remaining <= 0) return 0;
+  return Math.ceil(remaining / (24 * 60 * 60 * 1000));
+}
+
+/**
+ * Mongolian label for URL TTL status.
+ */
+export function urlTtlLabel(status: UrlTtlStatus, remainingDays?: number | null): string {
+  switch (status) {
+    case "expired": return "Линк хугацаа дууссан";
+    case "expiring": return `${remainingDays ?? "?"} хоног үлдсэн`;
+    case "valid": return "Баталгаажсан";
+    case "none": return "Ноорог";
+  }
+}
+
+// ---------------------------------------------------------------------------
 // Tree builder
 // ---------------------------------------------------------------------------
 

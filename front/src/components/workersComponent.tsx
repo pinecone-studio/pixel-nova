@@ -17,6 +17,8 @@ import { PlusIcon } from "./icons";
 
 export function WorkersComponent() {
   const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState<string | null>(null);
+  const [departmentFilter, setDepartmentFilter] = useState<string | null>(null);
   const [showAdd, setShowAdd] = useState(false);
   const [editEmp, setEditEmp] = useState<Employee | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -50,17 +52,19 @@ export function WorkersComponent() {
 
   const filtered = useMemo(
     () =>
-      employees.filter((employee) =>
-        [
+      employees.filter((employee) => {
+        if (statusFilter && employee.status !== statusFilter) return false;
+        if (departmentFilter && employee.department !== departmentFilter) return false;
+        return [
           employee.firstName,
           employee.lastName,
           employee.employeeCode,
           employee.email ?? "",
           employee.department,
           employee.jobTitle,
-        ].some((value) => value.toLowerCase().includes(search.toLowerCase())),
-      ),
-    [employees, search],
+        ].some((value) => value.toLowerCase().includes(search.toLowerCase()));
+      }),
+    [employees, search, statusFilter, departmentFilter],
   );
 
   const totalActive = employees.filter((employee) => employee.status === "Ирсэн").length;
@@ -136,7 +140,14 @@ export function WorkersComponent() {
         totalNewThisMonth={totalNewThisMonth}
       />
 
-      <WorkersToolbar search={search} onSearchChange={setSearch} />
+      <WorkersToolbar
+        search={search}
+        onSearchChange={setSearch}
+        statusFilter={statusFilter}
+        onStatusFilterChange={setStatusFilter}
+        departmentFilter={departmentFilter}
+        onDepartmentFilterChange={setDepartmentFilter}
+      />
 
       {error && (
         <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-500">

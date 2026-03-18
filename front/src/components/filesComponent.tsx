@@ -12,7 +12,7 @@ import {
   GET_EMPLOYEES,
 } from "@/graphql/queries";
 import type { Document, DocumentContent, Employee } from "@/lib/types";
-import { buildDocumentTree } from "@/lib/documentTree";
+import { buildDocumentTree, getUrlTtlStatus, getUrlRemainingDays, urlTtlLabel } from "@/lib/documentTree";
 import { DocumentTreeView } from "@/components/hr/documents/DocumentTreeView";
 import {
   ActiveIcon,
@@ -69,7 +69,19 @@ function stageLabel(employee?: Employee) {
 }
 
 function statusLabel(document: Document) {
-  return document.storageUrl ? "Баталгаажсан" : "Ноорог";
+  const ttlStatus = getUrlTtlStatus(document);
+  const remainingDays = getUrlRemainingDays(document);
+  return urlTtlLabel(ttlStatus, remainingDays);
+}
+
+function statusColor(document: Document) {
+  const ttlStatus = getUrlTtlStatus(document);
+  switch (ttlStatus) {
+    case "expired": return "border-red-300 text-red-500";
+    case "expiring": return "border-amber-300 text-amber-500";
+    case "valid": return "border-[#1aba5280] text-[#1aba52]";
+    case "none": return "border-black/12 text-[#77818c]";
+  }
 }
 
 function fileToBase64(file: File) {
@@ -771,7 +783,8 @@ export function FilesComponent() {
                       </span>
                     </div>
                     <div className="px-2">
-                      <span className="inline-flex items-center gap-1.5 rounded-full border border-[#1aba5280] px-3 py-1 text-[12px] font-medium text-[#1aba52]">
+                      <span className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-[12px] font-medium ${statusColor(row.document)}`}>
+                        {getUrlTtlStatus(row.document) === "expiring" || getUrlTtlStatus(row.document) === "expired" ? "⚠ " : ""}
                         {statusLabel(row.document)}
                       </span>
                     </div>

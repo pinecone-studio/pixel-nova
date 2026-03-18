@@ -3,8 +3,52 @@
 import type { Employee } from "@/lib/types";
 import { formatBranch, formatDepartment, formatLevel } from "@/lib/labels";
 import { BuildingIcon, CalIcon, LockIcon, MailIcon } from "@/components/icons";
+import { FiGithub, FiGlobe, FiHash } from "react-icons/fi";
 
+import type { EmployeeDocumentProfile } from "@/lib/types";
 import { avatarColor, getInitials, statusStyle } from "./shared";
+
+function DocumentProfileBadge({
+  profile,
+}: {
+  profile?: EmployeeDocumentProfile | null;
+}) {
+  const filledCount = profile
+    ? Object.values(profile).filter(
+        (v) => v !== null && v !== undefined && v !== "",
+      ).length
+    : 0;
+  const totalFields = 30; // total fields in EmployeeDocumentProfile
+
+  if (filledCount === 0) {
+    return (
+      <div className="flex items-center gap-2">
+        <FiHash className="h-3.5 w-3.5 text-slate-400" />
+        <span className="px-2 py-0.5 rounded-md bg-amber-50 text-amber-600 text-xs border border-amber-100">
+          Профайл хоосон
+        </span>
+      </div>
+    );
+  }
+
+  const percent = Math.round((filledCount / totalFields) * 100);
+  const isFull = percent >= 80;
+
+  return (
+    <div className="flex items-center gap-2">
+      <FiHash className="h-3.5 w-3.5 text-slate-400" />
+      <span
+        className={`px-2 py-0.5 rounded-md text-xs border ${
+          isFull
+            ? "bg-emerald-50 text-emerald-600 border-emerald-100"
+            : "bg-blue-50 text-blue-600 border-blue-100"
+        }`}
+      >
+        Профайл {percent}%
+      </span>
+    </div>
+  );
+}
 
 export function EmployeeCard({
   employee,
@@ -58,7 +102,24 @@ export function EmployeeCard({
             {formatBranch(employee.branch)}
           </span>
         </div>
+        {employee.entraId ? (
+          <div className="flex items-center gap-2">
+            <FiGlobe className="h-3.5 w-3.5 text-slate-400" />
+            <span className="px-2 py-0.5 rounded-md bg-blue-50 text-blue-600 text-xs border border-blue-100">
+              Entra ID
+            </span>
+          </div>
+        ) : null}
+        {employee.github ? (
+          <div className="flex items-center gap-2">
+            <FiGithub className="h-3.5 w-3.5 text-slate-400" />
+            <span className="text-slate-500 text-xs">{employee.github}</span>
+          </div>
+        ) : null}
       </div>
+
+      {/* Document profile status */}
+      <DocumentProfileBadge profile={employee.documentProfile} />
 
       <div className="h-px bg-slate-200" />
 
