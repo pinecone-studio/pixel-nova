@@ -1,3 +1,4 @@
+import Image from "next/image";
 import type { IconType } from "react-icons";
 import { AiFillCheckCircle } from "react-icons/ai";
 import {
@@ -363,57 +364,13 @@ export function ChevronDown({
 
 export function EpasLogo({ className = "h-9 w-9" }: { className?: string }) {
   return (
-    <svg
-      width="36"
-      height="36"
-      viewBox="0 0 36 36"
-      fill="none"
+    <Image
+      src="/icon.svg"
+      alt="EPAS logo"
       className={className}
-      xmlns="http://www.w3.org/2000/svg">
-      <mask id="path-1-inside-1_985_4405" fill="white">
-        <path d="M0 12C0 5.37258 5.37258 0 12 0H24C30.6274 0 36 5.37258 36 12V24C36 30.6274 30.6274 36 24 36H12C5.37258 36 0 30.6274 0 24V12Z" />
-      </mask>
-      <path
-        d="M12 0V1H24V0V-1H12V0ZM36 12H35V24H36H37V12H36ZM24 36V35H12V36V37H24V36ZM0 24H1V12H0H-1V24H0ZM12 36V35C5.92487 35 1 30.0751 1 24H0H-1C-1 31.1797 4.8203 37 12 37V36ZM36 24H35C35 30.0751 30.0751 35 24 35V36V37C31.1797 37 37 31.1797 37 24H36ZM24 0V1C30.0751 1 35 5.92487 35 12H36H37C37 4.8203 31.1797 -1 24 -1V0ZM12 0V-1C4.8203 -1 -1 4.8203 -1 12H0H1C1 5.92487 5.92487 1 12 1V0Z"
-        fill="black"
-        mask="url(#path-1-inside-1_985_4405)"
-      />
-      <path
-        d="M14 24.6667C13.6463 24.6667 13.3072 24.5262 13.0572 24.2762C12.8071 24.0261 12.6666 23.687 12.6666 23.3333V12.6667C12.6666 12.3131 12.8071 11.9739 13.0572 11.7239C13.3072 11.4738 13.6463 11.3333 14 11.3333H19.3333C19.5443 11.333 19.7533 11.3744 19.9483 11.4552C20.1433 11.536 20.3203 11.6545 20.4693 11.804L22.8613 14.196C23.0112 14.345 23.1301 14.5222 23.2111 14.7175C23.2921 14.9127 23.3336 15.122 23.3333 15.3333V23.3333C23.3333 23.687 23.1928 24.0261 22.9428 24.2762C22.6927 24.5262 22.3536 24.6667 22 24.6667H14Z"
-        stroke="black"
-        strokeWidth="1.33333"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <path
-        d="M19.3334 11.3333V14.6667C19.3334 14.8435 19.4036 15.0131 19.5286 15.1381C19.6537 15.2631 19.8232 15.3333 20 15.3333H23.3334"
-        stroke="black"
-        strokeWidth="1.33333"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <path
-        d="M16.6667 16H15.3334"
-        stroke="black"
-        strokeWidth="1.33333"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <path
-        d="M20.6667 18.6667H15.3334"
-        stroke="black"
-        strokeWidth="1.33333"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <path
-        d="M20.6667 21.3333H15.3334"
-        stroke="black"
-        strokeWidth="1.33333"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
+      width={200}
+      height={200}
+    />
   );
 }
 

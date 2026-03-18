@@ -46,8 +46,7 @@ function HrShellInner({ children }: { children: React.ReactNode }) {
   return (
     <div className="hr-scope h-screen overflow-hidden bg-[#fafafa]">
       <div
-        className={`flex h-full overflow-hidden transition-[filter] duration-200 ${blurred ? "blur-sm pointer-events-none select-none" : ""}`}
-      >
+        className={`flex h-full overflow-hidden transition-[filter] duration-200 ${blurred ? "blur-sm pointer-events-none select-none" : ""}`}>
         <aside className="scrollbar-hidden group sticky top-0 h-screen overflow-y-auto overflow-x-hidden w-20 hover:w-[232px] transition-[width] duration-300 border-r border-black/12 bg-white flex flex-col py-4 px-2 shrink-0">
           <div className="mb-8 flex min-h-[48px] items-center gap-3 px-2">
             <EpasLogo className="w-9 h-9 rounded-xl shrink-0" />
@@ -69,14 +68,12 @@ function HrShellInner({ children }: { children: React.ReactNode }) {
                       ? "bg-white text-slate-900 border border-[#111827]/20 shadow-[0_8px_20px_rgba(17,24,39,0.12)]"
                       : "text-slate-500 hover:text-slate-700 hover:bg-slate-100 border border-transparent"
                   }`}
-                  aria-label={item.label}
-                >
+                  aria-label={item.label}>
                   {active ? (
                     <span className="absolute left-0 top-1/2 h-8 w-1 -translate-y-1/2 rounded-r bg-[rgba(63,65,69,0.9)]" />
                   ) : null}
                   <span
-                    className={`flex h-10 w-10 items-center justify-center rounded-[12px] shrink-0 transition-all ${active ? "bg-linear-to-b from-white/25 to-black/60 text-black" : ""}`}
-                  >
+                    className={`flex h-10 w-10 items-center justify-center rounded-[12px] shrink-0 transition-all ${active ? "bg-linear-to-b from-white/25 to-black/60 text-black" : ""}`}>
                     {item.icon}
                   </span>
                   <span className="whitespace-nowrap text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-200">
@@ -123,8 +120,7 @@ function HrShellInner({ children }: { children: React.ReactNode }) {
                     })
                   }
                   className="flex h-9 w-9 cursor-pointer items-center justify-center rounded-[10px] text-[#3f4145] transition-colors hover:bg-white"
-                  aria-label="Мэдэгдэл"
-                >
+                  aria-label="Мэдэгдэл">
                   <NotifIcon />
                 </button>
                 {unreadCount > 0 ? (
@@ -137,7 +133,9 @@ function HrShellInner({ children }: { children: React.ReactNode }) {
           </header>
 
           <div className="flex min-w-0 flex-1 flex-col gap-5 overflow-x-hidden px-4 py-4 sm:px-6 sm:py-6">
-            <div key={pathname} className="hr-page-transition flex flex-col gap-5">
+            <div
+              key={pathname}
+              className="hr-page-transition flex flex-col gap-5">
               {children}
             </div>
           </div>
