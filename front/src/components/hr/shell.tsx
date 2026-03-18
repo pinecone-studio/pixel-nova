@@ -41,7 +41,7 @@ export function HrShell({ children }: { children: React.ReactNode }) {
   const unreadCount = notifications.filter((n) => n.status === "unread").length;
 
   return (
-    <div className="h-screen overflow-hidden bg-slate-50">
+    <div className="hr-scope h-screen overflow-hidden bg-slate-50">
       <div className="flex h-full overflow-hidden">
         <aside className="scrollbar-hidden group sticky top-0 h-screen overflow-y-auto overflow-x-hidden w-17 hover:w-60 transition-[width] duration-300 border-r border-slate-200 bg-white flex flex-col py-4 px-2 shrink-0">
           <div className="mb-8 flex items-center gap-3 px-2">

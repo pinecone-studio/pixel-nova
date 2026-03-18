@@ -193,6 +193,35 @@
   animation: fade-up 0.28s ease-out both;
 }
 
+.hr-scope button {
+  cursor: pointer;
+}
+
+.hr-scope button:disabled {
+  cursor: not-allowed;
+}
+
+.hr-scope input:disabled,
+.hr-scope select:disabled,
+.hr-scope textarea:disabled {
+  cursor: not-allowed;
+}
+
+@keyframes tab-swap {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.tab-swap {
+  animation: tab-swap 0.26s ease-out both;
+}
+
 @keyframes hr-page-enter {
   0% {
     opacity: 0;
@@ -222,6 +251,9 @@
 
 @media (prefers-reduced-motion: reduce) {
   .hr-page-transition {
+    animation: none;
+  }
+  .tab-swap {
     animation: none;
   }
 }
