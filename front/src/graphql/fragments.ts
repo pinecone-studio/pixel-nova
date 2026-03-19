@@ -80,6 +80,8 @@ export const AUDIT_LOG_FIELDS = gql`
     notificationAttempted
     recipientsNotified
     notificationError
+    employeeSigned
+    employeeSignedAt
     timestamp
   }
 `;

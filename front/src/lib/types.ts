@@ -80,6 +80,8 @@ export interface AuditLog {
   notificationAttempted: boolean;
   recipientsNotified: boolean;
   notificationError?: string | null;
+  employeeSigned?: boolean;
+  employeeSignedAt?: string | null;
   timestamp: string;
 }
 

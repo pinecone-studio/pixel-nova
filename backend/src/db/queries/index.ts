@@ -23,6 +23,7 @@ export {
   insertAuditLog,
   normalizeAuditLog,
   updateAuditLogDelivery,
+  updateAuditLogSignature,
 } from "./auditLog";
 export {
   normalizeActionConfig,
