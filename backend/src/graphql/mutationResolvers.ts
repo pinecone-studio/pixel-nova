@@ -2,10 +2,12 @@ import {
   createEmployeeCodeSession,
   deleteSessionByToken,
   ensureDefaultActionConfigs,
+  getAuditLogById,
   getEmployeeById,
   getEmployeeSignatureByEmployeeId,
   getContractRequestById,
   getLeaveRequestById,
+  getDocuments,
   insertDocument,
   insertContractRequest,
   insertLeaveRequest,
@@ -16,6 +18,7 @@ import {
   publishAnnouncement as publishAnnouncementRecord,
   listActionConfigs,
   requestEmployeeOtp,
+  updateAuditLogDelivery,
   updateContractRequestStatus,
   updateLeaveRequestStatus,
   updateEmployeeDocumentProfile,
@@ -31,6 +34,7 @@ import {
   buildEmployeeChangeSet,
   resolveEmployeeLifecycleAction,
 } from "../services/actionResolver";
+import { dispatchNotification } from "../notifications/dispatchNotification";
 import { uploadEmployeeDocumentToR2 } from "../storage/r2";
 import type { GraphQLContext } from "./schema";
 import { executeTriggeredAction } from "./helpers";
@@ -644,5 +648,58 @@ export const mutationResolvers = {
     }
 
     return inserted;
+  },
+
+  retryNotification: async (
+    _: unknown,
+    args: { auditLogId: string },
+    ctx: Ctx,
+  ) => {
+    if (ctx.actor.role !== "hr" && ctx.actor.role !== "admin") {
+      throw new Error("Unauthorized");
+    }
+
+    const entry = await getAuditLogById(ctx.db, args.auditLogId);
+    if (!entry) {
+      throw new Error("Audit log not found");
+    }
+
+    const employee = await getEmployeeById(ctx.db, entry.employeeId);
+    if (!employee) {
+      throw new Error("Employee not found");
+    }
+
+    // Get associated documents
+    const allDocs = await getDocuments(ctx.db, entry.employeeId);
+    const docs = allDocs.filter((d) =>
+      entry.documentIds.includes(d.id),
+    );
+
+    const resendApiKey =
+      (ctx.env as CloudflareBindings & { RESEND_API_KEY?: string })
+        .RESEND_API_KEY ?? "";
+    const documentLinkSecret =
+      (ctx.env as CloudflareBindings & { DOCUMENT_LINK_SECRET?: string })
+        .DOCUMENT_LINK_SECRET ?? "";
+
+    const result = await dispatchNotification({
+      db: ctx.db,
+      employee,
+      documents: docs,
+      action: entry.action,
+      apiKey: resendApiKey,
+      publicOrigin: ctx.publicOrigin,
+      documentLinkSecret,
+    });
+
+    await updateAuditLogDelivery(ctx.db, entry.id, {
+      recipientEmails: result.recipientEmails,
+      notificationAttempted: result.notificationAttempted,
+      recipientsNotified: result.notified,
+      notificationError: result.error ?? null,
+    });
+
+    const updated = await getAuditLogById(ctx.db, entry.id);
+    return updated ?? entry;
   },
 };

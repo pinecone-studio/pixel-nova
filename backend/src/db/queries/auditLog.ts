@@ -60,6 +60,16 @@ export async function getAuditLogs(
   return rows.map(normalizeAuditLog);
 }
 
+export async function getAuditLogById(db: DbClient, auditId: string) {
+  const [row] = await db
+    .select()
+    .from(auditLog)
+    .where(eq(auditLog.id, auditId))
+    .limit(1);
+
+  return row ? normalizeAuditLog(row) : null;
+}
+
 export async function insertAuditLog(
   db: DbClient,
   entry: typeof auditLog.$inferInsert,
