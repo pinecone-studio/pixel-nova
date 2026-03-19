@@ -12,8 +12,7 @@ import {
   GET_EMPLOYEES,
 } from "@/graphql/queries";
 import type { Document, DocumentContent, Employee } from "@/lib/types";
-import { buildDocumentTree, getUrlTtlStatus, getUrlRemainingDays, urlTtlLabel } from "@/lib/documentTree";
-import { DocumentTreeView } from "@/components/hr/documents/DocumentTreeView";
+import { getUrlTtlStatus, getUrlRemainingDays, urlTtlLabel } from "@/lib/documentTree";
 import {
   ActiveIcon,
   CalIcon,
@@ -24,7 +23,6 @@ import {
   ReqIcon,
 } from "./icons";
 import { CiWarning } from "react-icons/ci";
-import { FiList, FiFolder } from "react-icons/fi";
 import { useHrOverlay } from "./hr/overlay-context";
 
 // ── Types ──────────────────────────────────────────────
@@ -479,7 +477,6 @@ export function FilesComponent() {
   const [showModal, setShowModal] = useState(false);
   const [previewRow, setPreviewRow] = useState<FileRow | null>(null);
   const [downloadRow, setDownloadRow] = useState<FileRow | null>(null);
-  const [viewMode, setViewMode] = useState<"flat" | "tree">("tree");
   const { setBlurred } = useHrOverlay();
 
   useEffect(() => {
@@ -583,7 +580,6 @@ export function FilesComponent() {
       ? 0
       : Math.round((verifiedCount / filtered.length) * 100);
 
-  const documentTree = useMemo(() => buildDocumentTree(rows), [rows]);
 
   const stages = [
     {
@@ -702,31 +698,7 @@ export function FilesComponent() {
       </div>
 
       <div className="flex min-w-0 flex-1 flex-col xl:overflow-hidden">
-        {/* View mode toggle */}
-        <div className="mb-4 flex items-center justify-between">
-          <div className="flex items-center gap-1 rounded-[12px] border border-black/12 bg-white p-1">
-            <button
-              onClick={() => setViewMode("tree")}
-              className={`flex items-center gap-1.5 rounded-[8px] px-3 py-1.5 text-[13px] font-medium transition-colors ${
-                viewMode === "tree"
-                  ? "bg-[#121316] text-white"
-                  : "text-[#3f4145] hover:bg-[#f5f5f5]"
-              }`}>
-              <FiFolder className="h-3.5 w-3.5" />
-              Хавтас
-            </button>
-            <button
-              onClick={() => setViewMode("flat")}
-              className={`flex items-center gap-1.5 rounded-[8px] px-3 py-1.5 text-[13px] font-medium transition-colors ${
-                viewMode === "flat"
-                  ? "bg-[#121316] text-white"
-                  : "text-[#3f4145] hover:bg-[#f5f5f5]"
-              }`}>
-              <FiList className="h-3.5 w-3.5" />
-              Жагсаалт
-            </button>
-          </div>
-
+        <div className="mb-4 flex items-center justify-end">
           <button
             onClick={() => setShowModal(true)}
             className="flex items-center gap-2 rounded-[10px] bg-[#121316] px-4 py-2.5 text-[14px] font-medium text-white transition-colors hover:bg-[#1f2126]">
@@ -736,23 +708,7 @@ export function FilesComponent() {
         </div>
 
         {/* Tree view */}
-        {viewMode === "tree" ? (
-          <div className="xl:min-h-0 xl:flex-1 xl:overflow-y-auto xl:pr-1">
-            <DocumentTreeView
-              tree={documentTree}
-              onPreview={(doc, emp) =>
-                setPreviewRow({ document: doc, employee: emp })
-              }
-              onDownload={(doc, emp) =>
-                setDownloadRow({ document: doc, employee: emp })
-              }
-              loading={isLoading}
-              error={error}
-            />
-          </div>
-        ) : (
-          /* Flat list view (existing) */
-          <div className="flex flex-col overflow-hidden rounded-[24px] border border-black/12 bg-white xl:min-h-0 xl:flex-1">
+        <div className="flex flex-col overflow-hidden rounded-[24px] border border-black/12 bg-white xl:min-h-0 xl:flex-1">
             <div
               className="grid shrink-0 items-center border-b border-black/12 px-3 py-3 text-[14px] text-[#3f4145b3] md:px-5"
               style={{
@@ -841,7 +797,6 @@ export function FilesComponent() {
               )}
             </div>
           </div>
-        )}
       </div>
     </div>
   );

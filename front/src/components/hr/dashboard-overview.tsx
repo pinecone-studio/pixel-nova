@@ -1,15 +1,16 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { useMutation } from "@apollo/client/react";
+import { useMutation, useQuery } from "@apollo/client/react";
 import { createPortal } from "react-dom";
 
 import { ArrowUpRightIcon, UsersIcon } from "@/components/icons";
-import type { LeaveRequest } from "@/lib/types";
+import type { ContractRequest, LeaveRequest } from "@/lib/types";
 import {
   APPROVE_LEAVE_REQUEST,
   REJECT_LEAVE_REQUEST,
 } from "@/graphql/mutations";
+import { GET_CONTRACT_REQUESTS } from "@/graphql/queries/contract-requests";
 import { buildGraphQLHeaders } from "@/lib/apollo-client";
 import { useHrOverlay } from "./overlay-context";
 
@@ -37,6 +38,23 @@ export function HrDashboardOverview({
   const [localRequests, setLocalRequests] =
     useState<LeaveRequest[]>(pendingRequests);
   const { setBlurred } = useHrOverlay();
+
+  const { data: contractData } = useQuery<{
+    contractRequests: ContractRequest[];
+  }>(GET_CONTRACT_REQUESTS, {
+    context: { headers: buildGraphQLHeaders({ actorRole: "hr" }) },
+  });
+
+  const contractCounts = useMemo(() => {
+    const rows = contractData?.contractRequests ?? [];
+    let urgent = 0;
+    let success = 0;
+    for (const row of rows) {
+      if (row.status === "pending") urgent += 1;
+      if (row.status === "approved") success += 1;
+    }
+    return { urgent, success };
+  }, [contractData]);
   const overviewCards = [
     {
       title: "PROMOTE EMPLOYEE",
@@ -154,11 +172,13 @@ export function HrDashboardOverview({
             ))}
           </div>
         </div>
+
         <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
           {overviewCards.map((card) => (
             <div
               key={card.title}
-              className="flex min-h-[136px] flex-col items-start rounded-[16px] border border-black/12 bg-white p-[25px] text-left">
+              className="flex min-h-[136px] flex-col items-start rounded-[16px] border border-black/12 bg-white p-[25px] text-left"
+            >
               <div className="flex w-full items-start justify-between gap-3">
                 <p className="text-[16px] font-bold leading-5 tracking-[-0.096px] text-[#3f4145]">
                   {card.title}
@@ -170,13 +190,14 @@ export function HrDashboardOverview({
               </div>
 
               <div className="mt-3 flex flex-col gap-2">
-                <p className="text-[14px] font-semibold leading-5 tracking-[-0.084px] text-[#77818c]">
+                <p className="text-[14px] font-medium leading-5 tracking-[-0.084px] text-[#77818c]">
                   {card.description}
                 </p>
                 {card.items.map((item) => (
                   <div
                     key={item}
-                    className="flex items-center gap-2 text-[14px] leading-4 text-[#3f414599]">
+                    className="flex items-center gap-2 text-[14px] leading-4 text-[#3f414599]"
+                  >
                     <FiPaperclip className="h-[14px] w-[14px] shrink-0" />
                     <span>{item}</span>
                   </div>
@@ -224,7 +245,8 @@ export function HrDashboardOverview({
                   setSelected(req);
                   setNote(req.note ?? "");
                 }}
-                className="w-full text-left flex items-center gap-3 px-6 py-4 hover:bg-slate-50 transition-colors cursor-pointer">
+                className="w-full text-left flex items-center gap-3 px-6 py-4 hover:bg-slate-50 transition-colors cursor-pointer"
+              >
                 <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-600 text-white text-sm font-semibold">
                   {req.employee.firstName?.[0] ?? "А"}
                 </div>
@@ -236,9 +258,15 @@ export function HrDashboardOverview({
                     {req.type ?? "Хүсэлт"}
                   </p>
                 </div>
-                <p className="text-xs text-slate-400">
-                  {formatRelativeTime(req.createdAt)}
-                </p>
+                <div className="ml-6 flex items-center gap-3">
+                  <span className="rounded-full border border-red-200 bg-red-50 px-3 py-1 text-xs font-semibold text-red-500">
+                    Яаралтай
+                  </span>
+
+                  <p className="text-xs text-slate-400">
+                    {formatRelativeTime(req.createdAt)}
+                  </p>
+                </div>
               </button>
             ),
           )}
@@ -283,7 +311,8 @@ export function HrDashboardOverview({
                     <button
                       type="button"
                       onClick={() => setSelected(null)}
-                      className="text-slate-400 hover:text-slate-700 transition-colors text-xl leading-none">
+                      className="text-slate-400 hover:text-slate-700 transition-colors text-xl leading-none"
+                    >
                       ✕
                     </button>
                   </div>
@@ -338,14 +367,16 @@ export function HrDashboardOverview({
                     type="button"
                     onClick={handleReject}
                     disabled={acting}
-                    className="flex items-center gap-2 px-5 py-2.5 rounded-xl border border-red-200 text-red-500 text-sm font-medium hover:bg-red-50 disabled:opacity-50 transition-colors">
+                    className="flex items-center gap-2 px-5 py-2.5 rounded-xl border border-red-200 text-red-500 text-sm font-medium hover:bg-red-50 disabled:opacity-50 transition-colors"
+                  >
                     <span>✕</span> Татгалзах
                   </button>
                   <button
                     type="button"
                     onClick={handleApprove}
                     disabled={acting}
-                    className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-slate-900 text-white text-sm font-medium hover:bg-slate-800 disabled:opacity-50 transition-colors">
+                    className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-slate-900 text-white text-sm font-medium hover:bg-slate-800 disabled:opacity-50 transition-colors"
+                  >
                     <span>✓</span> {acting ? "Түр хүлээнэ үү..." : "Батлах"}
                   </button>
                 </div>
