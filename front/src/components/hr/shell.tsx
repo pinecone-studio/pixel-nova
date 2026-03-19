@@ -8,13 +8,12 @@ import { FiSearch } from "react-icons/fi";
 
 import { EmployeeNotifDrawer } from "@/components/employee-notif/EmployeeNotifDrawer";
 import { EpasLogo, NotifIcon } from "@/components/icons";
-import { GET_CONTRACT_REQUESTS } from "@/graphql/queries";
+import { GET_HR_NOTIFICATIONS } from "@/graphql/queries";
 import { buildGraphQLHeaders } from "@/lib/apollo-client";
-import type { ContractRequest, EmployeeNotification } from "@/lib/types";
+import type { HrNotification } from "@/lib/types";
 
 import { getHrAuthSnapshot, subscribeHrAuth } from "./auth";
 import { getActiveHrNavItem, HR_NAV_ITEMS } from "./navigation";
-import { mapContractRequestToEmployeeNotification } from "./notif/hrNotifUtils";
 import { HrOverlayProvider, useHrOverlay } from "./overlay-context";
 
 function HrShellInner({ children }: { children: React.ReactNode }) {
@@ -28,43 +27,35 @@ function HrShellInner({ children }: { children: React.ReactNode }) {
   const activeItem = getActiveHrNavItem(pathname);
   const [notifOpen, setNotifOpen] = useState(false);
   const [selectedNotifId, setSelectedNotifId] = useState<string | null>(null);
-  const [readIds, setReadIds] = useState<string[]>([]);
 
-  const { data: contractData, loading: notificationsLoading } = useQuery<{
-    contractRequests: ContractRequest[];
-  }>(GET_CONTRACT_REQUESTS, {
+  const { data: hrNotificationData, loading: notificationsLoading } = useQuery<{
+    hrNotifications: HrNotification[];
+  }>(GET_HR_NOTIFICATIONS, {
     skip: !authenticated,
     context: {
       headers: buildGraphQLHeaders({ actorRole: "hr" }),
     },
     fetchPolicy: "network-only",
+    pollInterval: 30000,
   });
 
   const notifications = useMemo(() => {
-    return (contractData?.contractRequests ?? [])
-      .map(mapContractRequestToEmployeeNotification)
+    return (hrNotificationData?.hrNotifications ?? [])
+      .map((notification) => ({
+        id: notification.id,
+        employeeId: notification.sourceType,
+        title: notification.title,
+        body: notification.body,
+        status: notification.status,
+        createdAt: notification.createdAt,
+        readAt: notification.status === "read" ? notification.createdAt : null,
+      }))
       .sort(
         (a, b) =>
           new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
       );
-  }, [contractData]);
-
-  const displayNotifications = useMemo(() => {
-    if (readIds.length === 0) return notifications;
-    const readSet = new Set(readIds);
-    return notifications.map<EmployeeNotification>((n) => {
-      if (!readSet.has(n.id)) return n;
-      return {
-        ...n,
-        status: "read",
-        readAt: n.readAt ?? new Date().toISOString(),
-      };
-    });
-  }, [notifications, readIds]);
-
-  const unreadCount = displayNotifications.filter(
-    (n) => n.status === "unread",
-  ).length;
+  }, [hrNotificationData]);
+  const unreadCount = notifications.filter((n) => n.status === "unread").length;
 
   if (!authenticated) {
     return null;
@@ -172,13 +163,9 @@ function HrShellInner({ children }: { children: React.ReactNode }) {
       <EmployeeNotifDrawer
         open={notifOpen}
         loading={notificationsLoading}
-        notifications={displayNotifications}
+        notifications={notifications}
         selectedId={selectedNotifId}
         unreadCount={unreadCount}
-        onMarkAllRead={() => {
-          if (notifications.length === 0) return;
-          setReadIds(notifications.map((n) => n.id));
-        }}
         theme="light"
         onOpenChange={(nextOpen) => {
           setNotifOpen(nextOpen);
@@ -187,13 +174,6 @@ function HrShellInner({ children }: { children: React.ReactNode }) {
           }
         }}
         onSelect={(notification) => {
-          if (notification.status === "unread") {
-            setReadIds((prev) =>
-              prev.includes(notification.id)
-                ? prev
-                : [...prev, notification.id],
-            );
-          }
           setSelectedNotifId((current) =>
             current === notification.id ? null : notification.id,
           );

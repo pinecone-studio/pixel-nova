@@ -45,7 +45,7 @@ export const HR_NAV_ITEMS: HrNavItem[] = [
   },
   {
     key: "documents",
-    label: "Баримтууд",
+    label: "Нийт баримт бичиг",
     href: "/hr/documents",
     icon: <CubaIcon />,
   },

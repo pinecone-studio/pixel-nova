@@ -16,7 +16,7 @@ function PreviewState({
       style={{
         width: "100%",
         height: "100%",
-        borderRadius: 24,
+        borderRadius: 20,
         border,
         background,
         display: "flex",
@@ -46,7 +46,7 @@ function PreviewFrame({
       style={{
         width: "100%",
         height: "100%",
-        borderRadius: 24,
+        borderRadius: 20,
         border: "none",
         background: "#fff",
       }}
@@ -70,13 +70,7 @@ export function FilesPreviewContent({
   error: string | null;
 }) {
   return (
-    <div
-      style={{
-        height: "calc(100% - 85px)",
-        background: "#FFFFFF",
-        padding: "24px 28px 28px",
-      }}
-    >
+    <div className="flex-1 overflow-hidden bg-white p-6">
       {loading ? (
         <PreviewState
           border="1px solid #E5E7EB"
@@ -98,9 +92,9 @@ export function FilesPreviewContent({
           style={{
             width: "100%",
             height: "100%",
-            borderRadius: 24,
+            borderRadius: 20,
             background: "#E5E7EB",
-            padding: 28,
+            padding: 24,
             boxShadow: "inset 0 1px 2px rgba(255,255,255,0.8)",
           }}
         >
@@ -111,9 +105,9 @@ export function FilesPreviewContent({
           style={{
             width: "100%",
             height: "100%",
-            borderRadius: 24,
+            borderRadius: 20,
             background: "#E5E7EB",
-            padding: 28,
+            padding: 24,
             boxShadow: "inset 0 1px 2px rgba(255,255,255,0.8)",
           }}
         >

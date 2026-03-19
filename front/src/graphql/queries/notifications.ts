@@ -13,3 +13,16 @@ export const GET_MY_NOTIFICATIONS = gql`
     }
   }
 `;
+
+export const GET_HR_NOTIFICATIONS = gql`
+  query GetHrNotifications {
+    hrNotifications {
+      id
+      title
+      body
+      status
+      createdAt
+      sourceType
+    }
+  }
+`;

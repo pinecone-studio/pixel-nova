@@ -16,7 +16,7 @@ export {
   updateEmployeeDocumentProfile,
   upsertEmployeeRecord,
 } from "./employee";
-export { getDocuments, getDocumentById, insertDocument } from "./document";
+export { getDocuments, getDocumentById, insertDocument, deleteDocument } from "./document";
 export {
   getAuditLogById,
   getAuditLogs,

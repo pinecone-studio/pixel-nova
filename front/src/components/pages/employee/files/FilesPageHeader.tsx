@@ -9,7 +9,6 @@ export function FilesPageHeader({
         display: "flex",
         flexDirection: "column",
         gap: 8,
-        marginBottom: 32,
       }}
     >
       <p
@@ -34,7 +33,7 @@ export function FilesPageHeader({
         }}
       >
         {employeeName
-          ? `${employeeName} ажилтны баримтууд.`
+          ? `Таны бүх хөдөлмөрийн баримт бичгүүдийг энд харах болон татаж авах боломжтой.`
           : "Таны бүх хөдөлмөрийн баримт бичгийг эндээс харах болон татах боломжтой."}
       </p>
     </div>

@@ -241,6 +241,15 @@ export const typeDefs = /* GraphQL */ `
     readCount: Int!
   }
 
+  type HrNotification {
+    id: ID!
+    title: String!
+    body: String!
+    status: String!
+    createdAt: String!
+    sourceType: String!
+  }
+
   type ProcessedEvent {
     eventId: ID!
     eventType: String!
@@ -269,6 +278,7 @@ export const typeDefs = /* GraphQL */ `
     employerSignatureStatus: EmployerSignatureStatus!
     myNotifications: [EmployeeNotification!]!
     announcements: [Announcement!]!
+    hrNotifications: [HrNotification!]!
     processedEvents(employeeId: ID, status: String): [ProcessedEvent!]!
   }
 
@@ -307,6 +317,7 @@ export const typeDefs = /* GraphQL */ `
     updateAnnouncementDraft(id: ID!, title: String!, body: String!, audience: String): Announcement!
     publishAnnouncement(id: ID!): Announcement!
     uploadHrDocument(input: UploadHrDocumentInput!): Document!
+    deleteDocument(id: ID!): Document
     retryNotification(auditLogId: ID!): AuditLog!
     signAuditLog(
       auditLogId: ID!

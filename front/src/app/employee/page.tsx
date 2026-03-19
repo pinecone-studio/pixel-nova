@@ -133,10 +133,10 @@ export default function EmployeePage() {
                 <Planeicon />
               </div>
               <div className="flex h-10 flex-col justify-between">
-                <span className="h-[20px] w-fit text-[16px] font-semibold text-[#111827]">
+                <span className="text-[16px] min-w-[200px] h-[20px] font-semibold text-[#111827]">
                   {displayName}
                 </span>
-                <span className="h-[16px] w-[64px] text-[14px] text-[#6B7280]">
+                <span className="text-[14px] text-[#6B7280] w-[64px] h-[16px]">
                   Томилолт
                 </span>
               </div>
@@ -153,8 +153,8 @@ export default function EmployeePage() {
               <h2 className="h-8 w-[246px] text-[20px] font-semibold tracking-[-0.02em] text-[#111827]">
                 Баримт бичиг шинэчлэлт
               </h2>
-              <span className="h-[24px] w-[89px] rounded-full border border-[#E5E7EB] bg-white px-3 py-1 text-[12px] font-medium text-[#6B7280] flex justify-center items-center">
-                {documents.length} баримт
+              <span className="rounded-full border min-w-[79px] h-[24px] border-[#E5E7EB] bg-white px-3 py-1 text-[12px] font-medium text-[#6B7280]">
+                {Math.min(documents.length)} баримт
               </span>
             </div>
             <Link
