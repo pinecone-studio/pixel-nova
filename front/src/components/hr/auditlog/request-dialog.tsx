@@ -118,6 +118,7 @@ export function AddEmployeeRequestDialog({
   const [terminationDate, setTerminationDate] = useState("");
   const [contractNo, setContractNo] = useState("");
   const [terminationReason, setTerminationReason] = useState("");
+  const [newEmployeeStep, setNewEmployeeStep] = useState<1 | 2>(1);
   const [previewSignatureOpen, setPreviewSignatureOpen] = useState(false);
   const [previewSignatureData, setPreviewSignatureData] = useState("");
   const previewSignatureCanvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -144,13 +145,13 @@ export function AddEmployeeRequestDialog({
   const documents = action?.documents ?? [];
   const actionKey = action?.name?.toLowerCase() ?? "";
   const actionLabelMap: Record<string, string> = {
-    add_employee: "ADD EMPLOYEE",
-    change_position: "CHANGE POSITION",
-    promote_employee: "PROMOTE EMPLOYEE",
-    offboard_employee: "OFFBOARD EMPLOYEE",
+    add_employee: "Шинэ ажилтан",
+    change_position: "Албан тушаал өөрчлөх",
+    promote_employee: "Цалин нэмэх",
+    offboard_employee: "Ажлаас чөлөөлөх",
   };
   const actionLabel =
-    actionLabelMap[actionKey] ?? action?.name ?? "ADD EMPLOYEE";
+    actionLabelMap[actionKey] ?? action?.name ?? "Шинэ ажилтан";
   const useAddEmployeeLayout = actionKey === "add_employee";
   const useChangePositionLayout = actionKey === "change_position";
   const useSalaryChangeLayout = actionKey === "promote_employee";
@@ -165,6 +166,14 @@ export function AddEmployeeRequestDialog({
 
   const removeRecipient = (recipient: string) => {
     setRecipients((prev) => prev.filter((v) => v !== recipient));
+  };
+
+  const handleDemoFill = () => {
+    setErrors({});
+    setTab("employee");
+    setSalaryStep("person");
+    setNewEmployeeStep(1);
+    setEmployeeCode("EMP-0001");
   };
 
   const searchKey = employeeCode.trim();
@@ -209,34 +218,16 @@ export function AddEmployeeRequestDialog({
   }, [open, previewOpen, setBlurred]);
 
   useEffect(() => {
-    const normalizedCode = employeeCode.replace(/\s+/g, "").toUpperCase();
-    if (normalizedCode === "EMP-0001" || normalizedCode === "EMP0001") {
-      setLastName("Дорж");
-      setFirstName("Эрдэнэ");
-      setEmail("dorj.erde@company.com");
-      setChangeEmail("bsunduibazrr8@gmail.com");
-      setRegisterNo("УХ04272036");
-      setPhone("99999999");
-      setBranch("Гурван гол");
-      setDept("Engineering");
-      setJobTitle("Senior Engineer");
-      setCurrentDept("Engineering");
-      setCurrentPosition("Senior Engineer");
-      setNextDept("Engineering");
-      setNextPosition("Lead Engineer");
-      setChangeReason("Гүйцэтгэлийн үнэлгээ");
-      setHireDate("2022-06-15");
-      setTerminationDate("2026-03-20");
-      setWorkStartDate("2024-02-01");
-      setWorkTotalDuration("2 жил 1 сар");
-      setPrevSalary("3500000");
-      setNextSalary("4200000");
-      setSalaryDelta("700000");
-      setContractNo("2345678987");
-      setTerminationReason("Ажилтны өөрийн хүсэлтээр");
+    if (!open) {
+      setNewEmployeeStep(1);
       return;
     }
+    if (action?.name?.trim() === "add_employee") {
+      setNewEmployeeStep(1);
+    }
+  }, [open, action?.name]);
 
+  useEffect(() => {
     if (!matchedEmployee) return;
     setLastName(matchedEmployee.lastName ?? "");
     setFirstName(matchedEmployee.firstName ?? "");
@@ -693,6 +684,15 @@ export function AddEmployeeRequestDialog({
             {actionLabel}
           </DialogTitle>
         </DialogHeader>
+        <div className="flex items-center justify-end">
+          <button
+            type="button"
+            onClick={handleDemoFill}
+            className="rounded-[10px] border border-black/12 px-3 py-1.5 text-[12px] font-medium text-[#3f4145] transition-colors hover:bg-[#f5f5f5]"
+          >
+            Demo бөглөх (EMP-0001)
+          </button>
+        </div>
 
         {/* ── ҮНДСЭН ЦАЛИН ӨӨРЧЛӨХ (2 алхам) ── */}
         {useSalaryChangeLayout ? (
@@ -788,6 +788,8 @@ export function AddEmployeeRequestDialog({
           />
         ) : useAddEmployeeLayout ? (
           <NewEmployeeForm
+            step={newEmployeeStep}
+            setStep={setNewEmployeeStep}
             tab={tab}
             setTab={setTab}
             companyAddress={companyAddress}
@@ -843,11 +845,18 @@ export function AddEmployeeRequestDialog({
         <div className="flex flex-nowrap items-center gap-[20px] justify-end shrink-0">
           <button
             onClick={() => onOpenChange(false)}
-            className="border border-slate-200 px-[20px] py-[10px] rounded-[12px] text-slate-500 text-[16px] hover:bg-slate-50 transition-colors cursor-pointer whitespace-nowrap"
+            className=" px-[20px] py-[10px] rounded-[12px] text-[#FF2B2B] text-[16px] hover:bg-slate-50 transition-colors cursor-pointer whitespace-nowrap border border-[#FF2B2B]"
           >
             Болих
           </button>
-          {useSalaryChangeLayout && salaryStep === "person" ? (
+          {useAddEmployeeLayout && newEmployeeStep === 1 ? (
+            <button
+              onClick={() => setNewEmployeeStep(2)}
+              className="bg-slate-900 px-[20px] py-[10px] rounded-[12px] text-white text-[16px] hover:bg-slate-800 transition-colors cursor-pointer whitespace-nowrap "
+            >
+              Цааш
+            </button>
+          ) : useSalaryChangeLayout && salaryStep === "person" ? (
             <button
               onClick={() => setSalaryStep("salary")}
               className="bg-slate-900 px-[20px] py-[10px] rounded-[12px] text-white text-[16px] hover:bg-slate-800 transition-colors cursor-pointer whitespace-nowrap"

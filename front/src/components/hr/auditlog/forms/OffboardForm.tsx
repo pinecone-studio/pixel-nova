@@ -60,7 +60,9 @@ export function OffboardForm({
   DocumentsSection,
 }: OffboardFormProps) {
   const getInputClass = (key: keyof typeof errors) =>
-    errors[key] ? `${inputClass} border-red-300 focus:border-red-400` : inputClass;
+    errors[key]
+      ? `${inputClass} border-red-300 focus:border-red-400`
+      : inputClass;
   const fillMock = () => {
     setEmployeeCode("EMP0003");
     setLastName("Дорж");
@@ -76,15 +78,6 @@ export function OffboardForm({
 
   return (
     <div className="flex min-w-0 flex-col gap-[16px]">
-      <div className="flex items-center justify-end">
-        <button
-          type="button"
-          onClick={fillMock}
-          className="rounded-[10px] border border-black/12 px-3 py-1.5 text-[12px] font-medium text-[#3f4145] transition-colors hover:bg-[#f5f5f5]"
-        >
-          Demo бөглөх
-        </button>
-      </div>
       <div className="flex min-w-0 flex-col gap-[8px]">
         <label className={labelClass}>Ажилтны код</label>
         <input
@@ -148,14 +141,14 @@ export function OffboardForm({
 
       <div className="flex min-w-0 flex-col gap-[8px]">
         <label className={labelClass}>Албан тушаал</label>
-      <input
-        value={jobTitle}
-        onChange={(e) => setJobTitle(e.target.value)}
-        placeholder="Junior Engineer"
-        className={getInputClass("jobTitle")}
-      />
-      <FieldError message={errors.jobTitle} />
-    </div>
+        <input
+          value={jobTitle}
+          onChange={(e) => setJobTitle(e.target.value)}
+          placeholder="Junior Engineer"
+          className={getInputClass("jobTitle")}
+        />
+        <FieldError message={errors.jobTitle} />
+      </div>
 
       <div className="grid min-w-0 grid-cols-2 gap-[16px]">
         <div className="flex min-w-0 flex-col gap-[8px]">
@@ -180,22 +173,22 @@ export function OffboardForm({
 
       <div className="flex min-w-0 flex-col gap-[8px]">
         <label className={labelClass}>Хөдөлмөрийн гэрээний дугаар</label>
-      <input
-        value={contractNo}
-        onChange={(e) => setContractNo(e.target.value)}
-        placeholder="2345678987"
-        className={getInputClass("contractNo")}
-      />
-      <FieldError message={errors.contractNo} />
-    </div>
+        <input
+          value={contractNo}
+          onChange={(e) => setContractNo(e.target.value)}
+          placeholder="2345678987"
+          className={getInputClass("contractNo")}
+        />
+        <FieldError message={errors.contractNo} />
+      </div>
 
       <div className="flex min-w-0 flex-col gap-[8px]">
         <label className={labelClass}>Чөлөөлөх үндэслэл</label>
-      <select
-        value={terminationReason}
-        onChange={(e) => setTerminationReason(e.target.value)}
-        className={getInputClass("terminationReason")}
-      >
+        <select
+          value={terminationReason}
+          onChange={(e) => setTerminationReason(e.target.value)}
+          className={getInputClass("terminationReason")}
+        >
           <option value="">Сонгох</option>
           <option value="Ажилтны өөрийн хүсэлтээр">
             Ажилтны өөрийн хүсэлтээр
