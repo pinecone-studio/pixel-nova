@@ -51,6 +51,8 @@ export const typeDefs = /* GraphQL */ `
     notificationAttempted: Boolean!
     recipientsNotified: Boolean!
     notificationError: String
+    employeeSigned: Boolean!
+    employeeSignedAt: String
     timestamp: String!
   }
 
@@ -299,5 +301,11 @@ export const typeDefs = /* GraphQL */ `
     publishAnnouncement(id: ID!): Announcement!
     uploadHrDocument(input: UploadHrDocumentInput!): Document!
     retryNotification(auditLogId: ID!): AuditLog!
+    signAuditLog(
+      auditLogId: ID!
+      signatureMode: String
+      signatureData: String
+      passcode: String
+    ): AuditLog!
   }
 `;
