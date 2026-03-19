@@ -21,8 +21,18 @@ export const DELETE_DOCUMENT = gql`
 `;
 
 export const SIGN_DOCUMENT = gql`
-  mutation SignDocument($documentId: ID!, $signatureData: String!) {
-    signDocument(documentId: $documentId, signatureData: $signatureData) {
+  mutation SignDocument(
+    $documentId: ID!
+    $signatureMode: String
+    $signatureData: String
+    $passcode: String
+  ) {
+    signDocument(
+      documentId: $documentId
+      signatureMode: $signatureMode
+      signatureData: $signatureData
+      passcode: $passcode
+    ) {
       document {
         ...DocumentFields
       }

@@ -70,3 +70,13 @@ export const SAVE_EMPLOYER_SIGNATURE = gql`
     }
   }
 `;
+
+export const DELETE_EMPLOYER_SIGNATURE = gql`
+  mutation DeleteEmployerSignature {
+    deleteEmployerSignature {
+      hasSignature
+      hasPasscode
+      updatedAt
+    }
+  }
+`;

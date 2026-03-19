@@ -10,6 +10,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { GET_EMPLOYER_SIGNATURE_STATUS } from "@/graphql/queries/contract-requests";
 import { GET_CONTRACT_TEMPLATE, GET_EMPLOYEES } from "@/graphql/queries";
 import { TRIGGER_ACTION } from "@/graphql/mutations";
 import { SIGN_DOCUMENT } from "@/graphql/mutations/documents";
@@ -118,17 +119,18 @@ export function AddEmployeeRequestDialog({
   const [contractNo, setContractNo] = useState("");
   const [terminationReason, setTerminationReason] = useState("");
   const [newEmployeeStep, setNewEmployeeStep] = useState<1 | 2>(1);
-  const [previewSignatureOpen, setPreviewSignatureOpen] = useState(false);
-  const [previewSignatureData, setPreviewSignatureData] = useState("");
-  const previewSignatureCanvasRef = useRef<HTMLCanvasElement | null>(null);
-  const previewSignatureContainerRef = useRef<HTMLDivElement | null>(null);
-  const previewSignatureDrawingRef = useRef(false);
   const previewFrameRef = useRef<HTMLIFrameElement | null>(null);
   const [previewFrameHeight, setPreviewFrameHeight] = useState(1200);
   const [signedDocIds, setSignedDocIds] = useState<Set<string>>(
     () => new Set(),
   );
   const [signatureNotice, setSignatureNotice] = useState<string | null>(null);
+  const [signatureModalOpen, setSignatureModalOpen] = useState(false);
+  const [signaturePasscode, setSignaturePasscode] = useState("");
+  const [signatureModalError, setSignatureModalError] = useState<string | null>(
+    null,
+  );
+  const [useSignaturePasscode, setUseSignaturePasscode] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [currentDept, setCurrentDept] = useState("Engineering");
   const [currentPosition, setCurrentPosition] = useState("");
@@ -144,6 +146,10 @@ export function AddEmployeeRequestDialog({
     ActionConfig["documents"][number] | null
   >(null);
   const [previewError, setPreviewError] = useState<string | null>(null);
+  const [previewSignatureOpen] = useState(false);
+  const [previewSignatureData, setPreviewSignatureData] = useState("");
+  const previewSignatureCanvasRef = useRef<HTMLCanvasElement | null>(null);
+  const previewSignatureDrawingRef = useRef(false);
 
   function handleDialogOpenChange(nextOpen: boolean) {
     if (!nextOpen && previewOpen) {
@@ -222,11 +228,14 @@ export function AddEmployeeRequestDialog({
     setChangeEmail("");
     setSignedDocIds(new Set());
     setSignatureNotice(null);
-    setPreviewSignatureData("");
-    setPreviewSignatureOpen(false);
+    setSignatureModalOpen(false);
+    setSignaturePasscode("");
+    setSignatureModalError(null);
+    setUseSignaturePasscode(false);
     setPreviewOpen(false);
     setPreviewDoc(null);
     setPreviewError(null);
+    setPreviewSignatureData("");
   }, [action]);
 
   useEffect(() => {
@@ -272,6 +281,16 @@ export function AddEmployeeRequestDialog({
   }>(SIGN_DOCUMENT, {
     context: { headers: buildGraphQLHeaders({ actorRole: "hr" }) },
   });
+  const { data: employerSignatureStatusData } = useQuery<{
+    employerSignatureStatus: {
+      hasSignature: boolean;
+      hasPasscode: boolean;
+      updatedAt?: string | null;
+    };
+  }>(GET_EMPLOYER_SIGNATURE_STATUS, {
+    context: { headers: buildGraphQLHeaders({ actorRole: "hr" }) },
+    fetchPolicy: "network-only",
+  });
 
   const [loadTemplate, { data: previewData, loading: previewLoading }] =
     useLazyQuery<{ contractTemplate: DocumentContent | null }>(
@@ -295,13 +314,18 @@ export function AddEmployeeRequestDialog({
     }
     return `data:${previewContent.contentType};base64,${previewContent.content}`;
   }, [previewContent]);
+  const employerSignatureStatus =
+    employerSignatureStatusData?.employerSignatureStatus ?? null;
+  const hasSavedEmployerSignature =
+    employerSignatureStatus?.hasSignature ?? false;
+  const savedSignatureHasPasscode =
+    employerSignatureStatus?.hasPasscode ?? false;
 
   useEffect(() => {
-    if (!previewSignatureOpen) return;
+    if (!signatureModalOpen || hasSavedEmployerSignature) return;
     const canvas = previewSignatureCanvasRef.current;
-    const container = previewSignatureContainerRef.current;
-    if (!canvas || !container) return;
-    const rect = container.getBoundingClientRect();
+    if (!canvas) return;
+    const rect = canvas.getBoundingClientRect();
     if (!rect.width || !rect.height) return;
     const ratio = window.devicePixelRatio || 1;
     canvas.width = rect.width * ratio;
@@ -311,57 +335,46 @@ export function AddEmployeeRequestDialog({
     ctx.scale(ratio, ratio);
     ctx.lineWidth = 2;
     ctx.lineCap = "round";
-    ctx.strokeStyle = "#0F172A";
-  }, [previewSignatureOpen]);
-
-  function handlePreviewSignaturePointerDown(
-    event: React.PointerEvent<HTMLCanvasElement>,
-  ) {
-    const canvas = previewSignatureCanvasRef.current;
-    if (!canvas) return;
-    const rect = canvas.getBoundingClientRect();
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
-    ctx.beginPath();
-    ctx.moveTo(event.clientX - rect.left, event.clientY - rect.top);
-    previewSignatureDrawingRef.current = true;
-  }
-
-  function handlePreviewSignaturePointerMove(
-    event: React.PointerEvent<HTMLCanvasElement>,
-  ) {
-    if (!previewSignatureDrawingRef.current) return;
-    const canvas = previewSignatureCanvasRef.current;
-    if (!canvas) return;
-    const rect = canvas.getBoundingClientRect();
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
-    ctx.lineTo(event.clientX - rect.left, event.clientY - rect.top);
-    ctx.stroke();
-  }
-
-  function handlePreviewSignaturePointerUp() {
-    previewSignatureDrawingRef.current = false;
-  }
-
-  function handleClearPreviewSignature() {
-    const canvas = previewSignatureCanvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-  }
+    ctx.strokeStyle = "#0B0E14";
+  }, [signatureModalOpen, hasSavedEmployerSignature]);
 
   async function handleSavePreviewSignature() {
-    const canvas = previewSignatureCanvasRef.current;
-    if (!canvas || !previewDoc) return;
-    const dataUrl = canvas.toDataURL("image/png");
+    if (!previewDoc) return;
+    if (
+      hasSavedEmployerSignature &&
+      savedSignatureHasPasscode &&
+      !/^[0-9]{4}$/.test(signaturePasscode)
+    ) {
+      setSignatureModalError("4 ??????? ????? ????? ??????? ??.");
+      return;
+    }
+    if (!hasSavedEmployerSignature && !previewSignatureData) {
+      setSignatureModalError("????? ????? ????? ??.");
+      return;
+    }
+    if (
+      !hasSavedEmployerSignature &&
+      useSignaturePasscode &&
+      !/^[0-9]{4}$/.test(signaturePasscode)
+    ) {
+      setSignatureModalError("4 ??????? ????? ????? ??????? ??.");
+      return;
+    }
 
     try {
+      setSignatureModalError(null);
       const result = await signDocument({
         variables: {
           documentId: previewDoc.id,
-          signatureData: dataUrl,
+          signatureMode: hasSavedEmployerSignature ? "reuse" : "redraw",
+          signatureData: hasSavedEmployerSignature ? null : previewSignatureData,
+          passcode: hasSavedEmployerSignature
+            ? savedSignatureHasPasscode
+              ? signaturePasscode
+              : null
+            : useSignaturePasscode
+              ? signaturePasscode
+              : null,
         },
       });
 
@@ -370,24 +383,71 @@ export function AddEmployeeRequestDialog({
         ? signedDocIds.size
         : signedDocIds.size + 1;
 
-      setPreviewSignatureData(dataUrl);
       setSignedDocIds((current) => {
         const next = new Set(current);
         next.add(previewDoc.id);
         return next;
       });
+      setSignaturePasscode("");
+      setUseSignaturePasscode(false);
+      setPreviewSignatureData("");
+      setSignatureModalOpen(false);
       setSignatureNotice(
         allSigned
-          ? "Бүх баримт гарын үсэг зурлаа."
-          : `${nextCount} баримт гарын үсэгтэй боллоо.`,
+          ? "??? ?????? ????? ???? ?????????."
+          : `${nextCount} ?????? ????? ??????? ??????.`,
       );
-      setPreviewSignatureOpen(false);
     } catch (err) {
       setSignatureNotice(null);
-      setPreviewError(
-        err instanceof Error ? err.message : "Гарын үсэг хадгалж чадсангүй.",
+      setSignatureModalError(
+        err instanceof Error ? err.message : "????? ???? ??????? ?????????.",
       );
     }
+  }
+
+  function handlePreviewSignaturePointerDown(
+    event: React.PointerEvent<HTMLCanvasElement>,
+  ) {
+    const canvas = previewSignatureCanvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+    const rect = canvas.getBoundingClientRect();
+    previewSignatureDrawingRef.current = true;
+    ctx.beginPath();
+    ctx.moveTo(event.clientX - rect.left, event.clientY - rect.top);
+  }
+
+  function handlePreviewSignaturePointerMove(
+    event: React.PointerEvent<HTMLCanvasElement>,
+  ) {
+    if (!previewSignatureDrawingRef.current) return;
+    const canvas = previewSignatureCanvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+    const rect = canvas.getBoundingClientRect();
+    ctx.lineTo(event.clientX - rect.left, event.clientY - rect.top);
+    ctx.stroke();
+  }
+
+  function handlePreviewSignaturePointerUp() {
+    if (!previewSignatureDrawingRef.current) return;
+    previewSignatureDrawingRef.current = false;
+    const canvas = previewSignatureCanvasRef.current;
+    if (!canvas) return;
+    setPreviewSignatureData(canvas.toDataURL("image/png"));
+  }
+
+  function handleClearPreviewSignature() {
+    const canvas = previewSignatureCanvasRef.current;
+    if (canvas) {
+      const ctx = canvas.getContext("2d");
+      if (ctx) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+      }
+    }
+    setPreviewSignatureData("");
   }
 
   function handlePreviewFrameLoad() {
@@ -412,8 +472,9 @@ export function AddEmployeeRequestDialog({
     setPreviewOpen(true);
     setPreviewDoc(doc);
     setPreviewError(null);
-    setPreviewSignatureOpen(false);
-    setPreviewSignatureData("");
+    setSignatureModalOpen(false);
+    setSignaturePasscode("");
+    setSignatureModalError(null);
     try {
       const result = await loadTemplate({
         variables: { templateId: doc.id },
@@ -454,33 +515,34 @@ export function AddEmployeeRequestDialog({
     };
 
     if (useAddEmployeeLayout) {
-      if (tab === "hr") {
-        requireValue(companyAddress, "companyAddress");
-        requirePattern(
-          companyRegisterNo,
-          "companyRegisterNo",
-          numberOnlyRegex,
-          "Зөвхөн тоо оруулна уу.",
-        );
-        requireValue(companyName, "companyName");
-      } else {
+      requireValue(companyAddress, "companyAddress");
+      requirePattern(
+        companyRegisterNo,
+        "companyRegisterNo",
+        numberOnlyRegex,
+        "?????? ??? ??????? ??.",
+      );
+      requireValue(companyName, "companyName");
+
+      if (newEmployeeStep === 1) {
         requirePattern(
           employeeCode,
           "employeeCode",
           employeeCodeRegex,
-          "EMP0001 хэлбэрээр оруулна уу.",
+          "EMP0001 ????????? ??????? ??.",
         );
         requireValue(branch, "branch");
         requireValue(lastName, "lastName");
         requireValue(firstName, "firstName");
-        requirePattern(email, "email", emailRegex, "@gmail.com-оор төгсөнө.");
+        requirePattern(email, "email", emailRegex, "@gmail.com-??? ???????.");
         requireValue(registerNo, "registerNo");
         requirePattern(
           phone,
           "phone",
           numberOnlyRegex,
-          "Зөвхөн тоо оруулна уу.",
+          "?????? ??? ??????? ??.",
         );
+      } else {
         requireValue(dept, "dept");
         requireValue(jobTitle, "jobTitle");
         requireValue(workSchedule, "workSchedule");
@@ -489,11 +551,14 @@ export function AddEmployeeRequestDialog({
           salaryAmount,
           "salaryAmount",
           numberOnlyRegex,
-          "Зөвхөн тоо оруулна уу.",
+          "?????? ??? ??????? ??.",
         );
         requireValue(contractStart, "contractStart");
         requireValue(contractEnd, "contractEnd");
         requireValue(contractDuration, "contractDuration");
+        if (contractStart && contractEnd && contractEnd < contractStart) {
+          nextErrors.contractEnd = "?????? ????? ????? ????????? ???? ?????.";
+        }
       }
     }
 
@@ -502,16 +567,11 @@ export function AddEmployeeRequestDialog({
         employeeCode,
         "employeeCode",
         employeeCodeRegex,
-        "EMP0001 хэлбэрээр оруулна уу.",
+        "EMP0001 ????????? ??????? ??.",
       );
       requireValue(lastName, "lastName");
       requireValue(firstName, "firstName");
-      requirePattern(
-        changeEmail,
-        "email",
-        emailRegex,
-        "@gmail.com-оор төгсөнө.",
-      );
+      requirePattern(changeEmail, "email", emailRegex, "@gmail.com-??? ???????.");
       requireValue(currentDept, "currentDept");
       requireValue(currentPosition, "currentPosition");
       requireValue(nextDept, "nextDept");
@@ -524,34 +584,28 @@ export function AddEmployeeRequestDialog({
         employeeCode,
         "employeeCode",
         employeeCodeRegex,
-        "EMP0001 хэлбэрээр оруулна уу.",
+        "EMP0001 ????????? ??????? ??.",
       );
       requireValue(lastName, "lastName");
       requireValue(firstName, "firstName");
 
-      if (salaryStep === "person") {
-        requirePattern(email, "email", emailRegex, "@gmail.com-оор төгсөнө.");
+      if (salaryStep == "person") {
+        requirePattern(email, "email", emailRegex, "@gmail.com-??? ???????.");
       } else {
         requireValue(workStartDate, "workStartDate");
         requireValue(workTotalDuration, "workTotalDuration");
-        requirePattern(
-          prevSalary,
-          "prevSalary",
-          numberOnlyRegex,
-          "Зөвхөн тоо оруулна уу.",
-        );
-        requirePattern(
-          nextSalary,
-          "nextSalary",
-          numberOnlyRegex,
-          "Зөвхөн тоо оруулна уу.",
-        );
-        requirePattern(
-          salaryDelta,
-          "salaryDelta",
-          numberOnlyRegex,
-          "Зөвхөн тоо оруулна уу.",
-        );
+        requirePattern(prevSalary, "prevSalary", numberOnlyRegex, "?????? ??? ??????? ??.");
+        requirePattern(nextSalary, "nextSalary", numberOnlyRegex, "?????? ??? ??????? ??.");
+        requirePattern(salaryDelta, "salaryDelta", numberOnlyRegex, "?????? ??? ??????? ??.");
+        if (
+          prevSalary &&
+          nextSalary &&
+          numberOnlyRegex.test(prevSalary.trim()) &&
+          numberOnlyRegex.test(nextSalary.trim()) &&
+          Number(nextSalary) <= Number(prevSalary)
+        ) {
+          nextErrors.nextSalary = "???? ????? ????? ????????? ?? ?????.";
+        }
       }
     }
 
@@ -560,22 +614,24 @@ export function AddEmployeeRequestDialog({
         employeeCode,
         "employeeCode",
         employeeCodeRegex,
-        "EMP0001 хэлбэрээр оруулна уу.",
+        "EMP0001 ????????? ??????? ??.",
       );
       requireValue(lastName, "lastName");
       requireValue(firstName, "firstName");
       requireValue(registerNo, "registerNo");
-      requirePattern(phone, "phone", numberOnlyRegex, "Зөвхөн тоо оруулна уу.");
+      requirePattern(phone, "phone", numberOnlyRegex, "?????? ??? ??????? ??.");
       requireValue(jobTitle, "jobTitle");
       requireValue(hireDate, "hireDate");
       requireValue(terminationDate, "terminationDate");
-      requirePattern(
-        contractNo,
-        "contractNo",
-        numberOnlyRegex,
-        "Зөвхөн тоо оруулна уу.",
-      );
+      requirePattern(contractNo, "contractNo", numberOnlyRegex, "?????? ??? ??????? ??.");
       requireValue(terminationReason, "terminationReason");
+      if (hireDate && terminationDate && terminationDate < hireDate) {
+        nextErrors.terminationDate = "???????? ????? ????? ????? ????????? ???? ?????.";
+      }
+    }
+
+    if (recipients.length === 0) {
+      nextErrors.recipients = "??????? ??????? 1 ?????? ????? ????? ??.";
     }
 
     return nextErrors;
@@ -647,7 +703,7 @@ export function AddEmployeeRequestDialog({
 
       await triggerAction({
         variables: {
-          employeeId: matchedEmployee.id,
+          employeeId: useAddEmployeeLayout ? "new" : matchedEmployee!.id,
           action: action.name,
           overrideRecipients,
           templateDataOverrides:
@@ -941,7 +997,9 @@ export function AddEmployeeRequestDialog({
         onOpenChange={(nextOpen) => {
           setPreviewOpen(nextOpen);
           if (!nextOpen) {
-            setPreviewSignatureOpen(false);
+            setSignatureModalOpen(false);
+            setSignaturePasscode("");
+            setSignatureModalError(null);
           }
         }}>
         <DialogContent
@@ -962,8 +1020,9 @@ export function AddEmployeeRequestDialog({
                 <button
                   type="button"
                   onClick={() => {
-                    setPreviewSignatureData("");
-                    setPreviewSignatureOpen(true);
+                    setSignatureModalError(null);
+                    setSignaturePasscode("");
+                    setSignatureModalOpen(true);
                   }}
                   className="rounded-lg border cursor-pointer border-slate-200 px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50">
                   Гарын үсэг зурах
@@ -972,7 +1031,7 @@ export function AddEmployeeRequestDialog({
                   type="button"
                   onClick={() => {
                     setPreviewOpen(false);
-                    setPreviewSignatureOpen(false);
+                    setSignatureModalOpen(false);
                   }}
                   className="w-8 h-8 rounded-lg flex items-center justify-center text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors">
                   <FiX className="text-lg" />
@@ -989,9 +1048,7 @@ export function AddEmployeeRequestDialog({
                   {previewError}
                 </div>
               ) : (
-                <div
-                  ref={previewSignatureContainerRef}
-                  className="relative w-full rounded-xl border border-slate-200 bg-white">
+                <div className="relative w-full rounded-xl border border-slate-200 bg-white">
                   {previewContent?.contentType === "text/html" ? (
                     <iframe
                       title={previewDoc?.template ?? "Template preview"}
@@ -1054,6 +1111,154 @@ export function AddEmployeeRequestDialog({
                   ) : null}
                 </div>
               )}
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog
+        open={signatureModalOpen}
+        onOpenChange={(nextOpen) => {
+          setSignatureModalOpen(nextOpen);
+          if (!nextOpen) {
+            setSignaturePasscode("");
+            setSignatureModalError(null);
+            setUseSignaturePasscode(false);
+            setPreviewSignatureData("");
+            handleClearPreviewSignature();
+          }
+        }}>
+        <DialogContent className="max-w-md rounded-2xl border border-slate-200 bg-white p-0 shadow-2xl">
+          <div className="border-b border-slate-200 px-6 py-4">
+            <DialogTitle className="text-base font-semibold text-slate-900">
+              Гарын үсгээр баталгаажуулах
+            </DialogTitle>
+            <p className="mt-1 text-sm text-slate-500">
+              Settings хэсэгт хадгалсан ажил олгогчийн гарын үсгийг ашиглана.
+            </p>
+          </div>
+          <div className="space-y-4 px-6 py-5">
+            {hasSavedEmployerSignature ? (
+              <>
+                <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
+                  ????????? ????? ???? ????? ?????.
+                  {employerSignatureStatus?.updatedAt
+                    ? ` ${new Date(employerSignatureStatus.updatedAt).toLocaleDateString("mn-MN")} ??????????.`
+                    : ""}
+                </div>
+
+                {savedSignatureHasPasscode ? (
+                  <div className="space-y-2">
+                    <label
+                      htmlFor="hr-signature-passcode"
+                      className="text-sm font-medium text-slate-700">
+                      4 ??????? ???
+                    </label>
+                    <input
+                      id="hr-signature-passcode"
+                      value={signaturePasscode}
+                      onChange={(event) =>
+                        setSignaturePasscode(
+                          event.target.value.replace(/\D/g, "").slice(0, 4),
+                        )
+                      }
+                      inputMode="numeric"
+                      maxLength={4}
+                      placeholder="1234"
+                      className="w-full rounded-xl border border-slate-200 px-4 py-3 text-base text-slate-900 outline-none focus:border-slate-400"
+                    />
+                  </div>
+                ) : null}
+              </>
+            ) : (
+              <>
+                <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-700">
+                  ????????? ????? ???? ???? ?????. ??? ???? ???? ??????? ?????.
+                </div>
+
+                <div className="space-y-3">
+                  <div className="relative overflow-hidden rounded-xl border border-slate-200 bg-white">
+                    <canvas
+                      ref={previewSignatureCanvasRef}
+                      onPointerDown={handlePreviewSignaturePointerDown}
+                      onPointerMove={handlePreviewSignaturePointerMove}
+                      onPointerUp={handlePreviewSignaturePointerUp}
+                      onPointerLeave={handlePreviewSignaturePointerUp}
+                      className="h-32 w-full cursor-crosshair"
+                      style={{ touchAction: "none" }}
+                    />
+                    {previewSignatureData ? (
+                      <button
+                        type="button"
+                        onClick={handleClearPreviewSignature}
+                        className="absolute right-3 top-3 rounded-md bg-white/90 px-2 py-1 text-xs text-slate-500 hover:text-red-500">
+                        ???????
+                      </button>
+                    ) : (
+                      <p className="pointer-events-none absolute inset-0 flex items-center justify-center text-xs text-slate-300">
+                        ??? ????? ????? ????? ??
+                      </p>
+                    )}
+                  </div>
+
+                  <label className="flex items-center gap-2 text-sm text-slate-600">
+                    <input
+                      type="checkbox"
+                      checked={useSignaturePasscode}
+                      onChange={(event) => setUseSignaturePasscode(event.target.checked)}
+                      className="h-4 w-4 rounded border-slate-300 text-slate-900"
+                    />
+                    4 ??????? ??? ?????
+                  </label>
+
+                  {useSignaturePasscode ? (
+                    <div className="space-y-2">
+                      <label
+                        htmlFor="hr-signature-passcode"
+                        className="text-sm font-medium text-slate-700">
+                        4 ??????? ???
+                      </label>
+                      <input
+                        id="hr-signature-passcode"
+                        value={signaturePasscode}
+                        onChange={(event) =>
+                          setSignaturePasscode(
+                            event.target.value.replace(/\D/g, "").slice(0, 4),
+                          )
+                        }
+                        inputMode="numeric"
+                        maxLength={4}
+                        placeholder="1234"
+                        className="w-full rounded-xl border border-slate-200 px-4 py-3 text-base text-slate-900 outline-none focus:border-slate-400"
+                      />
+                    </div>
+                  ) : null}
+                </div>
+              </>
+            )}
+
+            {signatureModalError ? (
+              <p className="text-sm text-red-500">{signatureModalError}</p>
+            ) : null}
+
+            <div className="flex justify-end gap-3">
+              <button
+                type="button"
+                onClick={() => {
+                  setSignatureModalOpen(false);
+                  setSignaturePasscode("");
+                  setSignatureModalError(null);
+                }}
+                className="rounded-xl border border-slate-200 px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50">
+                Болих
+              </button>
+              <button
+                type="button"
+                onClick={handleSavePreviewSignature}
+                disabled={signingDocument}
+                className="rounded-xl bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60">
+                {signingDocument ? "Баталгаажуулж байна..." : "Баталгаажуулах"}
+              </button>
             </div>
           </div>
         </DialogContent>

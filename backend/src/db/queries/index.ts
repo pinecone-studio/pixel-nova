@@ -93,6 +93,7 @@ export {
 export {
   getEmployerSignatureByUserId,
   upsertEmployerSignature,
+  deleteEmployerSignatureByUserId,
   verifyEmployerSignaturePasscode,
   getEmployerSignatureStatus,
 } from "./employerSignature";

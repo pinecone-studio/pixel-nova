@@ -41,6 +41,7 @@ import {
   upsertEmployerSignature,
   getEmployeeSignatureStatus,
   getEmployerSignatureStatus,
+  deleteEmployerSignatureByUserId,
   verifyEmployeeSignaturePasscode,
   verifyEmployerSignaturePasscode,
   verifyEmployeeOtp,
@@ -850,6 +851,18 @@ export const mutationResolvers = {
     return getEmployerSignatureStatus(ctx.db, ctx.actor.id);
   },
 
+  deleteEmployerSignature: async (
+    _: unknown,
+    __: unknown,
+    ctx: Ctx,
+  ) => {
+    if ((ctx.actor.role !== "hr" && ctx.actor.role !== "admin") || !ctx.actor.id) {
+      throw new Error("Unauthorized");
+    }
+
+    return deleteEmployerSignatureByUserId(ctx.db, ctx.actor.id);
+  },
+
   approveContractRequest: async (
     _: unknown,
     args: {
@@ -1240,7 +1253,12 @@ export const mutationResolvers = {
 
   signDocument: async (
     _: unknown,
-    args: { documentId: string; signatureData: string },
+    args: {
+      documentId: string;
+      signatureMode?: string | null;
+      signatureData?: string | null;
+      passcode?: string | null;
+    },
     ctx: Ctx,
   ) => {
     requireHrActor(ctx);
@@ -1257,21 +1275,55 @@ export const mutationResolvers = {
 
     const actionConfig = await getActionConfigByName(ctx.db, document.action);
     const nowIso = new Date().toISOString();
+    const signatureMode = (args.signatureMode ?? "").toLowerCase().trim();
+    const signatureDataArg = args.signatureData?.trim() ?? "";
+    const wantsRedraw =
+      signatureMode === "redraw" || (!signatureMode && Boolean(signatureDataArg));
+    const wantsReuse = signatureMode === "reuse" || (!signatureMode && !wantsRedraw);
+
+    let signatureData = signatureDataArg;
+
+    if (wantsReuse) {
+      if (!ctx.actor.id) {
+        throw new Error("Unauthorized");
+      }
+
+      const savedSignature = await getEmployerSignatureByUserId(ctx.db, ctx.actor.id);
+      if (!savedSignature?.signatureData) {
+        throw new Error("Saved employer signature not found. Please save it in settings first.");
+      }
+
+      const verification = await verifyEmployerSignaturePasscode(
+        ctx.db,
+        ctx.actor.id,
+        args.passcode?.trim() ?? "",
+      );
+      if (verification.hasPasscode && !verification.ok) {
+        throw new Error("Invalid employer signature passcode.");
+      }
+
+      signatureData = savedSignature.signatureData;
+    }
+
+    if (!signatureData) {
+      throw new Error("Signature data is required.");
+    }
+
     const storageUrl = await rerenderSignedDocument(
       ctx,
       {
         ...document,
-        hrSignatureData: args.signatureData,
+        hrSignatureData: signatureData,
         hrSignedAt: nowIso,
       },
       employee,
       {
-        employer_signature: buildSignatureHtml(args.signatureData),
-        employer_sign_line: buildSignatureHtml(args.signatureData),
-        issuer_signature: buildSignatureHtml(args.signatureData),
-        issuer_sign_line: buildSignatureHtml(args.signatureData),
-        company_ceo_sign_line: buildSignatureHtml(args.signatureData),
-        hr_manager_signature: buildSignatureHtml(args.signatureData),
+        employer_signature: buildSignatureHtml(signatureData),
+        employer_sign_line: buildSignatureHtml(signatureData),
+        issuer_signature: buildSignatureHtml(signatureData),
+        issuer_sign_line: buildSignatureHtml(signatureData),
+        company_ceo_sign_line: buildSignatureHtml(signatureData),
+        hr_manager_signature: buildSignatureHtml(signatureData),
         employer_sign_date: nowIso.slice(0, 10),
         issuer_date: nowIso.slice(0, 10),
       },
@@ -1279,7 +1331,7 @@ export const mutationResolvers = {
     );
 
     const updatedDocument = await updateDocumentHrSignature(ctx.db, document.id, {
-      hrSignatureData: args.signatureData,
+      hrSignatureData: signatureData,
       hrSignedAt: nowIso,
       storageUrl,
     });

@@ -13,7 +13,12 @@ import { GET_DOCUMENT_CONTENT } from "@/graphql/queries";
 import { GET_SIGNATURE_STATUS } from "@/graphql/queries/contract-requests";
 import { EMPLOYEE_SIGN_DOCUMENT } from "@/graphql/mutations/documents";
 import { buildGraphQLHeaders } from "@/lib/apollo-client";
-import type { AuditLog, Document, DocumentContent, Employee } from "@/lib/types";
+import type {
+  AuditLog,
+  Document,
+  DocumentContent,
+  Employee,
+} from "@/lib/types";
 import { FilesPreviewModal } from "@/components/pages/employee/files/FilesPreviewModal";
 import { buildDataUrl } from "@/components/pages/employee/files/filesUtils";
 
@@ -32,7 +37,11 @@ const PHASE_LABELS: Record<string, string> = {
   working: "Ажиллах",
 };
 
-type FilterAction = "" | "add_employee" | "promote_employee" | "change_position";
+type FilterAction =
+  | ""
+  | "add_employee"
+  | "promote_employee"
+  | "change_position";
 type AuditTab = "newEmployee" | "documentReview";
 
 function getDocumentSigningSummary(
@@ -43,13 +52,16 @@ function getDocumentSigningSummary(
     .map((documentId) => documentsById.get(documentId))
     .filter((document): document is Document => Boolean(document));
   const total = Math.max(log.documentIds.length, 1);
-  const hrSignedCount = documents.filter((document) => Boolean(document.hrSigned)).length;
+  const hrSignedCount = documents.filter((document) =>
+    Boolean(document.hrSigned),
+  ).length;
   const employeeSignedCount = documents.filter((document) =>
     Boolean(document.employeeSigned),
   ).length;
   const unsignedCount = Math.max(total - hrSignedCount, 0);
   const allHrSigned =
-    log.hrSignedAll ?? (log.documentIds.length > 0 && hrSignedCount === log.documentIds.length);
+    log.hrSignedAll ??
+    (log.documentIds.length > 0 && hrSignedCount === log.documentIds.length);
   const allEmployeeSigned =
     Boolean(log.employeeSigned) ||
     (documents.length > 0 && employeeSignedCount === documents.length);
@@ -304,8 +316,7 @@ function AuditDetailModal({
               type="button"
               onClick={onSign}
               disabled={signing}
-              className="mr-3 rounded-2xl border border-[#D0D5DD] px-6 py-3 text-[15px] font-medium text-[#101828] transition hover:bg-[#F2F4F7] disabled:opacity-50"
-            >
+              className="mr-3 rounded-2xl border border-[#D0D5DD] px-6 py-3 text-[15px] font-medium text-[#101828] transition hover:bg-[#F2F4F7] disabled:opacity-50">
               {signing ? "Илгээж байна..." : "Гарын үсэг зурах"}
             </button>
           ) : null}
@@ -390,14 +401,13 @@ function EmployeeRequestListRow({
 }) {
   const displayName = employee
     ? `${employee.lastName} ${employee.firstName}`
-    : ACTION_LABELS[log.action] ?? log.action;
+    : (ACTION_LABELS[log.action] ?? log.action);
 
   return (
     <button
       type="button"
       onClick={() => onOpen(log)}
-      className="group flex w-full items-center justify-between rounded-[20px] border border-[#EAECF0] bg-white px-5 py-5 text-left transition-colors"
-    >
+      className="group flex w-full items-center justify-between rounded-[20px] border border-[#EAECF0] bg-white px-5 py-5 text-left transition-colors">
       <div className="flex items-center gap-4">
         <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-[#86EFAC] bg-[#F0FDF4] text-[#22C55E]">
           <FiCheckCircle className="h-5 w-5" />
@@ -419,8 +429,7 @@ function EmployeeRequestListRow({
             log.employeeSigned
               ? "border-[#86EFAC] bg-white text-[#22C55E]"
               : "border-[#FF8A80] bg-white text-[#FF3B30]"
-          }`}
-        >
+          }`}>
           {log.employeeSigned ? "Ажилтан нэмсэн" : "Ажилтан нэмэх"}
         </span>
         <FiEye className="h-5 w-5 text-[#98A2B3]" />
@@ -462,19 +471,22 @@ function NewEmployeeAuditDetailModal({
       <div className="relative z-10 w-full max-w-[500px] rounded-[24px] border border-[#EAECF0] bg-white px-6 py-6 shadow-[0_24px_80px_rgba(0,0,0,0.18)]">
         <div className="mx-auto w-full max-w-[452px]">
           <div className="mb-6 flex items-start justify-between">
-            <h2 className="text-[20px] font-semibold text-[#101828]">Шинэ ажилтан</h2>
+            <h2 className="text-[20px] font-semibold text-[#101828]">
+              Шинэ ажилтан
+            </h2>
             <button
               type="button"
               onClick={onClose}
-              className="text-[#101828] transition hover:opacity-70"
-            >
+              className="text-[#101828] transition hover:opacity-70">
               <BiX className="h-7 w-7" />
             </button>
           </div>
 
           <div className="grid grid-cols-2 gap-x-5 gap-y-4">
             <div>
-              <p className="mb-1.5 text-[14px] leading-5 text-[#101828]">Овог</p>
+              <p className="mb-1.5 text-[14px] leading-5 text-[#101828]">
+                Овог
+              </p>
               <div className="rounded-[12px] border border-[#D0D5DD] px-3 py-2.5 text-[15px] leading-6 text-[#101828]">
                 {employee?.lastName ?? "Мэдээлэлгүй"}
               </div>
@@ -496,13 +508,17 @@ function NewEmployeeAuditDetailModal({
 
           <div className="mt-4 grid grid-cols-2 gap-x-5 gap-y-4">
             <div>
-              <p className="mb-1.5 text-[14px] leading-5 text-[#101828]">Хэлтэс</p>
+              <p className="mb-1.5 text-[14px] leading-5 text-[#101828]">
+                Хэлтэс
+              </p>
               <div className="rounded-[12px] border border-[#D0D5DD] px-3 py-2.5 text-[15px] leading-6 text-[#101828]">
                 {employee?.department ?? "Мэдээлэлгүй"}
               </div>
             </div>
             <div>
-              <p className="mb-1.5 text-[14px] leading-5 text-[#101828]">Албан тушаал</p>
+              <p className="mb-1.5 text-[14px] leading-5 text-[#101828]">
+                Албан тушаал
+              </p>
               <div className="rounded-[12px] border border-[#D0D5DD] px-3 py-2.5 text-[15px] leading-6 text-[#101828]">
                 {employee?.jobTitle ?? "Мэдээлэлгүй"}
               </div>
@@ -510,13 +526,14 @@ function NewEmployeeAuditDetailModal({
           </div>
 
           <div className="mt-4">
-            <p className="mb-2 text-[14px] leading-5 text-[#101828]">Хавсаргасан файл</p>
+            <p className="mb-2 text-[14px] leading-5 text-[#101828]">
+              Хавсаргасан файл
+            </p>
             <div className="flex flex-col gap-2.5">
               {files.map((document) => (
                 <div
                   key={document.id}
-                  className="flex items-center justify-between rounded-[16px] border border-[#D0D5DD] bg-white px-3 py-2.5"
-                >
+                  className="flex items-center justify-between rounded-[16px] border border-[#D0D5DD] bg-white px-3 py-2.5">
                   <div className="flex min-w-0 items-center gap-4">
                     <div className="flex h-[48px] w-[48px] shrink-0 items-center justify-center rounded-[16px] border border-[#D0D5DD] bg-white text-[#667085]">
                       <FiFileText className="h-5 w-5" />
@@ -533,8 +550,7 @@ function NewEmployeeAuditDetailModal({
                   <button
                     type="button"
                     onClick={() => onPreview(document)}
-                    className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-[#667085] transition hover:bg-[#F3F4F6] hover:text-[#101828]"
-                  >
+                    className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-[#667085] transition hover:bg-[#F3F4F6] hover:text-[#101828]">
                     <FiEye className="h-4.5 w-4.5" />
                   </button>
                 </div>
@@ -560,15 +576,13 @@ function NewEmployeeAuditDetailModal({
                 }
               }}
               disabled={!signableDocument}
-              className="rounded-[16px] border border-[#D0D5DD] px-6 py-2.5 text-[14px] font-medium text-[#101828] disabled:opacity-50"
-            >
+              className="rounded-[16px] border border-[#D0D5DD] px-6 py-2.5 text-[14px] font-medium text-[#101828] disabled:opacity-50">
               Гарын үсэг зурах
             </button>
             <button
               type="button"
               onClick={onClose}
-              className="rounded-[16px] bg-[#101828] px-6 py-2.5 text-[14px] font-medium text-white"
-            >
+              className="rounded-[16px] bg-[#101828] px-6 py-2.5 text-[14px] font-medium text-white">
               Баталгаажуулах
             </button>
           </div>
@@ -609,7 +623,9 @@ function DocumentReviewRow({
         </div>
         <div>
           <p className="text-[16px] font-medium text-[#101828]">{title}</p>
-          <p className="mt-1 text-[14px] text-[#98A2B3]">{document.documentName}</p>
+          <p className="mt-1 text-[14px] text-[#98A2B3]">
+            {document.documentName}
+          </p>
         </div>
       </div>
 
@@ -619,8 +635,7 @@ function DocumentReviewRow({
             isNewDocument
               ? "border-[#FF8A80] bg-white text-[#FF3B30]"
               : "border-[#86EFAC] bg-white text-[#22C55E]"
-          }`}
-        >
+          }`}>
           {isNewDocument ? "Шинэ баримт" : "Шинэчлэлт"}
         </span>
         <button
@@ -630,8 +645,7 @@ function DocumentReviewRow({
             onOpen(document);
           }}
           className="flex h-8 w-8 items-center justify-center rounded-[10px] text-[#98A2B3] transition hover:bg-[#F3F4F6] hover:text-[#101828]"
-          aria-label="Урьдчилж харах"
-        >
+          aria-label="Урьдчилж харах">
           <FiEye className="h-5 w-5" />
         </button>
         <button
@@ -640,8 +654,7 @@ function DocumentReviewRow({
             event.stopPropagation();
           }}
           className="flex h-8 w-8 items-center justify-center rounded-[10px] text-[#98A2B3] transition hover:bg-[#F3F4F6] hover:text-[#101828]"
-          aria-label="Татах"
-        >
+          aria-label="Татах">
           <FiFileText className="h-5 w-5" />
         </button>
       </div>
@@ -697,8 +710,7 @@ function DocumentAuditDetailModal({
           <button
             type="button"
             onClick={onClose}
-            className="text-[#101828] transition hover:opacity-70"
-          >
+            className="text-[#101828] transition hover:opacity-70">
             <BiX className="h-7 w-7" />
           </button>
         </div>
@@ -727,7 +739,10 @@ function DocumentAuditDetailModal({
                         </div>
                         <div className="min-w-0">
                           <p className="truncate text-[14px] font-medium leading-5 text-[#101828]">
-                            {(document?.documentName ?? docId).replace(/\.pdf$/i, "")}
+                            {(document?.documentName ?? docId).replace(
+                              /\.pdf$/i,
+                              "",
+                            )}
                           </p>
                           <p className="mt-0.5 text-[12px] text-[#98A2B3]">
                             {document?.documentName ?? docId}
@@ -766,8 +781,7 @@ function DocumentAuditDetailModal({
           <button
             type="button"
             onClick={onClose}
-            className="rounded-[16px] border border-[#FF8A80] px-5 py-2.5 text-[14px] font-medium text-[#FF3B30]"
-          >
+            className="rounded-[16px] border border-[#FF8A80] px-5 py-2.5 text-[14px] font-medium text-[#FF3B30]">
             Татгалзах
           </button>
           <button
@@ -775,7 +789,12 @@ function DocumentAuditDetailModal({
             onClick={() => {
               const firstUnsigned = log.documentIds
                 .map((docId) => documentsById.get(docId))
-                .find((document): document is Document => Boolean(document) && Boolean(document.hrSigned) && !Boolean(document.employeeSigned));
+                .find(
+                  (document): document is Document =>
+                    Boolean(document) &&
+                    Boolean(document!.hrSigned) &&
+                    !Boolean(document!.employeeSigned),
+                );
               if (firstUnsigned) {
                 onSignDocument(firstUnsigned);
               } else {
@@ -805,14 +824,18 @@ export function EmployeeAuditComponent() {
   const [previewDoc, setPreviewDoc] = useState<Document | null>(null);
   const [previewError, setPreviewError] = useState<string | null>(null);
   const [signatureOpen, setSignatureOpen] = useState(false);
-  const [signatureMode, setSignatureMode] = useState<"reuse" | "redraw">("reuse");
+  const [signatureMode, setSignatureMode] = useState<"reuse" | "redraw">(
+    "reuse",
+  );
   const [signatureData, setSignatureData] = useState("");
   const [passcode, setPasscode] = useState("");
   const [usePasscode, setUsePasscode] = useState(false);
   const [signatureError, setSignatureError] = useState<string | null>(null);
   const [signatureTargetDocument, setSignatureTargetDocument] =
     useState<Document | null>(null);
-  const [selectedDocument, setSelectedDocument] = useState<Document | null>(null);
+  const [selectedDocument, setSelectedDocument] = useState<Document | null>(
+    null,
+  );
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const drawingRef = useRef(false);
   const filterRef = useRef<HTMLDivElement | null>(null);
@@ -862,20 +885,18 @@ export function EmployeeAuditComponent() {
     },
   );
 
-  const {
-    data: signatureStatusData,
-    refetch: refetchSignatureStatus,
-  } = useQuery<{
-    mySignatureStatus: {
-      hasSignature: boolean;
-      hasPasscode: boolean;
-      updatedAt?: string | null;
-    };
-  }>(GET_SIGNATURE_STATUS, {
-    skip: !authToken,
-    context: { headers: buildGraphQLHeaders({ authToken }) },
-    fetchPolicy: "network-only",
-  });
+  const { data: signatureStatusData, refetch: refetchSignatureStatus } =
+    useQuery<{
+      mySignatureStatus: {
+        hasSignature: boolean;
+        hasPasscode: boolean;
+        updatedAt?: string | null;
+      };
+    }>(GET_SIGNATURE_STATUS, {
+      skip: !authToken,
+      context: { headers: buildGraphQLHeaders({ authToken }) },
+      fetchPolicy: "network-only",
+    });
 
   const [signDocument, { loading: signing }] = useMutation<{
     employeeSignDocument: {
@@ -1038,7 +1059,8 @@ export function EmployeeAuditComponent() {
 
   const auditLogs = useMemo(() => {
     let logs = (data?.auditLogs ?? []).filter(
-      (log) => log.action !== "offboard_employee" && log.phase !== "offboarding",
+      (log) =>
+        log.action !== "offboard_employee" && log.phase !== "offboarding",
     );
 
     logs = logs.filter((log) =>
@@ -1064,9 +1086,7 @@ export function EmployeeAuditComponent() {
       });
     }
 
-    return [...logs].sort(
-      (a, b) => b.timestamp.localeCompare(a.timestamp),
-    );
+    return [...logs].sort((a, b) => b.timestamp.localeCompare(a.timestamp));
   }, [activeTab, data, filterAction, search]);
 
   const documentReviewItems = useMemo(() => {
@@ -1122,7 +1142,8 @@ export function EmployeeAuditComponent() {
   const selectedDocumentLog = useMemo(() => {
     if (!selectedDocument) return null;
     return (
-      auditLogs.find((log) => log.documentIds.includes(selectedDocument.id)) ?? null
+      auditLogs.find((log) => log.documentIds.includes(selectedDocument.id)) ??
+      null
     );
   }, [auditLogs, selectedDocument]);
 
@@ -1144,18 +1165,18 @@ export function EmployeeAuditComponent() {
             }}
           />
         ) : (
-        <DocumentAuditDetailModal
-          log={detailLog}
-          employee={employee}
-          documentsById={documentsById}
-          onClose={() => setDetailLog(null)}
-          onPreview={handlePreviewDocument}
-          onSignDocument={(document) => {
-            void handlePreviewDocument(document);
-            openSignatureModal(document);
-          }}
-        />
-      ))}
+          <DocumentAuditDetailModal
+            log={detailLog}
+            employee={employee}
+            documentsById={documentsById}
+            onClose={() => setDetailLog(null)}
+            onPreview={handlePreviewDocument}
+            onSignDocument={(document) => {
+              void handlePreviewDocument(document);
+              openSignatureModal(document);
+            }}
+          />
+        ))}
 
       {selectedDocument && selectedDocumentLog ? (
         <DocumentAuditDetailModal
@@ -1209,8 +1230,7 @@ export function EmployeeAuditComponent() {
                   setSignatureOpen(false);
                   setSignatureTargetDocument(null);
                 }}
-                className="text-[#101828] transition hover:opacity-70"
-              >
+                className="text-[#101828] transition hover:opacity-70">
                 <BiX className="h-6 w-6" />
               </button>
             </div>
@@ -1232,7 +1252,9 @@ export function EmployeeAuditComponent() {
                     }`}>
                     <span
                       className={`h-3 w-3 rounded-full ${
-                        signatureMode === "reuse" ? "bg-[#2F80FF]" : "bg-transparent"
+                        signatureMode === "reuse"
+                          ? "bg-[#2F80FF]"
+                          : "bg-transparent"
                       }`}
                     />
                   </span>
@@ -1253,7 +1275,9 @@ export function EmployeeAuditComponent() {
                     }`}>
                     <span
                       className={`h-3 w-3 rounded-full ${
-                        signatureMode === "redraw" ? "bg-[#2F80FF]" : "bg-transparent"
+                        signatureMode === "redraw"
+                          ? "bg-[#2F80FF]"
+                          : "bg-transparent"
                       }`}
                     />
                   </span>
@@ -1265,12 +1289,13 @@ export function EmployeeAuditComponent() {
             {signatureMode === "redraw" ? (
               <div className="mb-4">
                 <div className="mb-3 mt-2 flex items-center justify-between">
-                  <p className="text-[14px] text-[#667085]">Гарын үсгээ зурна уу</p>
+                  <p className="text-[14px] text-[#667085]">
+                    Гарын үсгээ зурна уу
+                  </p>
                   <button
                     type="button"
                     onClick={clearSignature}
-                    className="text-[12px] text-[#667085] hover:text-[#101828]"
-                  >
+                    className="text-[12px] text-[#667085] hover:text-[#101828]">
                     Арилгах
                   </button>
                 </div>
@@ -1335,23 +1360,22 @@ export function EmployeeAuditComponent() {
               </div>
             ) : null}
 
-            <div className={`${signatureMode === "redraw" ? "mt-8" : "mt-10"} flex justify-end gap-3`}>
+            <div
+              className={`${signatureMode === "redraw" ? "mt-8" : "mt-10"} flex justify-end gap-3`}>
               <button
                 type="button"
                 onClick={() => {
                   setSignatureOpen(false);
                   setSignatureTargetDocument(null);
                 }}
-                className="rounded-[14px] border border-[#D0D5DD] px-5 py-2.5 text-[14px] text-[#344054]"
-              >
+                className="rounded-[14px] border border-[#D0D5DD] px-5 py-2.5 text-[14px] text-[#344054]">
                 Болих
               </button>
               <button
                 type="button"
                 onClick={handleSaveSignature}
                 disabled={signing}
-                className="rounded-[14px] bg-[#101828] px-5 py-2.5 text-[14px] font-medium text-white disabled:opacity-50"
-              >
+                className="rounded-[14px] bg-[#101828] px-5 py-2.5 text-[14px] font-medium text-white disabled:opacity-50">
                 {signing ? "Илгээж байна..." : "Баталгаажуулах"}
               </button>
             </div>
@@ -1381,19 +1405,18 @@ export function EmployeeAuditComponent() {
               activeTab === "newEmployee"
                 ? "border-[#86EFAC] bg-white"
                 : "border-[#D0D5DD] bg-white hover:border-[#B7EAC7] hover:bg-[#FBFFFC]"
-            }`}
-          >
+            }`}>
             <div className="flex min-w-0 items-center gap-5">
               <div className="flex h-16 w-16 items-center justify-center rounded-[20px] border border-[#86EFAC] bg-white text-[#22C55E] shadow-[0_10px_24px_rgba(34,197,94,0.10)]">
                 <FiCheckCircle className="h-8 w-8" />
               </div>
               <div className="flex min-w-0 items-end gap-3">
-                  <span className="text-[46px] font-semibold leading-none text-[#3F4145]">
-                    {counts.newEmployee}
-                  </span>
-                  <span className="truncate pb-1 text-[14px] text-[#667085]">
-                    Шинэ ажилтны хүсэлт
-                  </span>
+                <span className="text-[46px] font-semibold leading-none text-[#3F4145]">
+                  {counts.newEmployee}
+                </span>
+                <span className="truncate pb-1 text-[14px] text-[#667085]">
+                  Шинэ ажилтны хүсэлт
+                </span>
               </div>
             </div>
           </button>
@@ -1408,19 +1431,18 @@ export function EmployeeAuditComponent() {
               activeTab === "documentReview"
                 ? "border-[#98C1FF] bg-white"
                 : "border-[#D0D5DD] bg-white hover:border-[#B8D4FF] hover:bg-[#FBFDFF]"
-            }`}
-          >
+            }`}>
             <div className="flex min-w-0 items-center gap-5">
               <div className="flex h-16 w-16 items-center justify-center rounded-[20px] border border-[#98C1FF] bg-white text-[#3B82F6] shadow-[0_10px_24px_rgba(47,123,255,0.10)]">
                 <FiFileText className="h-8 w-8" />
               </div>
               <div className="flex min-w-0 items-end gap-3">
-                  <span className="text-[46px] font-semibold leading-none text-[#3F4145]">
-                    {counts.documentReview}
-                  </span>
-                  <span className="truncate pb-1 text-[14px] text-[#667085]">
-                    Баримт бичиг баталгаажуулах
-                  </span>
+                <span className="text-[46px] font-semibold leading-none text-[#3F4145]">
+                  {counts.documentReview}
+                </span>
+                <span className="truncate pb-1 text-[14px] text-[#667085]">
+                  Баримт бичиг баталгаажуулах
+                </span>
               </div>
             </div>
           </button>
@@ -1441,8 +1463,7 @@ export function EmployeeAuditComponent() {
             <button
               type="button"
               onClick={() => setFilterOpen((prev) => !prev)}
-              className="flex h-[44px] w-full items-center justify-between rounded-[12px] border border-[#D0D5DD] bg-white px-4 text-[15px] text-[#667085] outline-none"
-            >
+              className="flex h-[44px] w-full items-center justify-between rounded-[12px] border border-[#D0D5DD] bg-white px-4 text-[15px] text-[#667085] outline-none">
               <span>{activeActionLabel}</span>
               <BiChevronDown
                 className={`h-4 w-4 text-[#667085] transition-transform ${
@@ -1466,8 +1487,7 @@ export function EmployeeAuditComponent() {
                         active
                           ? "bg-[#F3F4F6] text-[#111827]"
                           : "text-[#344054] hover:bg-[#F3F4F6] hover:text-[#111827]"
-                      }`}
-                    >
+                      }`}>
                       {option.label}
                     </button>
                   );
@@ -1511,7 +1531,8 @@ export function EmployeeAuditComponent() {
           <div className="py-16 text-center text-[#98A2B3] text-[15px]">
             Аудит бүртгэл олдсонгүй
           </div>
-        ) : activeTab === "documentReview" && documentReviewItems.length === 0 ? (
+        ) : activeTab === "documentReview" &&
+          documentReviewItems.length === 0 ? (
           <div className="py-16 text-center text-[#98A2B3] text-[15px]">
             Баримт бичиг олдсонгүй
           </div>

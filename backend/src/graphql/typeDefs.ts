@@ -329,6 +329,7 @@ export const typeDefs = /* GraphQL */ `
     ): ContractRequest!
     saveMySignature(signatureData: String!, passcode: String): EmployeeSignatureStatus!
     saveEmployerSignature(signatureData: String!, passcode: String): EmployerSignatureStatus!
+    deleteEmployerSignature: EmployerSignatureStatus!
     approveContractRequest(
       id: ID!
       note: String
@@ -345,7 +346,12 @@ export const typeDefs = /* GraphQL */ `
     uploadHrDocument(input: UploadHrDocumentInput!): Document!
     deleteDocument(id: ID!): Document
     retryNotification(auditLogId: ID!): AuditLog!
-    signDocument(documentId: ID!, signatureData: String!): SignDocumentResult!
+    signDocument(
+      documentId: ID!
+      signatureMode: String
+      signatureData: String
+      passcode: String
+    ): SignDocumentResult!
     employeeSignDocument(
       documentId: ID!
       signatureMode: String
