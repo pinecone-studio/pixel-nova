@@ -6,6 +6,7 @@ import { useEffect, useSyncExternalStore } from "react";
 
 import { GET_ME } from "@/graphql/queries";
 import { buildGraphQLHeaders } from "@/lib/apollo-client";
+import { notifyAuthStateChanged } from "@/lib/auth-events";
 import type { Employee } from "@/lib/types";
 
 export const TOKEN_STORAGE_KEY = "epas_auth_token";
@@ -41,6 +42,7 @@ export function useEmployeeSession() {
 
     if (!loading && !error && !employee) {
       window.localStorage.removeItem(TOKEN_STORAGE_KEY);
+      notifyAuthStateChanged();
       router.replace("/auth/employee");
     }
   }, [authToken, employee, error, loading, router]);

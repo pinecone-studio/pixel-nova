@@ -6,6 +6,7 @@ import { useEffect, useMemo, useSyncExternalStore } from "react";
 import { useRouter } from "next/navigation";
 
 import { buildGraphQLHeaders } from "@/lib/apollo-client";
+import { notifyAuthStateChanged } from "@/lib/auth-events";
 import { GET_DOCUMENTS, GET_ME } from "@/graphql/queries";
 import type { Document, Employee } from "@/lib/types";
 
@@ -70,6 +71,7 @@ export default function EmployeePage() {
 
     if (!meLoading && !meError && !employee) {
       window.localStorage.removeItem(TOKEN_STORAGE_KEY);
+      notifyAuthStateChanged();
       router.replace("/auth/employee");
     }
   }, [authToken, employee, meError, meLoading, router]);

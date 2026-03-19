@@ -18,6 +18,8 @@ test("normalizeAuditLog parses JSON list fields into arrays", () => {
     notificationAttempted: true,
     recipientsNotified: true,
     notificationError: null,
+    employeeSigned: false,
+    employeeSignedAt: null,
     timestamp: "2026-03-11T10:00:00.000Z",
   });
 
@@ -43,6 +45,8 @@ test("normalizeAuditLog falls back to empty arrays for invalid JSON", () => {
     notificationAttempted: false,
     recipientsNotified: false,
     notificationError: "No recipients resolved",
+    employeeSigned: false,
+    employeeSignedAt: null,
     timestamp: "2026-03-11T10:00:00.000Z",
   });
 

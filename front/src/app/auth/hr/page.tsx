@@ -7,6 +7,7 @@ import { BiBriefcase } from "react-icons/bi";
 import { AuthShell } from "@/components/auth/AuthShell";
 import { HR_AUTH_STORAGE_KEY } from "@/components/hr/auth";
 import { Button } from "@/components/ui/button";
+import { notifyAuthStateChanged } from "@/lib/auth-events";
 
 const HR_CODE = "HR2025";
 
@@ -24,6 +25,7 @@ export default function HrAuthPage() {
     setTimeout(() => {
       if (code.trim() === HR_CODE) {
         localStorage.setItem(HR_AUTH_STORAGE_KEY, "true");
+        notifyAuthStateChanged();
         router.push("/hr");
       } else {
         setError("Код буруу байна. Дахин оролдоно уу.");
