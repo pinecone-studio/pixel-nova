@@ -60,7 +60,7 @@ export function TemplatePreviewModal({
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 p-4">
-      <div className="flex h-[90vh] w-full max-w-5xl flex-col overflow-hidden rounded-[24px] border border-black/12 bg-white shadow-2xl">
+      <div className="flex h-[82vh] w-[920px] max-w-[95vw] flex-col overflow-hidden rounded-[24px] border border-black/12 bg-white shadow-2xl">
         {/* Header */}
         <div className="flex items-center justify-between border-b border-black/12 px-6 py-4">
           <div>
