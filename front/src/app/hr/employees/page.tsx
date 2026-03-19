@@ -8,8 +8,16 @@ import { EmployeeModal } from "@/components/hr/workers/employee-modal";
 import { WorkersStats } from "@/components/hr/workers/stats";
 import { WorkersToolbar } from "@/components/hr/workers/toolbar";
 import type { EmployeeFormState } from "@/components/hr/workers/shared";
-import { BRANCHES, DEPARTMENTS, LEVELS, STATUSES } from "@/components/hr/workers/shared";
-import { CsvImportDialog, type CsvEmployeeRow } from "@/components/hr/workers/csv-import-dialog";
+import {
+  BRANCHES,
+  DEPARTMENTS,
+  LEVELS,
+  STATUSES,
+} from "@/components/hr/workers/shared";
+import {
+  CsvImportDialog,
+  type CsvEmployeeRow,
+} from "@/components/hr/workers/csv-import-dialog";
 import { PlusIcon } from "@/components/icons";
 import { FiUpload } from "react-icons/fi";
 import { UPSERT_EMPLOYEE } from "@/graphql/mutations";
@@ -60,7 +68,8 @@ export default function HrEmployeesPage() {
     () =>
       employees.filter((employee) => {
         if (statusFilter && employee.status !== statusFilter) return false;
-        if (departmentFilter && employee.department !== departmentFilter) return false;
+        if (departmentFilter && employee.department !== departmentFilter)
+          return false;
         return [
           employee.firstName,
           employee.lastName,
@@ -201,15 +210,6 @@ export default function HrEmployeesPage() {
         onImport={handleCsvImport}
         importing={importing}
       />
-
-      <div className="flex flex-col gap-2">
-        <h1 className="text-[20px] font-semibold leading-6 tracking-[-0.096px] text-black">
-          Ажилтнууд
-        </h1>
-        <p className="text-[14px] leading-5 text-[#3f4145b3]">
-          Байгууллагын бүх ажилтны мэдээлэл, төлөв болон үндсэн дэлгэрэнгүй.
-        </p>
-      </div>
 
       <WorkersStats
         totalEmployees={employees.length}
