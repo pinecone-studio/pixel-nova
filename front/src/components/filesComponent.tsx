@@ -243,6 +243,9 @@ function NewDocModal({
 }) {
   const fileRef = useRef<HTMLInputElement>(null);
   const [documentName, setDocumentName] = useState("");
+  const [selectedEmployeeId, setSelectedEmployeeId] = useState(
+    () => employees[0]?.id ?? "",
+  );
   const [recipients, setRecipients] = useState<string[]>([...ALL_RECIPIENTS]);
   const [file, setFile] = useState<File | null>(null);
   const [dragging, setDragging] = useState(false);
@@ -261,7 +264,17 @@ function NewDocModal({
   const removeRecipient = (r: string) =>
     setRecipients((prev) => prev.filter((x) => x !== r));
 
+  useEffect(() => {
+    if (!employees.some((employee) => employee.id === selectedEmployeeId)) {
+      setSelectedEmployeeId(employees[0]?.id ?? "");
+    }
+  }, [employees, selectedEmployeeId]);
+
   async function handleSubmit() {
+    if (!selectedEmployeeId) {
+      setError("Ажилтан сонгоно уу.");
+      return;
+    }
     if (!documentName.trim()) {
       setError("Баримтын нэр оруулна уу.");
       return;
@@ -279,7 +292,7 @@ function NewDocModal({
       await uploadDocument({
         variables: {
           input: {
-            employeeId: employees[0]?.id ?? "",
+            employeeId: selectedEmployeeId,
             action: "hr-upload",
             documentName: documentName.trim(),
             contentType: file.type || "application/octet-stream",
@@ -324,6 +337,24 @@ function NewDocModal({
         </div>
 
         {/* Баримтын нэр */}
+        <div className="flex flex-col gap-2">
+          <label className="text-slate-900 text-sm font-medium">
+            Ажилтан
+          </label>
+          <select
+            value={selectedEmployeeId}
+            onChange={(e) => setSelectedEmployeeId(e.target.value)}
+            className="w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-700 outline-none transition-colors focus:border-slate-300"
+          >
+            <option value="">Ажилтан сонгох</option>
+            {employees.map((employee) => (
+              <option key={employee.id} value={employee.id}>
+                {employee.employeeCode} - {employee.lastName} {employee.firstName}
+              </option>
+            ))}
+          </select>
+        </div>
+
         <div className="flex flex-col gap-2">
           <label className="text-slate-900 text-sm font-medium">
             Баримтын нэр
