@@ -39,6 +39,7 @@ import {
   resolveEmployeeLifecycleAction,
 } from "../services/actionResolver";
 import { dispatchNotification } from "../notifications/dispatchNotification";
+import { sendEmailWithRetry } from "../notifications/sendEmailWithRetry";
 import { uploadEmployeeDocumentToR2 } from "../storage/r2";
 import type { GraphQLContext } from "./schema";
 import { executeTriggeredAction } from "./helpers";
@@ -60,7 +61,7 @@ interface TriggerActionArgs {
 
 interface UpsertEmployeeInput {
   id: string;
-  employeeCode: string;
+  employeeCode?: string | null;
   firstName: string;
   lastName: string;
   firstNameEng?: string | null;
@@ -196,6 +197,42 @@ export const mutationResolvers = {
           resolvedAction,
         )
       : null;
+
+    // Send employee code to new employee's email
+    const isNewEmployee = !persisted.previousEmployee;
+    const employeeEmail = persisted.employee.email;
+    if (isNewEmployee && employeeEmail) {
+      const apiKey =
+        (ctx.env as CloudflareBindings & { RESEND_API_KEY?: string })
+          .RESEND_API_KEY ?? "";
+      if (apiKey) {
+        const code = persisted.employee.employeeCode;
+        const name = `${persisted.employee.lastName ?? ""} ${persisted.employee.firstName ?? ""}`.trim();
+        try {
+          await sendEmailWithRetry({
+            to: [employeeEmail],
+            subject: "EPAS — Таны ажилтны код",
+            text: `Сайн байна уу ${name},\n\nТаны ажилтны код: ${code}\n\nЭнэ кодоор системд нэвтэрнэ үү.\n\nХүндэтгэсэн,\nPinecone LLC HR`,
+            html: `
+              <div style="font-family:sans-serif;max-width:480px;margin:0 auto;padding:24px;">
+                <h2 style="color:#111827;margin-bottom:16px;">Сайн байна уу, ${name}!</h2>
+                <p style="color:#374151;font-size:15px;">Таны ажилтны код:</p>
+                <div style="background:#F0FDF4;border:1px solid #BBF7D0;border-radius:12px;padding:16px 24px;text-align:center;margin:16px 0;">
+                  <span style="font-size:28px;font-weight:700;color:#111827;letter-spacing:2px;">${code}</span>
+                </div>
+                <p style="color:#6B7280;font-size:14px;">Энэ кодоор EPAS системд нэвтэрнэ үү.</p>
+                <hr style="border:none;border-top:1px solid #E5E7EB;margin:24px 0;" />
+                <p style="color:#9CA3AF;font-size:12px;">Pinecone LLC — HR System</p>
+              </div>
+            `,
+            apiKey,
+          });
+        } catch {
+          // Non-critical — don't fail the mutation if email fails
+          console.error(`Failed to send employee code email to ${employeeEmail}`);
+        }
+      }
+    }
 
     return {
       employee: persisted.employee,

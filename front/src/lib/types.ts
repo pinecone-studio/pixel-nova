@@ -127,7 +127,7 @@ export interface UploadHrDocumentInput {
 
 export interface UpsertEmployeeInput {
   id: string;
-  employeeCode: string;
+  employeeCode?: string | null;
   firstName: string;
   lastName: string;
   firstNameEng?: string | null;

@@ -123,7 +123,7 @@ export async function updateEmployeeDocumentProfile(
 
 export async function upsertEmployeeRecord(
   db: DbClient,
-  employee: typeof employees.$inferInsert,
+  employee: Omit<typeof employees.$inferInsert, "employeeCode"> & { employeeCode?: string | null },
 ) {
   const previousEmployee = await getEmployeeById(db, employee.id);
   const resolvedEmployeeCode = employee.employeeCode?.trim()

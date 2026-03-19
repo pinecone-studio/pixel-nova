@@ -5,7 +5,6 @@ import { phaseBadge } from "@/utils/auditlog";
 
 import { EditIcon } from "@/components/icons";
 import { HiOutlineLightningBolt } from "react-icons/hi";
-import { GrDocument } from "react-icons/gr";
 import { FiSettings } from "react-icons/fi";
 
 export function AuditActionCard({
@@ -80,7 +79,7 @@ export function AuditActionCard({
         </div>
       </div>
 
-      <div className="flex flex-col gap-3">
+      {/* <div className="flex flex-col gap-3">
         <p className="text-[11px] uppercase tracking-[0.2em] text-slate-400">
           Баримт бичиг
         </p>
@@ -102,7 +101,7 @@ export function AuditActionCard({
             <span className="text-slate-500 text-xs">-</span>
           )}
         </div>
-      </div>
+      </div> */}
 
       <div className="mt-auto flex flex-col gap-2">
         {onEdit && (

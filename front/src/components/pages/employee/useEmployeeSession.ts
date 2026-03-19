@@ -39,11 +39,11 @@ export function useEmployeeSession() {
       return;
     }
 
-    if (!loading && !employee) {
+    if (!loading && !error && !employee) {
       window.localStorage.removeItem(TOKEN_STORAGE_KEY);
       router.replace("/auth/employee");
     }
-  }, [authToken, employee, loading, router]);
+  }, [authToken, employee, error, loading, router]);
 
   return {
     authToken,

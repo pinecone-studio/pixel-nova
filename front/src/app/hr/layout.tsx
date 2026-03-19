@@ -1,9 +1,9 @@
-import { HrShell } from "@/components/hr/shell";
+import { HrAccessGate } from "@/components/hr/HrAccessGate";
 
 export default function HrLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  return <HrShell>{children}</HrShell>;
+  return <HrAccessGate>{children}</HrAccessGate>;
 }

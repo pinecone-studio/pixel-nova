@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useSyncExternalStore } from "react";
 import { useQuery } from "@apollo/client/react";
 import { FiSearch } from "react-icons/fi";
 
@@ -12,12 +12,18 @@ import { GET_CONTRACT_REQUESTS } from "@/graphql/queries";
 import { buildGraphQLHeaders } from "@/lib/apollo-client";
 import type { ContractRequest, EmployeeNotification } from "@/lib/types";
 
+import { getHrAuthSnapshot, subscribeHrAuth } from "./auth";
 import { getActiveHrNavItem, HR_NAV_ITEMS } from "./navigation";
 import { mapContractRequestToEmployeeNotification } from "./notif/hrNotifUtils";
 import { HrOverlayProvider, useHrOverlay } from "./overlay-context";
 
 function HrShellInner({ children }: { children: React.ReactNode }) {
   const { blurred } = useHrOverlay();
+  const authenticated = useSyncExternalStore(
+    subscribeHrAuth,
+    getHrAuthSnapshot,
+    () => false,
+  );
   const pathname = usePathname();
   const activeItem = getActiveHrNavItem(pathname);
   const [notifOpen, setNotifOpen] = useState(false);
@@ -27,6 +33,7 @@ function HrShellInner({ children }: { children: React.ReactNode }) {
   const { data: contractData, loading: notificationsLoading } = useQuery<{
     contractRequests: ContractRequest[];
   }>(GET_CONTRACT_REQUESTS, {
+    skip: !authenticated,
     context: {
       headers: buildGraphQLHeaders({ actorRole: "hr" }),
     },
@@ -58,6 +65,10 @@ function HrShellInner({ children }: { children: React.ReactNode }) {
   const unreadCount = displayNotifications.filter(
     (n) => n.status === "unread",
   ).length;
+
+  if (!authenticated) {
+    return null;
+  }
 
   return (
     <div className="hr-scope h-screen overflow-hidden bg-[#fafafa]">

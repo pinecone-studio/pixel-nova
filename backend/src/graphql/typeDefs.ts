@@ -108,7 +108,7 @@ export const typeDefs = /* GraphQL */ `
 
   input UpsertEmployeeInput {
     id: ID!
-    employeeCode: String!
+    employeeCode: String
     firstName: String!
     lastName: String!
     firstNameEng: String

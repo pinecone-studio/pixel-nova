@@ -113,6 +113,7 @@ function UploadArea({
   onChange,
   error,
   disabled,
+  fileName,
 }: {
   label: string;
   subtitle?: string;
@@ -120,6 +121,7 @@ function UploadArea({
   onChange?: (file: File | null) => void;
   error?: string;
   disabled?: boolean;
+  fileName?: string;
 }) {
   const isLight = variant === "light";
   const inputId = `upload-${label.replace(/\s+/g, "-").toLowerCase()}`;
@@ -144,6 +146,7 @@ function UploadArea({
         }}
       />
       <div
+        onClick={() => document.getElementById(inputId)?.click()}
         className={`mt-[10px] flex h-[168px] w-[477px] cursor-pointer flex-col items-center justify-evenly rounded-xl border border-dashed transition-colors ${
           isLight
             ? "border-[#E5E7EB] hover:border-[#111827]/20"
@@ -154,13 +157,19 @@ function UploadArea({
           className={`h-6 w-6 ${isLight ? "text-[#000000]" : "text-gray-500"}`}
         />
         <div className="flex h-10 w-[445px] flex-col items-center">
-          <p
-            className={`flex h-5 items-center text-4 font-medium ${
-              isLight ? "text-[#111827]" : "text-white"
-            }`}
-          >
-            {subtitle ?? "Файл хавсаргах (заавал биш)"}
-          </p>
+          {fileName ? (
+            <p className={`flex h-5 items-center text-4 font-medium text-[#00CC99]`}>
+              {fileName}
+            </p>
+          ) : (
+            <p
+              className={`flex h-5 items-center text-4 font-medium ${
+                isLight ? "text-[#111827]" : "text-white"
+              }`}
+            >
+              {subtitle ?? "Файл хавсаргана уу"}
+            </p>
+          )}
           <p
             className={`flex h-5 items-center text-3 ${
               isLight ? "text-[#9CA3AF]" : "text-gray-500"
@@ -172,6 +181,10 @@ function UploadArea({
 
         <button
           type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            document.getElementById(inputId)?.click();
+          }}
           className={`h-8 w-[105px] rounded-lg border text-[14px] transition-colors ${
             isLight
               ? "border-[#E5E7EB] text-[#6B7280] hover:bg-[#F3F4F6] hover:text-[#111827]"
@@ -434,6 +447,7 @@ export const Request = ({ employee }: { employee?: Employee }) => {
                 setFieldErrors((prev) => ({ ...prev, clearanceFile: "" }));
               }}
               error={fieldErrors.clearanceFile}
+              fileName={clearanceFile?.name}
             />
 
             <div className="mt-9 flex h-[108px] w-[477px] flex-col">
@@ -501,6 +515,7 @@ export const Request = ({ employee }: { employee?: Employee }) => {
                 setFieldErrors((prev) => ({ ...prev, tripFile: "" }));
               }}
               error={fieldErrors.tripFile}
+              fileName={tripFile?.name}
             />
 
             {sendError && (

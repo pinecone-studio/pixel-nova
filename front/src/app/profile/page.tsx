@@ -98,10 +98,13 @@ export default function Profile() {
 
   useEffect(() => {
     if (hydrated && !loading && !employee) {
+      if (error) {
+        return;
+      }
       window.localStorage.removeItem(TOKEN_STORAGE_KEY);
       router.replace("/auth/employee");
     }
-  }, [employee, hydrated, loading, router]);
+  }, [employee, error, hydrated, loading, router]);
 
   if (!hydrated || !authToken) {
     return null;
@@ -113,6 +116,19 @@ export default function Profile() {
         <div className="flex items-center gap-3 text-sm text-[#6B7280]">
           <span className="h-5 w-5 animate-spin rounded-full border-2 border-[#D1D5DB] border-t-[#111827]" />
           Профайл ачаалж байна...
+        </div>
+      </div>
+    );
+  }
+
+  if (error && !employee) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-[#FAFAFA] px-4 text-[#111827]">
+        <div className="max-w-md rounded-2xl border border-[#FECACA] bg-white px-6 py-5 text-center shadow-sm">
+          <h2 className="text-base font-semibold text-[#111827]">
+            Профайл ачаалж чадсангүй
+          </h2>
+          <p className="mt-2 text-sm text-[#B91C1C]">{error.message}</p>
         </div>
       </div>
     );
