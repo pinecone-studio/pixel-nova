@@ -4,138 +4,42 @@ import { useMutation, useQuery } from "@apollo/client/react";
 import { useEffect, useRef, useState } from "react";
 import { BiToggleLeft, BiToggleRight } from "react-icons/bi";
 
-import {
-  GET_EMPLOYER_SIGNATURE_STATUS,
-} from "@/graphql/queries";
+import { GET_EMPLOYER_SIGNATURE_STATUS } from "@/graphql/queries";
 import { SAVE_EMPLOYER_SIGNATURE } from "@/graphql/mutations";
 import { buildGraphQLHeaders } from "@/lib/apollo-client";
 
 const STORAGE_KEY = "epas_hr_settings";
 
-const settingSections = [
-  {
-    title: "Мэдэгдэл",
-    items: [
-      {
-        id: "notif_email",
-        label: "И-мэйл мэдэгдэл",
-        desc: "Шинэ хүсэлт ирэхэд и-мэйлээр мэдэгдэнэ",
-        default: true,
-      },
-      {
-        id: "notif_push",
-        label: "Push мэдэгдэл",
-        desc: "Браузерт push notification явуулна",
-        default: false,
-      },
-      {
-        id: "notif_urgent",
-        label: "Яаралтай хүсэлтийн дохио",
-        desc: "Яаралтай хүсэлт ирэхэд дуут анхааруулга өгнө",
-        default: true,
-      },
-    ],
-  },
-  {
-    title: "Аюулгүй байдал",
-    items: [
-      {
-        id: "2fa",
-        label: "Хоёр шатлалт баталгаажуулалт",
-        desc: "Нэвтрэхэд нэмэлт кодоор баталгаажуулна",
-        default: true,
-      },
-      {
-        id: "session_log",
-        label: "Сессийн бүртгэл",
-        desc: "Бүх нэвтрэлтийг бүртгэж хадгална",
-        default: true,
-      },
-      {
-        id: "ip_limit",
-        label: "IP хязгаарлалт",
-        desc: "Зөвхөн зөвшөөрөгдсөн IP-ээс нэвтрэхийг зөвшөөрнө",
-        default: false,
-      },
-    ],
-  },
-  {
-    title: "Систем",
-    items: [
-      {
-        id: "dark_mode",
-        label: "Харанхуй горим",
-        desc: "Харанхуй дэвсгэртэй горим идэвхжүүлнэ",
-        default: true,
-      },
-      {
-        id: "lang_mn",
-        label: "Монгол хэл",
-        desc: "Системийн хэлийг монгол болгоно",
-        default: true,
-      },
-      {
-        id: "auto_backup",
-        label: "Автомат нөөцлөлт",
-        desc: "24 цаг тутамд өгөгдлийг автоматаар нөөцөлнө",
-        default: false,
-      },
-    ],
-  },
-];
-
-function buildDefaultToggles() {
-  const initial: Record<string, boolean> = {};
-  settingSections.forEach((section) =>
-    section.items.forEach((item) => {
-      initial[item.id] = item.default;
-    }),
-  );
-  return initial;
-}
-
 export const SettingsComponent = () => {
-  const defaults = buildDefaultToggles();
   const saveTimerRef = useRef<number | null>(null);
   const signatureCanvasRef = useRef<HTMLCanvasElement | null>(null);
   const signatureDrawingRef = useRef(false);
 
-  const [toggles, setToggles] = useState<Record<string, boolean>>(() => {
-    if (typeof window === "undefined") {
-      return defaults;
-    }
-
-    try {
-      const raw = window.localStorage.getItem(STORAGE_KEY);
-      if (!raw) return defaults;
-      const parsed = JSON.parse(raw) as Record<string, boolean>;
-      return { ...defaults, ...parsed };
-    } catch (error) {
-      console.error(error);
-      return defaults;
-    }
-  });
-
   const [saveState, setSaveState] = useState<"idle" | "saved">("idle");
-  const [signatureModeOverride, setSignatureModeOverride] = useState<"reuse" | "redraw" | null>(null);
+  const [signatureModeOverride, setSignatureModeOverride] = useState<
+    "reuse" | "redraw" | null
+  >(null);
   const [signatureData, setSignatureData] = useState("");
   const [passcode, setPasscode] = useState("");
   const [signatureMessage, setSignatureMessage] = useState<string | null>(null);
   const [signatureError, setSignatureError] = useState<string | null>(null);
 
-  const { data: signatureStatusData, loading: signatureStatusLoading, refetch } =
-    useQuery<{
-      employerSignatureStatus: {
-        hasSignature: boolean;
-        hasPasscode: boolean;
-        updatedAt?: string | null;
-      };
-    }>(GET_EMPLOYER_SIGNATURE_STATUS, {
-      context: {
-        headers: buildGraphQLHeaders({ actorRole: "hr" }),
-      },
-      fetchPolicy: "network-only",
-    });
+  const {
+    data: signatureStatusData,
+    loading: signatureStatusLoading,
+    refetch,
+  } = useQuery<{
+    employerSignatureStatus: {
+      hasSignature: boolean;
+      hasPasscode: boolean;
+      updatedAt?: string | null;
+    };
+  }>(GET_EMPLOYER_SIGNATURE_STATUS, {
+    context: {
+      headers: buildGraphQLHeaders({ actorRole: "hr" }),
+    },
+    fetchPolicy: "network-only",
+  });
 
   const [saveEmployerSignature, { loading: signatureSaving }] = useMutation(
     SAVE_EMPLOYER_SIGNATURE,
@@ -149,7 +53,8 @@ export const SettingsComponent = () => {
   const signatureStatus = signatureStatusData?.employerSignatureStatus ?? null;
   const hasSignature = signatureStatus?.hasSignature ?? false;
   const hasPasscode = signatureStatus?.hasPasscode ?? false;
-  const signatureMode = signatureModeOverride ?? (hasSignature ? "reuse" : "redraw");
+  const signatureMode =
+    signatureModeOverride ?? (hasSignature ? "reuse" : "redraw");
 
   useEffect(() => {
     if (signatureMode !== "redraw") {
@@ -177,24 +82,13 @@ export const SettingsComponent = () => {
       if (saveTimerRef.current) {
         window.clearTimeout(saveTimerRef.current);
       }
-      saveTimerRef.current = window.setTimeout(() => setSaveState("idle"), 1800);
+      saveTimerRef.current = window.setTimeout(
+        () => setSaveState("idle"),
+        1800,
+      );
     } catch (error) {
       console.error(error);
     }
-  }
-
-  function toggle(id: string) {
-    setToggles((prev) => {
-      const next = { ...prev, [id]: !prev[id] };
-      persist(next);
-      return next;
-    });
-  }
-
-  function resetSettings() {
-    setToggles(defaults);
-    window.localStorage.removeItem(STORAGE_KEY);
-    setSaveState("idle");
   }
 
   function getCanvasPoint(event: React.PointerEvent<HTMLCanvasElement>) {
@@ -286,7 +180,9 @@ export const SettingsComponent = () => {
     <div className="flex flex-col gap-5">
       <div className="flex items-start justify-between gap-4">
         <div>
-          <p className="text-slate-900 text-2xl font-bold tracking-tight">Тохиргоо</p>
+          <p className="text-slate-900 text-2xl font-bold tracking-tight">
+            Тохиргоо
+          </p>
           <p className="text-slate-500 text-sm mt-1">
             Системийн ерөнхий тохиргоо болон хувийн сонголтууд
           </p>
@@ -303,7 +199,8 @@ export const SettingsComponent = () => {
               Ажил олгогчийн гарын үсэг
             </p>
             <p className="text-slate-500 text-sm mt-1">
-              Шинэ ажилтан нэмэх болон HR баталгаажуулалттай баримтуудад ашиглана.
+              Шинэ ажилтан нэмэх болон HR баталгаажуулалттай баримтуудад
+              ашиглана.
             </p>
           </div>
           {signatureStatusLoading ? null : hasSignature ? (
@@ -400,7 +297,8 @@ export const SettingsComponent = () => {
                   className="w-40 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm tracking-widest text-slate-700 outline-none focus:border-slate-400"
                 />
                 <p className="text-xs text-slate-500">
-                  Хадгалсны дараа энэ signature-ийг зарим үйлдэл дээр кодоор баталгаажуулж ашиглаж болно.
+                  Хадгалсны дараа энэ signature-ийг зарим үйлдэл дээр кодоор
+                  баталгаажуулж ашиглаж болно.
                 </p>
               </div>
             </div>
@@ -421,62 +319,15 @@ export const SettingsComponent = () => {
           <div className="flex justify-end">
             <button
               onClick={handleSaveSignature}
-              disabled={signatureSaving || (signatureMode === "redraw" && !signatureData)}
-              className="rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50"
+              disabled={
+                signatureSaving ||
+                (signatureMode === "redraw" && !signatureData)
+              }
+              className="rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-medium text-white w-[116px] h-[36px] transition-colors hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50"
             >
-              {signatureSaving ? "Хадгалж байна..." : "Гарын үсэг хадгалах"}
+              {signatureSaving ? "Хадгалж байна..." : "Хадгалах"}
             </button>
           </div>
-        </div>
-      </div>
-
-      {settingSections.map((section) => (
-        <div
-          key={section.title}
-          className="rounded-2xl border border-slate-200 bg-white overflow-hidden shadow-[0_1px_2px_rgba(15,23,42,0.06)]"
-        >
-          <div className="px-6 py-4 border-b border-slate-200">
-            <p className="text-slate-900 font-semibold">{section.title}</p>
-          </div>
-
-          {section.items.map((item, index) => (
-            <div
-              key={item.id}
-              className={`flex items-center justify-between px-6 py-4 ${
-                index < section.items.length - 1 ? "border-b border-slate-200" : ""
-              }`}
-            >
-              <div>
-                <p className="text-slate-900 text-sm font-medium">{item.label}</p>
-                <p className="text-slate-500 text-xs mt-0.5">{item.desc}</p>
-              </div>
-              <button onClick={() => toggle(item.id)} className="shrink-0 ml-6">
-                {toggles[item.id] ? (
-                  <BiToggleRight className="text-3xl text-[#0ad4b1]" />
-                ) : (
-                  <BiToggleLeft className="text-3xl text-slate-600" />
-                )}
-              </button>
-            </div>
-          ))}
-        </div>
-      ))}
-
-      <div className="rounded-2xl border border-red-200 bg-red-50 p-6">
-        <p className="text-red-600 font-semibold mb-1">Аюултай бүс</p>
-        <p className="text-slate-500 text-xs mb-4">
-          Доорх үйлдлүүд буцаагдахгүй тул болгоомжтой хэрэглэнэ.
-        </p>
-        <div className="flex gap-3">
-          <button
-            onClick={resetSettings}
-            className="h-9 px-4 rounded-lg border border-red-200 text-red-600 text-sm hover:bg-red-100 transition-colors"
-          >
-            Тохиргоог анхдагч болгох
-          </button>
-          <button className="h-9 px-4 rounded-lg bg-red-100 border border-red-200 text-red-600 text-sm hover:bg-red-200 transition-colors">
-            Бүртгэл устгах
-          </button>
         </div>
       </div>
     </div>

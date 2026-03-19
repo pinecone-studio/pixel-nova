@@ -16,8 +16,8 @@ import {
   ActiveIcon,
   CalIcon,
   DownloadIcon,
-  OnboardIcon,
   PlusIcon,
+  RedirectIcon,
   ReqIcon,
 } from "./icons";
 import { CiWarning } from "react-icons/ci";
@@ -475,7 +475,7 @@ function NewDocModal({
 
         {/* Файл хавсаргах */}
         <div className="flex flex-col gap-2">
-          <label className="text-slate-900 text-sm font-medium">
+          <label className="text-slate-900 text-sm  font-medium">
             Файл хавсаргах
           </label>
           <input
@@ -675,7 +675,7 @@ export function FilesComponent() {
     {
       label: "Ажилд орох үе",
       count: stageCounts.onboarding,
-      icon: <OnboardIcon className="h-5 w-5 text-[#1ABA52]" />,
+      icon: <RedirectIcon />,
       borderColor: "border-[#1ABA52]",
       bgColor: "bg-[#1ABA52]/20",
     },
@@ -730,14 +730,14 @@ export function FilesComponent() {
           )
         : null}
 
-      <div className="w-full shrink-0 xl:w-[320px]">
+      <div className="w-full shrink-0 xl:w-[419px]">
         <div className="flex flex-col gap-4 xl:h-full xl:overflow-y-auto xl:pr-1">
           <div className="rounded-[20px] border border-black/12 bg-white p-5">
             <div className="flex items-center justify-between">
               <p className="text-[48px] font-bold leading-[48px] tracking-[-0.05em] text-[#121316]">
                 {filtered.length}
               </p>
-              <div className="flex h-12 w-12 items-center border-2 border-[#3F4145CC] justify-center rounded-2xl text-black">
+              <div className="flex h-[56px] w-[56px] items-center border-2 border-[#3F4145CC] justify-center rounded-2xl text-black">
                 <ReqIcon className="h-6 w-6" />
               </div>
             </div>
@@ -766,17 +766,17 @@ export function FilesComponent() {
                 >
                   <div className="flex items-center gap-3">
                     <div
-                      className={`flex h-10 w-10 shrink-0 items-center border justify-center rounded-[14px] ${stage.bgColor} ${stage.borderColor}`}
+                      className={`flex h-[40px] w-10 shrink-0 items-center border justify-center rounded-[14px] ${stage.bgColor} ${stage.borderColor}`}
                     >
                       {stage.icon}
                     </div>
                     <div className="min-w-0">
-                      <p className="text-[16px] font-medium leading-10 text-[#121316]">
+                      <p className="text-[19.8px] font-medium leading-10 text-[#121316]">
                         {stage.label}
                       </p>
                     </div>
                   </div>
-                  <span className="text-[30px] font-semibold leading-10 text-[#121316]">
+                  <span className="text-[20px] font-manrope leading-10 text-[#121316]">
                     {stage.count}
                   </span>
                 </div>
@@ -790,9 +790,7 @@ export function FilesComponent() {
 
       <div className="flex min-w-0 flex-1 flex-col xl:overflow-hidden gap-2">
         <div className="flex min-w-0 flex-col overflow-hidden rounded-[24px] border border-black/12 bg-white xl:min-h-0 xl:flex-1">
-          {/* Scrollable table (header + body together so columns align) */}
-          <div className="xl:min-h-0 xl:flex-1 xl:overflow-y-auto">
-            {/* Table header */}
+          <div className="h-[40px] xl:flex-1 xl:overflow-y-auto w-[904px]  ">
             <div
               className="sticky top-0 z-10 grid items-center border-b border-black/12 bg-white px-3 py-3 text-[14px] text-[#3f4145b3] md:px-5"
               style={{
@@ -800,7 +798,7 @@ export function FilesComponent() {
                   "minmax(200px,2fr) minmax(120px,1fr) minmax(120px,1fr) minmax(130px,1fr) 60px",
               }}
             >
-              <div className="flex items-center gap-1 px-2 font-medium text-[#121316]">
+              <div className="flex items-center gap-1  font-medium text-[#121316] ">
                 <span>Баримт бичиг</span>
                 <span className="text-[#77818c]">&#8597;</span>
               </div>
@@ -825,7 +823,7 @@ export function FilesComponent() {
                 {error}
               </div>
             ) : filtered.length === 0 ? (
-              <div className="py-12 text-center text-slate-400 text-sm">
+              <div className="py-12 text-center text-slate-400 text-sm ">
                 Баримт олдсонгүй
               </div>
             ) : (
@@ -878,7 +876,7 @@ export function FilesComponent() {
           </div>
 
           {/* Footer */}
-          <div className="flex shrink-0 items-center justify-between border-t border-black/12 px-5 py-3">
+          <div className="flex shrink-0 items-center justify-between border-t border-black/12 px-5 py-3  ">
             <p className="text-[13px] text-[#77818c]">
               Нийт {filtered.length} баримт
             </p>
@@ -887,7 +885,7 @@ export function FilesComponent() {
         <div className="flex items-center justify-end">
           <button
             onClick={() => setShowModal(true)}
-            className="flex cursor-pointer items-center gap-2 rounded-[12px] bg-[#121316] px-4 py-2.5 text-[14px] font-medium text-white transition-colors hover:bg-[#1f2126]"
+            className="flex cursor-pointer items-center gap-2 rounded-[12px] bg-[#121316] px-4 py-2.5 text-[14px] font-medium text-white transition-colors hover:bg-[#1f2126]. w-[167px] h-[40px]  "
           >
             <PlusIcon />
             Шинэ Баримт
