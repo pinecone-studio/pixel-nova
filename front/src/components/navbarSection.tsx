@@ -4,7 +4,6 @@ import { useQuery } from "@apollo/client/react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { BiHome } from "react-icons/bi";
-import { RxAvatar } from "react-icons/rx";
 
 import { buildGraphQLHeaders } from "@/lib/apollo-client";
 import { GET_ME } from "@/graphql/queries";
@@ -84,8 +83,7 @@ export function Navbar() {
         <div className="flex w-[260px] shrink-0 items-center">
           <Link
             href="/employee"
-            className="flex items-center gap-3 text-[#111827]"
-          >
+            className="flex items-center gap-3 text-[#111827]">
             <EpasLogo className="h-9 w-9 rounded-xl text-[#111827]" />
             <span className="text-base font-semibold tracking-[-0.4px]">
               EPAS
@@ -105,15 +103,13 @@ export function Navbar() {
                   active
                     ? "text-[#111827] after:absolute after:bottom-0 after:left-1/2 after:h-[2px] after:w-8 after:-translate-x-1/2 after:rounded-full after:bg-[#111827]"
                     : "text-[rgba(63,65,69,0.8)] hover:text-[#111827]"
-                }`}
-              >
+                }`}>
                 <span
                   className={
                     active
                       ? "text-[#111827]"
                       : "text-[rgba(63,65,69,0.8)] transition-colors group-hover:text-[#111827]"
-                  }
-                >
+                  }>
                   {icon}
                 </span>
                 {label}
@@ -122,7 +118,7 @@ export function Navbar() {
           })}
         </div>
 
-        <div className="flex w-[260px] items-center justify-end gap-2">
+        <div className="flex w-fit items-center justify-end gap-2">
           <EmployeeNotifDropdown />
           <Link href={"/profile"}>
             <button className="group flex h-10 cursor-pointer items-center gap-2 rounded-xl px-3 py-2 text-[#111827] transition-colors hover:bg-[#F7F7F7]">

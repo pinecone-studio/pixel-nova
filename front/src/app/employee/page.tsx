@@ -109,14 +109,13 @@ export default function EmployeePage() {
         <div className="mt-9">
           <div
             className="flex max-w-full items-center justify-between rounded-[12px] border border-[#E5E7EB] bg-white p-5 box-border"
-            style={{ width: 1056, height: 89 }}
-          >
+            style={{ width: 1056, height: 89 }}>
             <div className="flex items-center gap-4 h-[48px]">
               <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg border border-[#9BC1FF] bg-[#EEF4FF]">
                 <Planeicon />
               </div>
               <div className="flex flex-col h-10 justify-between">
-                <span className="text-[16px] w-[200px] h-[20px] font-semibold text-[#111827]">
+                <span className="text-[16px] w-fit h-[20px] font-semibold text-[#111827]">
                   {displayName}
                 </span>
                 <span className="text-[14px] text-[#6B7280] w-[64px] h-[16px]">
@@ -142,8 +141,7 @@ export default function EmployeePage() {
             </div>
             <a
               href="/employee/files"
-              className="text-[14px] w-[175px] justify-evenly h-8 font-medium hover:text-[#111827] transition-colors flex items-center"
-            >
+              className="text-[14px] w-[175px] justify-evenly h-8 font-medium hover:text-[#111827] transition-colors flex items-center">
               <span className="w-[133px] h-5">Бүх баримт бичгүүд</span>{" "}
               <span className="h-5 items-end flex">
                 <Righticon />

@@ -5,6 +5,7 @@ import {
   getAuditLogById,
   getEmployeeById,
   getEmployeeSignatureByEmployeeId,
+  getEmployerSignatureByUserId,
   getContractRequestById,
   getLeaveRequestById,
   getDocuments,
@@ -25,8 +26,11 @@ import {
   upsertActionConfig,
   upsertEmployeeRecord,
   upsertEmployeeSignature,
+  upsertEmployerSignature,
   getEmployeeSignatureStatus,
+  getEmployerSignatureStatus,
   verifyEmployeeSignaturePasscode,
+  verifyEmployerSignaturePasscode,
   verifyEmployeeOtp,
   markEmployeeNotificationRead,
 } from "../db/queries";
@@ -51,6 +55,7 @@ interface TriggerActionArgs {
   action: string;
   dryRun?: boolean | null;
   overrideRecipients?: string[] | null;
+  templateDataOverrides?: Record<string, string> | null;
 }
 
 interface UpsertEmployeeInput {
@@ -150,6 +155,7 @@ export const mutationResolvers = {
     executeTriggeredAction(ctx, args.employeeId, args.action, {
       dryRun: args.dryRun ?? false,
       overrideRecipients: args.overrideRecipients ?? undefined,
+      templateDataOverrides: args.templateDataOverrides ?? undefined,
     }),
 
   upsertEmployee: async (
@@ -400,9 +406,45 @@ export const mutationResolvers = {
     return getEmployeeSignatureStatus(ctx.db, ctx.actor.id);
   },
 
+  saveEmployerSignature: async (
+    _: unknown,
+    args: { signatureData: string; passcode?: string | null },
+    ctx: Ctx,
+  ) => {
+    if (ctx.actor.role !== "hr" && ctx.actor.role !== "admin") {
+      throw new Error("Unauthorized");
+    }
+    if (!ctx.actor.id) {
+      throw new Error("Actor ID required");
+    }
+
+    const signatureData = args.signatureData?.trim() ?? "";
+    const passcode = args.passcode?.trim() ?? "";
+    if (!signatureData) {
+      throw new Error("Гарын үсгээ зурна уу.");
+    }
+    if (passcode && !/^[0-9]{4}$/.test(passcode)) {
+      throw new Error("4 оронтой код шаардлагатай.");
+    }
+
+    await upsertEmployerSignature(ctx.db, {
+      userId: ctx.actor.id,
+      signatureData,
+      passcode: passcode || undefined,
+    });
+
+    return getEmployerSignatureStatus(ctx.db, ctx.actor.id);
+  },
+
   approveContractRequest: async (
     _: unknown,
-    args: { id: string; note?: string | null },
+    args: {
+      id: string;
+      note?: string | null;
+      employerSignatureMode?: string | null;
+      employerPasscode?: string | null;
+      employerSignatureData?: string | null;
+    },
     ctx: Ctx,
   ) => {
     if (ctx.actor.role !== "hr" && ctx.actor.role !== "admin") {
@@ -447,17 +489,70 @@ export const mutationResolvers = {
       throw new Error("Ажилтны гарын үсэг олдсонгүй.");
     }
 
+    // --- Employer (HR) signature handling ---
+    const employerSignatureMode = (args.employerSignatureMode ?? "").toLowerCase().trim();
+    const employerSignatureDataArg = args.employerSignatureData?.trim() ?? "";
+    const employerPasscode = args.employerPasscode?.trim() ?? "";
+
+    const wantsEmployerRedraw =
+      employerSignatureMode === "redraw" || (!employerSignatureMode && Boolean(employerSignatureDataArg));
+    const wantsEmployerReuse =
+      employerSignatureMode === "reuse" || (!employerSignatureMode && !wantsEmployerRedraw);
+
+    if (wantsEmployerRedraw && employerSignatureDataArg && ctx.actor.id) {
+      if (employerPasscode && !/^[0-9]{4}$/.test(employerPasscode)) {
+        throw new Error("4 оронтой код шаардлагатай.");
+      }
+      await upsertEmployerSignature(ctx.db, {
+        userId: ctx.actor.id,
+        signatureData: employerSignatureDataArg,
+        passcode: employerPasscode || undefined,
+      });
+    }
+
+    if (wantsEmployerReuse && ctx.actor.id) {
+      const existingEmployerSig = await getEmployerSignatureByUserId(ctx.db, ctx.actor.id);
+      if (existingEmployerSig?.passcodeHash && employerPasscode) {
+        const verification = await verifyEmployerSignaturePasscode(
+          ctx.db,
+          ctx.actor.id,
+          employerPasscode,
+        );
+        if (!verification.ok) {
+          throw new Error("Ажил олгогчийн гарын үсгийн код буруу байна.");
+        }
+      }
+    }
+
+    // Get employer signature (either newly saved or existing)
+    const employerSignature = ctx.actor.id
+      ? await getEmployerSignatureByUserId(ctx.db, ctx.actor.id)
+      : null;
+
     const signatureHtml = `<img src="${signature.signatureData}" style="height:40px; filter: brightness(0) saturate(100%);" />`;
+    const employerSignatureHtml = employerSignature?.signatureData
+      ? `<img src="${employerSignature.signatureData}" style="height:40px; filter: brightness(0) saturate(100%);" />`
+      : "";
     const signDate = nowIso.slice(0, 10);
 
     await executeTriggeredAction(ctx, request.employeeId, "contract_request", {
       actionConfig,
       templateDataOverrides: {
         employee_sign_date: signDate,
+        employer_sign_date: signDate,
         ...(signatureHtml
           ? {
               employee_signature: signatureHtml,
               employee_sign_line: signatureHtml,
+            }
+          : {}),
+        ...(employerSignatureHtml
+          ? {
+              employer_signature: employerSignatureHtml,
+              employer_sign_line: employerSignatureHtml,
+              issuer_signature: employerSignatureHtml,
+              issuer_sign_line: employerSignatureHtml,
+              company_ceo_sign_line: employerSignatureHtml,
             }
           : {}),
       },

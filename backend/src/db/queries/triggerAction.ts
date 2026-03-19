@@ -8,6 +8,7 @@ import { buildTemplateData, validateRequiredFields } from "../../document/templa
 import { uploadEmployeeDocumentToR2 } from "../../storage/r2";
 import type { NormalizedActionConfig } from "./actionConfig";
 import { getEmployeeById } from "./employee";
+import { getEmployerSignatureByUserId } from "./employerSignature";
 import type { Actor } from "./types";
 
 export async function createTriggeredActionRecords(
@@ -41,8 +42,19 @@ export async function createTriggeredActionRecords(
   const recipientRoles = actionConfig?.recipients ?? [];
   const requiredEmployeeFields = actionConfig?.requiredEmployeeFields ?? [];
 
+  // Inject employer signature as <img> tag if available
+  const signatureOverrides: Record<string, string> = {};
+  if (actor?.id) {
+    const employerSig = await getEmployerSignatureByUserId(db, actor.id);
+    if (employerSig?.signatureData) {
+      signatureOverrides.issuer_signature = `<img src="${employerSig.signatureData}" style="height:40px;" />`;
+      signatureOverrides.issuer_date = now.slice(0, 10);
+    }
+  }
+
   const templateData = {
     ...buildTemplateData(employee, now),
+    ...signatureOverrides,
     ...(templateDataOverrides ?? {}),
   };
   const {

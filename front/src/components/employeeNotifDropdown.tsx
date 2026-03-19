@@ -1,7 +1,7 @@
 "use client";
 
 import { useMutation, useQuery } from "@apollo/client/react";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 
 import { GrNotification } from "react-icons/gr";
 
@@ -11,16 +11,12 @@ import { buildGraphQLHeaders } from "@/lib/apollo-client";
 import type { EmployeeNotification } from "@/lib/types";
 
 import { EmployeeNotifDrawer } from "./employee-notif/EmployeeNotifDrawer";
-import { SAMPLE_EMPLOYEE_NOTIFICATIONS } from "./employee-notif/sampleNotifications";
 
 const TOKEN_KEY = "epas_auth_token";
 
 export const EmployeeNotifDropdown = () => {
   const [open, setOpen] = useState(false);
   const [selectedId, setSelectedId] = useState<string | null>(null);
-  const [mockNotifications, setMockNotifications] = useState(
-    SAMPLE_EMPLOYEE_NOTIFICATIONS,
-  );
   const token =
     typeof window === "undefined"
       ? ""
@@ -34,6 +30,7 @@ export const EmployeeNotifDropdown = () => {
       headers: buildGraphQLHeaders({ authToken: token }),
     },
     fetchPolicy: "network-only",
+    pollInterval: 30000,
   });
 
   const [markRead] = useMutation(MARK_NOTIFICATION_READ, {
@@ -42,61 +39,37 @@ export const EmployeeNotifDropdown = () => {
     },
   });
 
-  const liveNotifications = data?.myNotifications ?? [];
-  const useMockNotifications = liveNotifications.length === 0;
-  const notifications = useMockNotifications
-    ? mockNotifications
-    : liveNotifications;
-
+  const notifications = data?.myNotifications ?? [];
   const unreadCount = notifications.filter((n) => n.status === "unread").length;
 
-  async function handleMarkRead(id: string) {
-    if (useMockNotifications) {
-      setMockNotifications((current) =>
-        current.map<EmployeeNotification>((notification) => {
-          if (notification.id !== id) return notification;
-          return {
-            ...notification,
-            status: "read",
-            readAt: new Date().toISOString(),
-          };
-        }),
-      );
-      return;
-    }
+  const handleMarkRead = useCallback(
+    async (id: string) => {
+      await markRead({ variables: { id } });
+      await refetch();
+    },
+    [markRead, refetch],
+  );
 
-    await markRead({ variables: { id } });
-    await refetch();
-  }
+  const handleSelect = useCallback(
+    async (notification: EmployeeNotification) => {
+      const nextSelectedId =
+        selectedId === notification.id ? null : notification.id;
+      setSelectedId(nextSelectedId);
 
-  async function handleSelect(notification: EmployeeNotification) {
-    const nextSelectedId =
-      selectedId === notification.id ? null : notification.id;
-    setSelectedId(nextSelectedId);
+      if (notification.status === "unread") {
+        await handleMarkRead(notification.id);
+      }
+    },
+    [selectedId, handleMarkRead],
+  );
 
-    if (notification.status === "unread") {
-      await handleMarkRead(notification.id);
-    }
-  }
-
-  async function handleMarkAllRead() {
+  const handleMarkAllRead = useCallback(async () => {
     const unread = notifications.filter((n) => n.status === "unread");
     if (unread.length === 0) return;
 
-    if (useMockNotifications) {
-      setMockNotifications((current) =>
-        current.map<EmployeeNotification>((notification) => ({
-          ...notification,
-          status: "read",
-          readAt: notification.readAt ?? new Date().toISOString(),
-        })),
-      );
-      return;
-    }
-
     await Promise.all(unread.map((n) => markRead({ variables: { id: n.id } })));
     await refetch();
-  }
+  }, [notifications, markRead, refetch]);
 
   return (
     <>

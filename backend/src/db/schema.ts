@@ -235,6 +235,20 @@ export const employeeSignatures = sqliteTable(
   (table) => [index("employee_signatures_employee_id_idx").on(table.employeeId)],
 );
 
+export const employerSignatures = sqliteTable(
+  "employer_signatures",
+  {
+    id: text("id").primaryKey(),
+    userId: text("user_id").notNull().unique(),
+    signatureData: text("signature_data").notNull(),
+    passcodeSalt: text("passcode_salt"),
+    passcodeHash: text("passcode_hash"),
+    createdAt: text("created_at").notNull(),
+    updatedAt: text("updated_at").notNull(),
+  },
+  (table) => [index("employer_signatures_user_id_idx").on(table.userId)],
+);
+
 export const schema = {
   employees,
   documents,
@@ -249,6 +263,7 @@ export const schema = {
   announcements,
   contractRequests,
   employeeSignatures,
+  employerSignatures,
 };
 
 export type Employee = typeof employees.$inferSelect;
@@ -277,3 +292,5 @@ export type ContractRequest = typeof contractRequests.$inferSelect;
 export type NewContractRequest = typeof contractRequests.$inferInsert;
 export type EmployeeSignature = typeof employeeSignatures.$inferSelect;
 export type NewEmployeeSignature = typeof employeeSignatures.$inferInsert;
+export type EmployerSignature = typeof employerSignatures.$inferSelect;
+export type NewEmployerSignature = typeof employerSignatures.$inferInsert;

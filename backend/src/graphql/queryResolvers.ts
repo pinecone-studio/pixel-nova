@@ -6,6 +6,7 @@ import {
   getLeaveRequests,
   getContractRequests,
   getEmployeeSignatureStatus,
+  getEmployerSignatureStatus,
   getEmployeeNotifications,
   listAnnouncements,
   listEmployees,
@@ -116,6 +117,16 @@ export const queryResolvers = {
       throw new Error("Unauthorized");
     }
     return getEmployeeSignatureStatus(ctx.db, ctx.actor.id);
+  },
+
+  employerSignatureStatus: (_: unknown, __: unknown, ctx: Ctx) => {
+    if (ctx.actor.role !== "hr" && ctx.actor.role !== "admin") {
+      throw new Error("Unauthorized");
+    }
+    if (!ctx.actor.id) {
+      throw new Error("Actor ID required");
+    }
+    return getEmployerSignatureStatus(ctx.db, ctx.actor.id);
   },
 
   myNotifications: (_: unknown, __: unknown, ctx: Ctx) => {

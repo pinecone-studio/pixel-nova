@@ -29,3 +29,13 @@ export const GET_SIGNATURE_STATUS = gql`
     }
   }
 `;
+
+export const GET_EMPLOYER_SIGNATURE_STATUS = gql`
+  query GetEmployerSignatureStatus {
+    employerSignatureStatus {
+      hasSignature
+      hasPasscode
+      updatedAt
+    }
+  }
+`;
