@@ -104,3 +104,20 @@ export async function updateAuditLogDelivery(
     })
     .where(eq(auditLog.id, auditId));
 }
+
+export async function updateAuditLogSignature(
+  db: DbClient,
+  auditId: string,
+  input: {
+    employeeSigned: boolean;
+    employeeSignedAt?: string | null;
+  },
+) {
+  await db
+    .update(auditLog)
+    .set({
+      employeeSigned: input.employeeSigned,
+      employeeSignedAt: input.employeeSignedAt ?? null,
+    })
+    .where(eq(auditLog.id, auditId));
+}
