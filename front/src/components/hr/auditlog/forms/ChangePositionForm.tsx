@@ -63,7 +63,7 @@ export function ChangePositionForm({
     errors[key] ? `${inputClass} border-red-300 focus:border-red-400` : inputClass;
   const fillMock = () => {
     const defaultDept = departments?.[0] ?? "Engineering";
-    setEmployeeCode("EMP0003");
+    setEmployeeCode("EMP-0001");
     setLastName("Дорж");
     setFirstName("Эрдэнэ");
     setCurrentDept(defaultDept);
