@@ -4,7 +4,10 @@ import type { DbClient } from "../client";
 import { auditLog, documents } from "../schema";
 import { generateEmployeeDocument } from "../../document/generator";
 import { renderPdfFromService } from "../../document/pdfRenderer";
-import { buildTemplateData, validateRequiredFields } from "../../document/templateData";
+import {
+  buildTemplateData,
+  validateRequiredFields,
+} from "../../document/templateData";
 import { uploadEmployeeDocumentToR2 } from "../../storage/r2";
 import type { NormalizedActionConfig } from "./actionConfig";
 import { getEmployeeById } from "./employee";
@@ -17,7 +20,7 @@ export async function createTriggeredActionRecords(
   actionName: string,
   bucket?: R2Bucket,
   actor?: Actor,
-  pdfRenderer?: { serviceUrl?: string | null; secret?: string | null },
+  pdfRenderer?: { serviceUrl?: any | null; secret?: string | null },
   actionConfig?: NormalizedActionConfig | null,
   templateDataOverrides?: Record<string, string>,
 ) {
@@ -28,9 +31,7 @@ export async function createTriggeredActionRecords(
   }
 
   const rendererUrl = pdfRenderer?.serviceUrl?.trim();
-  if (!rendererUrl) {
-    throw new Error("PDF renderer service URL is not configured");
-  }
+  const hasRenderer = Boolean(rendererUrl);
 
   const now = new Date().toISOString();
   const normalizedAction = actionName.trim();
@@ -68,10 +69,8 @@ export async function createTriggeredActionRecords(
     ...signatureOverrides,
     ...(templateDataOverrides ?? {}),
   };
-  const {
-    data: patchedTemplateData,
-    incompleteFields,
-  } = validateRequiredFields(templateData, requiredEmployeeFields);
+  const { data: patchedTemplateData, incompleteFields } =
+    validateRequiredFields(templateData, requiredEmployeeFields);
 
   const documentInserts: Array<{
     id: string;
@@ -93,12 +92,24 @@ export async function createTriggeredActionRecords(
       templateFile: tmpl.template,
       templateData: patchedTemplateData,
     });
-    const pdfBytes = await renderPdfFromService({
-      html: generated.html,
-      documentName: generated.documentName,
-      serviceUrl: rendererUrl,
-      secret: pdfRenderer?.secret,
-    });
+    let renderedPdf = hasRenderer;
+    let pdfBytes: Uint8Array;
+    if (hasRenderer) {
+      try {
+        pdfBytes = await renderPdfFromService({
+          html: generated.html,
+          documentName: generated.documentName,
+          serviceUrl: rendererUrl,
+          secret: pdfRenderer?.secret,
+        });
+      } catch (err) {
+        console.error(`PDF render failed for ${tmpl.id}:`, err);
+        renderedPdf = false;
+        pdfBytes = new TextEncoder().encode(generated.html);
+      }
+    } else {
+      pdfBytes = new TextEncoder().encode(generated.html);
+    }
 
     let storageUrl = "";
 
@@ -117,16 +128,20 @@ export async function createTriggeredActionRecords(
           documentId,
           documentName: `${orderPrefix}_${tmpl.id}.pdf`,
           content: pdfBytes,
-          contentType: "application/pdf",
+          contentType: renderedPdf ? "application/pdf" : "text/html",
           createdAt: now,
         });
         storageUrl = `r2://${r2Key}`;
       } catch (err) {
         console.error(`R2 upload failed for ${tmpl.id}:`, err);
-        storageUrl = `data:application/pdf;base64,${Buffer.from(pdfBytes).toString("base64")}`;
+        storageUrl = renderedPdf
+          ? `data:application/pdf;base64,${Buffer.from(pdfBytes).toString("base64")}`
+          : `data:text/html;charset=utf-8,${encodeURIComponent(generated.html)}`;
       }
     } else {
-      storageUrl = `data:application/pdf;base64,${Buffer.from(pdfBytes).toString("base64")}`;
+      storageUrl = renderedPdf
+        ? `data:application/pdf;base64,${Buffer.from(pdfBytes).toString("base64")}`
+        : `data:text/html;charset=utf-8,${encodeURIComponent(generated.html)}`;
     }
 
     documentInserts.push({
@@ -160,12 +175,17 @@ export async function createTriggeredActionRecords(
     }),
   ];
 
-  await db.batch(batchOps as [typeof batchOps[0], ...typeof batchOps]);
+  await db.batch(batchOps as [(typeof batchOps)[0], ...typeof batchOps]);
 
   const createdDocuments = await db
     .select()
     .from(documents)
-    .where(and(eq(documents.employeeId, employeeId), eq(documents.action, normalizedAction)))
+    .where(
+      and(
+        eq(documents.employeeId, employeeId),
+        eq(documents.action, normalizedAction),
+      ),
+    )
     .orderBy(documents.documentName);
 
   const [auditEntry] = await db

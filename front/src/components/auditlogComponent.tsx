@@ -518,121 +518,123 @@ export function AuditlogComponent() {
         </div>
 
         {/* Body */}
-        {auditLoading ? (
-          <div className="flex flex-col gap-3 px-5 py-8">
-            <div className="h-4 w-56 rounded-full skeleton" />
-            <div className="h-3 w-80 rounded-full skeleton" />
-            <div className="h-3 w-72 rounded-full skeleton" />
-          </div>
-        ) : auditLogs.length === 0 ? (
-          <div className="py-12 text-center text-[#3f4145] text-sm">
-            Бүртгэл олдсонгүй
-          </div>
-        ) : (
-          auditLogs.map((log) => {
-            const emp = employeeMap.get(log.employeeId);
-            const empName = emp
-              ? `${emp.lastName} ${emp.firstName}`
-              : log.employeeId;
-            const docLabel = ACTION_DOC_LABELS[log.action] ?? log.action;
-            const phaseStyle =
-              PHASE_BADGE_STYLES[log.phase] ??
-              "bg-slate-50 text-slate-600 border-slate-200";
-            const phaseLabel = PHASE_LABELS[log.phase] ?? log.phase;
-            const dateStr = new Date(log.timestamp).toLocaleDateString(
-              "mn-MN",
-              {
-                year: "numeric",
-                month: "2-digit",
-                day: "2-digit",
-              },
-            );
+        <div className="max-h-[389px] overflow-y-auto">
+          {auditLoading ? (
+            <div className="flex flex-col gap-3 px-5 py-8">
+              <div className="h-4 w-56 rounded-full skeleton" />
+              <div className="h-3 w-80 rounded-full skeleton" />
+              <div className="h-3 w-72 rounded-full skeleton" />
+            </div>
+          ) : auditLogs.length === 0 ? (
+            <div className="py-12 text-center text-[#3f4145] text-sm">
+              Бүртгэл олдсонгүй
+            </div>
+          ) : (
+            auditLogs.map((log) => {
+              const emp = employeeMap.get(log.employeeId);
+              const empName = emp
+                ? `${emp.lastName} ${emp.firstName}`
+                : log.employeeId;
+              const docLabel = ACTION_DOC_LABELS[log.action] ?? log.action;
+              const phaseStyle =
+                PHASE_BADGE_STYLES[log.phase] ??
+                "bg-slate-50 text-slate-600 border-slate-200";
+              const phaseLabel = PHASE_LABELS[log.phase] ?? log.phase;
+              const dateStr = new Date(log.timestamp).toLocaleDateString(
+                "mn-MN",
+                {
+                  year: "numeric",
+                  month: "2-digit",
+                  day: "2-digit",
+                },
+              );
 
-            return (
-              <div
-                key={log.id}
-                className="grid items-center border-b border-black/12 px-3 py-3.5 transition-colors hover:bg-[#fafafa] md:px-5 cursor-pointer"
-                style={{
-                  gridTemplateColumns:
-                    "minmax(160px,2fr) minmax(140px,1.5fr) minmax(120px,1fr) minmax(110px,1fr) minmax(140px,1.2fr) minmax(120px,1fr) 80px",
-                }}
-                onClick={() => setDetailLog(log)}>
-                {/* Баримт бичиг */}
-                <div className="flex items-center gap-1.5 px-2">
-                  <div className="flex h-9 w-9 shrink-0 items-center justify-center">
-                    <ReqIcon className="h-4 w-4 text-[#121316]" />
-                  </div>
-                  <span className="truncate text-[14px] font-medium text-[#121316]">
-                    {docLabel}
-                  </span>
-                </div>
-
-                {/* Ажилтан */}
-                <div className="flex items-center gap-2 px-2">
-                  <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#f0f0f0]">
-                    {emp?.imageUrl ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img
-                        src={emp.imageUrl}
-                        alt={empName}
-                        className="h-7 w-7 rounded-full object-cover"
-                      />
-                    ) : (
-                      <FiUser className="h-3.5 w-3.5 text-[#77818c]" />
-                    )}
-                  </div>
-                  <span className="truncate text-[13px] text-[#121316]">
-                    {empName}
-                  </span>
-                </div>
-
-                {/* Үе (Phase badge) */}
-                <div className="px-2">
-                  <span
-                    className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-[11px] font-medium ${phaseStyle}`}>
-                    <span className="text-sm">
-                      <HiOutlineLightningBolt />
-                    </span>
-                    {phaseLabel}
-                  </span>
-                </div>
-
-                {/* Огноо */}
-                <div className="flex items-center gap-1.5 px-2">
-                  <CalIcon className="h-3.5 w-3.5 text-[#77818c]" />
-                  <span className="text-[13px] text-[#3f4145]">{dateStr}</span>
-                </div>
-
-                {/* Төлөв (status dots) */}
-                <div className="px-2">
-                  <StatusDots log={log} />
-                </div>
-
-                {/* Имэйл */}
-                <div className="px-2">
-                  <EmailStatus log={log} />
-                </div>
-
-                {/* Үйлдэл (download + delete) */}
+              return (
                 <div
-                  className="flex items-center gap-1 px-2"
-                  onClick={(e) => e.stopPropagation()}>
-                  <button
-                    className="flex h-8 w-8 items-center justify-center rounded-[10px] text-[#77818c] transition-colors hover:bg-[#f5f5f5] hover:text-[#121316]"
-                    aria-label="Татах"
-                    onClick={() => setDetailLog(log)}>
-                    <FiDownload className="h-4 w-4" />
-                  </button>
-                  <button
-                    className="flex h-8 w-8 items-center justify-center rounded-[10px] text-red-400 transition-colors hover:bg-red-50 hover:text-red-600"
-                    aria-label="Устгах">
-                    <FiTrash2 className="h-4 w-4" />
-                  </button>
+                  key={log.id}
+                  className="grid items-center border-b border-black/12 px-3 py-3.5 transition-colors hover:bg-[#fafafa] md:px-5 cursor-pointer"
+                  style={{
+                    gridTemplateColumns:
+                      "minmax(160px,2fr) minmax(140px,1.5fr) minmax(120px,1fr) minmax(110px,1fr) minmax(140px,1.2fr) minmax(120px,1fr) 80px",
+                  }}
+                  onClick={() => setDetailLog(log)}>
+                  {/* Баримт бичиг */}
+                  <div className="flex items-center gap-1.5 px-2">
+                    <div className="flex h-9 w-9 shrink-0 items-center justify-center">
+                      <ReqIcon className="h-4 w-4 text-[#121316]" />
+                    </div>
+                    <span className="truncate text-[14px] font-medium text-[#121316]">
+                      {docLabel}
+                    </span>
+                  </div>
+
+                  {/* Ажилтан */}
+                  <div className="flex items-center gap-2 px-2">
+                    <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#f0f0f0]">
+                      {emp?.imageUrl ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img
+                          src={emp.imageUrl}
+                          alt={empName}
+                          className="h-7 w-7 rounded-full object-cover"
+                        />
+                      ) : (
+                        <FiUser className="h-3.5 w-3.5 text-[#77818c]" />
+                      )}
+                    </div>
+                    <span className="truncate text-[13px] text-[#121316]">
+                      {empName}
+                    </span>
+                  </div>
+
+                  {/* Үе (Phase badge) */}
+                  <div className="px-2">
+                    <span
+                      className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-[11px] font-medium ${phaseStyle}`}>
+                      <span className="text-sm">
+                        <HiOutlineLightningBolt />
+                      </span>
+                      {phaseLabel}
+                    </span>
+                  </div>
+
+                  {/* Огноо */}
+                  <div className="flex items-center gap-1.5 px-2">
+                    <CalIcon className="h-3.5 w-3.5 text-[#77818c]" />
+                    <span className="text-[13px] text-[#3f4145]">{dateStr}</span>
+                  </div>
+
+                  {/* Төлөв (status dots) */}
+                  <div className="px-2">
+                    <StatusDots log={log} />
+                  </div>
+
+                  {/* Имэйл */}
+                  <div className="px-2">
+                    <EmailStatus log={log} />
+                  </div>
+
+                  {/* Үйлдэл (download + delete) */}
+                  <div
+                    className="flex items-center gap-1 px-2"
+                    onClick={(e) => e.stopPropagation()}>
+                    <button
+                      className="flex h-8 w-8 items-center justify-center rounded-[10px] text-[#77818c] transition-colors hover:bg-[#f5f5f5] hover:text-[#121316]"
+                      aria-label="Татах"
+                      onClick={() => setDetailLog(log)}>
+                      <FiDownload className="h-4 w-4" />
+                    </button>
+                    <button
+                      className="flex h-8 w-8 items-center justify-center rounded-[10px] text-red-400 transition-colors hover:bg-red-50 hover:text-red-600"
+                      aria-label="Устгах">
+                      <FiTrash2 className="h-4 w-4" />
+                    </button>
+                  </div>
                 </div>
-              </div>
-            );
-          })
-        )}
+              );
+            })
+          )}
+        </div>
 
         {/* Footer */}
         {!auditLoading && auditLogs.length > 0 && (

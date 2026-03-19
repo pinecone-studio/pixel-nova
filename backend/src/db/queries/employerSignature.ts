@@ -8,13 +8,21 @@ export async function getEmployerSignatureByUserId(
   db: DbClient,
   userId: string,
 ) {
-  const [row] = await db
-    .select()
-    .from(employerSignatures)
-    .where(eq(employerSignatures.userId, userId))
-    .limit(1);
+  try {
+    const [row] = await db
+      .select()
+      .from(employerSignatures)
+      .where(eq(employerSignatures.userId, userId))
+      .limit(1);
 
-  return row ?? null;
+    return row ?? null;
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    if (message.includes("no such table") || message.includes("employer_signatures")) {
+      return null;
+    }
+    throw err;
+  }
 }
 
 export async function upsertEmployerSignature(

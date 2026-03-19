@@ -198,6 +198,12 @@ export interface EmployeeSignatureStatus {
   updatedAt?: string | null;
 }
 
+export interface EmployeeSignature {
+  employeeId: string;
+  signatureData: string;
+  updatedAt?: string | null;
+}
+
 export interface EmployeeNotification {
   id: string;
   employeeId: string;

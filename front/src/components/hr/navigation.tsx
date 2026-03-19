@@ -4,21 +4,17 @@ import {
   AuditLog as AuditLogIcon,
   CubaIcon,
   InsightIcon,
-  NotifIcon,
   SettingsIcon,
   UsersIcon,
 } from "@/components/icons";
 import { GrDocument } from "react-icons/gr";
-import { FiFileText } from "react-icons/fi";
 
 export type HrSectionKey =
   | "dashboard"
   | "employees"
   | "requests"
   | "documents"
-  | "templates"
   | "audit-log"
-  | "notif"
   | "settings";
 
 export type HrNavItem = {
@@ -54,22 +50,10 @@ export const HR_NAV_ITEMS: HrNavItem[] = [
     icon: <CubaIcon />,
   },
   {
-    key: "templates",
-    label: "Загварууд",
-    href: "/hr/templates",
-    icon: <FiFileText />,
-  },
-  {
     key: "audit-log",
     label: "Үйлдлийн бүртгэл",
     href: "/hr/audit-log",
     icon: <InsightIcon />,
-  },
-  {
-    key: "notif",
-    label: "Мэдэгдэл",
-    href: "/hr/notif",
-    icon: <NotifIcon />,
   },
   {
     key: "settings",

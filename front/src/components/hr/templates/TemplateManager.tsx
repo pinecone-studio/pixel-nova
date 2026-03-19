@@ -3,9 +3,9 @@
 import { useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 import { useQuery } from "@apollo/client/react";
-import { FiSearch } from "react-icons/fi";
 
 import { GET_EMPLOYEES } from "@/graphql/queries/employees";
+import { GET_CONTRACT_REQUESTS } from "@/graphql/queries/contract-requests";
 import { buildGraphQLHeaders } from "@/lib/apollo-client";
 import {
   TEMPLATE_REGISTRY,
@@ -13,7 +13,7 @@ import {
   getTemplatesByPhase,
 } from "@/lib/templateConfig";
 import type { TemplateInfo } from "@/lib/templateConfig";
-import type { Employee } from "@/lib/types";
+import type { ContractRequest, Employee } from "@/lib/types";
 
 import { PhaseSection } from "./PhaseSection";
 import { TemplatePreviewModal } from "./TemplatePreviewModal";
@@ -30,10 +30,19 @@ export default function TemplateManager() {
     [employeeData?.employees],
   );
 
+  const { data: approvedData, loading: approvedLoading } = useQuery<{
+    contractRequests: ContractRequest[];
+  }>(GET_CONTRACT_REQUESTS, {
+    variables: { status: "approved" },
+    context: { headers: buildGraphQLHeaders({ actorRole: "hr" }) },
+  });
+
   const [previewTemplate, setPreviewTemplate] = useState<TemplateInfo | null>(
     null,
   );
-  const [search, setSearch] = useState("");
+  const [activePhase, setActivePhase] = useState<
+    "all" | (typeof PHASES)[number]
+  >("all");
   const { setBlurred } = useHrOverlay();
 
   useEffect(() => {
@@ -42,26 +51,13 @@ export default function TemplateManager() {
   }, [previewTemplate, setBlurred]);
 
   const filteredByPhase = useMemo(() => {
-    const query = search.toLowerCase();
-
-    return PHASES.map((phase) => {
-      let templates = getTemplatesByPhase(phase);
-      if (query) {
-        templates = templates.filter(
-          (template) =>
-            template.label.toLowerCase().includes(query) ||
-            template.id.toLowerCase().includes(query) ||
-            template.tokens.some(
-              (token) =>
-                token.key.includes(query) ||
-                token.label.toLowerCase().includes(query),
-            ),
-        );
-      }
-
-      return { phase, templates };
-    });
-  }, [search]);
+    const phases =
+      activePhase === "all" ? PHASES : ([activePhase] as typeof PHASES);
+    return phases.map((phase) => ({
+      phase,
+      templates: getTemplatesByPhase(phase),
+    }));
+  }, [activePhase]);
 
   const totalTemplates = TEMPLATE_REGISTRY.length;
   const totalTokens = new Set(
@@ -88,6 +84,31 @@ export default function TemplateManager() {
     return employeeIds.size;
   }, [employees]);
 
+  const templateLabelMap = useMemo(() => {
+    const map = new Map<string, string>();
+    for (const template of TEMPLATE_REGISTRY) {
+      map.set(template.id, template.label);
+    }
+    return map;
+  }, []);
+
+  const approvedContracts = useMemo(() => {
+    const rows = approvedData?.contractRequests ?? [];
+    return [...rows].sort((a, b) => {
+      const aTime = new Date(a.decidedAt ?? a.updatedAt).getTime();
+      const bTime = new Date(b.decidedAt ?? b.updatedAt).getTime();
+      return bTime - aTime;
+    });
+  }, [approvedData]);
+
+  function formatDate(value: string) {
+    return new Date(value).toLocaleDateString("mn-MN", {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    });
+  }
+
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -97,19 +118,33 @@ export default function TemplateManager() {
             Баримт бичгийн загвар, токен, шаардлагатай талбаруудыг удирдах
           </p>
         </div>
+      </div>
 
-        <div className="relative">
-          <div className="pointer-events-none absolute inset-y-0 left-3 flex items-center">
-            <FiSearch className="h-4 w-4 text-[#77818c]" />
-          </div>
-          <input
-            type="text"
-            value={search}
-            onChange={(event) => setSearch(event.target.value)}
-            placeholder="Загвар хайх..."
-            className="h-9 w-full rounded-[10px] border border-black/12 bg-white pl-9 pr-3 text-[14px] text-[#121316] placeholder:text-[#77818c] outline-none transition-colors focus:border-[#121316]/30 sm:w-56"
-          />
-        </div>
+      <div className="flex flex-wrap gap-2">
+        {[
+          { key: "all", label: "Бүгд" },
+          { key: "onboarding", label: "Ажилд орох" },
+          { key: "working", label: "Ажиллах" },
+          { key: "offboarding", label: "Ажлаас гарах" },
+        ].map((button) => {
+          const isActive = activePhase === button.key;
+          return (
+            <button
+              key={button.key}
+              type="button"
+              onClick={() =>
+                setActivePhase(button.key as "all" | (typeof PHASES)[number])
+              }
+              className={`rounded-full border px-4 py-2 text-[12px] font-semibold transition-colors ${
+                isActive
+                  ? "border-[#121316] bg-[#121316] text-white"
+                  : "border-black/12 bg-white text-[#3f4145] hover:bg-[#f5f5f5]"
+              }`}
+            >
+              {button.label}
+            </button>
+          );
+        })}
       </div>
 
       <div className="grid grid-cols-3 gap-3">
@@ -159,6 +194,68 @@ export default function TemplateManager() {
         <div className="flex items-center gap-1.5 text-[12px]">
           <span className="inline-block h-3 w-3 rounded-full border border-slate-200 bg-slate-50" />
           <span className="text-[#3f4145]">Автомат тооцоолол</span>
+        </div>
+      </div>
+
+      <div className="rounded-[16px] border border-black/10 bg-white p-5">
+        <div className="flex items-center justify-between gap-3">
+          <div>
+            <h3 className="text-[16px] font-semibold text-[#121316]">
+              Амжилттай гэрээнүүд
+            </h3>
+            <p className="text-[12px] text-[#77818c]">
+              HR баталсан гэрээний хүсэлтүүд
+            </p>
+          </div>
+          <span className="rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-[12px] font-medium text-emerald-700">
+            {approvedContracts.length}
+          </span>
+        </div>
+
+        <div className="mt-4 flex flex-col gap-3">
+          {approvedLoading ? (
+            <div className="rounded-[12px] border border-dashed border-black/10 px-4 py-3 text-[13px] text-[#77818c]">
+              Ачаалж байна...
+            </div>
+          ) : approvedContracts.length === 0 ? (
+            <div className="rounded-[12px] border border-dashed border-black/10 px-4 py-3 text-[13px] text-[#77818c]">
+              Одоогоор баталгаажсан гэрээ алга байна.
+            </div>
+          ) : (
+            approvedContracts.map((row) => {
+              const templateLabels = row.templateIds
+                .map((id) => templateLabelMap.get(id) ?? id)
+                .join(", ");
+              const decidedAt = row.decidedAt ?? row.updatedAt;
+              return (
+                <div
+                  key={row.id}
+                  className="flex flex-col gap-2 rounded-[12px] border border-black/10 bg-slate-50/60 px-4 py-3"
+                >
+                  <div className="flex flex-wrap items-center justify-between gap-3">
+                    <div className="flex flex-col">
+                      <span className="text-[14px] font-semibold text-[#121316]">
+                        {row.employee.lastName} {row.employee.firstName}
+                      </span>
+                      <span className="text-[12px] text-[#77818c]">
+                        {row.employee.employeeCode} • {row.employee.department}
+                      </span>
+                    </div>
+                    <span className="rounded-full border border-emerald-200 bg-white px-2.5 py-1 text-[12px] font-medium text-emerald-700">
+                      Баталгаажсан
+                    </span>
+                  </div>
+
+                  <div className="text-[12px] text-[#3f4145]">
+                    Гэрээ: {templateLabels || "Тодорхойгүй"}
+                  </div>
+                  <div className="text-[12px] text-[#77818c]">
+                    Баталсан огноо: {formatDate(decidedAt)}
+                  </div>
+                </div>
+              );
+            })
+          )}
         </div>
       </div>
 

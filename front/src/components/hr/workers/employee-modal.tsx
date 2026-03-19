@@ -260,7 +260,7 @@ export function EmployeeModal({
     >
       <DialogContent
         style={{ width: 560, maxWidth: 560 }}
-        className="max-h-[calc(100vh-2rem)] overflow-hidden rounded-3xl border border-slate-200 bg-white p-7 [&>button]:text-slate-400 [&>button]:transition-colors [&>button]:hover:text-slate-700"
+        className="flex max-h-[calc(100vh-2rem)] flex-col overflow-hidden rounded-3xl border border-slate-200 bg-white p-7 [&>button]:text-slate-400 [&>button]:transition-colors [&>button]:hover:text-slate-700"
       >
         <DialogHeader className="shrink-0 pb-4">
           <DialogTitle className="text-xl font-bold text-slate-900">
@@ -268,7 +268,7 @@ export function EmployeeModal({
           </DialogTitle>
         </DialogHeader>
 
-        <div className="flex flex-1 flex-col gap-4 overflow-y-auto pr-1">
+        <div className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto pr-1">
           {mode === "add" && !signatureStatusLoading && !hasSavedEmployerSignature ? (
             <div className="flex flex-col gap-4 rounded-3xl border border-amber-200 bg-amber-50/70 p-5">
               <div className="flex flex-col gap-1">

@@ -38,6 +38,13 @@ type FilterAction = "" | "add_employee" | "promote_employee" | "change_position"
 // ---------------------------------------------------------------------------
 
 function AuditStatusBadge({ log }: { log: AuditLog }) {
+  if (!log.documentsGenerated) {
+    return (
+      <span className="rounded-full border border-[#FF8A80] bg-white px-3 py-1 text-[12px] font-medium text-[#FF3B30]">
+        Алдаатай
+      </span>
+    );
+  }
   if (log.employeeSigned) {
     return (
       <span className="rounded-full border border-[#86EFAC] bg-white px-3 py-1 text-[12px] font-medium text-[#22C55E]">
@@ -45,23 +52,16 @@ function AuditStatusBadge({ log }: { log: AuditLog }) {
       </span>
     );
   }
-  if (log.notificationError) {
+  if (log.incompleteFields.length > 0) {
     return (
-      <span className="rounded-full border border-[#FF8A80] bg-white px-3 py-1 text-[12px] font-medium text-[#FF3B30]">
-        Алдаатай
-      </span>
-    );
-  }
-  if (log.documentsGenerated && log.recipientsNotified) {
-    return (
-      <span className="rounded-full border border-[#86EFAC] bg-white px-3 py-1 text-[12px] font-medium text-[#22C55E]">
-        Амжилттай
+      <span className="rounded-full border border-[#FDE68A] bg-white px-3 py-1 text-[12px] font-medium text-[#D97706]">
+        Хэсэгчлэн
       </span>
     );
   }
   return (
-    <span className="rounded-full border border-[#FDE68A] bg-white px-3 py-1 text-[12px] font-medium text-[#D97706]">
-      Хэсэгчлэн
+    <span className="rounded-full border border-[#86EFAC] bg-white px-3 py-1 text-[12px] font-medium text-[#22C55E]">
+      Амжилттай
     </span>
   );
 }
@@ -164,8 +164,10 @@ function AuditDetailModal({
               <span className="text-[#22C55E] font-medium">
                 Илгээсэн ({log.recipientEmails.length})
               </span>
-            ) : log.notificationError ? (
-              <span className="text-[#FF3B30] font-medium">Алдаа</span>
+            ) : log.documentsGenerated ? (
+              <span className="text-[#667085] font-medium">
+                Илгээхээр бэлтгэсэн
+              </span>
             ) : (
               <span className="text-[#98A2B3]">Илгээгээгүй</span>
             )}
@@ -179,13 +181,6 @@ function AuditDetailModal({
               <span className="text-[#98A2B3]">Зураагүй</span>
             )}
           </div>
-
-          {/* Error */}
-          {log.notificationError && (
-            <div className="rounded-xl border border-[#FF8A80] bg-[#FFF1F1] px-4 py-3 text-[13px] text-[#FF3B30]">
-              {log.notificationError}
-            </div>
-          )}
 
           {/* Incomplete fields */}
           {log.incompleteFields.length > 0 && (

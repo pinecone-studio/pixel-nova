@@ -39,3 +39,13 @@ export const GET_EMPLOYER_SIGNATURE_STATUS = gql`
     }
   }
 `;
+
+export const GET_EMPLOYEE_SIGNATURE = gql`
+  query GetEmployeeSignature($employeeId: ID!) {
+    employeeSignature(employeeId: $employeeId) {
+      employeeId
+      signatureData
+      updatedAt
+    }
+  }
+`;

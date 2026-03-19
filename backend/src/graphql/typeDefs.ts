@@ -56,6 +56,12 @@ export const typeDefs = /* GraphQL */ `
     timestamp: String!
   }
 
+  type EmployeeSignature {
+    employeeId: ID!
+    signatureData: String!
+    updatedAt: String
+  }
+
   type Recipient {
     id: ID!
     role: String!
@@ -268,6 +274,7 @@ export const typeDefs = /* GraphQL */ `
     contractRequests(status: String): [ContractRequest!]!
     myContractRequests: [ContractRequest!]!
     mySignatureStatus: EmployeeSignatureStatus!
+    employeeSignature(employeeId: ID!): EmployeeSignature
     employerSignatureStatus: EmployerSignatureStatus!
     myNotifications: [EmployeeNotification!]!
     announcements: [Announcement!]!
