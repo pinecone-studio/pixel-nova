@@ -233,14 +233,14 @@ export default function Profile() {
                 {getInitials(employee)}
               </div>
             )}
-            <div className="min-w-0 flex-1 md:pb-1">
-              <h2 className="text-[22px] font-semibold leading-[30px] tracking-[-0.088px] text-[#121316]">
+            <div className="min-w-0 flex-1 ">
+              <h2 className="h-[30px] text-[22px] font-semibold leading-[30px] tracking-[-0.088px] text-[#121316]">
                 {displayName}
               </h2>
-              <p className="text-[16px] leading-6 tracking-[-0.16px] text-black/70">
+              <p className="h-6 mt-1 text-[16px] leading-6 tracking-[-0.16px] text-black/70">
                 {displayNameEng}
               </p>
-              <div className="flex flex-wrap items-center gap-2 pt-[10px]">
+              <div className="h-[38px] flex flex-wrap items-center gap-2 pt-[10px]">
                 <span className="flex items-center gap-1 rounded-[10px] border border-black/12 px-[13px] py-[5px] text-center text-[12px] font-medium leading-[18px] text-black/70">
                   <Senior />
                   {employee?.jobTitle ?? "Мэдээлэлгүй"}

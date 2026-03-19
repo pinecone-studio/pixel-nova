@@ -1,4 +1,5 @@
 import type { Document } from "@/lib/types";
+import { FiX } from "react-icons/fi";
 
 export function FilesPreviewHeader({
   document,
@@ -8,55 +9,18 @@ export function FilesPreviewHeader({
   onClose: () => void;
 }) {
   return (
-    <div
-      style={{
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "space-between",
-        padding: "22px 24px 18px",
-        borderBottom: "1px solid #E5E7EB",
-        background: "#FFFFFF",
-      }}
-    >
+    <div className="flex items-center justify-between border-b border-black/12 px-6 py-4">
       <div>
-        <p
-          style={{
-            color: "#111827",
-            fontSize: 18,
-            fontWeight: 600,
-            margin: 0,
-          }}
-        >
+        <h3 className="text-[16px] font-semibold text-[#121316]">
           {document.action}
-        </p>
-        <p
-          style={{
-            color: "#64748B",
-            fontSize: 14,
-            marginTop: 6,
-          }}
-        >
-          {document.documentName}
-        </p>
+        </h3>
+        <p className="text-[13px] text-[#3f4145]">{document.documentName}</p>
       </div>
       <button
-        type="button"
         onClick={onClose}
-        style={{
-          width: 40,
-          height: 40,
-          borderRadius: 12,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          color: "#111827",
-          background: "#F8FAFC",
-          border: "1px solid #E5E7EB",
-          cursor: "pointer",
-          fontSize: 22,
-        }}
+        className="flex h-8 w-8 items-center justify-center rounded-[10px] text-[#77818c] transition-colors hover:bg-[#f5f5f5] hover:text-[#121316]"
       >
-        ✕
+        <FiX className="h-5 w-5" />
       </button>
     </div>
   );
