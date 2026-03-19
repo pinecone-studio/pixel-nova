@@ -232,3 +232,12 @@ export interface Announcement {
   recipientCount: number;
   readCount: number;
 }
+
+export interface HrNotification {
+  id: string;
+  title: string;
+  body: string;
+  status: "unread" | "read";
+  createdAt: string;
+  sourceType: string;
+}
