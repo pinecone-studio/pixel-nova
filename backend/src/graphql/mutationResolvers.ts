@@ -1,5 +1,6 @@
 import {
   createEmployeeCodeSession,
+  deleteDocument,
   deleteSessionByToken,
   ensureDefaultActionConfigs,
   getAuditLogById,
@@ -319,6 +320,13 @@ export const mutationResolvers = {
     }
     const row = await updateLeaveRequestStatus(ctx.db, args.id, "approved", args.note);
     if (!row) throw new Error("Leave request not found");
+    await insertEmployeeNotification(ctx.db, {
+      employeeId: row.employeeId,
+      title: "Чөлөөний хүсэлт батлагдлаа",
+      body: args.note?.trim()
+        ? `Таны ${row.type} хүсэлт батлагдлаа.\nТайлбар: ${args.note.trim()}`
+        : `Таны ${row.type} хүсэлт батлагдлаа.`,
+    });
     return row;
   },
 
@@ -332,6 +340,13 @@ export const mutationResolvers = {
     }
     const row = await updateLeaveRequestStatus(ctx.db, args.id, "rejected", args.note);
     if (!row) throw new Error("Leave request not found");
+    await insertEmployeeNotification(ctx.db, {
+      employeeId: row.employeeId,
+      title: "Чөлөөний хүсэлт татгалзагдлаа",
+      body: args.note?.trim()
+        ? `Таны ${row.type} хүсэлт татгалзагдлаа.\nТайлбар: ${args.note.trim()}`
+        : `Таны ${row.type} хүсэлт татгалзагдлаа.`,
+    });
     return row;
   },
 
@@ -628,6 +643,13 @@ export const mutationResolvers = {
       args.note,
     );
     if (!updated) throw new Error("Contract request not found");
+    await insertEmployeeNotification(ctx.db, {
+      employeeId: updated.employeeId,
+      title: "Гэрээний хүсэлт татгалзагдлаа",
+      body: args.note?.trim()
+        ? `Таны гэрээний хүсэлт татгалзагдлаа.\nТайлбар: ${args.note.trim()}`
+        : "Таны гэрээний хүсэлт татгалзагдлаа.",
+    });
     return updated;
   },
 
@@ -780,7 +802,24 @@ export const mutationResolvers = {
       throw new Error("Failed to save document");
     }
 
+    await insertEmployeeNotification(ctx.db, {
+      employeeId: employee.id,
+      title: "Шинэ баримт нэмэгдлээ",
+      body: `"${documentName}" баримтыг HR нэмлээ.`,
+    });
+
     return inserted;
+  },
+
+  deleteDocument: async (
+    _: unknown,
+    args: { id: string },
+    ctx: Ctx,
+  ) => {
+    if (ctx.actor.role !== "hr" && ctx.actor.role !== "admin") {
+      throw new Error("Unauthorized");
+    }
+    return deleteDocument(ctx.db, args.id);
   },
 
   retryNotification: async (

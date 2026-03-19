@@ -10,3 +10,13 @@ export const UPLOAD_HR_DOCUMENT = gql`
   }
   ${DOCUMENT_FIELDS}
 `;
+
+export const DELETE_DOCUMENT = gql`
+  mutation DeleteDocument($id: ID!) {
+    deleteDocument(id: $id) {
+      ...DocumentFields
+    }
+  }
+  ${DOCUMENT_FIELDS}
+`;
+
