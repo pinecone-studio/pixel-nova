@@ -8,6 +8,7 @@ import { BiUser } from "react-icons/bi";
 import { AuthShell } from "@/components/auth/AuthShell";
 import { Button } from "@/components/ui/button";
 import { LOGIN_WITH_CODE } from "@/graphql/mutations";
+import { notifyAuthStateChanged } from "@/lib/auth-events";
 import type { AuthSession } from "@/lib/types";
 
 const TOKEN_STORAGE_KEY = "epas_auth_token";
@@ -39,6 +40,7 @@ export default function EmployeeAuthPage() {
 
       localStorage.setItem(TOKEN_STORAGE_KEY, session.token);
       localStorage.setItem("epas_employee_code", code);
+      notifyAuthStateChanged();
       router.push("/employee");
     } catch (err) {
       const message =

@@ -3,6 +3,7 @@ import { ApolloClient, HttpLink, InMemoryCache } from "@apollo/client";
 export const API_URL = (
   process.env.NEXT_PUBLIC_API_URL || "https://backend.pixel-nova.workers.dev"
 ).replace(/\/$/, "");
+export const HR_ACTOR_ID = "hr-shared-actor";
 
 export interface GraphQLRequestOptions {
   actorId?: string;
@@ -12,9 +13,11 @@ export interface GraphQLRequestOptions {
 
 export function buildGraphQLHeaders(options?: GraphQLRequestOptions) {
   const headers: Record<string, string> = {};
+  const actorId =
+    options?.actorId ?? (options?.actorRole === "hr" ? HR_ACTOR_ID : undefined);
 
-  if (options?.actorId) {
-    headers["x-actor-id"] = options.actorId;
+  if (actorId) {
+    headers["x-actor-id"] = actorId;
   }
   if (options?.actorRole) {
     headers["x-actor-role"] = options.actorRole;

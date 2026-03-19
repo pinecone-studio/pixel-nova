@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 import { buildGraphQLHeaders } from "@/lib/apollo-client";
+import { notifyAuthStateChanged } from "@/lib/auth-events";
 import { GET_ME } from "@/graphql/queries";
 import type { Employee } from "@/lib/types";
 import { formatBranch, formatDepartment } from "@/lib/labels";
@@ -102,6 +103,7 @@ export default function Profile() {
         return;
       }
       window.localStorage.removeItem(TOKEN_STORAGE_KEY);
+      notifyAuthStateChanged();
       router.replace("/auth/employee");
     }
   }, [employee, error, hydrated, loading, router]);

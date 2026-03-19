@@ -1,9 +1,9 @@
 "use client";
 
 import { ApolloProvider } from "@apollo/client/react";
-import { usePathname } from "next/navigation";
 import { useEffect, useRef } from "react";
 
+import { AUTH_STATE_CHANGED_EVENT } from "./auth-events";
 import { appApolloClient } from "./apollo-client";
 
 export function ApolloAppProvider({
@@ -11,7 +11,6 @@ export function ApolloAppProvider({
 }: {
   children: React.ReactNode;
 }) {
-  const pathname = usePathname();
   const authSignatureRef = useRef<string | null>(null);
 
   useEffect(() => {
@@ -19,21 +18,38 @@ export function ApolloAppProvider({
       return;
     }
 
-    const nextSignature = [
-      window.localStorage.getItem("epas_auth_token") ?? "",
-      window.localStorage.getItem("hr_authenticated") ?? "",
-    ].join("|");
+    const getSignature = () =>
+      [
+        window.localStorage.getItem("epas_auth_token") ?? "",
+        window.localStorage.getItem("hr_authenticated") ?? "",
+      ].join("|");
 
-    if (authSignatureRef.current === null) {
-      authSignatureRef.current = nextSignature;
-      return;
-    }
+    authSignatureRef.current = getSignature();
 
-    if (authSignatureRef.current !== nextSignature) {
+    const handleAuthStateChanged = () => {
+      const nextSignature = getSignature();
+      if (authSignatureRef.current === nextSignature) {
+        return;
+      }
       authSignatureRef.current = nextSignature;
       void appApolloClient.clearStore();
-    }
-  }, [pathname]);
+    };
+
+    const handleStorage = () => {
+      handleAuthStateChanged();
+    };
+
+    window.addEventListener(AUTH_STATE_CHANGED_EVENT, handleAuthStateChanged);
+    window.addEventListener("storage", handleStorage);
+
+    return () => {
+      window.removeEventListener(
+        AUTH_STATE_CHANGED_EVENT,
+        handleAuthStateChanged,
+      );
+      window.removeEventListener("storage", handleStorage);
+    };
+  }, []);
 
   return <ApolloProvider client={appApolloClient}>{children}</ApolloProvider>;
 }

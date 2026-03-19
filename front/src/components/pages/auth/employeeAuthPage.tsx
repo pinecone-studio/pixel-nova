@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { LOGIN_WITH_CODE } from "@/graphql/mutations";
+import { notifyAuthStateChanged } from "@/lib/auth-events";
 import type { AuthSession } from "@/lib/types";
 
 import { EmployeeAuthForm } from "./employee/EmployeeAuthForm";
@@ -38,6 +39,7 @@ export default function EmployeeAuthPage() {
 
       localStorage.setItem(TOKEN_STORAGE_KEY, session.token);
       localStorage.setItem("epas_employee_code", code);
+      notifyAuthStateChanged();
       router.push("/employee");
     } catch (err) {
       const message =
