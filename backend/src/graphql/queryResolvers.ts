@@ -19,6 +19,22 @@ import type { GraphQLContext } from "./schema";
 
 type Ctx = GraphQLContext;
 
+const CONTRACT_TEMPLATE_LABELS: Record<string, string> = {
+  employment_contract: "Хөдөлмөрийн гэрээ",
+  probation_order: "Туршилтаар авах тушаал",
+  job_description: "Албан тушаалын тодорхойлолт",
+  nda: "Нууцын гэрээ",
+  salary_increase_order: "Цалин нэмэх тушаал",
+  position_update_order: "Албан тушаал өөрчлөх тушаал",
+  contract_addendum: "Гэрээний нэмэлт",
+  termination_order: "Ажил дуусгавар болгох тушаал",
+  handover_sheet: "Хүлээлгэн өгөх акт",
+};
+
+function formatContractTemplateLabel(id: string) {
+  return CONTRACT_TEMPLATE_LABELS[id] ?? id;
+}
+
 interface DocumentsArgs {
   employeeId: string;
 }
@@ -141,6 +157,65 @@ export const queryResolvers = {
       throw new Error("Unauthorized");
     }
     return listAnnouncements(ctx.db);
+  },
+
+  hrNotifications: async (_: unknown, __: unknown, ctx: Ctx) => {
+    if (ctx.actor.role !== "hr" && ctx.actor.role !== "admin") {
+      throw new Error("Unauthorized");
+    }
+
+    const [contracts, leaves, announcements] = await Promise.all([
+      getContractRequests(ctx.db),
+      getLeaveRequests(ctx.db),
+      listAnnouncements(ctx.db),
+    ]);
+
+    const contractItems = contracts.map((row) => ({
+      id: `contract-${row.id}`,
+      title: "Гэрээний хүсэлт",
+      body: [
+        `${row.employee.lastName} ${row.employee.firstName}`,
+        row.templateIds.map(formatContractTemplateLabel).join(", "),
+        `Төлөв: ${row.status}`,
+        row.note?.trim() ? `Тайлбар: ${row.note.trim()}` : null,
+      ]
+        .filter(Boolean)
+        .join("\n"),
+      status: row.status === "pending" ? "unread" : "read",
+      createdAt: row.createdAt,
+      sourceType: "contract_request",
+    }));
+
+    const leaveItems = leaves.map((row) => ({
+      id: `leave-${row.id}`,
+      title: "Чөлөөний хүсэлт",
+      body: [
+        `${row.employee.lastName} ${row.employee.firstName}`,
+        row.type,
+        `Төлөв: ${row.status}`,
+        row.reason?.trim() ? `Шалтгаан: ${row.reason.trim()}` : null,
+        row.note?.trim() ? `Тайлбар: ${row.note.trim()}` : null,
+      ]
+        .filter(Boolean)
+        .join("\n"),
+      status: row.status === "pending" ? "unread" : "read",
+      createdAt: row.createdAt,
+      sourceType: "leave_request",
+    }));
+
+    const announcementItems = announcements.map((row) => ({
+      id: `announcement-${row.id}`,
+      title: row.title,
+      body: row.body,
+      status: row.status === "draft" ? "unread" : "read",
+      createdAt: row.publishedAt ?? row.createdAt,
+      sourceType: "announcement",
+    }));
+
+    return [...contractItems, ...leaveItems, ...announcementItems].sort(
+      (a, b) =>
+        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+    );
   },
 
   processedEvents: (

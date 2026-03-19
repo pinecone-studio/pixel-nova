@@ -22,6 +22,7 @@ export function HrNotifPage() {
         headers: buildGraphQLHeaders({ actorRole: "hr" }),
       },
       fetchPolicy: "network-only",
+      pollInterval: 30000,
     },
   );
 
