@@ -52,6 +52,12 @@ export const DOCUMENT_FIELDS = gql`
     documentName
     storageUrl
     createdAt
+    hrSigned
+    hrSignatureData
+    hrSignedAt
+    employeeSigned
+    employeeSignatureData
+    employeeSignedAt
   }
 `;
 
@@ -80,6 +86,8 @@ export const AUDIT_LOG_FIELDS = gql`
     notificationAttempted
     recipientsNotified
     notificationError
+    hrSignedAll
+    hrSignedAllAt
     employeeSigned
     employeeSignedAt
     timestamp

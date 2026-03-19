@@ -105,6 +105,23 @@ export async function updateAuditLogDelivery(
     .where(eq(auditLog.id, auditId));
 }
 
+export async function updateAuditLogHrSigned(
+  db: DbClient,
+  auditId: string,
+  input: {
+    hrSignedAll: boolean;
+    hrSignedAllAt?: string | null;
+  },
+) {
+  await db
+    .update(auditLog)
+    .set({
+      hrSignedAll: input.hrSignedAll,
+      hrSignedAllAt: input.hrSignedAllAt ?? null,
+    })
+    .where(eq(auditLog.id, auditId));
+}
+
 export async function updateAuditLogSignature(
   db: DbClient,
   auditId: string,
@@ -120,4 +137,13 @@ export async function updateAuditLogSignature(
       employeeSignedAt: input.employeeSignedAt ?? null,
     })
     .where(eq(auditLog.id, auditId));
+}
+
+export async function getAuditLogByDocumentId(
+  db: DbClient,
+  documentId: string,
+) {
+  const rows = await db.select().from(auditLog).orderBy(desc(auditLog.timestamp));
+  const match = rows.find((row) => parseJsonList(row.documentIds).includes(documentId));
+  return match ? normalizeAuditLog(match) : null;
 }
