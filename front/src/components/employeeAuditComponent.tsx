@@ -5,10 +5,11 @@ import { useMemo, useState } from "react";
 import { BiChevronRight, BiSearch, BiX } from "react-icons/bi";
 import { FiFileText, FiCheckCircle } from "react-icons/fi";
 
+import { useEmployeeDocuments } from "@/components/pages/employee/useEmployeeDocuments";
 import { useEmployeeSession } from "@/components/pages/employee/useEmployeeSession";
 import { GET_AUDIT_LOGS } from "@/graphql/queries/audit-logs";
 import { buildGraphQLHeaders } from "@/lib/apollo-client";
-import type { AuditLog } from "@/lib/types";
+import type { AuditLog, Document } from "@/lib/types";
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -59,9 +60,11 @@ function AuditStatusBadge({ log }: { log: AuditLog }) {
 
 function AuditDetailModal({
   log,
+  documentsById,
   onClose,
 }: {
   log: AuditLog;
+  documentsById: Map<string, Document>;
   onClose: () => void;
 }) {
   const dateStr = new Date(log.timestamp).toLocaleString("mn-MN", {
@@ -114,8 +117,8 @@ function AuditDetailModal({
                     <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-[#D0D5DD] bg-[#F9FAFB] text-[#667085]">
                       <FiFileText className="h-4 w-4" />
                     </div>
-                    <span className="text-[13px] text-[#101828] truncate font-mono">
-                      {docId}
+                    <span className="truncate text-[13px] text-[#101828]">
+                      {documentsById.get(docId)?.documentName ?? docId}
                     </span>
                   </div>
                 ))}
@@ -257,6 +260,15 @@ export function EmployeeAuditComponent() {
       fetchPolicy: "network-only",
     },
   );
+  const { documents, loading: documentsLoading } = useEmployeeDocuments({
+    authToken,
+    employeeId: employee?.id,
+  });
+
+  const documentsById = useMemo(
+    () => new Map(documents.map((document) => [document.id, document])),
+    [documents],
+  );
 
   const auditLogs = useMemo(() => {
     let logs = (data?.auditLogs ?? []).filter(
@@ -291,12 +303,16 @@ export function EmployeeAuditComponent() {
     };
   }, [data]);
 
-  const isLoading = sessionLoading || loading;
+  const isLoading = sessionLoading || loading || documentsLoading;
 
   return (
     <div className="min-h-screen bg-white px-6 py-8 text-[#101828]">
       {detailLog && (
-        <AuditDetailModal log={detailLog} onClose={() => setDetailLog(null)} />
+        <AuditDetailModal
+          log={detailLog}
+          documentsById={documentsById}
+          onClose={() => setDetailLog(null)}
+        />
       )}
 
       <div className="mx-auto flex w-full max-w-[1061px] flex-col gap-8">

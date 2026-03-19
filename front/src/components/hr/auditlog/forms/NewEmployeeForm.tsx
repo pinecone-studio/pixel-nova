@@ -206,7 +206,7 @@ export function NewEmployeeForm({
             <input
               value={employeeCode}
               onChange={(e) => setEmployeeCode(e.target.value)}
-              placeholder="EMP001"
+              placeholder="EMP0001"
               className={getInputClass("employeeCode")}
             />
             <FieldError message={errors.employeeCode} />

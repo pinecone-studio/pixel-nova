@@ -77,11 +77,6 @@ export function EmployeeModal({
 
   function validate() {
     const next: Record<string, string> = {};
-    if (!form.employeeCode.trim()) {
-      next.employeeCode = "Ажилтны код заавал оруулна уу.";
-    } else if (!EMPLOYEE_CODE_PATTERN.test(form.employeeCode.trim())) {
-      next.employeeCode = "EMP-0000 форматтай код оруулна уу.";
-    }
     if (!form.lastName.trim()) next.lastName = "Овгоо заавал оруулна уу.";
     if (!form.firstName.trim()) next.firstName = "Нэрээ заавал оруулна уу.";
     if (!form.email.trim()) {
@@ -122,15 +117,17 @@ export function EmployeeModal({
           {/* Ажилтны код */}
           <div className="flex flex-col gap-1.5">
             <Label className="text-slate-700 text-sm font-medium">Ажилтны код</Label>
-            <Input
-              value={form.employeeCode}
-              onChange={(e) => updateField("employeeCode", e.target.value)}
-              placeholder="EMP-0001"
-              className="bg-white border-slate-200 rounded-2xl px-4 py-3 h-auto text-slate-700 text-sm placeholder:text-slate-400 focus-visible:ring-0 focus-visible:border-slate-300 transition-colors"
-            />
-            {errors.employeeCode ? (
-              <p className="text-xs text-red-400">{errors.employeeCode}</p>
-            ) : null}
+            {mode === "add" ? (
+              <div className="bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm text-slate-400">
+                Автоматаар үүснэ
+              </div>
+            ) : (
+              <Input
+                value={form.employeeCode}
+                readOnly
+                className="bg-slate-50 border-slate-200 rounded-2xl px-4 py-3 h-auto text-slate-700 text-sm focus-visible:ring-0 cursor-not-allowed"
+              />
+            )}
           </div>
 
           {/* Овог, Нэр */}

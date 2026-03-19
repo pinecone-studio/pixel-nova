@@ -82,7 +82,7 @@ export function WorkersComponent() {
     try {
       const payload: UpsertEmployeeInput = {
         id: form.id,
-        employeeCode: form.employeeCode,
+        employeeCode: form.employeeCode || null,
         firstName: form.firstName,
         lastName: form.lastName,
         email: form.email || null,

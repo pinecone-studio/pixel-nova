@@ -240,13 +240,135 @@ export function buildTemplateData(
     employee_signature: "",
     employee_sign_date: "",
 
+    // Employer signature fields
+    employer_sign_line: "",
+    employer_signature: "",
+    employer_sign_date: "",
+
     // Salary order misc
     other_reason_text: "",
+    other_termination_reason: "",
     reason_detail_line_1: "",
     reason_detail_line_2: "",
     reason_detail_line_3: "",
     implementation_department: "",
     control_responsible: "",
+
+    // Salary pay days
+    salary_pay_day_1: "10",
+    salary_pay_day_2: "25",
+
+    // Probation / contract extras
+    workplace_unit: employee.department ?? "",
+    employee_ack_name: `${employee.lastName ?? ""} ${employee.firstName ?? ""}`.trim(),
+    employee_ack_date: "",
+    employment_contract_number: employee.employeeCode ?? "",
+
+    // Position change reasons
+    reason_structure_change: "",
+    reason_skill_competence: "",
+    reason_other: "",
+
+    // Department assignees
+    hr_department_assignee: "",
+    hr_department_responsible: "",
+    contract_addendum_assignee: "",
+    finance_department_assignee: "",
+
+    // Termination law references
+    law_article: "",
+    law_clause: "",
+    termination_law_article: "",
+    termination_law_clause: "",
+    termination_request_date: "",
+
+    // Job description fields
+    direct_manager: "",
+    job_location: employee.branch ?? "",
+    unit_name: employee.department ?? "",
+    report_to: "",
+    direct_reports: "",
+    substitute_position: "",
+    collaborate_units: "",
+    external_relations: "",
+    position_name_purpose: jobTitle,
+    additional_duty: "",
+    external_contact_authority: "",
+    contract_authority: "",
+    financial_approval_limit: "",
+    disciplinary_authority: "",
+    education_level: "",
+    major_field: "",
+    professional_cert: "",
+    professional_grade: "",
+    total_experience_years: "",
+    management_experience: "",
+    industry_experience: "",
+    approver_title: "",
+    approver_date: "",
+    hr_specialist_name: "",
+    hr_sign_date: "",
+
+    // Duty placeholders (1-8)
+    duty_1_desc: "", duty_1_kpi: "", duty_1_weight: "",
+    duty_2_desc: "", duty_2_kpi: "", duty_2_weight: "",
+    duty_3_desc: "", duty_3_kpi: "", duty_3_weight: "",
+    duty_4_desc: "", duty_4_kpi: "", duty_4_weight: "",
+    duty_5_desc: "", duty_5_kpi: "", duty_5_weight: "",
+    duty_6_desc: "", duty_6_kpi: "", duty_6_weight: "",
+    duty_7_desc: "", duty_7_kpi: "", duty_7_weight: "",
+    duty_8_desc: "", duty_8_kpi: "", duty_8_weight: "",
+
+    // Skill placeholders (1-6)
+    skill_1_name: "", skill_1_requirement: "",
+    skill_2_name: "", skill_2_requirement: "",
+    skill_3_name: "", skill_3_requirement: "",
+    skill_4_name: "", skill_4_requirement: "",
+    skill_5_name: "", skill_5_requirement: "",
+    skill_6_name: "", skill_6_requirement: "",
+
+    // Language
+    english_reading_level: "", english_writing_level: "", english_speaking_level: "",
+    second_language: "", second_language_requirement: "",
+
+    // Traits
+    trait_leadership_desc: "", trait_teamwork_desc: "", trait_communication_desc: "",
+    trait_problem_solving_desc: "", trait_custom_1_desc: "", trait_custom_2_desc: "",
+
+    // KPI placeholders (1-5)
+    kpi_1_name: "", kpi_1_target: "", kpi_1_weight: "",
+    kpi_2_name: "", kpi_2_target: "", kpi_2_weight: "",
+    kpi_3_name: "", kpi_3_target: "", kpi_3_weight: "",
+    kpi_4_name: "", kpi_4_target: "", kpi_4_weight: "",
+    kpi_5_name: "", kpi_5_target: "", kpi_5_weight: "",
+
+    // Contract addendum signature extras
+    company_ceo_sign_line: "",
+    company_address_line_1: "", company_address_line_2: "", company_address_line_3: "",
+    employee_address_line_1: "", employee_address_line_2: "", employee_address_line_3: "",
+
+    // Handover extras
+    order_number_handover: employee.employeeCode ?? "",
+    handover_deadline_year_short: String(date.getFullYear()).slice(2),
+    handover_deadline_month: String(date.getMonth() + 1).padStart(2, "0"),
+    handover_deadline_day: String(date.getDate()).padStart(2, "0"),
+    completion_date_year_short: String(date.getFullYear()).slice(2),
+    completion_date_month: String(date.getMonth() + 1).padStart(2, "0"),
+    completion_date_day: String(date.getDate()).padStart(2, "0"),
+    handover_hr_receive_date: "",
+    handover_prepared_by_name: "",
+    handover_employee_received_date: "",
+    handover_given_by: "", handover_given_date: "",
+    handover_received_by: "", handover_received_date: "",
+    dept_manager_signature: "",
+    it_signature: "",
+    archive_signature: "",
+    warehouse_signature: "",
+    accountant_signature: "",
+    hr_manager_signature: "",
+    final_salary_amount: "",
+    total_payable_amount: "",
+    finance_total_amount: "",
 
     ...documentProfile,
   };

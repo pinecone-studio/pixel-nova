@@ -61,7 +61,7 @@ export const HR_NAV_ITEMS: HrNavItem[] = [
   },
   {
     key: "audit-log",
-    label: "Аудитын бүртгэл",
+    label: "Үйлдлийн бүртгэл",
     href: "/hr/audit-log",
     icon: <InsightIcon />,
   },
