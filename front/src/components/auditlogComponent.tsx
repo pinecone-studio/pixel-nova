@@ -5,6 +5,7 @@ import { useCallback, useMemo, useState } from "react";
 import { FiUser } from "react-icons/fi";
 
 import { AuditActionCard } from "@/components/hr/auditlog/action-card";
+import { EditActionDialog } from "@/components/hr/auditlog/edit-action-dialog";
 import { AddEmployeeRequestDialog } from "@/components/hr/auditlog/request-dialog";
 import { CalIcon, ReqIcon, EyeIcon } from "@/components/icons";
 import { GET_ACTIONS, GET_EMPLOYEES } from "@/graphql/queries";
@@ -282,6 +283,7 @@ export function AuditlogComponent() {
   const [search, setSearch] = useState("");
   const [sendRequestAction, setSendRequestAction] =
     useState<ActionConfig | null>(null);
+  const [editAction, setEditAction] = useState<ActionConfig | null>(null);
   const [detailLog, setDetailLog] = useState<AuditLog | null>(null);
   const [sort, setSort] = useState<{ key: SortKey; dir: SortDir }>({
     key: "date",
@@ -412,6 +414,14 @@ export function AuditlogComponent() {
         }}
       />
 
+      <EditActionDialog
+        action={editAction}
+        open={!!editAction}
+        onOpenChange={(open) => {
+          if (!open) setEditAction(null);
+        }}
+      />
+
       {detailLog && (
         <AuditDetailModal
           log={detailLog}
@@ -448,6 +458,7 @@ export function AuditlogComponent() {
               key={action.id}
               action={action}
               onSendRequest={setSendRequestAction}
+              onEdit={setEditAction}
             />
           ))}
         </div>
