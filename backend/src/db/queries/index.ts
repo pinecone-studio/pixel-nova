@@ -18,6 +18,7 @@ export {
 } from "./employee";
 export { getDocuments, getDocumentById, insertDocument } from "./document";
 export {
+  getAuditLogById,
   getAuditLogs,
   insertAuditLog,
   normalizeAuditLog,

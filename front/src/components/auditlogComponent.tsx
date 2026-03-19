@@ -1,8 +1,8 @@
 "use client";
 
-import { useQuery } from "@apollo/client/react";
+import { useMutation, useQuery } from "@apollo/client/react";
 import { useCallback, useMemo, useState } from "react";
-import { FiUser } from "react-icons/fi";
+import { FiUser, FiFilter, FiX, FiRefreshCw } from "react-icons/fi";
 
 import { AuditActionCard } from "@/components/hr/auditlog/action-card";
 import { EditActionDialog } from "@/components/hr/auditlog/edit-action-dialog";
@@ -11,6 +11,7 @@ import { AddEmployeeRequestDialog } from "@/components/hr/auditlog/request-dialo
 import { CalIcon, ReqIcon, EyeIcon } from "@/components/icons";
 import { GET_ACTIONS, GET_EMPLOYEES } from "@/graphql/queries";
 import { GET_AUDIT_LOGS } from "@/graphql/queries/audit-logs";
+import { RETRY_NOTIFICATION } from "@/graphql/mutations";
 import { buildGraphQLHeaders } from "@/lib/apollo-client";
 import { phaseBadge } from "@/utils/auditlog";
 import type { ActionConfig, AuditLog, Employee } from "@/lib/types";
@@ -149,10 +150,14 @@ function AuditDetailModal({
   log,
   employee,
   onClose,
+  onRetry,
+  retrying,
 }: {
   log: AuditLog;
   employee?: Employee;
   onClose: () => void;
+  onRetry?: () => void;
+  retrying?: boolean;
 }) {
   const empName = employee
     ? `${employee.lastName} ${employee.firstName}`
@@ -239,8 +244,21 @@ function AuditDetailModal({
 
               {log.notificationError && (
                 <div className="mt-2 rounded-[8px] border border-red-200 bg-red-50 px-3 py-2 text-[12px] text-red-600">
-                  <span className="font-medium">Алдаа: </span>
-                  {log.notificationError}
+                  <div className="flex items-center justify-between gap-2">
+                    <div>
+                      <span className="font-medium">Алдаа: </span>
+                      {log.notificationError}
+                    </div>
+                    {onRetry && (
+                      <button
+                        onClick={onRetry}
+                        disabled={retrying}
+                        className="shrink-0 flex items-center gap-1 rounded-[8px] border border-red-300 bg-white px-2.5 py-1 text-[11px] font-medium text-red-600 transition-colors hover:bg-red-50 disabled:opacity-50">
+                        <FiRefreshCw className={`h-3 w-3 ${retrying ? "animate-spin" : ""}`} />
+                        {retrying ? "Илгээж байна..." : "Дахин илгээх"}
+                      </button>
+                    )}
+                  </div>
                 </div>
               )}
             </div>
@@ -294,10 +312,41 @@ export function AuditlogComponent() {
     dir: "desc",
   });
 
+  // ---- Audit trail filters ----
+  const [filterAction, setFilterAction] = useState("");
+  const [filterFromDate, setFilterFromDate] = useState("");
+  const [filterToDate, setFilterToDate] = useState("");
+  const [filterEmployee, setFilterEmployee] = useState("");
+
+  const hasActiveFilters = !!(filterAction || filterFromDate || filterToDate || filterEmployee);
+
+  const clearFilters = useCallback(() => {
+    setFilterAction("");
+    setFilterFromDate("");
+    setFilterToDate("");
+    setFilterEmployee("");
+  }, []);
+
   const headers = useMemo(
     () => ({ headers: buildGraphQLHeaders({ actorRole: "hr" }) }),
     [],
   );
+
+  // ---- Retry mutation ----
+  const [retryNotification, { loading: retrying }] = useMutation<{
+    retryNotification: AuditLog;
+  }>(RETRY_NOTIFICATION, {
+    context: headers,
+    refetchQueries: [{ query: GET_AUDIT_LOGS, variables: { action: filterAction || undefined, fromDate: filterFromDate || undefined, toDate: filterToDate || undefined } }],
+    onCompleted: (result) => {
+      setDetailLog(result.retryNotification);
+    },
+  });
+
+  const handleRetry = useCallback(() => {
+    if (!detailLog) return;
+    retryNotification({ variables: { auditLogId: detailLog.id } });
+  }, [detailLog, retryNotification]);
 
   // ---- Queries ----
   const {
@@ -314,6 +363,11 @@ export function AuditlogComponent() {
   }>(GET_AUDIT_LOGS, {
     context: headers,
     fetchPolicy: "network-only",
+    variables: {
+      action: filterAction || undefined,
+      fromDate: filterFromDate || undefined,
+      toDate: filterToDate || undefined,
+    },
   });
 
   const { data: empData } = useQuery<{ employees: Employee[] }>(GET_EMPLOYEES, {
@@ -367,7 +421,18 @@ export function AuditlogComponent() {
 
   // ---- Audit logs (bottom table) ----
   const auditLogs = useMemo(() => {
-    const logs = auditData?.auditLogs ?? [];
+    let logs = auditData?.auditLogs ?? [];
+
+    // Client-side employee name filter
+    if (filterEmployee) {
+      const q = filterEmployee.toLowerCase();
+      logs = logs.filter((log) => {
+        const emp = employeeMap.get(log.employeeId);
+        if (!emp) return log.employeeId.toLowerCase().includes(q);
+        const fullName = `${emp.lastName} ${emp.firstName}`.toLowerCase();
+        return fullName.includes(q) || emp.employeeCode.toLowerCase().includes(q);
+      });
+    }
 
     // Sort
     const sorted = [...logs].sort((a, b) => {
@@ -399,7 +464,7 @@ export function AuditlogComponent() {
     });
 
     return sorted;
-  }, [auditData, sort, employeeMap]);
+  }, [auditData, sort, employeeMap, filterEmployee]);
 
   const handleSort = useCallback(
     (key: SortKey) => setSort((prev) => toggleSort(prev, key)),
@@ -457,6 +522,8 @@ export function AuditlogComponent() {
           log={detailLog}
           employee={employeeMap.get(detailLog.employeeId)}
           onClose={() => setDetailLog(null)}
+          onRetry={detailLog.notificationError ? handleRetry : undefined}
+          retrying={retrying}
         />
       )}
 
@@ -493,6 +560,67 @@ export function AuditlogComponent() {
           ))}
         </div>
       )}
+
+      {/* ── Audit Trail Filters ── */}
+      <div className="flex flex-wrap items-center gap-3">
+        <div className="flex items-center gap-1.5 text-[13px] text-[#3f4145]">
+          <FiFilter className="h-3.5 w-3.5" />
+          <span className="font-medium">Шүүлтүүр:</span>
+        </div>
+
+        {/* Employee search */}
+        <input
+          type="text"
+          value={filterEmployee}
+          onChange={(e) => setFilterEmployee(e.target.value)}
+          placeholder="Ажилтан хайх..."
+          className="rounded-[10px] border border-black/12 bg-white px-3 py-1.5 text-[13px] text-[#121316] outline-none focus:border-blue-400 w-44"
+        />
+
+        {/* Action filter */}
+        <select
+          value={filterAction}
+          onChange={(e) => setFilterAction(e.target.value)}
+          className="rounded-[10px] border border-black/12 bg-white px-3 py-1.5 text-[13px] text-[#121316] outline-none focus:border-blue-400">
+          <option value="">Бүх үйлдэл</option>
+          <option value="add_employee">Шинэ ажилтан авах</option>
+          <option value="promote_employee">Тушаал дэвшүүлэх</option>
+          <option value="change_position">Албан тушаал солих</option>
+          <option value="offboard_employee">Ажлаас чөлөөлөх</option>
+        </select>
+
+        {/* Date from */}
+        <div className="flex items-center gap-1">
+          <span className="text-[12px] text-[#77818c]">Эхлэх:</span>
+          <input
+            type="date"
+            value={filterFromDate}
+            onChange={(e) => setFilterFromDate(e.target.value)}
+            className="rounded-[10px] border border-black/12 bg-white px-2 py-1.5 text-[13px] text-[#121316] outline-none focus:border-blue-400"
+          />
+        </div>
+
+        {/* Date to */}
+        <div className="flex items-center gap-1">
+          <span className="text-[12px] text-[#77818c]">Дуусах:</span>
+          <input
+            type="date"
+            value={filterToDate}
+            onChange={(e) => setFilterToDate(e.target.value)}
+            className="rounded-[10px] border border-black/12 bg-white px-2 py-1.5 text-[13px] text-[#121316] outline-none focus:border-blue-400"
+          />
+        </div>
+
+        {/* Clear filters */}
+        {hasActiveFilters && (
+          <button
+            onClick={clearFilters}
+            className="flex items-center gap-1 rounded-[10px] border border-black/12 bg-white px-3 py-1.5 text-[12px] text-[#3f4145] transition-colors hover:bg-[#f5f5f5]">
+            <FiX className="h-3 w-3" />
+            Цэвэрлэх
+          </button>
+        )}
+      </div>
 
       {/* ── Audit Trail Table ── */}
       <div className="overflow-hidden rounded-[24px] border border-black/12 bg-white">

@@ -1,4 +1,5 @@
 export * from "./auth";
+export * from "./audit";
 export * from "./documents";
 export * from "./employees";
 export * from "./leave-requests";
