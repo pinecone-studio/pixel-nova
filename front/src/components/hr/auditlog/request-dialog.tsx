@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { createPortal } from "react-dom";
 import { FiEye, FiFileText, FiX } from "react-icons/fi";
 import { useLazyQuery, useMutation, useQuery } from "@apollo/client/react";
 import {
@@ -683,62 +684,63 @@ export function AddEmployeeRequestDialog({
         </div>
       </DialogContent>
 
-      {previewOpen ? (
-        <DialogPortal>
-          <div className="fixed inset-0 z-120 flex items-center justify-center overflow-y-auto">
-            <button
-              type="button"
-              aria-label="Preview close overlay"
-              className="absolute inset-0 bg-black/60"
-              onClick={() => setPreviewOpen(false)}
-            />
-            <div className="relative w-215 max-w-[92vw] h-[82vh] overflow-y-auto bg-white border border-slate-200 rounded-2xl shadow-2xl ">
-              <div className="flex items-center justify-between px-5 py-4 border-b border-slate-200">
-                <div className="flex flex-col">
-                  <p className="text-slate-900 text-sm font-semibold overflow-y-scroll">
-                    {previewDoc?.template ?? "Баримт"}
-                  </p>
-                  <p className="text-slate-500 text-xs mt-0.5">Preview</p>
+      {typeof document !== "undefined" && previewOpen
+        ? createPortal(
+            <div className="fixed inset-0 z-120 flex items-center justify-center overflow-y-auto bg-black/60 backdrop-blur-sm">
+              <button
+                type="button"
+                aria-label="Preview close overlay"
+                className="absolute inset-0"
+                onClick={() => setPreviewOpen(false)}
+              />
+              <div className="relative w-[920px] max-w-[95vw] h-[82vh] overflow-y-auto bg-white border border-slate-200 rounded-2xl shadow-2xl">
+                <div className="flex items-center justify-between px-5 py-4 border-b border-slate-200">
+                  <div className="flex flex-col">
+                    <p className="text-slate-900 text-sm font-semibold">
+                      {previewDoc?.template ?? "Баримт"}
+                    </p>
+                    <p className="text-slate-500 text-xs mt-0.5">Preview</p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setPreviewOpen(false)}
+                    className="w-8 h-8 rounded-lg flex items-center justify-center text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors"
+                  >
+                    <FiX className="text-lg" />
+                  </button>
                 </div>
-                <button
-                  type="button"
-                  onClick={() => setPreviewOpen(false)}
-                  className="w-8 h-8 rounded-lg flex items-center justify-center text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors"
-                >
-                  <FiX className="text-lg" />
-                </button>
+                <div className="h-full bg-slate-50 p-4">
+                  {previewLoading ? (
+                    <div className="w-full h-full rounded-xl border border-slate-200 flex items-center justify-center text-sm text-slate-400">
+                      Уншиж байна...
+                    </div>
+                  ) : previewError ? (
+                    <div className="w-full h-full rounded-xl border border-red-200 bg-red-50 flex items-center justify-center text-sm text-red-500">
+                      {previewError}
+                    </div>
+                  ) : previewContent?.contentType === "text/html" ? (
+                    <iframe
+                      title={previewDoc?.template ?? "Template preview"}
+                      className="w-full h-full rounded-xl border border-slate-200 bg-white"
+                      srcDoc={previewContent.content}
+                    />
+                  ) : previewUrl ? (
+                    <iframe
+                      title={previewDoc?.template ?? "Template preview"}
+                      className="w-full h-full rounded-xl border border-slate-200 bg-white"
+                      src={previewUrl}
+                    />
+                  ) : (
+                    <div className="w-full h-full rounded-xl border border-slate-200 flex items-center justify-center text-sm text-slate-400">
+                      Preview бэлэн биш байна.
+                    </div>
+                  )}
+                </div>
               </div>
-              <div className="h-full bg-slate-50 p-4">
-                {previewLoading ? (
-                  <div className="w-full h-full rounded-xl border border-slate-200 flex items-center justify-center text-sm text-slate-400">
-                    Уншиж байна...
-                  </div>
-                ) : previewError ? (
-                  <div className="w-full h-full rounded-xl border border-red-200 bg-red-50 flex items-center justify-center text-sm text-red-500">
-                    {previewError}
-                  </div>
-                ) : previewContent?.contentType === "text/html" ? (
-                  <iframe
-                    title={previewDoc?.template ?? "Template preview"}
-                    className="w-full h-full rounded-xl border border-slate-200 bg-white "
-                    srcDoc={previewContent.content}
-                  />
-                ) : previewUrl ? (
-                  <iframe
-                    title={previewDoc?.template ?? "Template preview"}
-                    className="w-full h-full rounded-xl border border-slate-200 bg-white"
-                    src={previewUrl}
-                  />
-                ) : (
-                  <div className="w-full h-full rounded-xl border border-slate-200 flex items-center justify-center text-sm text-slate-400">
-                    Preview бэлэн биш байна.
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-        </DialogPortal>
-      ) : null}
+            </div>,
+            document.body,
+          )
+        : null}
     </Dialog>
   );
 }

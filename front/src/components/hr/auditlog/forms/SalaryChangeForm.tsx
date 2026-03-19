@@ -77,9 +77,29 @@ export function SalaryChangeForm({
     errors[key]
       ? `${inputClass} border-red-300 focus:border-red-400`
       : inputClass;
+  const fillMock = () => {
+    setEmployeeCode("EMP0003");
+    setLastName("Дорж");
+    setFirstName("Эрдэнэ");
+    setEmail("dorj.erde@gmail.com");
+    setWorkStartDate("2024-02-01");
+    setWorkTotalDuration("2 жил 1 сар");
+    setPrevSalary("3500000");
+    setNextSalary("4200000");
+    setSalaryDelta("700000");
+  };
 
   return (
     <div className="flex min-w-0 flex-col gap-[16px]">
+      <div className="flex items-center justify-end">
+        <button
+          type="button"
+          onClick={fillMock}
+          className="rounded-[10px] border border-black/12 px-3 py-1.5 text-[12px] font-medium text-[#3f4145] transition-colors hover:bg-[#f5f5f5]"
+        >
+          Demo бөглөх
+        </button>
+      </div>
       {salaryStep === "person" ? (
         <>
           <div className="flex min-w-0 flex-col gap-[8px]">

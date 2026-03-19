@@ -22,6 +22,7 @@ function HrShellInner({ children }: { children: React.ReactNode }) {
   const activeItem = getActiveHrNavItem(pathname);
   const [notifOpen, setNotifOpen] = useState(false);
   const [selectedNotifId, setSelectedNotifId] = useState<string | null>(null);
+  const [readIds, setReadIds] = useState<string[]>([]);
 
   const { data: contractData, loading: notificationsLoading } = useQuery<{
     contractRequests: ContractRequest[];
@@ -41,7 +42,19 @@ function HrShellInner({ children }: { children: React.ReactNode }) {
       );
   }, [contractData]);
 
-  const unreadCount = notifications.filter((n) => n.status === "unread").length;
+  const displayNotifications = useMemo(() => {
+    if (readIds.length === 0) return notifications;
+    const readSet = new Set(readIds);
+    return notifications.map((n) =>
+      readSet.has(n.id)
+        ? { ...n, status: "read", readAt: n.readAt ?? new Date().toISOString() }
+        : n,
+    );
+  }, [notifications, readIds]);
+
+  const unreadCount = displayNotifications.filter(
+    (n) => n.status === "unread",
+  ).length;
 
   return (
     <div className="hr-scope h-screen overflow-hidden bg-[#fafafa]">
@@ -145,8 +158,13 @@ function HrShellInner({ children }: { children: React.ReactNode }) {
       <EmployeeNotifDrawer
         open={notifOpen}
         loading={notificationsLoading}
-        notifications={notifications}
+        notifications={displayNotifications}
         selectedId={selectedNotifId}
+        unreadCount={unreadCount}
+        onMarkAllRead={() => {
+          if (notifications.length === 0) return;
+          setReadIds(notifications.map((n) => n.id));
+        }}
         theme="light"
         onOpenChange={(nextOpen) => {
           setNotifOpen(nextOpen);
@@ -155,6 +173,13 @@ function HrShellInner({ children }: { children: React.ReactNode }) {
           }
         }}
         onSelect={(notification) => {
+          if (notification.status === "unread") {
+            setReadIds((prev) =>
+              prev.includes(notification.id)
+                ? prev
+                : [...prev, notification.id],
+            );
+          }
           setSelectedNotifId((current) =>
             current === notification.id ? null : notification.id,
           );

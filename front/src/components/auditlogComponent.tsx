@@ -1,13 +1,15 @@
 "use client";
 
 import { useMutation, useQuery } from "@apollo/client/react";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { createPortal } from "react-dom";
 import { FiUser, FiFilter, FiX, FiRefreshCw } from "react-icons/fi";
 
 import { AuditActionCard } from "@/components/hr/auditlog/action-card";
 import { EditActionDialog } from "@/components/hr/auditlog/edit-action-dialog";
 import { ProcessedEventsViewer } from "@/components/hr/auditlog/processed-events-viewer";
 import { AddEmployeeRequestDialog } from "@/components/hr/auditlog/request-dialog";
+import { useHrOverlay } from "@/components/hr/overlay-context";
 import { CalIcon, ReqIcon, EyeIcon } from "@/components/icons";
 import { GET_ACTIONS, GET_EMPLOYEES } from "@/graphql/queries";
 import { GET_AUDIT_LOGS } from "@/graphql/queries/audit-logs";
@@ -170,9 +172,15 @@ function AuditDetailModal({
     minute: "2-digit",
   });
 
-  return (
+  const modal = (
     <div className="fixed inset-0 z-100 flex items-center justify-center bg-black/50 p-4">
-      <div className="w-full max-w-lg rounded-[24px] border border-black/12 bg-white shadow-2xl">
+      <button
+        type="button"
+        aria-label="Close detail overlay"
+        className="absolute inset-0"
+        onClick={onClose}
+      />
+      <div className="relative z-10 w-full max-w-lg rounded-[24px] border border-black/12 bg-white shadow-2xl">
         {/* Header */}
         <div className="flex items-center justify-between border-b border-black/12 px-6 py-4">
           <div>
@@ -254,7 +262,9 @@ function AuditDetailModal({
                         onClick={onRetry}
                         disabled={retrying}
                         className="shrink-0 flex items-center gap-1 rounded-[8px] border border-red-300 bg-white px-2.5 py-1 text-[11px] font-medium text-red-600 transition-colors hover:bg-red-50 disabled:opacity-50">
-                        <FiRefreshCw className={`h-3 w-3 ${retrying ? "animate-spin" : ""}`} />
+                        <FiRefreshCw
+                          className={`h-3 w-3 ${retrying ? "animate-spin" : ""}`}
+                        />
                         {retrying ? "Илгээж байна..." : "Дахин илгээх"}
                       </button>
                     )}
@@ -292,6 +302,10 @@ function AuditDetailModal({
       </div>
     </div>
   );
+
+  return typeof document !== "undefined"
+    ? createPortal(modal, document.body)
+    : modal;
 }
 
 // ---------------------------------------------------------------------------
@@ -307,6 +321,7 @@ export function AuditlogComponent() {
     useState<ActionConfig | null>(null);
   const [editAction, setEditAction] = useState<ActionConfig | null>(null);
   const [detailLog, setDetailLog] = useState<AuditLog | null>(null);
+  const { setBlurred } = useHrOverlay();
   const [sort, setSort] = useState<{ key: SortKey; dir: SortDir }>({
     key: "date",
     dir: "desc",
@@ -318,7 +333,12 @@ export function AuditlogComponent() {
   const [filterToDate, setFilterToDate] = useState("");
   const [filterEmployee, setFilterEmployee] = useState("");
 
-  const hasActiveFilters = !!(filterAction || filterFromDate || filterToDate || filterEmployee);
+  const hasActiveFilters = !!(
+    filterAction ||
+    filterFromDate ||
+    filterToDate ||
+    filterEmployee
+  );
 
   const clearFilters = useCallback(() => {
     setFilterAction("");
@@ -337,7 +357,16 @@ export function AuditlogComponent() {
     retryNotification: AuditLog;
   }>(RETRY_NOTIFICATION, {
     context: headers,
-    refetchQueries: [{ query: GET_AUDIT_LOGS, variables: { action: filterAction || undefined, fromDate: filterFromDate || undefined, toDate: filterToDate || undefined } }],
+    refetchQueries: [
+      {
+        query: GET_AUDIT_LOGS,
+        variables: {
+          action: filterAction || undefined,
+          fromDate: filterFromDate || undefined,
+          toDate: filterToDate || undefined,
+        },
+      },
+    ],
     onCompleted: (result) => {
       setDetailLog(result.retryNotification);
     },
@@ -430,7 +459,9 @@ export function AuditlogComponent() {
         const emp = employeeMap.get(log.employeeId);
         if (!emp) return log.employeeId.toLowerCase().includes(q);
         const fullName = `${emp.lastName} ${emp.firstName}`.toLowerCase();
-        return fullName.includes(q) || emp.employeeCode.toLowerCase().includes(q);
+        return (
+          fullName.includes(q) || emp.employeeCode.toLowerCase().includes(q)
+        );
       });
     }
 
@@ -471,6 +502,10 @@ export function AuditlogComponent() {
     [],
   );
 
+  useEffect(() => {
+    setBlurred(!!detailLog);
+  }, [detailLog, setBlurred]);
+
   // ---- Render ----
   return (
     <div className="min-h-screen bg-[#F4F5F7] text-slate-900 font-sans flex flex-col gap-6 p-0">
@@ -499,270 +534,275 @@ export function AuditlogComponent() {
       {activeTab === "events" ? (
         <ProcessedEventsViewer />
       ) : (
-      <>
-      <AddEmployeeRequestDialog
-        key={sendRequestAction?.id ?? "empty"}
-        action={sendRequestAction}
-        open={!!sendRequestAction}
-        onOpenChange={(open) => {
-          if (!open) setSendRequestAction(null);
-        }}
-      />
+        <>
+          <AddEmployeeRequestDialog
+            key={sendRequestAction?.id ?? "empty"}
+            action={sendRequestAction}
+            open={!!sendRequestAction}
+            onOpenChange={(open) => {
+              if (!open) setSendRequestAction(null);
+            }}
+          />
 
-      <EditActionDialog
-        action={editAction}
-        open={!!editAction}
-        onOpenChange={(open) => {
-          if (!open) setEditAction(null);
-        }}
-      />
+          <EditActionDialog
+            action={editAction}
+            open={!!editAction}
+            onOpenChange={(open) => {
+              if (!open) setEditAction(null);
+            }}
+          />
 
-      {detailLog && (
-        <AuditDetailModal
-          log={detailLog}
-          employee={employeeMap.get(detailLog.employeeId)}
-          onClose={() => setDetailLog(null)}
-          onRetry={detailLog.notificationError ? handleRetry : undefined}
-          retrying={retrying}
-        />
-      )}
-
-      {/* ── Action Cards ── */}
-      <p className="text-[#3F4145] text-sm font-medium">
-        Нийт {filteredActions.length} үйлдэл
-      </p>
-
-      {actionsError && (
-        <div className="rounded-2xl border border-red-200 bg-red-50 px-5 py-4 text-sm text-red-500">
-          {actionsError.message}
-        </div>
-      )}
-
-      {actionsLoading ? (
-        <div className="py-8 px-4 flex flex-col gap-3">
-          <div className="h-4 w-64 rounded-full skeleton" />
-          <div className="h-3 w-80 rounded-full skeleton" />
-          <div className="h-3 w-72 rounded-full skeleton" />
-        </div>
-      ) : filteredActions.length === 0 ? (
-        <div className="py-12 text-center text-slate-400 text-sm">
-          Үйлдэл олдсонгүй
-        </div>
-      ) : (
-        <div className="grid grid-cols-4 gap-4">
-          {filteredActions.map((action) => (
-            <AuditActionCard
-              key={action.id}
-              action={action}
-              onSendRequest={setSendRequestAction}
-              onEdit={setEditAction}
+          {detailLog && (
+            <AuditDetailModal
+              log={detailLog}
+              employee={employeeMap.get(detailLog.employeeId)}
+              onClose={() => setDetailLog(null)}
+              onRetry={detailLog.notificationError ? handleRetry : undefined}
+              retrying={retrying}
             />
-          ))}
-        </div>
-      )}
+          )}
 
-      {/* ── Audit Trail Filters ── */}
-      <div className="flex flex-wrap items-center gap-3">
-        <div className="flex items-center gap-1.5 text-[13px] text-[#3f4145]">
-          <FiFilter className="h-3.5 w-3.5" />
-          <span className="font-medium">Шүүлтүүр:</span>
-        </div>
+          {/* ── Action Cards ── */}
+          <p className="text-[#3F4145] text-sm font-medium">
+            Нийт {filteredActions.length} үйлдэл
+          </p>
 
-        {/* Employee search */}
-        <input
-          type="text"
-          value={filterEmployee}
-          onChange={(e) => setFilterEmployee(e.target.value)}
-          placeholder="Ажилтан хайх..."
-          className="rounded-[10px] border border-black/12 bg-white px-3 py-1.5 text-[13px] text-[#121316] outline-none focus:border-blue-400 w-44"
-        />
+          {actionsError && (
+            <div className="rounded-2xl border border-red-200 bg-red-50 px-5 py-4 text-sm text-red-500">
+              {actionsError.message}
+            </div>
+          )}
 
-        {/* Action filter */}
-        <select
-          value={filterAction}
-          onChange={(e) => setFilterAction(e.target.value)}
-          className="rounded-[10px] border border-black/12 bg-white px-3 py-1.5 text-[13px] text-[#121316] outline-none focus:border-blue-400">
-          <option value="">Бүх үйлдэл</option>
-          <option value="add_employee">Шинэ ажилтан авах</option>
-          <option value="promote_employee">Тушаал дэвшүүлэх</option>
-          <option value="change_position">Албан тушаал солих</option>
-          <option value="offboard_employee">Ажлаас чөлөөлөх</option>
-        </select>
+          {actionsLoading ? (
+            <div className="py-8 px-4 flex flex-col gap-3">
+              <div className="h-4 w-64 rounded-full skeleton" />
+              <div className="h-3 w-80 rounded-full skeleton" />
+              <div className="h-3 w-72 rounded-full skeleton" />
+            </div>
+          ) : filteredActions.length === 0 ? (
+            <div className="py-12 text-center text-slate-400 text-sm">
+              Үйлдэл олдсонгүй
+            </div>
+          ) : (
+            <div className="grid grid-cols-4 gap-4">
+              {filteredActions.map((action) => (
+                <AuditActionCard
+                  key={action.id}
+                  action={action}
+                  onSendRequest={setSendRequestAction}
+                  onEdit={setEditAction}
+                />
+              ))}
+            </div>
+          )}
 
-        {/* Date from */}
-        <div className="flex items-center gap-1">
-          <span className="text-[12px] text-[#77818c]">Эхлэх:</span>
-          <input
-            type="date"
-            value={filterFromDate}
-            onChange={(e) => setFilterFromDate(e.target.value)}
-            className="rounded-[10px] border border-black/12 bg-white px-2 py-1.5 text-[13px] text-[#121316] outline-none focus:border-blue-400"
-          />
-        </div>
+          {/* ── Audit Trail Filters ── */}
+          <div className="flex flex-wrap items-center gap-3">
+            <div className="flex items-center gap-1.5 text-[13px] text-[#3f4145]">
+              <FiFilter className="h-3.5 w-3.5" />
+              <span className="font-medium">Шүүлтүүр:</span>
+            </div>
 
-        {/* Date to */}
-        <div className="flex items-center gap-1">
-          <span className="text-[12px] text-[#77818c]">Дуусах:</span>
-          <input
-            type="date"
-            value={filterToDate}
-            onChange={(e) => setFilterToDate(e.target.value)}
-            className="rounded-[10px] border border-black/12 bg-white px-2 py-1.5 text-[13px] text-[#121316] outline-none focus:border-blue-400"
-          />
-        </div>
+            {/* Employee search */}
+            <input
+              type="text"
+              value={filterEmployee}
+              onChange={(e) => setFilterEmployee(e.target.value)}
+              placeholder="Ажилтан хайх..."
+              className="rounded-[10px] border border-black/12 bg-white px-3 py-1.5 text-[13px] text-[#121316] outline-none focus:border-blue-400 w-44"
+            />
 
-        {/* Clear filters */}
-        {hasActiveFilters && (
-          <button
-            onClick={clearFilters}
-            className="flex items-center gap-1 rounded-[10px] border border-black/12 bg-white px-3 py-1.5 text-[12px] text-[#3f4145] transition-colors hover:bg-[#f5f5f5]">
-            <FiX className="h-3 w-3" />
-            Цэвэрлэх
-          </button>
-        )}
-      </div>
+            {/* Action filter */}
+            <select
+              value={filterAction}
+              onChange={(e) => setFilterAction(e.target.value)}
+              className="rounded-[10px] border border-black/12 bg-white px-3 py-1.5 text-[13px] text-[#121316] outline-none focus:border-blue-400">
+              <option value="">Бүх үйлдэл</option>
+              <option value="add_employee">Шинэ ажилтан авах</option>
+              <option value="promote_employee">Тушаал дэвшүүлэх</option>
+              <option value="change_position">Албан тушаал солих</option>
+              <option value="offboard_employee">Ажлаас чөлөөлөх</option>
+            </select>
 
-      {/* ── Audit Trail Table ── */}
-      <div className="overflow-hidden rounded-[24px] border border-black/12 bg-white">
-        {/* Header */}
-        <div
-          className="grid items-center border-b border-dashed border-black/12 px-3 py-3 text-[13px] text-[#3f4145] md:px-5"
-          style={{
-            gridTemplateColumns:
-              "minmax(160px,2fr) minmax(140px,1.25fr) minmax(90px,0.8fr) minmax(100px,0.9fr) minmax(120px,1fr) minmax(120px,1fr) 72px",
-          }}>
-          <button
-            onClick={() => handleSort("documentName")}
-            className="flex items-center gap-1 px-2 font-medium hover:text-[#121316] transition-colors text-left">
-            Баримт бичиг
-            <SortArrow active={sort.key === "documentName"} dir={sort.dir} />
-          </button>
-          <button
-            onClick={() => handleSort("employee")}
-            className="flex items-center gap-1 px-2 font-medium hover:text-[#121316] transition-colors text-left">
-            Ажилтан
-            <SortArrow active={sort.key === "employee"} dir={sort.dir} />
-          </button>
-          <span className="px-2 font-medium">Үе</span>
-          <button
-            onClick={() => handleSort("date")}
-            className="flex items-center gap-1 px-2 font-medium hover:text-[#121316] transition-colors text-left">
-            Огноо
-            <SortArrow active={sort.key === "date"} dir={sort.dir} />
-          </button>
-          <span className="px-2 font-medium">Баримт</span>
-          <span className="px-2 font-medium">Имэйл</span>
-          <span className="px-2 font-medium">Дэлгэр.</span>
-        </div>
+            {/* Date from */}
+            <div className="flex items-center gap-1">
+              <span className="text-[12px] text-[#77818c]">Эхлэх:</span>
+              <input
+                type="date"
+                value={filterFromDate}
+                onChange={(e) => setFilterFromDate(e.target.value)}
+                className="rounded-[10px] border border-black/12 bg-white px-2 py-1.5 text-[13px] text-[#121316] outline-none focus:border-blue-400"
+              />
+            </div>
 
-        {/* Body */}
-        {auditLoading ? (
-          <div className="flex flex-col gap-3 px-5 py-8">
-            <div className="h-4 w-56 rounded-full skeleton" />
-            <div className="h-3 w-80 rounded-full skeleton" />
-            <div className="h-3 w-72 rounded-full skeleton" />
+            {/* Date to */}
+            <div className="flex items-center gap-1">
+              <span className="text-[12px] text-[#77818c]">Дуусах:</span>
+              <input
+                type="date"
+                value={filterToDate}
+                onChange={(e) => setFilterToDate(e.target.value)}
+                className="rounded-[10px] border border-black/12 bg-white px-2 py-1.5 text-[13px] text-[#121316] outline-none focus:border-blue-400"
+              />
+            </div>
+
+            {/* Clear filters */}
+            {hasActiveFilters && (
+              <button
+                onClick={clearFilters}
+                className="flex items-center gap-1 rounded-[10px] border border-black/12 bg-white px-3 py-1.5 text-[12px] text-[#3f4145] transition-colors hover:bg-[#f5f5f5]">
+                <FiX className="h-3 w-3" />
+                Цэвэрлэх
+              </button>
+            )}
           </div>
-        ) : auditLogs.length === 0 ? (
-          <div className="py-12 text-center text-[#3f4145] text-sm">
-            Бүртгэл олдсонгүй
-          </div>
-        ) : (
-          auditLogs.map((log) => {
-            const emp = employeeMap.get(log.employeeId);
-            const empName = emp
-              ? `${emp.lastName} ${emp.firstName}`
-              : log.employeeId;
-            const docLabel = ACTION_DOC_LABELS[log.action] ?? log.action;
-            const phaseKey = PHASE_LABELS[log.phase] ?? log.phase;
-            const dateStr = new Date(log.timestamp).toLocaleDateString(
-              "mn-MN",
-              { year: "numeric", month: "2-digit", day: "2-digit" },
-            );
 
-            return (
-              <div
-                key={log.id}
-                className="grid items-center border-b border-black/12 px-3 py-3.5 transition-colors hover:bg-[#fafafa] md:px-5"
-                style={{
-                  gridTemplateColumns:
-                    "minmax(160px,2fr) minmax(140px,1.25fr) minmax(90px,0.8fr) minmax(100px,0.9fr) minmax(120px,1fr) minmax(120px,1fr) 72px",
-                }}>
-                {/* Баримт бичиг */}
-                <div className="flex items-center gap-2.5 px-2">
-                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[12px] border border-black/12 bg-white">
-                    <ReqIcon className="h-4 w-4 text-[#121316]" />
-                  </div>
-                  <span className="truncate text-[14px] font-medium text-[#121316]">
-                    {docLabel}
-                  </span>
-                </div>
+          {/* ── Audit Trail Table ── */}
+          <div className="overflow-hidden rounded-[24px] border border-black/12 bg-white">
+            {/* Header */}
+            <div
+              className="grid items-center border-b border-dashed border-black/12 px-3 py-3 text-[13px] text-[#3f4145] md:px-5"
+              style={{
+                gridTemplateColumns:
+                  "minmax(160px,2fr) minmax(140px,1.25fr) minmax(90px,0.8fr) minmax(100px,0.9fr) minmax(120px,1fr) minmax(120px,1fr) 72px",
+              }}>
+              <button
+                onClick={() => handleSort("documentName")}
+                className="flex items-center gap-1 px-2 font-medium hover:text-[#121316] transition-colors text-left">
+                Баримт бичиг
+                <SortArrow
+                  active={sort.key === "documentName"}
+                  dir={sort.dir}
+                />
+              </button>
+              <button
+                onClick={() => handleSort("employee")}
+                className="flex items-center gap-1 px-2 font-medium hover:text-[#121316] transition-colors text-left">
+                Ажилтан
+                <SortArrow active={sort.key === "employee"} dir={sort.dir} />
+              </button>
+              <span className="px-2 font-medium">Үе</span>
+              <button
+                onClick={() => handleSort("date")}
+                className="flex items-center gap-1 px-2 font-medium hover:text-[#121316] transition-colors text-left">
+                Огноо
+                <SortArrow active={sort.key === "date"} dir={sort.dir} />
+              </button>
+              <span className="px-2 font-medium">Баримт</span>
+              <span className="px-2 font-medium">Имэйл</span>
+              <span className="px-2 font-medium">Дэлгэр.</span>
+            </div>
 
-                {/* Ажилтан */}
-                <div className="flex items-center gap-2 px-2">
-                  <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#f0f0f0]">
-                    {emp?.imageUrl ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img
-                        src={emp.imageUrl}
-                        alt={empName}
-                        className="h-7 w-7 rounded-full object-cover"
-                      />
-                    ) : (
-                      <FiUser className="h-3.5 w-3.5 text-[#77818c]" />
-                    )}
-                  </div>
-                  <span className="truncate text-[13px] text-[#121316]">
-                    {empName}
-                  </span>
-                </div>
-
-                {/* Үе (Phase badge) */}
-                <div className="px-2">
-                  <span
-                    className={`inline-flex items-center gap-1 rounded-full px-2 py-1 text-[11px] font-medium ${phaseBadge(log.phase)}`}>
-                    <span className="text-[10px]">◆</span>
-                    {phaseKey}
-                  </span>
-                </div>
-
-                {/* Огноо */}
-                <div className="flex items-center gap-1.5 px-2">
-                  <CalIcon className="h-3.5 w-3.5 text-[#77818c]" />
-                  <span className="text-[13px] text-[#3f4145]">{dateStr}</span>
-                </div>
-
-                {/* Баримт (signing dots) */}
-                <div className="px-2">
-                  <SigningStatus log={log} />
-                </div>
-
-                {/* Имэйл статус */}
-                <div className="px-2">
-                  <EmailStatus log={log} />
-                </div>
-
-                {/* Дэлгэрэнгүй */}
-                <div className="flex items-center justify-center px-2">
-                  <button
-                    onClick={() => setDetailLog(log)}
-                    className="flex h-8 w-8 items-center justify-center rounded-[10px] text-[#77818c] transition-colors hover:bg-[#f5f5f5] hover:text-[#121316]"
-                    aria-label="Дэлгэрэнгүй">
-                    <EyeIcon />
-                  </button>
-                </div>
+            {/* Body */}
+            {auditLoading ? (
+              <div className="flex flex-col gap-3 px-5 py-8">
+                <div className="h-4 w-56 rounded-full skeleton" />
+                <div className="h-3 w-80 rounded-full skeleton" />
+                <div className="h-3 w-72 rounded-full skeleton" />
               </div>
-            );
-          })
-        )}
+            ) : auditLogs.length === 0 ? (
+              <div className="py-12 text-center text-[#3f4145] text-sm">
+                Бүртгэл олдсонгүй
+              </div>
+            ) : (
+              auditLogs.map((log) => {
+                const emp = employeeMap.get(log.employeeId);
+                const empName = emp
+                  ? `${emp.lastName} ${emp.firstName}`
+                  : log.employeeId;
+                const docLabel = ACTION_DOC_LABELS[log.action] ?? log.action;
+                const phaseKey = PHASE_LABELS[log.phase] ?? log.phase;
+                const dateStr = new Date(log.timestamp).toLocaleDateString(
+                  "mn-MN",
+                  { year: "numeric", month: "2-digit", day: "2-digit" },
+                );
 
-        {/* Footer */}
-        {!auditLoading && auditLogs.length > 0 && (
-          <div className="border-t border-dashed border-black/12 px-5 py-3 text-[13px] text-[#3f4145]">
-            Нийт {auditLogs.length} баримт
+                return (
+                  <div
+                    key={log.id}
+                    className="grid items-center border-b border-black/12 px-3 py-3.5 transition-colors hover:bg-[#fafafa] md:px-5"
+                    style={{
+                      gridTemplateColumns:
+                        "minmax(160px,2fr) minmax(140px,1.25fr) minmax(90px,0.8fr) minmax(100px,0.9fr) minmax(120px,1fr) minmax(120px,1fr) 72px",
+                    }}>
+                    {/* Баримт бичиг */}
+                    <div className="flex items-center gap-2.5 px-2">
+                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[12px] border border-black/12 bg-white">
+                        <ReqIcon className="h-4 w-4 text-[#121316]" />
+                      </div>
+                      <span className="truncate text-[14px] font-medium text-[#121316]">
+                        {docLabel}
+                      </span>
+                    </div>
+
+                    {/* Ажилтан */}
+                    <div className="flex items-center gap-2 px-2">
+                      <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#f0f0f0]">
+                        {emp?.imageUrl ? (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img
+                            src={emp.imageUrl}
+                            alt={empName}
+                            className="h-7 w-7 rounded-full object-cover"
+                          />
+                        ) : (
+                          <FiUser className="h-3.5 w-3.5 text-[#77818c]" />
+                        )}
+                      </div>
+                      <span className="truncate text-[13px] text-[#121316]">
+                        {empName}
+                      </span>
+                    </div>
+
+                    {/* Үе (Phase badge) */}
+                    <div className="px-2">
+                      <span
+                        className={`inline-flex items-center gap-1 rounded-full px-2 py-1 text-[11px] font-medium ${phaseBadge(log.phase)}`}>
+                        <span className="text-[10px]">◆</span>
+                        {phaseKey}
+                      </span>
+                    </div>
+
+                    {/* Огноо */}
+                    <div className="flex items-center gap-1.5 px-2">
+                      <CalIcon className="h-3.5 w-3.5 text-[#77818c]" />
+                      <span className="text-[13px] text-[#3f4145]">
+                        {dateStr}
+                      </span>
+                    </div>
+
+                    {/* Баримт (signing dots) */}
+                    <div className="px-2">
+                      <SigningStatus log={log} />
+                    </div>
+
+                    {/* Имэйл статус */}
+                    <div className="px-2">
+                      <EmailStatus log={log} />
+                    </div>
+
+                    {/* Дэлгэрэнгүй */}
+                    <div className="flex items-center justify-center px-2">
+                      <button
+                        onClick={() => setDetailLog(log)}
+                        className="flex h-8 w-8 items-center justify-center rounded-[10px] text-[#77818c] transition-colors hover:bg-[#f5f5f5] hover:text-[#121316]"
+                        aria-label="Дэлгэрэнгүй">
+                        <EyeIcon />
+                      </button>
+                    </div>
+                  </div>
+                );
+              })
+            )}
+
+            {/* Footer */}
+            {!auditLoading && auditLogs.length > 0 && (
+              <div className="border-t border-dashed border-black/12 px-5 py-3 text-[13px] text-[#3f4145]">
+                Нийт {auditLogs.length} баримт
+              </div>
+            )}
           </div>
-        )}
-      </div>
-      </>
+        </>
       )}
     </div>
   );

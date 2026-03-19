@@ -1,6 +1,7 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { createPortal } from "react-dom";
 import { useQuery } from "@apollo/client/react";
 import { FiSearch } from "react-icons/fi";
 
@@ -17,6 +18,7 @@ import type { Employee } from "@/lib/types";
 import { PhaseSection } from "./PhaseSection";
 import { TemplatePreviewModal } from "./TemplatePreviewModal";
 import { PHASES, getEmployeeDocumentProfile } from "./template-manager-shared";
+import { useHrOverlay } from "../overlay-context";
 
 export default function TemplateManager() {
   const { data: employeeData } = useQuery<{ employees: Employee[] }>(
@@ -32,6 +34,12 @@ export default function TemplateManager() {
     null,
   );
   const [search, setSearch] = useState("");
+  const { setBlurred } = useHrOverlay();
+
+  useEffect(() => {
+    setBlurred(Boolean(previewTemplate));
+    return () => setBlurred(false);
+  }, [previewTemplate, setBlurred]);
 
   const filteredByPhase = useMemo(() => {
     const query = search.toLowerCase();
@@ -168,12 +176,15 @@ export default function TemplateManager() {
         )}
       </div>
 
-      {previewTemplate && (
-        <TemplatePreviewModal
-          template={previewTemplate}
-          onClose={() => setPreviewTemplate(null)}
-        />
-      )}
+      {typeof document !== "undefined" && previewTemplate
+        ? createPortal(
+            <TemplatePreviewModal
+              template={previewTemplate}
+              onClose={() => setPreviewTemplate(null)}
+            />,
+            document.body,
+          )
+        : null}
     </div>
   );
 }
