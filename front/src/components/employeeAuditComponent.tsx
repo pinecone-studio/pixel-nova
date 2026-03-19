@@ -1,15 +1,18 @@
 "use client";
 
-import { useQuery } from "@apollo/client/react";
+import { useLazyQuery, useQuery } from "@apollo/client/react";
 import { useMemo, useState } from "react";
 import { BiChevronRight, BiSearch, BiX } from "react-icons/bi";
-import { FiFileText, FiCheckCircle } from "react-icons/fi";
+import { FiFileText, FiCheckCircle, FiEye } from "react-icons/fi";
 
 import { useEmployeeDocuments } from "@/components/pages/employee/useEmployeeDocuments";
 import { useEmployeeSession } from "@/components/pages/employee/useEmployeeSession";
 import { GET_AUDIT_LOGS } from "@/graphql/queries/audit-logs";
+import { GET_DOCUMENT_CONTENT } from "@/graphql/queries";
 import { buildGraphQLHeaders } from "@/lib/apollo-client";
-import type { AuditLog, Document } from "@/lib/types";
+import type { AuditLog, Document, DocumentContent } from "@/lib/types";
+import { FilesPreviewModal } from "@/components/pages/employee/files/FilesPreviewModal";
+import { buildDataUrl } from "@/components/pages/employee/files/filesUtils";
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -62,10 +65,12 @@ function AuditDetailModal({
   log,
   documentsById,
   onClose,
+  onPreview,
 }: {
   log: AuditLog;
   documentsById: Map<string, Document>;
   onClose: () => void;
+  onPreview: (document: Document) => void;
 }) {
   const dateStr = new Date(log.timestamp).toLocaleString("mn-MN", {
     year: "numeric",
@@ -113,13 +118,24 @@ function AuditDetailModal({
                 {log.documentIds.map((docId) => (
                   <div
                     key={docId}
-                    className="flex items-center gap-3 rounded-2xl border border-[#EAECF0] bg-white px-3 py-3">
+                    className="flex items-center justify-between gap-3 rounded-2xl border border-[#EAECF0] bg-white px-3 py-3">
                     <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-[#D0D5DD] bg-[#F9FAFB] text-[#667085]">
                       <FiFileText className="h-4 w-4" />
                     </div>
-                    <span className="truncate text-[13px] text-[#101828]">
+                    <span className="truncate text-[13px] text-[#101828] flex-1">
                       {documentsById.get(docId)?.documentName ?? docId}
                     </span>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const doc = documentsById.get(docId);
+                        if (doc) onPreview(doc);
+                      }}
+                      disabled={!documentsById.get(docId)}
+                      className="flex h-8 w-8 items-center justify-center rounded-[10px] text-[#667085] transition-colors hover:bg-[#f5f5f5] hover:text-[#101828] disabled:cursor-not-allowed disabled:opacity-50"
+                      aria-label="Урьдчилж харах">
+                      <FiEye className="h-4 w-4" />
+                    </button>
                   </div>
                 ))}
               </div>
@@ -246,6 +262,39 @@ export function EmployeeAuditComponent() {
   const [search, setSearch] = useState("");
   const [filterAction, setFilterAction] = useState<FilterAction>("");
   const [detailLog, setDetailLog] = useState<AuditLog | null>(null);
+  const [previewDoc, setPreviewDoc] = useState<Document | null>(null);
+  const [previewError, setPreviewError] = useState<string | null>(null);
+
+  const [loadContent, { data: previewData, loading: previewLoading }] =
+    useLazyQuery<{ documentContent: DocumentContent | null }>(
+      GET_DOCUMENT_CONTENT,
+      { fetchPolicy: "network-only" },
+    );
+
+  const previewContent = previewData?.documentContent ?? null;
+  const previewUrl = useMemo(
+    () => (previewContent ? buildDataUrl(previewContent) : null),
+    [previewContent],
+  );
+
+  async function handlePreviewDocument(document: Document) {
+    if (!authToken) return;
+    setPreviewDoc(document);
+    setPreviewError(null);
+    try {
+      const result = await loadContent({
+        variables: { documentId: document.id },
+        context: { headers: buildGraphQLHeaders({ authToken }) },
+      });
+      if (!result.data?.documentContent) {
+        setPreviewError("Баримтын агуулга олдсонгүй.");
+      }
+    } catch (err) {
+      setPreviewError(
+        err instanceof Error ? err.message : "Баримтыг нээж чадсангүй.",
+      );
+    }
+  }
 
   const { data, loading, error } = useQuery<{ auditLogs: AuditLog[] }>(
     GET_AUDIT_LOGS,
@@ -312,8 +361,20 @@ export function EmployeeAuditComponent() {
           log={detailLog}
           documentsById={documentsById}
           onClose={() => setDetailLog(null)}
+          onPreview={handlePreviewDocument}
         />
       )}
+
+      {previewDoc ? (
+        <FilesPreviewModal
+          document={previewDoc}
+          content={previewContent}
+          previewUrl={previewUrl}
+          loading={previewLoading}
+          error={previewError}
+          onClose={() => setPreviewDoc(null)}
+        />
+      ) : null}
 
       <div className="mx-auto flex w-full max-w-[1061px] flex-col gap-8">
         {/* Header */}
