@@ -1,26 +1,30 @@
 "use client";
 
 import { useLazyQuery, useMutation, useQuery } from "@apollo/client/react";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import {
   FiChevronDown,
   FiChevronUp,
   FiDownload,
+  FiEdit3,
   FiEye,
   FiFileText,
   FiFilter,
+  FiRefreshCw,
   FiSearch,
 } from "react-icons/fi";
 
 import {
   APPROVE_CONTRACT_REQUEST,
   REJECT_CONTRACT_REQUEST,
+  SAVE_EMPLOYER_SIGNATURE,
 } from "@/graphql/mutations";
 import {
   GET_CONTRACT_REQUESTS,
   GET_DOCUMENTS,
   GET_DOCUMENT_CONTENT,
+  GET_EMPLOYER_SIGNATURE_STATUS,
 } from "@/graphql/queries";
 import { buildGraphQLHeaders } from "@/lib/apollo-client";
 import type { ContractRequest, Document, DocumentContent } from "@/lib/types";
@@ -108,21 +112,141 @@ const RequestModal = ({
 }: {
   row: ContractRequest;
   onClose: () => void;
-  onApprove: (id: string, note: string) => Promise<void>;
+  onApprove: (
+    id: string,
+    note: string,
+    employerSig: {
+      mode: string;
+      signatureData?: string;
+      passcode?: string;
+    },
+  ) => Promise<void>;
   onReject: (id: string, note: string) => Promise<void>;
 }) => {
   const [note, setNote] = useState(row.note ?? "");
   const [acting, setActing] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Employer signature states
+  const [employerSignMode, setEmployerSignMode] = useState<"reuse" | "redraw">(
+    "reuse",
+  );
+  const [employerPasscode, setEmployerPasscode] = useState("");
+  const [employerSignatureData, setEmployerSignatureData] = useState("");
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const drawingRef = useRef(false);
+
+  const { data: sigStatusData } = useQuery<{
+    employerSignatureStatus: {
+      hasSignature: boolean;
+      hasPasscode: boolean;
+      updatedAt: string | null;
+    };
+  }>(GET_EMPLOYER_SIGNATURE_STATUS, {
+    context: {
+      headers: buildGraphQLHeaders({ actorRole: "hr" }),
+    },
+    fetchPolicy: "network-only",
+  });
+
+  const sigStatus = sigStatusData?.employerSignatureStatus;
+  const hasExistingSig = sigStatus?.hasSignature ?? false;
+  const hasPasscode = sigStatus?.hasPasscode ?? false;
+
+  // Auto-switch to redraw if no existing sig
+  useEffect(() => {
+    if (sigStatus && !sigStatus.hasSignature) {
+      setEmployerSignMode("redraw");
+    }
+  }, [sigStatus]);
+
+  // Canvas setup
+  useEffect(() => {
+    if (employerSignMode !== "redraw") return;
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const rect = canvas.getBoundingClientRect();
+    const ratio = window.devicePixelRatio || 1;
+    canvas.width = rect.width * ratio;
+    canvas.height = rect.height * ratio;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+    ctx.scale(ratio, ratio);
+    ctx.lineWidth = 2;
+    ctx.lineCap = "round";
+    ctx.strokeStyle = "#0B0E14";
+  }, [employerSignMode]);
+
+  function getCanvasPoint(e: React.PointerEvent<HTMLCanvasElement>) {
+    const canvas = canvasRef.current!;
+    const rect = canvas.getBoundingClientRect();
+    return { x: e.clientX - rect.left, y: e.clientY - rect.top };
+  }
+
+  function handlePointerDown(e: React.PointerEvent<HTMLCanvasElement>) {
+    if (employerSignMode !== "redraw") return;
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+    drawingRef.current = true;
+    const { x, y } = getCanvasPoint(e);
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+  }
+
+  function handlePointerMove(e: React.PointerEvent<HTMLCanvasElement>) {
+    if (!drawingRef.current || employerSignMode !== "redraw") return;
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+    const { x, y } = getCanvasPoint(e);
+    ctx.lineTo(x, y);
+    ctx.stroke();
+  }
+
+  function handlePointerUp() {
+    if (!drawingRef.current || employerSignMode !== "redraw") return;
+    drawingRef.current = false;
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    setEmployerSignatureData(canvas.toDataURL("image/png"));
+  }
+
+  const clearCanvas = useCallback(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    setEmployerSignatureData("");
+  }, []);
+
   const initials = getInitials(row.employee.firstName, row.employee.lastName);
   const color = avatarColor(row.employeeId);
 
   async function handleApprove() {
     setError(null);
+
+    // Validate employer signature
+    if (employerSignMode === "redraw" && !employerSignatureData) {
+      setError("Ажил олгогчийн гарын үсгээ зурна уу.");
+      return;
+    }
+    if (employerSignMode === "reuse" && hasPasscode && !employerPasscode) {
+      setError("4 оронтой кодоо оруулна уу.");
+      return;
+    }
+
     setActing(true);
     try {
-      await onApprove(row.id, note);
+      await onApprove(row.id, note, {
+        mode: employerSignMode,
+        signatureData:
+          employerSignMode === "redraw" ? employerSignatureData : undefined,
+        passcode: employerPasscode || undefined,
+      });
       onClose();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Алдаа гарлаа.");
@@ -150,7 +274,7 @@ const RequestModal = ({
       onClick={onClose}
     >
       <div
-        className="relative w-[460px] max-w-[95vw] bg-white rounded-3xl border border-slate-200 shadow-[0_28px_60px_rgba(15,23,42,0.12)] p-6 flex flex-col gap-5"
+        className="relative w-[520px] max-w-[95vw] max-h-[90vh] overflow-y-auto bg-white rounded-3xl border border-slate-200 shadow-[0_28px_60px_rgba(15,23,42,0.12)] p-6 flex flex-col gap-5"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-start justify-between">
@@ -204,6 +328,113 @@ const RequestModal = ({
             {new Date(row.createdAt).toLocaleDateString("mn-MN")}
           </p>
         </div>
+
+        {/* Employer Signature Section */}
+        {row.status === "pending" ? (
+          <div className="bg-blue-50/50 rounded-2xl p-4 flex flex-col gap-3 border border-blue-200/60">
+            <div className="flex items-center justify-between">
+              <p className="text-slate-900 font-semibold text-base">
+                Ажил олгогчийн гарын үсэг
+              </p>
+              {hasExistingSig ? (
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => setEmployerSignMode("reuse")}
+                    className={`text-xs px-3 py-1.5 rounded-lg border transition-colors ${
+                      employerSignMode === "reuse"
+                        ? "bg-blue-600 text-white border-blue-600"
+                        : "bg-white text-slate-600 border-slate-200 hover:border-slate-300"
+                    }`}
+                  >
+                    <FiRefreshCw className="inline mr-1 text-[10px]" />
+                    Дахин ашиглах
+                  </button>
+                  <button
+                    onClick={() => setEmployerSignMode("redraw")}
+                    className={`text-xs px-3 py-1.5 rounded-lg border transition-colors ${
+                      employerSignMode === "redraw"
+                        ? "bg-blue-600 text-white border-blue-600"
+                        : "bg-white text-slate-600 border-slate-200 hover:border-slate-300"
+                    }`}
+                  >
+                    <FiEdit3 className="inline mr-1 text-[10px]" />
+                    Шинээр зурах
+                  </button>
+                </div>
+              ) : null}
+            </div>
+
+            {employerSignMode === "reuse" && hasExistingSig ? (
+              <div className="flex flex-col gap-2">
+                <p className="text-xs text-slate-500">
+                  Хадгалсан гарын үсгээ ашиглах
+                  {sigStatus?.updatedAt
+                    ? ` (${new Date(sigStatus.updatedAt).toLocaleDateString("mn-MN")})`
+                    : ""}
+                </p>
+                {hasPasscode ? (
+                  <input
+                    type="password"
+                    inputMode="numeric"
+                    maxLength={4}
+                    value={employerPasscode}
+                    onChange={(e) =>
+                      setEmployerPasscode(e.target.value.replace(/\D/g, ""))
+                    }
+                    placeholder="4 оронтой код"
+                    className="w-36 bg-white border border-slate-200 rounded-xl px-3 py-2 text-sm text-slate-700 outline-none focus:border-blue-300 tracking-widest text-center"
+                  />
+                ) : (
+                  <p className="text-xs text-emerald-600">
+                    Код шаардлагагүй — шууд батлах боломжтой.
+                  </p>
+                )}
+              </div>
+            ) : (
+              <div className="flex flex-col gap-2">
+                <p className="text-xs text-slate-500">
+                  {hasExistingSig
+                    ? "Шинэ гарын үсэг зурж хуучныг солих"
+                    : "Гарын үсэг олдсонгүй — шинээр зурна уу"}
+                </p>
+                <div className="relative">
+                  <canvas
+                    ref={canvasRef}
+                    onPointerDown={handlePointerDown}
+                    onPointerMove={handlePointerMove}
+                    onPointerUp={handlePointerUp}
+                    onPointerLeave={handlePointerUp}
+                    className="h-24 w-full cursor-crosshair rounded-xl bg-white border border-slate-200"
+                    style={{ touchAction: "none" }}
+                  />
+                  {employerSignatureData ? (
+                    <button
+                      onClick={clearCanvas}
+                      className="absolute top-2 right-2 text-xs text-slate-400 hover:text-red-500 bg-white/80 rounded-md px-2 py-1"
+                    >
+                      Арилгах
+                    </button>
+                  ) : (
+                    <p className="absolute inset-0 flex items-center justify-center text-xs text-slate-300 pointer-events-none">
+                      Энд гарын үсгээ зурна уу
+                    </p>
+                  )}
+                </div>
+                <input
+                  type="password"
+                  inputMode="numeric"
+                  maxLength={4}
+                  value={employerPasscode}
+                  onChange={(e) =>
+                    setEmployerPasscode(e.target.value.replace(/\D/g, ""))
+                  }
+                  placeholder="4 оронтой код (заавал биш)"
+                  className="w-48 bg-white border border-slate-200 rounded-xl px-3 py-2 text-sm text-slate-700 outline-none focus:border-blue-300 tracking-widest"
+                />
+              </div>
+            )}
+          </div>
+        ) : null}
 
         <div className="flex flex-col gap-2">
           <p className="text-slate-900 font-semibold text-base">
@@ -320,8 +551,24 @@ export const ContractRequestsComponent = () => {
     return haystack.includes(search.trim().toLowerCase());
   });
 
-  async function handleApprove(id: string, note: string) {
-    await approveContractRequest({ variables: { id, note } });
+  async function handleApprove(
+    id: string,
+    note: string,
+    employerSig: {
+      mode: string;
+      signatureData?: string;
+      passcode?: string;
+    },
+  ) {
+    await approveContractRequest({
+      variables: {
+        id,
+        note,
+        employerSignatureMode: employerSig.mode,
+        employerSignatureData: employerSig.signatureData,
+        employerPasscode: employerSig.passcode,
+      },
+    });
     await refetch();
     setSuccessMessage("Хүсэлт амжилттай батлагдлаа.");
     setTimeout(() => setSuccessMessage(null), 2000);

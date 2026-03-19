@@ -213,6 +213,12 @@ export const typeDefs = /* GraphQL */ `
     updatedAt: String
   }
 
+  type EmployerSignatureStatus {
+    hasSignature: Boolean!
+    hasPasscode: Boolean!
+    updatedAt: String
+  }
+
   type Announcement {
     id: ID!
     title: String!
@@ -251,6 +257,7 @@ export const typeDefs = /* GraphQL */ `
     contractRequests(status: String): [ContractRequest!]!
     myContractRequests: [ContractRequest!]!
     mySignatureStatus: EmployeeSignatureStatus!
+    employerSignatureStatus: EmployerSignatureStatus!
     myNotifications: [EmployeeNotification!]!
     announcements: [Announcement!]!
     processedEvents(employeeId: ID, status: String): [ProcessedEvent!]!
@@ -261,7 +268,7 @@ export const typeDefs = /* GraphQL */ `
     verifyOtp(employeeCode: String!, code: String!): AuthSession!
     loginWithCode(employeeCode: String!): AuthSession!
     logout: Boolean!
-    triggerAction(employeeId: ID!, action: String!, dryRun: Boolean, overrideRecipients: [String!]): TriggerActionResult!
+    triggerAction(employeeId: ID!, action: String!, dryRun: Boolean, overrideRecipients: [String!], templateDataOverrides: JSON): TriggerActionResult!
     upsertEmployee(input: UpsertEmployeeInput!): UpsertEmployeeResult!
     resolveEmployeeAction(input: ResolveEmployeeActionInput!): ResolvedEmployeeAction
     updateRegistry(input: UpdateActionRegistryInput!): ActionConfig!
@@ -276,7 +283,14 @@ export const typeDefs = /* GraphQL */ `
       signatureData: String
     ): ContractRequest!
     saveMySignature(signatureData: String!, passcode: String): EmployeeSignatureStatus!
-    approveContractRequest(id: ID!, note: String): ContractRequest!
+    saveEmployerSignature(signatureData: String!, passcode: String): EmployerSignatureStatus!
+    approveContractRequest(
+      id: ID!
+      note: String
+      employerSignatureMode: String
+      employerPasscode: String
+      employerSignatureData: String
+    ): ContractRequest!
     rejectContractRequest(id: ID!, note: String): ContractRequest!
     markNotificationRead(id: ID!): EmployeeNotification!
     sendAnnouncement(title: String!, body: String!): Int!

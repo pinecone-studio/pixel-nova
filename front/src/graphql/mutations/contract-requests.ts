@@ -22,8 +22,20 @@ export const SUBMIT_CONTRACT_REQUEST = gql`
 `;
 
 export const APPROVE_CONTRACT_REQUEST = gql`
-  mutation ApproveContractRequest($id: ID!, $note: String) {
-    approveContractRequest(id: $id, note: $note) {
+  mutation ApproveContractRequest(
+    $id: ID!
+    $note: String
+    $employerSignatureMode: String
+    $employerPasscode: String
+    $employerSignatureData: String
+  ) {
+    approveContractRequest(
+      id: $id
+      note: $note
+      employerSignatureMode: $employerSignatureMode
+      employerPasscode: $employerPasscode
+      employerSignatureData: $employerSignatureData
+    ) {
       ...ContractRequestFields
     }
   }
@@ -42,6 +54,16 @@ export const REJECT_CONTRACT_REQUEST = gql`
 export const SAVE_MY_SIGNATURE = gql`
   mutation SaveMySignature($signatureData: String!, $passcode: String) {
     saveMySignature(signatureData: $signatureData, passcode: $passcode) {
+      hasSignature
+      hasPasscode
+      updatedAt
+    }
+  }
+`;
+
+export const SAVE_EMPLOYER_SIGNATURE = gql`
+  mutation SaveEmployerSignature($signatureData: String!, $passcode: String) {
+    saveEmployerSignature(signatureData: $signatureData, passcode: $passcode) {
       hasSignature
       hasPasscode
       updatedAt

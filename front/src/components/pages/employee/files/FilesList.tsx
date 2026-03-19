@@ -5,6 +5,8 @@ import type { Document } from "@/lib/types";
 import { FilesDocumentRow } from "./FilesDocumentRow";
 import { emptyBoxStyle, formatMonthLabel } from "./filesUtils";
 
+const HIDDEN_ACTIONS = new Set(["offboard_employee"]);
+
 export function FilesList({
   loading,
   error,
@@ -35,11 +37,13 @@ export function FilesList({
     );
   }
 
-  if (documents.length === 0) {
+  const visible = documents.filter((d) => !HIDDEN_ACTIONS.has(d.action));
+
+  if (visible.length === 0) {
     return <div style={emptyBoxStyle}>Баримт олдсонгүй.</div>;
   }
 
-  const sorted = [...documents].sort(
+  const sorted = [...visible].sort(
     (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
   );
   const grouped = sorted.reduce<Map<string, Document[]>>((acc, doc) => {

@@ -19,9 +19,9 @@ const TEMPLATE_LABELS: Record<string, string> = {
   salary_increase_order: "Цалин нэмэх тушаал",
   position_update_order: "Албан тушаал өөрчлөх тушаал",
   contract_addendum: "Гэрээний нэмэлт",
-  termination_order: "Ажил дуусгавар болгох тушаал",
-  handover_sheet: "Хүлээлгэн өгөх акт",
 };
+
+const OFFBOARDING_TEMPLATES = new Set(["termination_order", "handover_sheet"]);
 
 function formatTemplateLabel(id: string) {
   return TEMPLATE_LABELS[id] ?? id;
@@ -90,7 +90,15 @@ export const MyContractRequests = () => {
     },
   );
 
-  const rows = useMemo(() => data?.myContractRequests ?? [], [data]);
+  const rows = useMemo(() => {
+    const all = data?.myContractRequests ?? [];
+    return all
+      .map((r) => ({
+        ...r,
+        templateIds: r.templateIds.filter((id) => !OFFBOARDING_TEMPLATES.has(id)),
+      }))
+      .filter((r) => r.templateIds.length > 0);
+  }, [data]);
   const [expanded, setExpanded] = useState(false);
   const [viewMode, setViewMode] = useState<"list" | "grid">("list");
   const sortedRows = useMemo(

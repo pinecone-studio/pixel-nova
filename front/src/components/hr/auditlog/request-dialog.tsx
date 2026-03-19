@@ -420,12 +420,55 @@ export function AddEmployeeRequestDialog({
       }));
       return;
     }
+    // Build template data overrides from form fields
+    const overrides: Record<string, string> = {};
+    if (useSalaryChangeLayout) {
+      if (prevSalary) {
+        overrides.base_salary_prev = prevSalary;
+        overrides.base_salary_prev_clause = prevSalary;
+      }
+      if (nextSalary) {
+        overrides.base_salary_new = nextSalary;
+        overrides.base_salary_new_clause = nextSalary;
+      }
+      if (salaryDelta) overrides.increase_amount = salaryDelta;
+      if (prevSalary && nextSalary && Number(prevSalary) > 0) {
+        overrides.increase_percent = String(
+          Math.round(((Number(nextSalary) - Number(prevSalary)) / Number(prevSalary)) * 100),
+        );
+      }
+    }
+    if (useAddEmployeeLayout) {
+      if (salaryAmount) {
+        overrides.monthly_base_salary_amount = salaryAmount;
+        overrides.salary_amount = salaryAmount;
+      }
+      if (registerNo) overrides.employee_register_no = registerNo;
+      if (phone) overrides.employee_phone = phone;
+      if (companyAddress) overrides.company_address = companyAddress;
+      if (companyRegisterNo) overrides.company_register_no = companyRegisterNo;
+    }
+    if (useChangePositionLayout) {
+      overrides.from_department = currentDept;
+      overrides.from_position = currentPosition;
+      overrides.to_department = nextDept;
+      overrides.to_position = nextPosition;
+      if (changeReason) overrides.reason_detail_line_1 = changeReason;
+    }
+    if (useOffboardLayout) {
+      if (registerNo) overrides.employee_register_no = registerNo;
+      if (phone) overrides.employee_phone = phone;
+      if (terminationReason) overrides.reason_detail_line_1 = terminationReason;
+      if (contractNo) overrides.contract_number = contractNo;
+    }
+
     try {
       await triggerAction({
         variables: {
           employeeId: matchedEmployee.id,
           action: action.name,
           overrideRecipients: recipients,
+          templateDataOverrides: Object.keys(overrides).length > 0 ? overrides : undefined,
         },
       });
       onOpenChange(false);

@@ -8,12 +8,14 @@ export const TRIGGER_ACTION = gql`
     $action: String!
     $dryRun: Boolean
     $overrideRecipients: [String!]
+    $templateDataOverrides: JSON
   ) {
     triggerAction(
       employeeId: $employeeId
       action: $action
       dryRun: $dryRun
       overrideRecipients: $overrideRecipients
+      templateDataOverrides: $templateDataOverrides
     ) {
       auditLog {
         id

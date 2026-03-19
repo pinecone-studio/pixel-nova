@@ -18,16 +18,14 @@ const ACTION_LABELS: Record<string, string> = {
   add_employee: "Шинэ ажилтан авах",
   promote_employee: "Тушаал дэвшүүлэх",
   change_position: "Албан тушаал солих",
-  offboard_employee: "Ажлаас чөлөөлөх",
 };
 
 const PHASE_LABELS: Record<string, string> = {
   onboarding: "Ажилд орох",
   working: "Ажиллах",
-  offboarding: "Ажлаас гарах",
 };
 
-type FilterAction = "" | "add_employee" | "promote_employee" | "change_position" | "offboard_employee";
+type FilterAction = "" | "add_employee" | "promote_employee" | "change_position";
 
 // ---------------------------------------------------------------------------
 // Status badge
@@ -261,7 +259,9 @@ export function EmployeeAuditComponent() {
   );
 
   const auditLogs = useMemo(() => {
-    let logs = data?.auditLogs ?? [];
+    let logs = (data?.auditLogs ?? []).filter(
+      (log) => log.action !== "offboard_employee" && log.phase !== "offboarding",
+    );
 
     if (search) {
       const q = search.toLowerCase();
@@ -362,7 +362,6 @@ export function EmployeeAuditComponent() {
             <option value="add_employee">Шинэ ажилтан авах</option>
             <option value="promote_employee">Тушаал дэвшүүлэх</option>
             <option value="change_position">Албан тушаал солих</option>
-            <option value="offboard_employee">Ажлаас чөлөөлөх</option>
           </select>
         </div>
 

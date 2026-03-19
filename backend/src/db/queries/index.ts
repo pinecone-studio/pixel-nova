@@ -75,3 +75,9 @@ export {
   verifyEmployeeSignaturePasscode,
   getEmployeeSignatureStatus,
 } from "./employeeSignature";
+export {
+  getEmployerSignatureByUserId,
+  upsertEmployerSignature,
+  verifyEmployerSignaturePasscode,
+  getEmployerSignatureStatus,
+} from "./employerSignature";

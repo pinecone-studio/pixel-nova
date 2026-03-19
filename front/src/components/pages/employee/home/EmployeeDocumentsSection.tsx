@@ -12,6 +12,7 @@ export function EmployeeDocumentsSection({
   authToken: string;
 }) {
   const recentDocuments = [...documents]
+    .filter((d) => d.action !== "offboard_employee")
     .sort(
       (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
     )

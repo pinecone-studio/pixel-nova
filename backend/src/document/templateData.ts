@@ -51,6 +51,16 @@ export function buildTemplateData(
   const termDate = employee.terminationDate ? new Date(employee.terminationDate) : null;
   const jobTitle = employee.jobTitle ?? employee.level ?? "";
 
+  // Calculate total years/months worked from hireDate
+  let totalYearsWorked = "";
+  let totalMonthsWorked = "";
+  if (hireDate) {
+    const diffMs = date.getTime() - hireDate.getTime();
+    const totalMonths = Math.max(0, Math.floor(diffMs / (1000 * 60 * 60 * 24 * 30.44)));
+    totalYearsWorked = String(Math.floor(totalMonths / 12));
+    totalMonthsWorked = String(totalMonths % 12);
+  }
+
   return {
     // Employee fields
     employee_first_name: employee.firstName ?? "",
@@ -170,14 +180,14 @@ export function buildTemplateData(
     increase_amount: "",
     increase_percent: "",
 
-    // Company info (defaults — can be overridden by config)
-    company_name: "",
-    company_name_full: "",
-    company_name_in_title: "",
-    company_name_purpose: "",
-    company_name_for_signature: "",
-    company_name_signature: "",
-    company_name_handover: "",
+    // Company info
+    company_name: "Pinecone",
+    company_name_full: "Pinecone LLC",
+    company_name_in_title: "Pinecone LLC",
+    company_name_purpose: "Pinecone LLC",
+    company_name_for_signature: "Pinecone LLC",
+    company_name_signature: "Pinecone LLC",
+    company_name_handover: "Pinecone LLC",
     company_address: "",
     company_register_no: "",
     company_legal_address: "",
@@ -207,6 +217,10 @@ export function buildTemplateData(
     special_work_conditions: "",
     travel_requirement_details: "",
 
+    // Calculated work duration
+    total_years_worked: totalYearsWorked,
+    total_months_worked: totalMonthsWorked,
+
     // Position change fields
     from_department: "",
     from_position: "",
@@ -215,6 +229,25 @@ export function buildTemplateData(
     new_department: employee.department ?? "",
     new_position: jobTitle,
     current_position: jobTitle,
+
+    // Signature placeholders (injected by triggerAction if available)
+    issuer_sign_line: "",
+    issuer_title: "",
+    issuer_name: "",
+    issuer_signature: "",
+    issuer_date: "",
+    employee_sign_line: "",
+    employee_signature: "",
+    employee_sign_date: "",
+
+    // Salary order misc
+    other_reason_text: "",
+    reason_detail_line_1: "",
+    reason_detail_line_2: "",
+    reason_detail_line_3: "",
+    implementation_department: "",
+    control_responsible: "",
+
     ...documentProfile,
   };
 }
