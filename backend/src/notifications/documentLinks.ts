@@ -85,6 +85,10 @@ export async function buildDocumentDeliveryUrl(input: DocumentLinkInput) {
     return `${origin}/documents/${input.documentId}?expires=${expiresAt}&signature=${signature}`;
   }
 
+  if (origin && !input.signingSecret) {
+    return `${origin}/documents/${input.documentId}`;
+  }
+
   if (isHttpUrl(input.storageUrl)) {
     return input.storageUrl;
   }
@@ -93,7 +97,11 @@ export async function buildDocumentDeliveryUrl(input: DocumentLinkInput) {
 }
 
 export async function validateDocumentAccess(input: ValidateDocumentAccessInput) {
-  if (!input.signingSecret || !input.expires || !input.signature) {
+  if (!input.signingSecret) {
+    return true;
+  }
+
+  if (!input.expires || !input.signature) {
     return false;
   }
 

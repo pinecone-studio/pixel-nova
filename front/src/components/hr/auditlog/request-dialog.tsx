@@ -93,6 +93,7 @@ export function AddEmployeeRequestDialog({
   const [lastName, setLastName] = useState("");
   const [firstName, setFirstName] = useState("");
   const [email, setEmail] = useState("");
+  const [changeEmail, setChangeEmail] = useState("");
   const [registerNo, setRegisterNo] = useState("");
   const [phone, setPhone] = useState("");
   const [branch, setBranch] = useState("");
@@ -192,6 +193,7 @@ export function AddEmployeeRequestDialog({
     setTab("hr");
     setSalaryStep("person");
     setErrors({});
+    setChangeEmail("");
   }, [action]);
 
   useEffect(() => {
@@ -200,10 +202,42 @@ export function AddEmployeeRequestDialog({
   }, [open, previewOpen, setBlurred]);
 
   useEffect(() => {
+    const normalizedCode = employeeCode.replace(/\s+/g, "").toUpperCase();
+    if (normalizedCode === "EMP-0001" || normalizedCode === "EMP0001") {
+      setLastName("Дорж");
+      setFirstName("Эрдэнэ");
+      setEmail("dorj.erde@company.com");
+      setChangeEmail("bsunduibazrr8@gmail.com");
+      setRegisterNo("УХ04272036");
+      setPhone("99999999");
+      setBranch("Гурван гол");
+      setDept("Engineering");
+      setJobTitle("Senior Engineer");
+      setCurrentDept("Engineering");
+      setCurrentPosition("Senior Engineer");
+      setNextDept("Engineering");
+      setNextPosition("Lead Engineer");
+      setChangeReason("Гүйцэтгэлийн үнэлгээ");
+      setHireDate("2022-06-15");
+      setTerminationDate("2026-03-20");
+      setWorkStartDate("2024-02-01");
+      setWorkTotalDuration("2 жил 1 сар");
+      setPrevSalary("3500000");
+      setNextSalary("4200000");
+      setSalaryDelta("700000");
+      setContractNo("2345678987");
+      setTerminationReason("Ажилтны өөрийн хүсэлтээр");
+      return;
+    }
+
     if (!matchedEmployee) return;
     setLastName(matchedEmployee.lastName ?? "");
     setFirstName(matchedEmployee.firstName ?? "");
     setEmail(matchedEmployee.email ?? "");
+    setChangeEmail(matchedEmployee.email ?? "bsunduibazrr8@gmail.com");
+    const docProfile = matchedEmployee.documentProfile;
+    setRegisterNo(docProfile?.employee_register_no ?? "");
+    setPhone(docProfile?.employee_legal_phone ?? "");
     setBranch(matchedEmployee.branch ?? "");
     setDept(matchedEmployee.department ?? "Engineering");
     setJobTitle(matchedEmployee.jobTitle ?? "");
@@ -211,7 +245,7 @@ export function AddEmployeeRequestDialog({
     setCurrentPosition(matchedEmployee.jobTitle ?? "");
     setHireDate(matchedEmployee.hireDate ?? "");
     setTerminationDate(matchedEmployee.terminationDate ?? "");
-  }, [matchedEmployee]);
+  }, [employeeCode, matchedEmployee]);
   /* eslint-enable react-hooks/set-state-in-effect */
 
   const [triggerAction, { loading: submitting }] = useMutation(TRIGGER_ACTION, {
@@ -337,6 +371,7 @@ export function AddEmployeeRequestDialog({
       );
       requireValue(lastName, "lastName");
       requireValue(firstName, "firstName");
+      requirePattern(changeEmail, "email", emailRegex, "@gmail.com-оор төгсөнө.");
       requireValue(currentDept, "currentDept");
       requireValue(currentPosition, "currentPosition");
       requireValue(nextDept, "nextDept");
@@ -454,6 +489,7 @@ export function AddEmployeeRequestDialog({
       overrides.to_department = nextDept;
       overrides.to_position = nextPosition;
       if (changeReason) overrides.reason_detail_line_1 = changeReason;
+      if (changeEmail) overrides.employee_email = changeEmail;
     }
     if (useOffboardLayout) {
       if (registerNo) overrides.employee_register_no = registerNo;
@@ -463,11 +499,14 @@ export function AddEmployeeRequestDialog({
     }
 
     try {
+      const overrideRecipients =
+        useChangePositionLayout && changeEmail ? [changeEmail] : recipients;
+
       await triggerAction({
         variables: {
           employeeId: matchedEmployee.id,
           action: action.name,
-          overrideRecipients: recipients,
+          overrideRecipients,
           templateDataOverrides: Object.keys(overrides).length > 0 ? overrides : undefined,
         },
       });
@@ -601,6 +640,8 @@ export function AddEmployeeRequestDialog({
             setLastName={setLastName}
             firstName={firstName}
             setFirstName={setFirstName}
+            email={changeEmail}
+            setEmail={setChangeEmail}
             currentDept={currentDept}
             setCurrentDept={setCurrentDept}
             currentPosition={currentPosition}

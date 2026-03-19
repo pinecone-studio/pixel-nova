@@ -2,7 +2,6 @@ import type { Document } from "@/lib/types";
 
 import { FilesEyeIcon } from "@/components/icons";
 import { FilesActionButton } from "./FilesActionButton";
-import { formatDate } from "./filesUtils";
 
 export function FilesDocumentActions({
   document,
@@ -18,6 +17,7 @@ export function FilesDocumentActions({
       <FilesActionButton title="Харах" onClick={onPreview}>
         <FilesEyeIcon />
       </FilesActionButton>
+
       <FilesActionButton title="Татах" onClick={onDownload}>
         <svg
           width="15"
@@ -30,6 +30,7 @@ export function FilesDocumentActions({
           <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3" />
         </svg>
       </FilesActionButton>
+
       <span
         style={{
           color: "#111827",
@@ -38,9 +39,14 @@ export function FilesDocumentActions({
           textAlign: "right",
         }}
       >
-        {document.createdAt ? formatDate(document.createdAt) : "—"}
+        {document.createdAt
+          ? `${new Date(document.createdAt).getFullYear()}/${String(
+              new Date(document.createdAt).getMonth() + 1,
+            ).padStart(2, "0")}/${String(
+              new Date(document.createdAt).getDate(),
+            ).padStart(2, "0")}`
+          : "—"}
       </span>
     </div>
   );
 }
-

@@ -20,6 +20,7 @@ import {
   listActionConfigs,
   requestEmployeeOtp,
   updateAuditLogDelivery,
+  updateAuditLogSignature,
   updateContractRequestStatus,
   updateLeaveRequestStatus,
   updateEmployeeDocumentProfile,
@@ -829,6 +830,84 @@ export const mutationResolvers = {
       notificationAttempted: result.notificationAttempted,
       recipientsNotified: result.notified,
       notificationError: result.error ?? null,
+    });
+
+    const updated = await getAuditLogById(ctx.db, entry.id);
+    return updated ?? entry;
+  },
+
+  signAuditLog: async (
+    _: unknown,
+    args: {
+      auditLogId: string;
+      signatureMode?: string | null;
+      signatureData?: string | null;
+      passcode?: string | null;
+    },
+    ctx: Ctx,
+  ) => {
+    if (ctx.actor.role !== "employee" || !ctx.actor.id) {
+      throw new Error("Unauthorized");
+    }
+
+    const entry = await getAuditLogById(ctx.db, args.auditLogId);
+    if (!entry) {
+      throw new Error("Audit log not found");
+    }
+    if (entry.employeeId !== ctx.actor.id) {
+      throw new Error("Unauthorized");
+    }
+
+    const signature = await getEmployeeSignatureByEmployeeId(
+      ctx.db,
+      ctx.actor.id,
+    );
+    const signatureMode = (args.signatureMode ?? "").toLowerCase().trim();
+    const signatureData = args.signatureData?.trim() ?? "";
+    const passcode = args.passcode?.trim() ?? "";
+
+    const wantsRedraw =
+      signatureMode === "redraw" || (!signatureMode && Boolean(signatureData));
+    const wantsReuse =
+      signatureMode === "reuse" || (!signatureMode && !wantsRedraw);
+
+    if (wantsReuse) {
+      if (!signature?.signatureData) {
+        throw new Error("Гарын үсэг олдсонгүй. Эхлээд гарын үсгээ зурна уу.");
+      }
+      if (signature.passcodeHash) {
+        if (!passcode) {
+          throw new Error("4 оронтой кодоо оруулна уу.");
+        }
+        const verification = await verifyEmployeeSignaturePasscode(
+          ctx.db,
+          ctx.actor.id,
+          passcode,
+        );
+        if (!verification.ok) {
+          throw new Error("Код буруу байна. Дахин оролдоно уу.");
+        }
+      }
+    }
+
+    if (wantsRedraw) {
+      if (!signatureData) {
+        throw new Error("Гарын үсгээ зурна уу.");
+      }
+      if (passcode && !/^[0-9]{4}$/.test(passcode)) {
+        throw new Error("4 оронтой код шаардлагатай.");
+      }
+      await upsertEmployeeSignature(ctx.db, {
+        employeeId: ctx.actor.id,
+        signatureData,
+        passcode: passcode || undefined,
+      });
+    }
+
+    const nowIso = new Date().toISOString();
+    await updateAuditLogSignature(ctx.db, entry.id, {
+      employeeSigned: true,
+      employeeSignedAt: nowIso,
     });
 
     const updated = await getAuditLogById(ctx.db, entry.id);

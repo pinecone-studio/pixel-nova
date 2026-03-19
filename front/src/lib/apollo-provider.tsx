@@ -6,11 +6,7 @@ import { useEffect, useRef } from "react";
 import { AUTH_STATE_CHANGED_EVENT } from "./auth-events";
 import { appApolloClient } from "./apollo-client";
 
-export function ApolloAppProvider({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export function ApolloAppProvider({ children }: { children: React.ReactNode }) {
   const authSignatureRef = useRef<string | null>(null);
 
   useEffect(() => {

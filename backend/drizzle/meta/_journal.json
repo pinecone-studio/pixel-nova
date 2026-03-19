@@ -50,6 +50,13 @@
       "when": 1773897587678,
       "tag": "0006_woozy_hitman",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "6",
+      "when": 1773914441150,
+      "tag": "0007_new_komodo",
+      "breakpoints": true
     }
   ]
 }

@@ -86,6 +86,15 @@ export async function dispatchNotification(
     };
   }
 
+  if (!input.apiKey || input.apiKey.trim().length === 0) {
+    return {
+      notified: false,
+      notificationAttempted: false,
+      recipientCount: emails.length,
+      recipientEmails: emails,
+    };
+  }
+
   const template = buildEmailTemplate({
     employeeName: `${input.employee.firstName} ${input.employee.lastName}`,
     employeeCode: input.employee.employeeCode,

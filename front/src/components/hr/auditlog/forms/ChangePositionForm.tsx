@@ -15,6 +15,8 @@ export type ChangePositionFormProps = {
   setLastName: (v: string) => void;
   firstName: string;
   setFirstName: (v: string) => void;
+  email: string;
+  setEmail: (v: string) => void;
   currentDept: string;
   setCurrentDept: (v: string) => void;
   currentPosition: string;
@@ -41,6 +43,8 @@ export function ChangePositionForm({
   setLastName,
   firstName,
   setFirstName,
+  email,
+  setEmail,
   currentDept,
   setCurrentDept,
   currentPosition,
@@ -63,7 +67,7 @@ export function ChangePositionForm({
     errors[key] ? `${inputClass} border-red-300 focus:border-red-400` : inputClass;
   const fillMock = () => {
     const defaultDept = departments?.[0] ?? "Engineering";
-    setEmployeeCode("EMP0003");
+    setEmployeeCode("EMP-0001");
     setLastName("Дорж");
     setFirstName("Эрдэнэ");
     setCurrentDept(defaultDept);
@@ -118,6 +122,16 @@ export function ChangePositionForm({
           className={getInputClass("firstName")}
         />
         <FieldError message={errors.firstName} />
+      </div>
+      <div className="flex min-w-0 flex-col gap-[8px]">
+        <label className={labelClass}>Gmail</label>
+        <input
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          placeholder="dorj@gmail.com"
+          className={getInputClass("email")}
+        />
+        <FieldError message={errors.email} />
       </div>
 
       <div className="grid min-w-0 grid-cols-2 gap-[16px]">
