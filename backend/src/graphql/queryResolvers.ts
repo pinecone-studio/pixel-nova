@@ -10,6 +10,7 @@ import {
   listAnnouncements,
   listEmployees,
   listActionConfigs,
+  listProcessedEvents,
 } from "../db/queries";
 import { getTemplateFileById } from "../services/contractTemplates";
 import { getTemplateHtml } from "../document/generator";
@@ -129,6 +130,20 @@ export const queryResolvers = {
       throw new Error("Unauthorized");
     }
     return listAnnouncements(ctx.db);
+  },
+
+  processedEvents: (
+    _: unknown,
+    args: { employeeId?: string | null; status?: string | null },
+    ctx: Ctx,
+  ) => {
+    if (ctx.actor.role !== "hr" && ctx.actor.role !== "admin") {
+      throw new Error("Unauthorized");
+    }
+    return listProcessedEvents(ctx.db, {
+      employeeId: args.employeeId,
+      status: args.status,
+    });
   },
 
   documentContent: async (

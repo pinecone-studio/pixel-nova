@@ -101,6 +101,19 @@ export const ACTION_CONFIG_FIELDS = gql`
   }
 `;
 
+export const PROCESSED_EVENT_FIELDS = gql`
+  fragment ProcessedEventFields on ProcessedEvent {
+    eventId
+    eventType
+    employeeId
+    action
+    status
+    payload
+    lastError
+    processedAt
+  }
+`;
+
 export const LEAVE_REQUEST_FIELDS = gql`
   fragment LeaveRequestFields on LeaveRequest {
     id

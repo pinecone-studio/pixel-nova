@@ -6,3 +6,4 @@ export * from "./leave-requests";
 export * from "./contract-requests";
 export * from "./notifications";
 export * from "./announcements";
+export * from "./processed-events";

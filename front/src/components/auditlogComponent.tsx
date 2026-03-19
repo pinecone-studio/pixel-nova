@@ -6,6 +6,7 @@ import { FiUser } from "react-icons/fi";
 
 import { AuditActionCard } from "@/components/hr/auditlog/action-card";
 import { EditActionDialog } from "@/components/hr/auditlog/edit-action-dialog";
+import { ProcessedEventsViewer } from "@/components/hr/auditlog/processed-events-viewer";
 import { AddEmployeeRequestDialog } from "@/components/hr/auditlog/request-dialog";
 import { CalIcon, ReqIcon, EyeIcon } from "@/components/icons";
 import { GET_ACTIONS, GET_EMPLOYEES } from "@/graphql/queries";
@@ -279,7 +280,10 @@ function AuditDetailModal({
 // Main Component
 // ---------------------------------------------------------------------------
 
+type TabKey = "actions" | "events";
+
 export function AuditlogComponent() {
+  const [activeTab, setActiveTab] = useState<TabKey>("actions");
   const [search, setSearch] = useState("");
   const [sendRequestAction, setSendRequestAction] =
     useState<ActionConfig | null>(null);
@@ -405,6 +409,32 @@ export function AuditlogComponent() {
   // ---- Render ----
   return (
     <div className="min-h-screen bg-[#F4F5F7] text-slate-900 font-sans flex flex-col gap-6 p-0">
+      {/* ── Tab Toggle ── */}
+      <div className="flex items-center gap-1 rounded-[14px] border border-black/12 bg-white p-1 self-start">
+        <button
+          onClick={() => setActiveTab("actions")}
+          className={`rounded-[10px] px-4 py-2 text-[13px] font-medium transition-colors ${
+            activeTab === "actions"
+              ? "bg-[#121316] text-white"
+              : "text-[#3f4145] hover:bg-[#f5f5f5]"
+          }`}>
+          Үйлдлүүд & Аудит
+        </button>
+        <button
+          onClick={() => setActiveTab("events")}
+          className={`rounded-[10px] px-4 py-2 text-[13px] font-medium transition-colors ${
+            activeTab === "events"
+              ? "bg-[#121316] text-white"
+              : "text-[#3f4145] hover:bg-[#f5f5f5]"
+          }`}>
+          Эвент боловсруулалт
+        </button>
+      </div>
+
+      {activeTab === "events" ? (
+        <ProcessedEventsViewer />
+      ) : (
+      <>
       <AddEmployeeRequestDialog
         key={sendRequestAction?.id ?? "empty"}
         action={sendRequestAction}
@@ -604,6 +634,8 @@ export function AuditlogComponent() {
           </div>
         )}
       </div>
+      </>
+      )}
     </div>
   );
 }
