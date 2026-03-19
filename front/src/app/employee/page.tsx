@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useQuery } from "@apollo/client/react";
 import Link from "next/link";
@@ -124,7 +124,8 @@ export default function EmployeePage() {
         <div className="mt-9">
           <div
             className="box-border flex max-w-full items-center justify-between rounded-[12px] border border-[#E5E7EB] bg-white p-5"
-            style={{ width: 1056, height: 89 }}>
+            style={{ width: 1056, height: 89 }}
+          >
             <div className="flex h-[48px] items-center gap-4">
               <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg border border-[#9BC1FF] bg-[#EEF4FF]">
                 <Planeicon />
@@ -150,13 +151,14 @@ export default function EmployeePage() {
               <h2 className="h-8 w-[246px] text-[20px] font-semibold tracking-[-0.02em] text-[#111827]">
                 Баримт бичиг шинэчлэлт
               </h2>
-              <span className="h-[24px] w-[79px] rounded-full border border-[#E5E7EB] bg-white px-3 py-1 text-[12px] font-medium text-[#6B7280]">
+              <span className="h-[24px] w-[89px] rounded-full border border-[#E5E7EB] bg-white px-3 py-1 text-[12px] font-medium text-[#6B7280] flex justify-center items-center">
                 {documents.length} баримт
               </span>
             </div>
             <Link
               href="/employee/files"
-              className="flex h-8 w-[175px] items-center justify-evenly text-[14px] font-medium transition-colors hover:text-[#111827]">
+              className="flex h-8 w-[175px] items-center justify-evenly text-[14px] font-medium transition-colors hover:text-[#111827]"
+            >
               <span className="h-5 w-[133px]">Бүх баримт бичгүүд</span>
               <span className="flex h-5 items-end">
                 <Righticon />
@@ -166,13 +168,15 @@ export default function EmployeePage() {
 
           <div className="flex h-[356px] w-[1056px] flex-col divide-y divide-[#E5E7EB] rounded-2xl border border-[#E5E7EB] bg-white">
             {documents.length > 0 ? (
-              documents.slice(0, 4).map((document) => (
-                <ContractPreview
-                  key={document.id}
-                  document={document}
-                  authToken={authToken}
-                />
-              ))
+              documents
+                .slice(0, 4)
+                .map((document) => (
+                  <ContractPreview
+                    key={document.id}
+                    document={document}
+                    authToken={authToken}
+                  />
+                ))
             ) : (
               <div className="flex flex-col items-center justify-center gap-3 py-10 text-center">
                 <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-[18px] border border-[#E5E7EB] bg-[#F8FAFC]">

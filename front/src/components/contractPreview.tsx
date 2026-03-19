@@ -2,15 +2,13 @@
 
 import { useLazyQuery } from "@apollo/client/react";
 import { useMemo, useState } from "react";
-import { VscPreview } from "react-icons/vsc";
-import { BiDownload } from "react-icons/bi";
+import { createPortal } from "react-dom";
 
 import { buildGraphQLHeaders } from "@/lib/apollo-client";
 import { GET_DOCUMENT_CONTENT } from "@/graphql/queries";
 import type { Document, DocumentContent } from "@/lib/types";
 
-import { DocumentIcon, FilesEyeIcon } from "./icons";
-import { FilesPreviewModal } from "./pages/employee/files/FilesPreviewModal";
+import { ReqIcon, EyeIcon, DownloadIcon, CalIcon } from "./icons";
 
 type ContractPreviewProps = {
   document: Document;
@@ -104,48 +102,47 @@ export const ContractPreview = ({
 
   return (
     <>
-      <div className="flex h-[88px] w-full items-center justify-between w-[1054px] px-4 py-[20px]">
-        <div className="flex min-w-0 items-center justify-between w-[990px] gap-4 h-[48px]">
-          <div className="flex gap-4">
-            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg border border-[#E5E7EB] bg-[#F8FAFC] text-slate-500">
-              <DocumentIcon />
-            </div>
-
-            <div className="min-w-0">
-              <p className="truncate text-[16px] font-semibold text-[#111827]">
-                {document.action}
-              </p>
-              <p className="truncate text-[14px] text-[#6B7280]">
-                {document.documentName}
-              </p>
-            </div>
+      <div
+        className="grid items-center border-b border-[#E5E7EB] px-5 py-3 transition-colors hover:bg-[#fafafa]"
+        style={{
+          gridTemplateColumns:
+            "minmax(220px,2fr) minmax(140px,1fr) 72px",
+        }}
+      >
+        <div className="flex items-center gap-2.5 px-2">
+          <div className="flex h-10 w-10 items-center justify-center rounded-[14px] border border-black/12 bg-white text-[#121316]">
+            <ReqIcon className="h-4 w-4 text-[#121316]" />
           </div>
-
-          <div className="flex items-center justify-between gap-3 text-[12px] w-[191.8px] h-10 text-[#6B7280]">
-            <div className="w-[88px] h-10 flex justify-between">
-              {" "}
-              <button
-                type="button"
-                onClick={() => void handlePreview()}
-                className="flex h-10 w-10 items-center justify-center rounded-full bg-white text-[#111827] transition-colors hover:bg-[#F3F4F6]"
-                aria-label="Preview"
-              >
-                <FilesEyeIcon />
-              </button>
-              <button
-                type="button"
-                onClick={() => void handleDownload()}
-                className="flex h-10 w-10 items-center justify-center rounded-full bg-white text-[#111827] transition-colors hover:bg-[#F3F4F6]"
-                aria-label="Download"
-              >
-                <BiDownload className="text-sm text-[#000000] w-[20px] h-[20px]" />
-              </button>
-            </div>
-
-            <span className="text-[#111827] text-[14px] w-[73.8] h-5">
-              {formatDate(document.createdAt)}
-            </span>
+          <div>
+            <p className="text-[14px] font-medium text-[#121316]">
+              {document.documentName}
+            </p>
+            <p className="text-[12px] text-[#3f4145b3]">
+              {document.action}
+            </p>
           </div>
+        </div>
+        <div className="flex items-center gap-2 px-2">
+          <CalIcon className="h-4 w-4 text-[#77818c]" />
+          <span className="text-[14px] text-[#3f4145]">
+            {formatDate(document.createdAt)}
+          </span>
+        </div>
+        <div className="flex items-center gap-0">
+          <button
+            onClick={() => void handlePreview()}
+            className="flex h-8 w-8 items-center justify-center rounded-[10px] text-[#77818c] transition-colors hover:bg-[#f5f5f5] hover:text-[#121316] cursor-pointer"
+            aria-label="Урьдчилж харах"
+          >
+            <EyeIcon />
+          </button>
+          <button
+            onClick={() => void handleDownload()}
+            className="flex h-8 w-8 items-center justify-center rounded-[10px] text-[#77818c] transition-colors hover:bg-[#f5f5f5] hover:text-[#121316] cursor-pointer"
+            aria-label="Татах"
+          >
+            <DownloadIcon className="text-[#77818c]" />
+          </button>
         </div>
       </div>
 
@@ -153,16 +150,65 @@ export const ContractPreview = ({
         <p className="px-4 pb-3 text-[12px] text-red-400">{error}</p>
       ) : null}
 
-      {previewOpen ? (
-        <FilesPreviewModal
-          document={document}
-          content={content}
-          previewUrl={previewUrl}
-          loading={loading}
-          error={error}
-          onClose={() => setPreviewOpen(false)}
-        />
-      ) : null}
+      {previewOpen && typeof document !== "undefined"
+        ? createPortal(
+            <div
+              className="fixed inset-0 z-50 flex items-center justify-center bg-black/45"
+              onClick={() => setPreviewOpen(false)}
+            >
+              <div
+                className="relative w-[920px] max-w-[95vw] h-[82vh] bg-white rounded-3xl border border-slate-200 shadow-[0_28px_60px_rgba(15,23,42,0.12)] overflow-hidden"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200">
+                  <div>
+                    <p className="text-slate-900 font-semibold text-base">
+                      {content?.documentName ?? document.documentName}
+                    </p>
+                    <p className="text-slate-400 text-xs mt-0.5">
+                      {document.action}
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => setPreviewOpen(false)}
+                    className="text-slate-400 hover:text-slate-700 transition-colors text-lg cursor-pointer"
+                  >
+                    ✕
+                  </button>
+                </div>
+
+                <div className="h-[calc(82vh-64px)] bg-slate-50 p-6">
+                  {loading ? (
+                    <div className="w-full h-full rounded-2xl border border-slate-200 flex items-center justify-center text-slate-400 text-sm">
+                      Уншиж байна...
+                    </div>
+                  ) : error ? (
+                    <div className="w-full h-full rounded-2xl border border-red-200 bg-red-50 flex items-center justify-center text-red-500 text-sm">
+                      {error}
+                    </div>
+                  ) : content?.contentType === "text/html" ? (
+                    <iframe
+                      title={content.documentName}
+                      className="w-full h-full rounded-2xl bg-white border border-slate-200"
+                      srcDoc={content.content}
+                    />
+                  ) : content && previewUrl ? (
+                    <iframe
+                      title={content.documentName}
+                      className="w-full h-full rounded-2xl bg-white border border-slate-200"
+                      src={previewUrl}
+                    />
+                  ) : (
+                    <div className="w-full h-full rounded-2xl border border-slate-200 flex items-center justify-center text-slate-500 text-sm bg-white">
+                      Урьдчилан харах боломжгүй байна.
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>,
+            window.document.body,
+          )
+        : null}
     </>
   );
 };
