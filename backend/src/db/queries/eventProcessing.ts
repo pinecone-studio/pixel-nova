@@ -1,7 +1,33 @@
-import { eq } from "drizzle-orm";
+import { eq, desc, and, type SQL } from "drizzle-orm";
 
 import type { DbClient } from "../client";
 import { processedEvents } from "../schema";
+
+export async function listProcessedEvents(
+  db: DbClient,
+  filters?: {
+    employeeId?: string | null;
+    status?: string | null;
+  },
+) {
+  const conditions: SQL[] = [];
+
+  if (filters?.employeeId) {
+    conditions.push(eq(processedEvents.employeeId, filters.employeeId));
+  }
+  if (filters?.status) {
+    conditions.push(eq(processedEvents.status, filters.status));
+  }
+
+  const rows = await db
+    .select()
+    .from(processedEvents)
+    .where(conditions.length > 0 ? and(...conditions) : undefined)
+    .orderBy(desc(processedEvents.processedAt))
+    .limit(200);
+
+  return rows;
+}
 
 export async function getProcessedEventById(db: DbClient, eventId: string) {
   const [row] = await db

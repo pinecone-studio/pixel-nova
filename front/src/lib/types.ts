@@ -206,6 +206,17 @@ export interface EmployeeNotification {
   readAt?: string | null;
 }
 
+export interface ProcessedEvent {
+  eventId: string;
+  eventType: string;
+  employeeId: string;
+  action: string | null;
+  status: "processing" | "completed" | "ignored" | "failed";
+  payload: string;
+  lastError: string | null;
+  processedAt: string;
+}
+
 export interface Announcement {
   id: string;
   title: string;

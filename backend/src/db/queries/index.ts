@@ -45,6 +45,7 @@ export {
 } from "./leaveRequest";
 export { createTriggeredActionRecords } from "./triggerAction";
 export {
+  listProcessedEvents,
   getProcessedEventById,
   tryStartProcessedEvent,
   finishProcessedEvent,

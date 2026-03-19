@@ -227,6 +227,17 @@ export const typeDefs = /* GraphQL */ `
     readCount: Int!
   }
 
+  type ProcessedEvent {
+    eventId: ID!
+    eventType: String!
+    employeeId: ID!
+    action: String
+    status: String!
+    payload: String!
+    lastError: String
+    processedAt: String!
+  }
+
   type Query {
     me: Employee
     employees(search: String, status: String, department: String): [Employee!]!
@@ -242,6 +253,7 @@ export const typeDefs = /* GraphQL */ `
     mySignatureStatus: EmployeeSignatureStatus!
     myNotifications: [EmployeeNotification!]!
     announcements: [Announcement!]!
+    processedEvents(employeeId: ID, status: String): [ProcessedEvent!]!
   }
 
   type Mutation {
