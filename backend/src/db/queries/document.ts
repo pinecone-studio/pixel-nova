@@ -25,6 +25,13 @@ export async function getDocumentById(db: DbClient, documentId: string) {
   return doc ?? null;
 }
 
+export async function deleteDocument(db: DbClient, documentId: string) {
+  const doc = await getDocumentById(db, documentId);
+  if (!doc) return null;
+  await db.delete(documents).where(eq(documents.id, documentId));
+  return doc;
+}
+
 export async function insertDocument(
   db: DbClient,
   document: typeof documents.$inferInsert,
