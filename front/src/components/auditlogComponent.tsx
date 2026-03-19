@@ -61,7 +61,8 @@ function toggleSort(
 function SortArrow({ active, dir }: { active: boolean; dir: SortDir }) {
   return (
     <span
-      className={`ml-1 text-[10px] ${active ? "text-[#121316]" : "text-[#3f4145]/40"}`}>
+      className={`ml-1 text-[10px] ${active ? "text-black" : "text-black"}`}
+    >
       {dir === "asc" ? "↑↓" : "↓↑"}
     </span>
   );
@@ -209,7 +210,8 @@ function AuditDetailModal({
           </div>
           <button
             onClick={onClose}
-            className="flex h-8 w-8 items-center justify-center rounded-[10px] text-[#77818c] transition-colors hover:bg-[#f5f5f5] hover:text-[#121316]">
+            className="flex h-8 w-8 items-center justify-center rounded-[10px] text-[#77818c] transition-colors hover:bg-[#f5f5f5] hover:text-[#121316]"
+          >
             ✕
           </button>
         </div>
@@ -224,7 +226,8 @@ function AuditDetailModal({
                 {log.documentIds.map((docId) => (
                   <div
                     key={docId}
-                    className="flex items-center gap-2 rounded-[10px] border border-black/6 bg-[#fafafa] px-3 py-2 text-[13px]">
+                    className="flex items-center gap-2 rounded-[10px] border border-black/6 bg-[#fafafa] px-3 py-2 text-[13px]"
+                  >
                     <ReqIcon className="h-3.5 w-3.5 text-[#77818c]" />
                     <span className="truncate text-[#121316]">
                       {documentsById.get(docId)?.documentName ?? docId}
@@ -257,7 +260,8 @@ function AuditDetailModal({
                     {log.recipientEmails.map((email) => (
                       <span
                         key={email}
-                        className="rounded-full border border-black/12 bg-white px-2 py-0.5 text-[11px] text-[#3f4145]">
+                        className="rounded-full border border-black/12 bg-white px-2 py-0.5 text-[11px] text-[#3f4145]"
+                      >
                         {email}
                       </span>
                     ))}
@@ -275,7 +279,8 @@ function AuditDetailModal({
                       <button
                         onClick={onRetry}
                         disabled={retrying}
-                        className="shrink-0 flex items-center gap-1 rounded-[8px] border border-red-300 bg-white px-2.5 py-1 text-[11px] font-medium text-red-600 transition-colors hover:bg-red-50 disabled:opacity-50">
+                        className="shrink-0 flex items-center gap-1 rounded-[8px] border border-red-300 bg-white px-2.5 py-1 text-[11px] font-medium text-red-600 transition-colors hover:bg-red-50 disabled:opacity-50"
+                      >
                         <FiRefreshCw
                           className={`h-3 w-3 ${retrying ? "animate-spin" : ""}`}
                         />
@@ -297,7 +302,8 @@ function AuditDetailModal({
                 {log.incompleteFields.map((field) => (
                   <span
                     key={field}
-                    className="rounded-full border border-amber-200 bg-amber-50 px-2 py-0.5 text-[11px] text-amber-700">
+                    className="rounded-full border border-amber-200 bg-amber-50 px-2 py-0.5 text-[11px] text-amber-700"
+                  >
                     {field}
                   </span>
                 ))}
@@ -542,7 +548,7 @@ export function AuditlogComponent() {
 
       {/* ═══════════ ACTION CARDS (TOP) ═══════════ */}
       <div className="shrink-0">
-        <p className="text-[#3F4145] text-sm font-medium mb-3">
+        <p className="text-[#3F4145] text-[14px] font-medium mb-3">
           Нийт {filteredActions.length} үйлдэл
         </p>
 
@@ -584,29 +590,39 @@ export function AuditlogComponent() {
           style={{
             gridTemplateColumns:
               "minmax(160px,2fr) minmax(140px,1.5fr) minmax(120px,1fr) minmax(110px,1fr) minmax(140px,1.2fr) minmax(120px,1fr) 80px",
-          }}>
+          }}
+        >
           <button
             onClick={() => handleSort("documentName")}
-            className="flex items-center gap-1 px-2 font-medium hover:text-[#121316] transition-colors text-left">
+            className="flex items-center gap-1 px-2 font-medium text-[#3F4145CC] transition-colors text-[14px]"
+          >
             Баримт бичиг
             <SortArrow active={sort.key === "documentName"} dir={sort.dir} />
           </button>
           <button
             onClick={() => handleSort("employee")}
-            className="flex items-center gap-1 px-2 font-medium hover:text-[#121316] transition-colors text-left">
+            className="flex items-center gap-1 px-2 font-medium text-[#3F4145CC] transition-colors text-[14px]"
+          >
             Ажилтан
             <SortArrow active={sort.key === "employee"} dir={sort.dir} />
           </button>
           <span className="px-2 font-medium">Үе</span>
           <button
             onClick={() => handleSort("date")}
-            className="flex items-center gap-1 px-2 font-medium hover:text-[#121316] transition-colors text-left">
+            className="flex items-center gap-1 px-2 font-medium text-[#3F4145CC] transition-colors text-[14px]"
+          >
             Огноо
             <SortArrow active={sort.key === "date"} dir={sort.dir} />
           </button>
-          <span className="px-2 font-medium">Төлөв</span>
-          <span className="px-2 font-medium">Имэйл</span>
-          <span className="px-2 font-medium">Үйлдэл</span>
+          <span className="px-2  font-medium text-[#3F4145CC] transition-colors text-[14px]">
+            Төлөв
+          </span>
+          <span className="px-2  font-medium text-[#3F4145CC] transition-colors text-[14px]">
+            Имэйл
+          </span>
+          <span className="px-2 font-medium text-[#3F4145CC] transition-colors text-[14px]">
+            Үйлдэл
+          </span>
         </div>
 
         {/* Body */}
@@ -649,7 +665,8 @@ export function AuditlogComponent() {
                     gridTemplateColumns:
                       "minmax(160px,2fr) minmax(140px,1.5fr) minmax(120px,1fr) minmax(110px,1fr) minmax(140px,1.2fr) minmax(120px,1fr) 80px",
                   }}
-                  onClick={() => setDetailLog(log)}>
+                  onClick={() => setDetailLog(log)}
+                >
                   {/* Баримт бичиг */}
                   <div className="flex items-center gap-1.5 px-2">
                     <div className="flex h-9 w-9 shrink-0 items-center justify-center">
@@ -682,7 +699,8 @@ export function AuditlogComponent() {
                   {/* Үе (Phase badge) */}
                   <div className="px-2">
                     <span
-                      className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-[11px] font-medium ${phaseStyle}`}>
+                      className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-[11px] font-medium ${phaseStyle}`}
+                    >
                       <span className="text-sm">
                         <HiOutlineLightningBolt />
                       </span>
@@ -711,16 +729,19 @@ export function AuditlogComponent() {
                   {/* Үйлдэл (download + delete) */}
                   <div
                     className="flex items-center gap-1 px-2"
-                    onClick={(e) => e.stopPropagation()}>
+                    onClick={(e) => e.stopPropagation()}
+                  >
                     <button
                       className="flex h-8 w-8 items-center justify-center rounded-[10px] text-[#77818c] transition-colors hover:bg-[#f5f5f5] hover:text-[#121316]"
                       aria-label="Татах"
-                      onClick={() => setDetailLog(log)}>
+                      onClick={() => setDetailLog(log)}
+                    >
                       <FiDownload className="h-4 w-4" />
                     </button>
                     <button
                       className="flex h-8 w-8 items-center justify-center rounded-[10px] text-red-400 transition-colors hover:bg-red-50 hover:text-red-600"
-                      aria-label="Устгах">
+                      aria-label="Устгах"
+                    >
                       <FiTrash2 className="h-4 w-4" />
                     </button>
                   </div>
@@ -732,7 +753,7 @@ export function AuditlogComponent() {
 
         {/* Footer */}
         {!auditLoading && auditLogs.length > 0 && (
-          <div className="shrink-0 border-t border-dashed border-black/12 px-5 py-3 text-[13px] text-[#3f4145]">
+          <div className="shrink-0 border-t border-dashed border-black/12 px-5 py-3 text-[14px] text-[#3f4145]">
             Нийт {auditLogs.length} баримт
           </div>
         )}
