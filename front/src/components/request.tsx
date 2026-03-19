@@ -1,5 +1,5 @@
-import { useMutation } from "@apollo/client/react";
-import { useState } from "react";
+﻿import { useMutation } from "@apollo/client/react";
+import { useRef, useState } from "react";
 import { BiCalendar, BiChevronDown, BiPlus } from "react-icons/bi";
 import { FiCheck, FiSend, FiUploadCloud, FiX } from "react-icons/fi";
 
@@ -10,17 +10,20 @@ import { Planeicon } from "./icons";
 
 const TOKEN_KEY = "epas_auth_token";
 
-const INPUT_CLASS = `w-full bg-[#040d18] border border-[#1a2035] rounded-lg p-2.5 text-sm text-gray-300 focus:outline-none focus:border-[#00CC99]/40 appearance-none`;
+const INPUT_CLASS =
+  "w-full bg-[#040d18] border border-[#1a2035] rounded-lg p-2.5 text-sm text-gray-300 focus:outline-none focus:border-[#00CC99]/40 appearance-none";
 const LIGHT_DIALOG_BG = "bg-white";
 const LIGHT_DIALOG_BORDER = "border-[#E5E7EB]";
-const LIGHT_INPUT_CLASS = `w-full bg-white border border-[#E5E7EB] rounded-lg p-2.5 text-sm text-[#111827] focus:outline-none focus:border-[#111827]/30 appearance-none`;
-const LIGHT_TEXTAREA_CLASS = `w-full mt-[10px] h-[74px] bg-white border border-[#E5E7EB] rounded-lg p-3 text-sm text-[#111827] placeholder-[#9CA3AF] resize-none focus:outline-none focus:border-[#111827]/30`;
+const LIGHT_INPUT_CLASS =
+  "w-full bg-white border border-[#E5E7EB] rounded-lg p-2.5 text-sm text-[#111827] focus:outline-none focus:border-[#111827]/30 appearance-none";
+const LIGHT_TEXTAREA_CLASS =
+  "w-full mt-[10px] h-[74px] bg-white border border-[#E5E7EB] rounded-lg p-3 text-sm text-[#111827] placeholder-[#9CA3AF] resize-none focus:outline-none focus:border-[#111827]/30";
 
 function CloseBtn({ onClick }: { onClick: () => void }) {
   return (
     <button
       onClick={onClick}
-      className="h-6 w-6 text-[#000000] transition-colors hover:text-white"
+      className="h-6 w-6 text-gray-400 transition-colors hover:text-black cursor-pointer"
     >
       <FiX className="h-6 w-6" />
     </button>
@@ -38,7 +41,7 @@ function SendBtn({
     <button
       onClick={onClick}
       disabled={disabled}
-      className="flex w-[108px] items-center justify-evenly gap-2 rounded-lg bg-[#111827] text-4 font-medium text-white transition-colors hover:bg-[#0b1220] disabled:cursor-not-allowed disabled:opacity-50"
+      className="flex w-[108px] items-center justify-evenly rounded-lg bg-[#111827] text-4 font-medium text-white transition-colors hover:bg-[#0b1220] disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer"
     >
       <FiSend className="h-[18px] w-[18px]" />
       <span className="flex h-5 w-[54px] items-center justify-center">
@@ -52,7 +55,7 @@ function BackBtn({ onClick }: { onClick: () => void }) {
   return (
     <button
       onClick={onClick}
-      className="h-9 w-[78px] rounded-lg border border-[#1a2035] text-sm text-gray-400 transition-colors hover:bg-white/5 hover:text-white"
+      className="h-9 w-[78px] rounded-lg border border-[#1a2035] text-sm text-gray-600 transition-colors hover:bg-white/5 hover:text-black cursor-pointer"
     >
       Буцах
     </button>
@@ -79,7 +82,7 @@ function SelectField({
   inputClassName?: string;
 }) {
   return (
-    <div className="mt-9 flex h-[69px] w-[477px] flex-col justify-between">
+    <div className="mt-9 flex h-[72px] w-[477px] flex-col gap-2">
       <label
         htmlFor={id}
         className={`${labelClassName} h-[24px] w-full text-[18px]`}
@@ -110,6 +113,7 @@ function UploadArea({
   label,
   subtitle,
   variant = "dark",
+  value,
   onChange,
   error,
   disabled,
@@ -117,12 +121,19 @@ function UploadArea({
   label: string;
   subtitle?: string;
   variant?: "dark" | "light";
+  value?: File | null;
   onChange?: (file: File | null) => void;
   error?: string;
   disabled?: boolean;
 }) {
+  const inputRef = useRef<HTMLInputElement | null>(null);
   const isLight = variant === "light";
   const inputId = `upload-${label.replace(/\s+/g, "-").toLowerCase()}`;
+  const fileName = value?.name ?? "";
+  const handlePickFile = () => {
+    if (disabled) return;
+    inputRef.current?.click();
+  };
 
   return (
     <div className="mt-9 flex h-[202px] w-[477px] flex-col justify-between gap-1.5">
@@ -137,6 +148,7 @@ function UploadArea({
         id={inputId}
         type="file"
         className="hidden"
+        ref={inputRef}
         disabled={disabled}
         onChange={(event) => {
           const file = event.target.files?.[0] ?? null;
@@ -144,6 +156,7 @@ function UploadArea({
         }}
       />
       <div
+        onClick={handlePickFile}
         className={`mt-[10px] flex h-[168px] w-[477px] cursor-pointer flex-col items-center justify-evenly rounded-xl border border-dashed transition-colors ${
           isLight
             ? "border-[#E5E7EB] hover:border-[#111827]/20"
@@ -159,26 +172,32 @@ function UploadArea({
               isLight ? "text-[#111827]" : "text-white"
             }`}
           >
-            {subtitle ?? "Файл хавсаргах (заавал биш)"}
+            {fileName
+              ? "Сонгосон файл"
+              : (subtitle ?? "Файл хавсаргах (заавал биш)")}
           </p>
           <p
             className={`flex h-5 items-center text-3 ${
               isLight ? "text-[#9CA3AF]" : "text-gray-500"
             }`}
           >
-            JPEG, PNG, PDF, MP4 төрлүүд - 50MB хүртэл
+            {fileName || "JPEG, PNG, PDF, MP4 төрлүүд — 50MB хүртэл"}
           </p>
         </div>
 
         <button
           type="button"
-          className={`h-8 w-[105px] rounded-lg border text-[14px] transition-colors ${
+          onClick={(event) => {
+            event.stopPropagation();
+            handlePickFile();
+          }}
+          className={`h-8 w-[105px] rounded-lg border text-[14px] transition-colors cursor-pointer ${
             isLight
               ? "border-[#E5E7EB] text-[#6B7280] hover:bg-[#F3F4F6] hover:text-[#111827]"
               : "border-[#1a2035] text-gray-300 hover:bg-white/5"
           }`}
         >
-          Оруулах
+          {fileName ? "Солих" : "Оруулах"}
         </button>
       </div>
       {error ? <p className="text-xs text-red-500">{error}</p> : null}
@@ -249,10 +268,11 @@ export const Request = ({ employee }: { employee?: Employee }) => {
     try {
       if (activeTab === "Тойрох хуудас") {
         const nextErrors: Record<string, string> = {};
-        if (!clearanceType.trim()) nextErrors.clearanceType = "Заавал бөглөнө.";
+        if (!clearanceType.trim())
+          nextErrors.clearanceType = "Төрөл сонгоно уу.";
         if (!clearanceFile) nextErrors.clearanceFile = "Файл хавсаргана уу.";
         if (!clearanceReason.trim()) {
-          nextErrors.clearanceReason = "Заавал бөглөнө.";
+          nextErrors.clearanceReason = "Шалтгаанаа бичнэ үү.";
         }
         if (Object.keys(nextErrors).length > 0) {
           setFieldErrors(nextErrors);
@@ -268,9 +288,6 @@ export const Request = ({ employee }: { employee?: Employee }) => {
       } else if (activeTab === "Томилолт") {
         const nextErrors: Record<string, string> = {};
         if (!tripFile) nextErrors.tripFile = "Файл хавсаргана уу.";
-        if (!clearanceReason.trim()) {
-          nextErrors.clearanceReason = "Заавал бөглөнө.";
-        }
         if (Object.keys(nextErrors).length > 0) {
           setFieldErrors(nextErrors);
           return;
@@ -362,7 +379,7 @@ export const Request = ({ employee }: { employee?: Employee }) => {
               <button
                 type="button"
                 onClick={() => setActiveTab(action.title)}
-                className="absolute right-5 top-1/2 flex h-5 w-5 -translate-y-1/2 items-center justify-center text-[#6B7280] transition-colors hover:bg-[#F3F4F6] hover:text-[#111827]"
+                className="absolute right-5 top-1/2 flex h-5 w-5 -translate-y-1/2 items-center justify-center text-[#6B7280] hover:rounded-lg hover:h-7 hover: w-7 cursor-pointer transition-colors hover:bg-[#F3F4F6] hover:text-[#111827]"
               >
                 <BiPlus className="h-5 w-5" />
               </button>
@@ -421,7 +438,7 @@ export const Request = ({ employee }: { employee?: Employee }) => {
               inputClassName={LIGHT_INPUT_CLASS}
             />
             {fieldErrors.clearanceType ? (
-              <p className="text-xs text-red-500">
+              <p className="mt-3 text-xs leading-4 text-red-500">
                 {fieldErrors.clearanceType}
               </p>
             ) : null}
@@ -429,6 +446,7 @@ export const Request = ({ employee }: { employee?: Employee }) => {
             <UploadArea
               label="Файл хавсаргах"
               variant="light"
+              value={clearanceFile}
               onChange={(file) => {
                 setClearanceFile(file);
                 setFieldErrors((prev) => ({ ...prev, clearanceFile: "" }));
@@ -455,7 +473,7 @@ export const Request = ({ employee }: { employee?: Employee }) => {
                 }}
               />
               {fieldErrors.clearanceReason ? (
-                <p className="text-xs text-red-500">
+                <p className="mt-2 text-xs leading-4 text-red-500">
                   {fieldErrors.clearanceReason}
                 </p>
               ) : null}
@@ -496,6 +514,7 @@ export const Request = ({ employee }: { employee?: Employee }) => {
               label="Файл хавсаргах"
               subtitle="Файл хавсаргана уу."
               variant="light"
+              value={tripFile}
               onChange={(file) => {
                 setTripFile(file);
                 setFieldErrors((prev) => ({ ...prev, tripFile: "" }));

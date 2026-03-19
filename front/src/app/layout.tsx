@@ -28,9 +28,9 @@ export default function RootLayout({
     <html lang="mn" className={cn("font-sans", manrope.variable)}>
       <body>
         <ApolloAppProvider>
-          <div className="min-h-screen bg-[#F5F7FB]">
+          <div className="min-h-screen bg-[#F5F7FB] flex flex-col">
             <Navbar />
-            {children}
+            <main className="flex-1">{children}</main>
             <FooterSection />
           </div>
         </ApolloAppProvider>

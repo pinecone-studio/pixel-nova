@@ -2,6 +2,7 @@
 
 import { useQuery } from "@apollo/client/react";
 import { useEffect, useMemo, useSyncExternalStore } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 import { buildGraphQLHeaders } from "@/lib/apollo-client";
@@ -116,7 +117,7 @@ export default function EmployeePage() {
                 <Planeicon />
               </div>
               <div className="flex flex-col h-10 justify-between">
-                <span className="text-[16px] w-[200px] h-[20px] font-semibold text-[#111827]">
+                <span className="text-[16px] min-w-[200px] h-[20px] font-semibold text-[#111827]">
                   {displayName}
                 </span>
                 <span className="text-[14px] text-[#6B7280] w-[64px] h-[16px]">
@@ -136,11 +137,11 @@ export default function EmployeePage() {
               <h2 className="text-[20px] w-[246px] h-8 font-semibold tracking-[-0.02em] text-[#111827]">
                 Баримт бичиг шинэчлэлт
               </h2>
-              <span className="rounded-full border w-[79px] h-[24px] border-[#E5E7EB] bg-white px-3 py-1 text-[12px] font-medium text-[#6B7280]">
+              <span className="rounded-full border min-w-[79px] h-[24px] border-[#E5E7EB] bg-white px-3 py-1 text-[12px] font-medium text-[#6B7280]">
                 {Math.min(documents.length)} баримт
               </span>
             </div>
-            <a
+            <Link
               href="/employee/files"
               className="text-[14px] w-[175px] justify-evenly h-8 font-medium hover:text-[#111827] transition-colors flex items-center"
             >
@@ -148,7 +149,7 @@ export default function EmployeePage() {
               <span className="h-5 items-end flex">
                 <Righticon />
               </span>
-            </a>
+            </Link>
           </div>
 
           <div className="flex flex-col  divide-y divide-[#E5E7EB] w-[1056px] h-[356px] rounded-2xl border border-[#E5E7EB] bg-white">

@@ -127,7 +127,7 @@ export const ContractPreview = ({
               <button
                 type="button"
                 onClick={() => void handlePreview()}
-                className="flex h-10 w-10 items-center justify-center rounded-full bg-white text-[#111827] transition-colors hover:bg-[#F3F4F6]"
+                className="flex h-10 w-10 items-center justify-center rounded-full bg-white text-[#111827] transition-colors cursor-pointer hover:bg-[#F3F4F6]"
                 aria-label="Preview"
               >
                 <FilesEyeIcon />
@@ -135,7 +135,7 @@ export const ContractPreview = ({
               <button
                 type="button"
                 onClick={() => void handleDownload()}
-                className="flex h-10 w-10 items-center justify-center rounded-full bg-white text-[#111827] transition-colors hover:bg-[#F3F4F6]"
+                className="flex h-10 w-10 items-center justify-center rounded-full bg-white text-[#111827] cursor-pointer transition-colors hover:bg-[#F3F4F6]"
                 aria-label="Download"
               >
                 <BiDownload className="text-sm text-[#000000] w-[20px] h-[20px]" />

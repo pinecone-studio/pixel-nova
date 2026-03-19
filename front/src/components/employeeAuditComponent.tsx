@@ -61,10 +61,26 @@ const newEmployeeRequests: EmployeeRequest[] = [
     role: "Junior Engineer",
     submittedAt: "2026/03/14 9:15AM",
     files: [
-      { id: "f-1", title: "CV, Resume", fileName: "01_employment_contract.pdf" },
-      { id: "f-2", title: "Хөдөлмөрийн гэрээ", fileName: "01_employment_contract.pdf" },
-      { id: "f-3", title: "Туршилтаар авах тушаал", fileName: "01_employment_contract.pdf" },
-      { id: "f-4", title: "Нууцын гэрээ", fileName: "01_employment_contract.pdf" },
+      {
+        id: "f-1",
+        title: "CV, Resume",
+        fileName: "01_employment_contract.pdf",
+      },
+      {
+        id: "f-2",
+        title: "Хөдөлмөрийн гэрээ",
+        fileName: "01_employment_contract.pdf",
+      },
+      {
+        id: "f-3",
+        title: "Туршилтаар авах тушаал",
+        fileName: "01_employment_contract.pdf",
+      },
+      {
+        id: "f-4",
+        title: "Нууцын гэрээ",
+        fileName: "01_employment_contract.pdf",
+      },
     ],
   },
   {
@@ -77,8 +93,16 @@ const newEmployeeRequests: EmployeeRequest[] = [
     submittedAt: "2026/03/14 9:15AM",
     files: [
       { id: "f-5", title: "CV, Resume", fileName: "02_resume.pdf" },
-      { id: "f-6", title: "Хөдөлмөрийн гэрээ", fileName: "02_employment_contract.pdf" },
-      { id: "f-7", title: "Туршилтаар авах тушаал", fileName: "02_probation_order.pdf" },
+      {
+        id: "f-6",
+        title: "Хөдөлмөрийн гэрээ",
+        fileName: "02_employment_contract.pdf",
+      },
+      {
+        id: "f-7",
+        title: "Туршилтаар авах тушаал",
+        fileName: "02_probation_order.pdf",
+      },
       { id: "f-8", title: "Нууцын гэрээ", fileName: "02_confidentiality.pdf" },
     ],
   },
@@ -92,7 +116,11 @@ const newEmployeeRequests: EmployeeRequest[] = [
     submittedAt: "2026/03/13 4:20PM",
     files: [
       { id: "f-9", title: "CV, Resume", fileName: "nomin_resume.pdf" },
-      { id: "f-10", title: "Хөдөлмөрийн гэрээ", fileName: "nomin_contract.pdf" },
+      {
+        id: "f-10",
+        title: "Хөдөлмөрийн гэрээ",
+        fileName: "nomin_contract.pdf",
+      },
     ],
   },
   {
@@ -105,7 +133,11 @@ const newEmployeeRequests: EmployeeRequest[] = [
     submittedAt: "2026/03/13 10:12AM",
     files: [
       { id: "f-11", title: "CV, Resume", fileName: "temuulen_resume.pdf" },
-      { id: "f-12", title: "Нууцын гэрээ", fileName: "temuulen_confidentiality.pdf" },
+      {
+        id: "f-12",
+        title: "Нууцын гэрээ",
+        fileName: "temuulen_confidentiality.pdf",
+      },
     ],
   },
 ];
@@ -115,7 +147,8 @@ const documentReviews: DocumentReview[] = [
     id: "doc-1",
     title: "Хөдөлмөрийн гэрээ шинэчлэлт",
     modalTitle: "Шинэ баримт",
-    description: "Хөдөлмөрийн гэрээнд нэмэлт өөрчлөлт оруулав. Уншиж танилцана уу.",
+    description:
+      "Хөдөлмөрийн гэрээнд нэмэлт өөрчлөлт оруулав. Уншиж танилцана уу.",
     fileTitle: "Хөдөлмөрийн гэрээ",
     fileName: "01_employment_contract.pdf",
     badge: "Шинэчлэлт",
@@ -127,7 +160,8 @@ const documentReviews: DocumentReview[] = [
     id: "doc-2",
     title: "Туршилтаар авах тушаал",
     modalTitle: "Шинэ баримт",
-    description: "Туршилтаар авах тушаалын шинэ хувилбар хавсаргалаа. Уншиж танилцана уу.",
+    description:
+      "Туршилтаар авах тушаалын шинэ хувилбар хавсаргалаа. Уншиж танилцана уу.",
     fileTitle: "Туршилтаар авах тушаал",
     fileName: "02_probation_order.pdf",
     badge: "Шинэ баримт",
@@ -152,7 +186,8 @@ const documentReviews: DocumentReview[] = [
     id: "doc-4",
     title: "Нууцын гэрээ шинэчлэлт",
     modalTitle: "Шинэ баримт",
-    description: "Нууцын гэрээний шинэчилсэн хувилбар ирлээ. Уншиж танилцана уу.",
+    description:
+      "Нууцын гэрээний шинэчилсэн хувилбар ирлээ. Уншиж танилцана уу.",
     fileTitle: "Нууцын гэрээ",
     fileName: "04_confidentiality.pdf",
     badge: "Шинэчлэлт",
@@ -179,7 +214,10 @@ const statusUpdates: StatusUpdate[] = [
   },
 ];
 
-const FILTER_OPTIONS: Record<AuditView, Array<{ value: ListFilter; label: string }>> = {
+const FILTER_OPTIONS: Record<
+  AuditView,
+  Array<{ value: ListFilter; label: string }>
+> = {
   newEmployee: [
     { value: "all", label: "Бүгд" },
     { value: "engineering", label: "Engineering" },
@@ -280,7 +318,9 @@ function EmployeeRequestModal({
         </div>
 
         <div className="mt-6">
-          <p className="mb-3 text-sm font-medium text-[#101828]">Хавсаргасан файл</p>
+          <p className="mb-3 text-sm font-medium text-[#101828]">
+            Хавсаргасан файл
+          </p>
           <div className="flex flex-col gap-3">
             {entry.files.map((file) => (
               <div
@@ -354,14 +394,18 @@ function DocumentReviewModal({
         </div>
 
         <div>
-          <p className="mb-3 text-[18px] font-semibold text-[#101828]">Тайлбар</p>
+          <p className="mb-3 text-[18px] font-semibold text-[#101828]">
+            Тайлбар
+          </p>
           <div className="min-h-[120px] rounded-[18px] border border-[#D0D5DD] bg-[#FCFCFD] px-5 py-4 text-[18px] leading-[1.35] text-[#667085]">
             {entry.description}
           </div>
         </div>
 
         <div className="mt-8">
-          <p className="mb-4 text-[18px] font-semibold text-[#101828]">Хавсаргасан файл</p>
+          <p className="mb-4 text-[18px] font-semibold text-[#101828]">
+            Хавсаргасан файл
+          </p>
           <div className="flex items-center justify-between rounded-[18px] border border-[#EAECF0] bg-white px-3.5 py-3.5">
             <div className="flex items-center gap-4">
               <div className="flex h-[56px] w-[56px] items-center justify-center rounded-[20px] border border-[#D0D5DD] bg-[#F9FAFB] text-[#667085]">
@@ -371,7 +415,9 @@ function DocumentReviewModal({
                 <p className="text-[16px] font-medium text-[#101828]">
                   {entry.fileTitle}
                 </p>
-                <p className="mt-1 text-[14px] text-[#98A2B3]">{entry.fileName}</p>
+                <p className="mt-1 text-[14px] text-[#98A2B3]">
+                  {entry.fileName}
+                </p>
               </div>
             </div>
             <button
@@ -473,7 +519,9 @@ function DocumentRow({
           <FiFileText className="h-6 w-6" />
         </div>
         <div>
-          <p className="text-[16px] font-medium text-[#101828]">{entry.title}</p>
+          <p className="text-[16px] font-medium text-[#101828]">
+            {entry.title}
+          </p>
           <p className="mt-1 text-[14px] text-[#98A2B3]">{entry.fileName}</p>
         </div>
       </div>
@@ -525,7 +573,9 @@ function StatusRow({ entry }: { entry: StatusUpdate }) {
         <p className="text-[16px] font-medium text-[#101828]">{entry.title}</p>
         <p className="mt-1 text-[13px] text-[#98A2B3]">{entry.subtitle}</p>
       </div>
-      <span className={`rounded-full border px-4 py-1.5 text-[13px] font-medium ${tone}`}>
+      <span
+        className={`rounded-full border px-4 py-1.5 text-[13px] font-medium ${tone}`}
+      >
         {entry.status}
       </span>
     </div>
@@ -535,13 +585,12 @@ function StatusRow({ entry }: { entry: StatusUpdate }) {
 export function EmployeeAuditComponent() {
   const [selectedView, setSelectedView] = useState<AuditView>("newEmployee");
   const [listFilter, setListFilter] = useState<ListFilter>("all");
+  const [filterOpen, setFilterOpen] = useState(false);
   const [search, setSearch] = useState("");
-  const [selectedEmployee, setSelectedEmployee] = useState<EmployeeRequest | null>(
-    null,
-  );
-  const [selectedDocument, setSelectedDocument] = useState<DocumentReview | null>(
-    null,
-  );
+  const [selectedEmployee, setSelectedEmployee] =
+    useState<EmployeeRequest | null>(null);
+  const [selectedDocument, setSelectedDocument] =
+    useState<DocumentReview | null>(null);
 
   const filteredEmployees = useMemo(() => {
     return newEmployeeRequests.filter((entry) => {
@@ -580,8 +629,7 @@ export function EmployeeAuditComponent() {
       const haystack =
         `${entry.title} ${entry.subtitle} ${entry.status}`.toLowerCase();
       const matchesSearch = haystack.includes(search.toLowerCase());
-      const matchesFilter =
-        listFilter === "all" ? true : entry.tone === "gold";
+      const matchesFilter = listFilter === "all" ? true : entry.tone === "gold";
 
       return matchesSearch && matchesFilter;
     });
@@ -597,7 +645,7 @@ export function EmployeeAuditComponent() {
   const visibleFilterOptions = FILTER_OPTIONS[selectedView];
 
   return (
-    <div className="min-h-screen bg-white px-6 py-8 text-[#101828]">
+    <div className="bg-[#F5F7FB]">
       {selectedEmployee ? (
         <EmployeeRequestModal
           entry={selectedEmployee}
@@ -611,24 +659,24 @@ export function EmployeeAuditComponent() {
         />
       ) : null}
 
-      <div className="mx-auto flex w-full max-w-[1061px] flex-col gap-8">
-        <div className="flex w-full flex-col gap-1.5">
-          <h1 className="text-[34px] font-semibold leading-[1.1] tracking-[-0.03em] text-[#101828]">
+      <div className="mx-auto flex max-w-full w-[1061px] flex-col mt-8">
+        <div className="flex w-full flex-col justify-between h-[61px]">
+          <h1 className="text-[28px] items-center flex h-[30px] font-semibold leading-[1.1] tracking-[-0.03em] text-[#101828]">
             Аудит хүсэлтүүд
           </h1>
-          <p className="text-[16px] text-[#667085]">
+          <p className="text-[16px] h-6 flex items-center text-[#667085]">
             Хүний нөөцийн ажилтнаас илгээсэн хүсэлтүүд
           </p>
         </div>
 
-        <div className="flex w-full flex-col gap-4 lg:flex-row">
+        <div className="flex w-full flex-col h-[120px] mt-[38px] lg:flex-row">
           <button
             type="button"
             onClick={() => {
               setSelectedView("newEmployee");
               setListFilter("all");
             }}
-            className={`flex h-[92px] min-w-0 items-center justify-between rounded-[24px] border px-7 text-left transition-[flex-basis,background-color,border-color] duration-300 lg:basis-[34%] ${selectedView === "newEmployee" ? "lg:basis-[66%]" : ""} ${summaryCardTone(selectedView === "newEmployee", "blue")}`}
+            className={`flex h-full cursor-pointer min-w-0 items-center justify-between rounded-[24px] border px-7 text-left transition-[flex-basis,background-color,border-color] duration-300 lg:basis-[34%] ${selectedView === "newEmployee" ? "lg:basis-[66%]" : ""} ${summaryCardTone(selectedView === "newEmployee", "blue")}`}
           >
             <div className="flex min-w-0 items-center gap-5">
               <div className="flex h-14 w-14 items-center justify-center rounded-[18px] bg-[#2F7BFF] text-white shadow-[0_10px_30px_rgba(47,123,255,0.35)]">
@@ -639,7 +687,7 @@ export function EmployeeAuditComponent() {
                   7
                 </span>
                 <span className="truncate pb-1 text-[14px] text-[#667085]">
-                  Шинэ ажилтаны хүсэлт
+                  Шинэ ажилтны хүсэлт
                 </span>
               </div>
             </div>
@@ -652,7 +700,7 @@ export function EmployeeAuditComponent() {
               setSelectedView("documentReview");
               setListFilter("all");
             }}
-            className={`flex h-[92px] min-w-0 items-center justify-between rounded-[24px] border px-7 text-left transition-[flex-basis,background-color,border-color] duration-300 lg:basis-[34%] ${selectedView === "documentReview" ? "lg:basis-[66%]" : ""} ${summaryCardTone(selectedView === "documentReview", "green")}`}
+            className={`flex h-[92px] cursor-pointer min-w-0 items-center justify-between rounded-[24px] border px-7 text-left transition-[flex-basis,background-color,border-color] duration-300 lg:basis-[34%] ${selectedView === "documentReview" ? "lg:basis-[66%]" : ""} ${summaryCardTone(selectedView === "documentReview", "green")}`}
           >
             <div className="flex min-w-0 items-center gap-5">
               <div className="flex h-14 w-14 items-center justify-center rounded-[18px] bg-[#12C95E] text-white shadow-[0_10px_30px_rgba(18,201,94,0.28)]">
@@ -671,7 +719,7 @@ export function EmployeeAuditComponent() {
           </button>
         </div>
 
-        <div className="flex w-full flex-col gap-7">
+        <div className="flex w-full flex-col mt-[38px]">
           <div className="flex w-full items-center gap-3">
             <div className="flex h-[44px] flex-1 items-center gap-3 rounded-[12px] border border-[#D0D5DD] bg-white px-4">
               <BiSearch className="h-5 w-5 text-[#667085]" />
@@ -683,19 +731,47 @@ export function EmployeeAuditComponent() {
               />
             </div>
 
-            <div className="relative">
-              <select
-                value={listFilter}
-                onChange={(event) => setListFilter(event.target.value as ListFilter)}
-                className="h-[44px] w-[186px] appearance-none rounded-[12px] border border-[#D0D5DD] bg-white px-4 pr-11 text-[15px] text-[#667085] outline-none"
+            <div
+              className="relative"
+              tabIndex={0}
+              onBlur={() => setFilterOpen(false)}
+            >
+              <button
+                type="button"
+                onClick={() => setFilterOpen((prev) => !prev)}
+                className="flex h-[44px] w-[186px] items-center justify-between rounded-[12px] border border-[#D0D5DD] bg-white px-4 pr-3 text-[15px] text-[#667085] outline-none"
               >
-                {visibleFilterOptions.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
-              <BiChevronDown className="pointer-events-none absolute right-4 top-1/2 h-5 w-5 -translate-y-1/2 text-[#667085]" />
+                <span>
+                  {visibleFilterOptions.find((opt) => opt.value === listFilter)
+                    ?.label ?? "Бүгд"}
+                </span>
+                <BiChevronDown className="h-5 w-5 text-[#667085]" />
+              </button>
+              {filterOpen ? (
+                <div className="absolute right-0 mt-2 w-[186px] rounded-sm border border-[#D0D5DD] bg-white shadow-md">
+                  {visibleFilterOptions.map((option) => {
+                    const active = option.value === listFilter;
+                    return (
+                      <button
+                        key={option.value}
+                        type="button"
+                        onMouseDown={(event) => event.preventDefault()}
+                        onClick={() => {
+                          setListFilter(option.value as ListFilter);
+                          setFilterOpen(false);
+                        }}
+                        className={`flex w-full px-3 py-2 text-left text-[14px] transition-colors ${
+                          active
+                            ? "bg-[#E6F0FF] text-[#1D4ED8]"
+                            : "text-[#4B5563] hover:bg-[#F3F4F6] hover:text-[#111827]"
+                        }`}
+                      >
+                        {option.label}
+                      </button>
+                    );
+                  })}
+                </div>
+              ) : null}
             </div>
           </div>
 

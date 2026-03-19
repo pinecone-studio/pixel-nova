@@ -1,9 +1,11 @@
-"use client";
+﻿"use client";
 
 import type { Document } from "@/lib/types";
 
 import { FilesDocumentRow } from "./FilesDocumentRow";
 import { emptyBoxStyle, formatMonthLabel } from "./filesUtils";
+import { FactIcon } from "@/components/icons";
+import { ContractPreview } from "@/components/contractPreview";
 
 export function FilesList({
   loading,
@@ -17,7 +19,7 @@ export function FilesList({
   authToken: string;
 }) {
   if (loading) {
-    return <div style={emptyBoxStyle}>Баримтуудыг ачаалж байна...</div>;
+    return <div style={{ ...emptyBoxStyle, marginBottom: 24 }}>Баримтуудыг ачаалж байна...</div>;
   }
 
   if (error) {
@@ -36,7 +38,7 @@ export function FilesList({
   }
 
   if (documents.length === 0) {
-    return <div style={emptyBoxStyle}>Баримт олдсонгүй.</div>;
+    return <div style={{ ...emptyBoxStyle, marginBottom: 24 }}>Ð‘Ð°Ñ€Ð¸Ð¼Ñ‚ Ð¾Ð»Ð´ÑÐ¾Ð½Ð³Ò¯Ð¹.</div>;
   }
 
   const sorted = [...documents].sort(
@@ -50,31 +52,27 @@ export function FilesList({
   }, new Map());
 
   return (
-    <div className="flex flex-col gap-4">
-      {[...grouped.entries()].map(([month, docs]) => (
-        <div key={month} className="flex flex-col gap-2">
-          <div className="text-xs font-semibold text-slate-500 uppercase tracking-[0.18em]">
-            {month}
+    <div className="flex flex-col  divide-y divide-[#E5E7EB] w-[1056px] mt-4 rounded-2xl border border-[#E5E7EB] bg-white">
+      {documents.length > 0 ? (
+        documents.map((document) => (
+          <ContractPreview
+            key={document.id}
+            document={document}
+            authToken={authToken}
+          />
+        ))
+      ) : (
+        <div className="flex flex-col items-center justify-center gap-3 py-10 text-center">
+          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-[18px] border border-[#E5E7EB] bg-[#F8FAFC]">
+            <FactIcon />
           </div>
-          <div
-            style={{
-              borderRadius: 14,
-              overflow: "hidden",
-              border: "1px solid #E5E7EB",
-              background: "white",
-            }}
-          >
-            {docs.map((document, index) => (
-              <FilesDocumentRow
-                key={document.id}
-                document={document}
-                authToken={authToken}
-                isLast={index === docs.length - 1}
-              />
-            ))}
+          <div className="flex flex-col items-center gap-1">
+            <h3 className="text-[13px] font-semibold text-[#6B7280]">
+              Ð‘Ð°Ñ€Ð¸Ð¼Ñ‚ Ð¾Ð»Ð´ÑÐ¾Ð½Ð³Ò¯Ð¹
+            </h3>
           </div>
         </div>
-      ))}
+      )}
     </div>
   );
 }
