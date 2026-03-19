@@ -2,11 +2,11 @@
 
 import { useQuery } from "@apollo/client/react";
 import { useCallback, useMemo, useState } from "react";
-import { FiUser, FiTrash2 } from "react-icons/fi";
+import { FiUser } from "react-icons/fi";
 
 import { AuditActionCard } from "@/components/hr/auditlog/action-card";
 import { AddEmployeeRequestDialog } from "@/components/hr/auditlog/request-dialog";
-import { DownloadIcon, CalIcon, ReqIcon } from "@/components/icons";
+import { CalIcon, ReqIcon, EyeIcon } from "@/components/icons";
 import { GET_ACTIONS, GET_EMPLOYEES } from "@/graphql/queries";
 import { GET_AUDIT_LOGS } from "@/graphql/queries/audit-logs";
 import { buildGraphQLHeaders } from "@/lib/apollo-client";
@@ -65,7 +65,6 @@ function SigningStatus({ log }: { log: AuditLog }) {
   const signed = log.documentsGenerated ? total : 0;
   const missing = total - signed;
 
-  // Render colored dots
   const dots: React.ReactNode[] = [];
   for (let i = 0; i < Math.min(total, 4); i++) {
     const isSigned = i < signed;
@@ -83,12 +82,194 @@ function SigningStatus({ log }: { log: AuditLog }) {
     <div className="flex items-center gap-1.5">
       <div className="flex items-center gap-0.5">{dots}</div>
       {missing > 0 ? (
-        <span className="text-[12px] text-[#3f4145]">{missing} missing</span>
+        <span className="text-[12px] text-[#3f4145]">{missing} дутуу</span>
       ) : (
         <span className="text-[12px] text-[#1aba52] font-medium">
-          All signed
+          Бүгд бэлэн
         </span>
       )}
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Email dispatch status
+// ---------------------------------------------------------------------------
+
+function EmailStatus({ log }: { log: AuditLog }) {
+  if (!log.notificationAttempted) {
+    return (
+      <span className="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-slate-50 px-2 py-0.5 text-[11px] text-slate-500">
+        <span className="h-1.5 w-1.5 rounded-full bg-slate-400" />
+        Илгээгээгүй
+      </span>
+    );
+  }
+
+  if (log.notificationError) {
+    return (
+      <div className="flex flex-col gap-0.5">
+        <span className="inline-flex items-center gap-1 rounded-full border border-red-200 bg-red-50 px-2 py-0.5 text-[11px] text-red-600">
+          <span className="h-1.5 w-1.5 rounded-full bg-red-500" />
+          Алдаа
+        </span>
+        <span
+          className="truncate text-[10px] text-red-400 max-w-[140px]"
+          title={log.notificationError}>
+          {log.notificationError}
+        </span>
+      </div>
+    );
+  }
+
+  if (log.recipientsNotified) {
+    return (
+      <span className="inline-flex items-center gap-1 rounded-full border border-emerald-200 bg-emerald-50 px-2 py-0.5 text-[11px] text-emerald-700">
+        <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+        Илгээсэн ({log.recipientEmails.length})
+      </span>
+    );
+  }
+
+  return (
+    <span className="inline-flex items-center gap-1 rounded-full border border-amber-200 bg-amber-50 px-2 py-0.5 text-[11px] text-amber-600">
+      <span className="h-1.5 w-1.5 rounded-full bg-amber-500" />
+      Хүлээгдэж байна
+    </span>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Detail modal
+// ---------------------------------------------------------------------------
+
+function AuditDetailModal({
+  log,
+  employee,
+  onClose,
+}: {
+  log: AuditLog;
+  employee?: Employee;
+  onClose: () => void;
+}) {
+  const empName = employee
+    ? `${employee.lastName} ${employee.firstName}`
+    : log.employeeId;
+  const dateStr = new Date(log.timestamp).toLocaleDateString("mn-MN", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+
+  return (
+    <div className="fixed inset-0 z-100 flex items-center justify-center bg-black/50 p-4">
+      <div className="w-full max-w-lg rounded-[24px] border border-black/12 bg-white shadow-2xl">
+        {/* Header */}
+        <div className="flex items-center justify-between border-b border-black/12 px-6 py-4">
+          <div>
+            <h3 className="text-[16px] font-semibold text-[#121316]">
+              {ACTION_DOC_LABELS[log.action] ?? log.action}
+            </h3>
+            <p className="text-[13px] text-[#3f4145]">
+              {empName} · {dateStr}
+            </p>
+          </div>
+          <button
+            onClick={onClose}
+            className="flex h-8 w-8 items-center justify-center rounded-[10px] text-[#77818c] transition-colors hover:bg-[#f5f5f5] hover:text-[#121316]">
+            ✕
+          </button>
+        </div>
+
+        <div className="flex flex-col gap-4 px-6 py-5">
+          {/* Documents */}
+          <div>
+            <p className="mb-1.5 text-[12px] font-semibold uppercase tracking-wider text-[#3f4145]">
+              Баримтууд ({log.documentIds.length})
+            </p>
+            {log.documentIds.length > 0 ? (
+              <div className="flex flex-col gap-1">
+                {log.documentIds.map((docId) => (
+                  <div
+                    key={docId}
+                    className="flex items-center gap-2 rounded-[10px] border border-black/6 bg-[#fafafa] px-3 py-2 text-[13px]">
+                    <ReqIcon className="h-3.5 w-3.5 text-[#77818c]" />
+                    <span className="text-[#121316] truncate">{docId}</span>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <span className="text-[13px] text-[#77818c]">
+                Баримт үүсээгүй
+              </span>
+            )}
+          </div>
+
+          {/* Email dispatch */}
+          <div>
+            <p className="mb-1.5 text-[12px] font-semibold uppercase tracking-wider text-[#3f4145]">
+              Имэйл мэдэгдэл
+            </p>
+            <div className="rounded-[12px] border border-black/6 bg-[#fafafa] px-4 py-3">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-[13px] text-[#3f4145]">Статус</span>
+                <EmailStatus log={log} />
+              </div>
+
+              {log.recipientEmails.length > 0 && (
+                <div className="mt-2 border-t border-black/6 pt-2">
+                  <p className="mb-1 text-[11px] text-[#77818c]">
+                    Хүлээн авагчид:
+                  </p>
+                  <div className="flex flex-wrap gap-1">
+                    {log.recipientEmails.map((email) => (
+                      <span
+                        key={email}
+                        className="rounded-full border border-black/12 bg-white px-2 py-0.5 text-[11px] text-[#3f4145]">
+                        {email}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {log.notificationError && (
+                <div className="mt-2 rounded-[8px] border border-red-200 bg-red-50 px-3 py-2 text-[12px] text-red-600">
+                  <span className="font-medium">Алдаа: </span>
+                  {log.notificationError}
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Incomplete fields */}
+          {log.incompleteFields.length > 0 && (
+            <div>
+              <p className="mb-1.5 text-[12px] font-semibold uppercase tracking-wider text-[#3f4145]">
+                Дутуу талбарууд
+              </p>
+              <div className="flex flex-wrap gap-1">
+                {log.incompleteFields.map((field) => (
+                  <span
+                    key={field}
+                    className="rounded-full border border-amber-200 bg-amber-50 px-2 py-0.5 text-[11px] text-amber-700">
+                    {field}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Meta */}
+          <div className="flex items-center gap-4 text-[12px] text-[#77818c] border-t border-black/6 pt-3">
+            <span>Actor: {log.actorId ?? "system"}</span>
+            <span>Role: {log.actorRole}</span>
+            <span>Phase: {log.phase}</span>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
@@ -101,6 +282,7 @@ export function AuditlogComponent() {
   const [search, setSearch] = useState("");
   const [sendRequestAction, setSendRequestAction] =
     useState<ActionConfig | null>(null);
+  const [detailLog, setDetailLog] = useState<AuditLog | null>(null);
   const [sort, setSort] = useState<{ key: SortKey; dir: SortDir }>({
     key: "date",
     dir: "desc",
@@ -230,6 +412,14 @@ export function AuditlogComponent() {
         }}
       />
 
+      {detailLog && (
+        <AuditDetailModal
+          log={detailLog}
+          employee={employeeMap.get(detailLog.employeeId)}
+          onClose={() => setDetailLog(null)}
+        />
+      )}
+
       {/* ── Action Cards ── */}
       <p className="text-[#3F4145] text-sm font-medium">
         Нийт {filteredActions.length} үйлдэл
@@ -270,7 +460,7 @@ export function AuditlogComponent() {
           className="grid items-center border-b border-dashed border-black/12 px-3 py-3 text-[13px] text-[#3f4145] md:px-5"
           style={{
             gridTemplateColumns:
-              "minmax(180px,2fr) minmax(160px,1.5fr) minmax(110px,1fr) minmax(120px,1fr) minmax(160px,1.5fr) 72px",
+              "minmax(160px,2fr) minmax(140px,1.25fr) minmax(90px,0.8fr) minmax(100px,0.9fr) minmax(120px,1fr) minmax(120px,1fr) 72px",
           }}>
           <button
             onClick={() => handleSort("documentName")}
@@ -291,8 +481,9 @@ export function AuditlogComponent() {
             Огноо
             <SortArrow active={sort.key === "date"} dir={sort.dir} />
           </button>
-          <span className="px-2 font-medium">Төлөв</span>
-          <span className="px-2 font-medium">Үйлдэл</span>
+          <span className="px-2 font-medium">Баримт</span>
+          <span className="px-2 font-medium">Имэйл</span>
+          <span className="px-2 font-medium">Дэлгэр.</span>
         </div>
 
         {/* Body */}
@@ -325,7 +516,7 @@ export function AuditlogComponent() {
                 className="grid items-center border-b border-black/12 px-3 py-3.5 transition-colors hover:bg-[#fafafa] md:px-5"
                 style={{
                   gridTemplateColumns:
-                    "minmax(180px,2fr) minmax(160px,1.5fr) minmax(110px,1fr) minmax(120px,1fr) minmax(160px,1.5fr) 72px",
+                    "minmax(160px,2fr) minmax(140px,1.25fr) minmax(90px,0.8fr) minmax(100px,0.9fr) minmax(120px,1fr) minmax(120px,1fr) 72px",
                 }}>
                 {/* Баримт бичиг */}
                 <div className="flex items-center gap-2.5 px-2">
@@ -351,7 +542,7 @@ export function AuditlogComponent() {
                       <FiUser className="h-3.5 w-3.5 text-[#77818c]" />
                     )}
                   </div>
-                  <span className="truncate text-[14px] text-[#121316]">
+                  <span className="truncate text-[13px] text-[#121316]">
                     {empName}
                   </span>
                 </div>
@@ -359,7 +550,7 @@ export function AuditlogComponent() {
                 {/* Үе (Phase badge) */}
                 <div className="px-2">
                   <span
-                    className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-medium ${phaseBadge(log.phase)}`}>
+                    className={`inline-flex items-center gap-1 rounded-full px-2 py-1 text-[11px] font-medium ${phaseBadge(log.phase)}`}>
                     <span className="text-[10px]">◆</span>
                     {phaseKey}
                   </span>
@@ -371,22 +562,23 @@ export function AuditlogComponent() {
                   <span className="text-[13px] text-[#3f4145]">{dateStr}</span>
                 </div>
 
-                {/* Төлөв (signing dots) */}
+                {/* Баримт (signing dots) */}
                 <div className="px-2">
                   <SigningStatus log={log} />
                 </div>
 
-                {/* Үйлдэл */}
-                <div className="flex items-center gap-0 px-2">
+                {/* Имэйл статус */}
+                <div className="px-2">
+                  <EmailStatus log={log} />
+                </div>
+
+                {/* Дэлгэрэнгүй */}
+                <div className="flex items-center justify-center px-2">
                   <button
+                    onClick={() => setDetailLog(log)}
                     className="flex h-8 w-8 items-center justify-center rounded-[10px] text-[#77818c] transition-colors hover:bg-[#f5f5f5] hover:text-[#121316]"
-                    aria-label="Татах">
-                    <DownloadIcon />
-                  </button>
-                  <button
-                    className="flex h-8 w-8 items-center justify-center rounded-[10px] text-[#77818c] transition-colors hover:bg-[#f5f5f5] hover:text-red-500"
-                    aria-label="Устгах">
-                    <FiTrash2 className="h-4 w-4" />
+                    aria-label="Дэлгэрэнгүй">
+                    <EyeIcon />
                   </button>
                 </div>
               </div>
