@@ -1,14 +1,16 @@
 "use client";
 
 import {
+  AnalyticsIcon,
   AuditLog as AuditLogIcon,
   CubaIcon,
   InsightIcon,
   SettingsIcon,
+  SettingsIcon3,
+  StatisticIcon,
   UsersIcon,
 } from "@/components/icons";
-import { GrDocument } from "react-icons/gr";
-
+import { BoxIcon, ClipboardIcon } from "lucide-react";
 export type HrSectionKey =
   | "dashboard"
   | "employees"
@@ -29,7 +31,7 @@ export const HR_NAV_ITEMS: HrNavItem[] = [
     key: "dashboard",
     label: "Хянах хэсэг",
     href: "/hr",
-    icon: <GrDocument />,
+    icon: <AnalyticsIcon />,
   },
   {
     key: "employees",
@@ -41,25 +43,25 @@ export const HR_NAV_ITEMS: HrNavItem[] = [
     key: "requests",
     label: "Гэрээний сан",
     href: "/hr/requests",
-    icon: <AuditLogIcon />,
+    icon: <ClipboardIcon />,
   },
   {
     key: "documents",
     label: "Нийт баримт бичиг",
     href: "/hr/documents",
-    icon: <CubaIcon />,
+    icon: <BoxIcon />,
   },
   {
     key: "audit-log",
     label: "Үйлдлийн бүртгэл",
     href: "/hr/audit-log",
-    icon: <InsightIcon />,
+    icon: <StatisticIcon />,
   },
   {
     key: "settings",
     label: "Тохиргоо",
     href: "/hr/settings",
-    icon: <SettingsIcon />,
+    icon: <SettingsIcon3 />,
   },
 ];
 
