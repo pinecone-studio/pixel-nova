@@ -18,6 +18,7 @@ import {
 import { GET_DOCUMENTS, GET_LEAVE_REQUESTS } from "@/graphql/queries";
 import type { Document, LeaveRequest } from "@/lib/types";
 import { formatDepartment, formatLeaveRequestStatus } from "@/lib/labels";
+import { Download, Filter } from "lucide-react";
 
 const StatusBadge = ({ status }: { status: string }) => {
   const styles: Record<string, string> = {
@@ -27,7 +28,8 @@ const StatusBadge = ({ status }: { status: string }) => {
   };
   return (
     <span
-      className={`text-xs px-3 py-1 rounded-full font-medium whitespace-nowrap ${styles[status] ?? "bg-slate-600/30 text-slate-400"}`}>
+      className={`text-xs px-3 py-1 rounded-full font-medium whitespace-nowrap ${styles[status] ?? "bg-slate-600/30 text-slate-400"}`}
+    >
       {formatLeaveRequestStatus(status) || status}
     </span>
   );
@@ -76,15 +78,18 @@ const PreviewModal = ({
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm"
-      onClick={onClose}>
+      onClick={onClose}
+    >
       <div
         className="relative w-[420px] max-w-[95vw] bg-white rounded-3xl border border-slate-200 shadow-[0_28px_60px_rgba(15,23,42,0.12)] p-6 flex flex-col gap-5"
-        onClick={(e) => e.stopPropagation()}>
+        onClick={(e) => e.stopPropagation()}
+      >
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-3">
             <div className="w-14 h-14 rounded-full overflow-hidden shrink-0">
               <div
-                className={`w-full h-full ${color} flex items-center justify-center text-white font-bold text-lg`}>
+                className={`w-full h-full ${color} flex items-center justify-center text-white font-bold text-lg`}
+              >
                 {initials}
               </div>
             </div>
@@ -103,7 +108,8 @@ const PreviewModal = ({
           </div>
           <button
             onClick={onClose}
-            className="text-slate-400 hover:text-slate-700 transition-colors text-xl leading-none mt-1">
+            className="text-slate-400 hover:text-slate-700 transition-colors text-xl leading-none mt-1"
+          >
             âœ•
           </button>
         </div>
@@ -173,13 +179,15 @@ const PreviewModal = ({
             <button
               onClick={handleReject}
               disabled={acting}
-              className="flex items-center gap-2 px-5 py-2.5 rounded-xl border border-red-200 text-red-500 text-sm font-medium hover:bg-red-50 disabled:opacity-50 transition-colors">
+              className="flex items-center gap-2 px-5 py-2.5 rounded-xl border border-red-200 text-red-500 text-sm font-medium hover:bg-red-50 disabled:opacity-50 transition-colors"
+            >
               <span>âœ•</span> Ð¢Ð°Ñ‚Ð³Ð°Ð»Ð·Ð°Ñ…
             </button>
             <button
               onClick={handleApprove}
               disabled={acting}
-              className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-slate-900 text-white text-sm font-medium hover:bg-slate-800 disabled:opacity-50 transition-colors">
+              className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-slate-900 text-white text-sm font-medium hover:bg-slate-800 disabled:opacity-50 transition-colors"
+            >
               <span>âœ“</span>{" "}
               {acting ? "Ð¢Ò¯Ñ€ Ñ…Ò¯Ð»ÑÑÐ½Ñ Ò¯Ò¯..." : "Ð‘Ð°Ñ‚Ð»Ð°Ñ…"}
             </button>
@@ -218,25 +226,32 @@ const RequestRow = ({
     <>
       <div
         className="flex items-center justify-between h-24 p-5 hover:bg-slate-50 transition-colors cursor-pointer"
-        onClick={() => onToggle(row)}>
+        onClick={() => onToggle(row)}
+      >
         <div className="flex items-center gap-3">
           <div
-            className={`w-11 h-11 rounded-xl ${color} flex items-center justify-center font-bold text-white text-sm shrink-0`}>
+            className={`w-11 h-11 rounded-xl ${color} flex items-center justify-center font-bold text-white text-sm shrink-0`}
+          >
             {initials}
           </div>
           <div className=" flex justify-center flex-col">
-            <p className="text-slate-900 font-semibold text-sm h-6">
+            <p className="text-[#000000] font-semibold text-[18px] ">
               {row.employee.lastName} {row.employee.firstName}
             </p>
-            <p className="text-slate-500 text-xs">
-              {row.employee.employeeCode} •{" "}
-              {formatDepartment(row.employee.department)}
-            </p>
+            <div className="flex gap-2 items-center">
+              <p className="text-[#3F4145B2] text-[12px] font-medium">
+                {row.employee.employeeCode}
+              </p>
+              <p className="text-[#3F4145B2] text-[12px] font-medium">• </p>
+              <p className="text-[#3F4145B2] text-[12px] font-medium">
+                {formatDepartment(row.employee.department)}
+              </p>
             </div>
           </div>
+        </div>
         <div className="flex items-center gap-3">
-          <span className="text-blue-600 text-[11px] px-2.5 py-1 rounded-full bg-blue-50 border border-blue-200 hidden sm:block">
-            {documentsLoading ? "..." : documentCount} файл
+          <span className="text-blue-600 text-[11px] w-[67px] h-[26px] flex items-center justify-center rounded-full bg-blue-50 border border-blue-200 ">
+            {documentsLoading ? "..." : documentCount} гэрээ
           </span>
           <DownIcon
             className={
@@ -256,17 +271,18 @@ const RequestRow = ({
                 уншиж байна
               </div>
             ) : documents.length === 0 ? (
-              <div className="py-8 text-center text-slate-500 text-sm">
+              <div className="py-8 text-center text-slate-500 text-[14px] font-medium">
                 Мэдээлэл байхгүй байна
               </div>
             ) : (
               documents.map((doc, idx) => (
                 <div
                   key={doc.id}
-                  className={`flex items-center justify-between px-4 py-3 ${idx > 0 ? "border-t border-slate-200" : ""}`}>
+                  className={`flex items-center justify-between px-4 py-3 ${idx > 0 ? "border-t border-slate-200" : ""}`}
+                >
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-xl bg-white border border-slate-200 flex items-center justify-center text-slate-400">
-                      <ReqIcon />
+                      <ReqIcon className="text-black" />
                     </div>
                     <div>
                       <p className="text-slate-900 text-sm font-semibold">
@@ -276,9 +292,9 @@ const RequestRow = ({
                     </div>
                   </div>
                   <div className="flex items-center gap-4 text-slate-500 text-xs">
-                    <PreviewIcon />
-                    <DownloadIcon />
-                    <span className="min-w-[72px] text-right">
+                    <PreviewIcon className="text-black w-4 h-4" />
+                    <Download className="text-black w-4 h-4" />
+                    <span className="min-w-18 text-right">
                       {new Date(doc.createdAt).toLocaleDateString("mn-MN")}
                     </span>
                   </div>
@@ -294,7 +310,6 @@ const RequestRow = ({
 };
 
 export const RequestsComponent = () => {
-  // const [activeTab, setActiveTab] = useState("Ð‘Ò¯Ð³Ð´");
   const [search, setSearch] = useState("");
   const [previewRow, setPreviewRow] = useState<LeaveRequest | null>(null);
   const [expandedId, setExpandedId] = useState<string | null>(null);
@@ -422,7 +437,9 @@ export const RequestsComponent = () => {
   }
 
   useEffect(() => {
-    const employeeIds = Array.from(new Set(requests.map((request) => request.employeeId)));
+    const employeeIds = Array.from(
+      new Set(requests.map((request) => request.employeeId)),
+    );
     if (employeeIds.length === 0) {
       return;
     }
@@ -453,7 +470,7 @@ export const RequestsComponent = () => {
           <div className="flex items-center gap-2 bg-white border border-slate-200 rounded-xl px-3 py-2 min-w-[230px]">
             <SearchIcon />
             <input
-              className="bg-transparent text-slate-600 text-sm outline-none placeholder:text-slate-400 w-full"
+              className="bg-transparent text-slate-600 text-sm outline-none placeholder:text-slate-400 "
               placeholder="Ажилтны кодоор хайх"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
@@ -462,11 +479,11 @@ export const RequestsComponent = () => {
 
           <div className="flex items-center gap-2 ml-auto">
             <button className="flex items-center gap-2 px-3 py-2 rounded-xl bg-white border border-slate-200 text-slate-600 text-sm hover:bg-slate-50 transition-colors">
-              <FilterIcon />
+              <Filter className="text-black w-4 h-4" />
               Шүүлтүүр
             </button>
             <button className="flex items-center gap-2 px-3 py-2 rounded-xl bg-white border border-slate-200 text-slate-600 text-sm hover:bg-slate-50 transition-colors">
-              <DownloadIcon />
+              <Download className="text-black w-4 h-4" />
               Татах
             </button>
           </div>

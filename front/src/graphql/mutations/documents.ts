@@ -1,6 +1,6 @@
 import { gql } from "@apollo/client";
 
-import { DOCUMENT_FIELDS } from "../fragments";
+import { AUDIT_LOG_FIELDS, DOCUMENT_FIELDS } from "../fragments";
 
 export const UPLOAD_HR_DOCUMENT = gql`
   mutation UploadHrDocument($input: UploadHrDocumentInput!) {
@@ -18,5 +18,47 @@ export const DELETE_DOCUMENT = gql`
     }
   }
   ${DOCUMENT_FIELDS}
+`;
+
+export const SIGN_DOCUMENT = gql`
+  mutation SignDocument($documentId: ID!, $signatureData: String!) {
+    signDocument(documentId: $documentId, signatureData: $signatureData) {
+      document {
+        ...DocumentFields
+      }
+      auditLog {
+        ...AuditLogFields
+      }
+      allSigned
+    }
+  }
+  ${DOCUMENT_FIELDS}
+  ${AUDIT_LOG_FIELDS}
+`;
+
+export const EMPLOYEE_SIGN_DOCUMENT = gql`
+  mutation EmployeeSignDocument(
+    $documentId: ID!
+    $signatureMode: String
+    $signatureData: String
+    $passcode: String
+  ) {
+    employeeSignDocument(
+      documentId: $documentId
+      signatureMode: $signatureMode
+      signatureData: $signatureData
+      passcode: $passcode
+    ) {
+      document {
+        ...DocumentFields
+      }
+      auditLog {
+        ...AuditLogFields
+      }
+      allSigned
+    }
+  }
+  ${DOCUMENT_FIELDS}
+  ${AUDIT_LOG_FIELDS}
 `;
 

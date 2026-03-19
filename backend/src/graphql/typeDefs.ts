@@ -33,6 +33,12 @@ export const typeDefs = /* GraphQL */ `
     action: String!
     documentName: String!
     storageUrl: String!
+    hrSigned: Boolean!
+    hrSignatureData: String
+    hrSignedAt: String
+    employeeSigned: Boolean!
+    employeeSignatureData: String
+    employeeSignedAt: String
     createdAt: String!
   }
 
@@ -51,9 +57,17 @@ export const typeDefs = /* GraphQL */ `
     notificationAttempted: Boolean!
     recipientsNotified: Boolean!
     notificationError: String
+    hrSignedAll: Boolean!
+    hrSignedAllAt: String
     employeeSigned: Boolean!
     employeeSignedAt: String
     timestamp: String!
+  }
+
+  type SignDocumentResult {
+    document: Document!
+    auditLog: AuditLog!
+    allSigned: Boolean!
   }
 
   type EmployeeSignature {
@@ -331,6 +345,13 @@ export const typeDefs = /* GraphQL */ `
     uploadHrDocument(input: UploadHrDocumentInput!): Document!
     deleteDocument(id: ID!): Document
     retryNotification(auditLogId: ID!): AuditLog!
+    signDocument(documentId: ID!, signatureData: String!): SignDocumentResult!
+    employeeSignDocument(
+      documentId: ID!
+      signatureMode: String
+      signatureData: String
+      passcode: String
+    ): SignDocumentResult!
     signAuditLog(
       auditLogId: ID!
       signatureMode: String

@@ -12,6 +12,8 @@ type SelectWrapperProps = {
 };
 
 export type NewEmployeeFormProps = {
+  step: 1 | 2;
+  setStep: (v: 1 | 2) => void;
   tab: "hr" | "employee";
   setTab: (v: "hr" | "employee") => void;
   companyAddress: string;
@@ -60,6 +62,8 @@ export type NewEmployeeFormProps = {
 };
 
 export function NewEmployeeForm({
+  step,
+  setStep,
   tab,
   setTab,
   companyAddress,
@@ -134,85 +138,14 @@ export function NewEmployeeForm({
 
   return (
     <div className="flex min-w-0 flex-col gap-[16px]">
-      <div className="flex items-center justify-end">
-        <button
-          type="button"
-          onClick={fillMock}
-          className="rounded-[10px] border border-black/12 px-3 py-1.5 text-[12px] font-medium text-[#3f4145] transition-colors hover:bg-[#f5f5f5]"
-        >
-          Demo бөглөх
-        </button>
-      </div>
-      <div className="flex min-w-0 gap-[16px] shrink-0">
-        <button
-          onClick={() => setTab("hr")}
-          className={`flex-1 py-2 px-3 cursor-pointer rounded-[8px] text-slate-600 text-[12px] font-normal leading-[20px] transition-colors ${
-            tab === "hr"
-              ? "border border-[#178AFC] bg-slate-50"
-              : "border border-slate-200"
-          }`}
-        >
-          HR
-        </button>
-        <button
-          onClick={() => setTab("employee")}
-          className={`flex-1 py-2 px-3 cursor-pointer rounded-[8px] text-slate-600 text-[12px] font-normal leading-[20px] transition-colors ${
-            tab === "employee"
-              ? "border border-[#178AFC] bg-slate-50"
-              : "border border-slate-200"
-          }`}
-        >
-          Ажилтан
-        </button>
-      </div>
-
-      {tab === "hr" ? (
+      {step === 1 ? (
         <>
           <div className="flex flex-col gap-[8px]">
-            <label className={labelClass}>Компанийн Хаяг</label>
-            <input
-              value={companyAddress}
-              onChange={(e) => setCompanyAddress(e.target.value)}
-              placeholder="Сүхбаатар дүүрэг, Гурван гол оффис 3 давхар"
-              className={getInputClass("companyAddress")}
-            />
-            <FieldError message={errors.companyAddress} />
-          </div>
-          <div className="flex flex-col gap-[8px]">
-            <label className={labelClass}>Улсын бүртгэлийн дугаар</label>
-            <input
-              value={companyRegisterNo}
-              onChange={(e) => setCompanyRegisterNo(e.target.value)}
-              placeholder="31234567345"
-              className={getInputClass("companyRegisterNo")}
-            />
-            <FieldError message={errors.companyRegisterNo} />
-          </div>
-          <div className="flex flex-col gap-[8px]">
-            <label className={labelClass}>Компанийн нэр</label>
-            <input
-              value={companyName}
-              onChange={(e) => setCompanyName(e.target.value)}
-              placeholder="Pinecone Academy"
-              className={getInputClass("companyName")}
-            />
-            <FieldError message={errors.companyName} />
-          </div>
-        </>
-      ) : (
-        <>
-          <div className="flex flex-col gap-[8px]">
-            <label className={labelClass}>Ажилтны код</label>
-            <input
-              value={employeeCode}
-              onChange={(e) => setEmployeeCode(e.target.value)}
-              placeholder="EMP0001"
-              className={getInputClass("employeeCode")}
-            />
-            <FieldError message={errors.employeeCode} />
-          </div>
-          <div className="flex flex-col gap-[8px]">
-            <label className={labelClass}>Салбар</label>
+            <label className={labelClass}>
+              <span className="text-[14px] text-black font-semibold">
+                Салбар
+              </span>
+            </label>
             <input
               value={branch}
               onChange={(e) => setBranch(e.target.value)}
@@ -222,27 +155,29 @@ export function NewEmployeeForm({
             <FieldError message={errors.branch} />
           </div>
 
-          <div className="grid min-w-0 grid-cols-2 gap-[16px]">
-            <div className="flex min-w-0 flex-col gap-[8px]">
-              <label className={labelClass}>Овог</label>
-              <input
-                value={lastName}
-                onChange={(e) => setLastName(e.target.value)}
-                placeholder="Дорж"
-                className={getInputClass("lastName")}
-              />
-              <FieldError message={errors.lastName} />
-            </div>
-            <div className="flex min-w-0 flex-col gap-[8px]">
-              <label className={labelClass}>Нэр</label>
-              <input
-                value={firstName}
-                onChange={(e) => setFirstName(e.target.value)}
-                placeholder="Дуламрагчаа"
-                className={getInputClass("firstName")}
-              />
-              <FieldError message={errors.firstName} />
-            </div>
+          <div className="flex min-w-0 flex-col gap-[8px]">
+            <label className={labelClass}>
+              <span className="text-[14px] text-black font-semibold">Овог</span>
+            </label>
+            <input
+              value={lastName}
+              onChange={(e) => setLastName(e.target.value)}
+              placeholder="Дорж"
+              className={getInputClass("lastName")}
+            />
+            <FieldError message={errors.lastName} />
+          </div>
+          <div className="flex min-w-0 flex-col gap-[8px]">
+            <label className={labelClass}>
+              <span className="text-[14px] text-black font-semibold">Нэр</span>
+            </label>
+            <input
+              value={firstName}
+              onChange={(e) => setFirstName(e.target.value)}
+              placeholder="Дуламрагчаа"
+              className={getInputClass("firstName")}
+            />
+            <FieldError message={errors.firstName} />
           </div>
 
           <div className="flex flex-col gap-[8px]">
@@ -278,7 +213,9 @@ export function NewEmployeeForm({
               <FieldError message={errors.phone} />
             </div>
           </div>
-
+        </>
+      ) : (
+        <>
           <div className="flex min-w-0 flex-col gap-[8px]">
             <label className={labelClass}>Хэлтэс</label>
             <SelectWrapper
@@ -382,11 +319,11 @@ export function NewEmployeeForm({
             </SelectWrapper>
             <FieldError message={errors.contractDuration} />
           </div>
+
+          {RecipientsSection}
+          {DocumentsSection}
         </>
       )}
-
-      {RecipientsSection}
-      {DocumentsSection}
     </div>
   );
 }

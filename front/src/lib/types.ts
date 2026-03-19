@@ -63,6 +63,12 @@ export interface Document {
   documentName: string;
   storageUrl: string;
   createdAt: string;
+  hrSigned?: boolean;
+  hrSignatureData?: string | null;
+  hrSignedAt?: string | null;
+  employeeSigned?: boolean;
+  employeeSignatureData?: string | null;
+  employeeSignedAt?: string | null;
 }
 
 export interface AuditLog {
@@ -80,6 +86,8 @@ export interface AuditLog {
   notificationAttempted: boolean;
   recipientsNotified: boolean;
   notificationError?: string | null;
+  hrSignedAll?: boolean;
+  hrSignedAllAt?: string | null;
   employeeSigned?: boolean;
   employeeSignedAt?: string | null;
   timestamp: string;

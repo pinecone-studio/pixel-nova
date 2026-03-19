@@ -72,13 +72,15 @@ export function FilesToolbar({
           placeholder="Баримт хайх..."
           style={{
             width: "854px",
-            height: 47,
-            padding: "0 12px 0 36px",
+            height: 44,
+            padding: "13.5px 13px 13.5px 41px",
             background: "white",
-            border: "1px solid #E5E7EB",
-            borderRadius: 12,
+            border: "1px solid rgba(0,0,0,0.12)",
+            borderRadius: 10,
             color: "#121316",
             fontSize: 14,
+            lineHeight: "20px",
+            fontWeight: 500,
             outline: "none",
           }}
         />
@@ -87,7 +89,7 @@ export function FilesToolbar({
         <button
           type="button"
           onClick={() => setOpen((prev) => !prev)}
-          className="flex h-[47px] w-[186px] items-center justify-between rounded-lg border border-solid border-[#e5e7eb] bg-white pl-3 pr-2 text-[14px] text-[#6b7280] outline-none"
+          className="flex h-[44px] w-[186px] items-center justify-between rounded-[8px] border border-black/12 bg-white px-4 py-2 text-[16px] text-black outline-none"
         >
           <span>{activeLabel}</span>
           <BiChevronDown
@@ -97,7 +99,7 @@ export function FilesToolbar({
           />
         </button>
         {open ? (
-          <div className="absolute right-0 z-10 mt-2 w-[186px] rounded-xl border border-[#e5e7eb] bg-white p-1 shadow-md">
+          <div className="absolute right-0 z-10 mt-2 w-[186px] rounded-[10px] border border-black/12 bg-white p-1 shadow-[0_12px_32px_rgba(15,23,42,0.12)]">
             {options.map((opt) => {
               const active = opt.value === filter;
               return (
@@ -109,7 +111,7 @@ export function FilesToolbar({
                     onFilterChange(opt.value);
                     setOpen(false);
                   }}
-                  className={`flex w-full rounded-lg bg-white px-3 py-2 text-left text-[14px] transition-colors ${
+                  className={`flex w-full rounded-[8px] bg-white px-3 py-2 text-left text-[14px] leading-5 transition-colors ${
                     active
                       ? "bg-[#F3F4F6] text-[#111827]"
                       : "text-[#4B5563] hover:bg-[#F3F4F6] hover:text-[#111827]"

@@ -14,15 +14,29 @@ export {
   insertEmployee,
   updateEmployee,
   updateEmployeeDocumentProfile,
+  updateEmployeeStatus,
   upsertEmployeeRecord,
 } from "./employee";
-export { getDocuments, getDocumentById, insertDocument, deleteDocument } from "./document";
+export {
+  getDocuments,
+  getDocumentById,
+  getDocumentsByIds,
+  insertDocument,
+  deleteDocument,
+  updateDocumentStorage,
+  updateDocumentHrSignature,
+  updateDocumentEmployeeSignature,
+  areAllDocumentsHrSigned,
+  areAllDocumentsEmployeeSigned,
+} from "./document";
 export {
   getAuditLogById,
+  getAuditLogByDocumentId,
   getAuditLogs,
   insertAuditLog,
   normalizeAuditLog,
   updateAuditLogDelivery,
+  updateAuditLogHrSigned,
   updateAuditLogSignature,
 } from "./auditLog";
 export {

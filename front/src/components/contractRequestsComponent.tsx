@@ -730,6 +730,36 @@ export const ContractRequestsComponent = () => {
     }
   }
 
+  async function handleAuditPreview(log: AuditLog) {
+    const firstDocId = log.documentIds?.[0];
+    if (!firstDocId) {
+      setPreviewError("Баримт олдсонгүй.");
+      setPreviewOpen(true);
+      return;
+    }
+    setPreviewOpen(true);
+    setPreviewError(null);
+    setPreviewLoading(true);
+    try {
+      const result = await loadDocumentContent({
+        variables: { documentId: firstDocId },
+        context: {
+          headers: buildGraphQLHeaders({ actorRole: "hr" }),
+        },
+      });
+      const content = result.data?.documentContent ?? null;
+      if (!content) {
+        setPreviewError("Баримтын агуулга олдсонгүй.");
+        return;
+      }
+      setPreviewContent(content);
+    } catch (err) {
+      setPreviewError(err instanceof Error ? err.message : "Алдаа гарлаа.");
+    } finally {
+      setPreviewLoading(false);
+    }
+  }
+
   async function handleDownload(
     row: ContractRequest,
     templateId: string,
@@ -1059,6 +1089,14 @@ export const ContractRequestsComponent = () => {
                     <span className="rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-[11px] font-medium text-emerald-600">
                       Амжилттай
                     </span>
+                    <button
+                      type="button"
+                      onClick={() => void handleAuditPreview(log)}
+                      className="flex h-8 w-8 items-center justify-center rounded-full border border-slate-200 text-slate-500 hover:text-slate-900 hover:bg-slate-50"
+                      aria-label="Preview contract"
+                    >
+                      <FiEye className="text-sm" />
+                    </button>
                     <span className="text-xs text-slate-400">{dateLabel}</span>
                   </div>
                 </div>

@@ -703,3 +703,86 @@ export const AnnouncementIcon = () => {
     </svg>
   );
 };
+
+export const Note = () => {
+  return (
+    <svg
+      width="14"
+      height="14"
+      viewBox="0 0 14 14"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        d="M3.50016 12.8334C3.19074 12.8334 2.894 12.7104 2.6752 12.4916C2.45641 12.2729 2.3335 11.9761 2.3335 11.6667V2.33336C2.3335 2.02394 2.45641 1.72719 2.6752 1.5084C2.894 1.28961 3.19074 1.16669 3.50016 1.16669H8.16683C8.35149 1.16639 8.53438 1.20262 8.70497 1.2733C8.87557 1.34398 9.03049 1.44772 9.16083 1.57852L11.2538 3.67152C11.385 3.8019 11.489 3.95697 11.5599 4.12778C11.6308 4.29859 11.6671 4.48175 11.6668 4.66669V11.6667C11.6668 11.9761 11.5439 12.2729 11.3251 12.4916C11.1063 12.7104 10.8096 12.8334 10.5002 12.8334H3.50016Z"
+        stroke="#3F4145"
+        strokeOpacity="0.6"
+        strokeWidth="1.16667"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M8.1665 1.16669V4.08335C8.1665 4.23806 8.22796 4.38644 8.33736 4.49583C8.44675 4.60523 8.59513 4.66669 8.74984 4.66669H11.6665"
+        stroke="#3F4145"
+        strokeOpacity="0.6"
+        strokeWidth="1.16667"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+};
+
+export const Pen = () => {
+  return (
+    <svg
+      width="16"
+      height="16"
+      viewBox="0 0 16 16"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <g clipPath="url(#clip0_1417_2770)">
+        <path
+          d="M14.1161 4.54132C14.4686 4.18894 14.6666 3.71097 14.6667 3.21256C14.6668 2.71415 14.4688 2.23613 14.1165 1.88366C13.7641 1.53118 13.2861 1.33313 12.7877 1.33307C12.2893 1.33301 11.8113 1.53094 11.4588 1.88332L2.56145 10.7827C2.40667 10.937 2.29219 11.127 2.22812 11.336L1.34745 14.2373C1.33022 14.295 1.32892 14.3562 1.34369 14.4146C1.35845 14.4729 1.38873 14.5261 1.43132 14.5687C1.4739 14.6112 1.5272 14.6414 1.58556 14.656C1.64392 14.6707 1.70516 14.6693 1.76279 14.652L4.66479 13.772C4.87357 13.7085 5.06357 13.5947 5.21812 13.4407L14.1161 4.54132Z"
+          stroke="white"
+          strokeWidth="1.33333"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </g>
+      <defs>
+        <clipPath id="clip0_1417_2770">
+          <rect width="16" height="16" fill="white" />
+        </clipPath>
+      </defs>
+    </svg>
+  );
+};
+
+export const Sth = () => {
+  return (
+    <svg
+      width="16"
+      height="16"
+      viewBox="0 0 16 16"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        d="M4.66699 4.66669H11.3337V11.3334"
+        stroke="white"
+        strokeWidth="1.33333"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M4.66699 11.3334L11.3337 4.66669"
+        stroke="white"
+        strokeWidth="1.33333"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+};

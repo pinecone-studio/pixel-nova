@@ -45,6 +45,52 @@ const PHASE_LABELS: Record<string, string> = {
 // Sort helpers
 // ---------------------------------------------------------------------------
 
+function getAuditSigningSummary(log: AuditLog, documents: Document[]) {
+  const hrSignedCount = documents.filter((document) =>
+    Boolean(document.hrSigned),
+  ).length;
+  const employeeSignedCount = documents.filter((document) =>
+    Boolean(document.employeeSigned),
+  ).length;
+  const unsignedCount = Math.max(log.documentIds.length - hrSignedCount, 0);
+  const allHrSigned =
+    log.hrSignedAll ??
+    (log.documentIds.length > 0 && hrSignedCount === log.documentIds.length);
+  const allEmployeeSigned =
+    Boolean(log.employeeSigned) ||
+    (documents.length > 0 && employeeSignedCount === documents.length);
+
+  return {
+    unsignedCount,
+    allHrSigned,
+    allEmployeeSigned,
+  };
+}
+
+function getDocumentStatus(document: Document) {
+  const hrSigned = Boolean(document.hrSigned);
+  const employeeSigned = Boolean(document.employeeSigned);
+
+  if (hrSigned && employeeSigned) {
+    return {
+      label: "Баталгаажсан",
+      className: "border-emerald-200 bg-emerald-50 text-emerald-700",
+    };
+  }
+
+  if (hrSigned) {
+    return {
+      label: "Ажилтан хүлээгдэж байна",
+      className: "border-amber-200 bg-amber-50 text-amber-700",
+    };
+  }
+
+  return {
+    label: "HR хүлээгдэж байна",
+    className: "border-slate-200 bg-slate-50 text-slate-500",
+  };
+}
+
 type SortKey = "documentName" | "employee" | "phase" | "date";
 type SortDir = "asc" | "desc";
 
@@ -61,7 +107,7 @@ function toggleSort(
 function SortArrow({ active, dir }: { active: boolean; dir: SortDir }) {
   return (
     <span
-      className={`ml-1 text-[10px] ${active ? "text-[#121316]" : "text-[#3f4145]/40"}`}>
+      className={`ml-1 text-[10px] ${active ? "text-black" : "text-black"}`}>
       {dir === "asc" ? "↑↓" : "↓↑"}
     </span>
   );
@@ -116,6 +162,42 @@ function StatusDots({ log }: { log: AuditLog }) {
 // ---------------------------------------------------------------------------
 // Email dispatch status (for detail modal)
 // ---------------------------------------------------------------------------
+
+function DocumentStatusDots({
+  log,
+  documents,
+}: {
+  log: AuditLog;
+  documents: Document[];
+}) {
+  const summary = getAuditSigningSummary(log, documents);
+
+  if (!log.documentsGenerated) {
+    return <span className="text-[12px] text-[#3f4145]">Бэлдээгүй</span>;
+  }
+
+  if (summary.allHrSigned && summary.allEmployeeSigned) {
+    return (
+      <span className="text-[12px] font-medium text-emerald-600">
+        Баталгаажсан
+      </span>
+    );
+  }
+
+  if (!summary.allHrSigned) {
+    return (
+      <span className="text-[12px] text-[#3f4145]">
+        {summary.unsignedCount} дутуу
+      </span>
+    );
+  }
+
+  return (
+    <span className="text-[12px] font-medium text-amber-600">
+      Ажилтан хүлээгдэж байна
+    </span>
+  );
+}
 
 function EmailStatus({ log }: { log: AuditLog }) {
   if (!log.notificationAttempted) {
@@ -181,6 +263,9 @@ function AuditDetailModal({
   const empName = employee
     ? `${employee.lastName} ${employee.firstName}`
     : log.employeeId;
+  const documents = log.documentIds
+    .map((documentId) => documentsById.get(documentId))
+    .filter((document): document is Document => Boolean(document));
   const dateStr = new Date(log.timestamp).toLocaleDateString("mn-MN", {
     year: "numeric",
     month: "2-digit",
@@ -216,10 +301,13 @@ function AuditDetailModal({
 
         <div className="flex flex-col gap-4 px-6 py-5">
           <div>
-            <p className="mb-1.5 text-[12px] font-semibold uppercase tracking-wider text-[#3f4145]">
-              Баримтууд ({log.documentIds.length})
-            </p>
-            {log.documentIds.length > 0 ? (
+            <div className="mb-1.5 flex items-center justify-between gap-3">
+              <p className="text-[12px] font-semibold uppercase tracking-wider text-[#3f4145]">
+                Баримтууд ({log.documentIds.length})
+              </p>
+              <DocumentStatusDots log={log} documents={documents} />
+            </div>
+            {documents.length > 0 ? (
               <div className="flex flex-col gap-1">
                 {log.documentIds.map((docId) => (
                   <div
@@ -542,7 +630,7 @@ export function AuditlogComponent() {
 
       {/* ═══════════ ACTION CARDS (TOP) ═══════════ */}
       <div className="shrink-0">
-        <p className="text-[#3F4145] text-sm font-medium mb-3">
+        <p className="text-[#3F4145] text-[14px] font-medium mb-3">
           Нийт {filteredActions.length} үйлдэл
         </p>
 
@@ -587,26 +675,32 @@ export function AuditlogComponent() {
           }}>
           <button
             onClick={() => handleSort("documentName")}
-            className="flex items-center gap-1 px-2 font-medium hover:text-[#121316] transition-colors text-left">
+            className="flex items-center gap-1 px-2 font-medium text-[#3F4145CC] transition-colors text-[14px]">
             Баримт бичиг
             <SortArrow active={sort.key === "documentName"} dir={sort.dir} />
           </button>
           <button
             onClick={() => handleSort("employee")}
-            className="flex items-center gap-1 px-2 font-medium hover:text-[#121316] transition-colors text-left">
+            className="flex items-center gap-1 px-2 font-medium text-[#3F4145CC] transition-colors text-[14px]">
             Ажилтан
             <SortArrow active={sort.key === "employee"} dir={sort.dir} />
           </button>
           <span className="px-2 font-medium">Үе</span>
           <button
             onClick={() => handleSort("date")}
-            className="flex items-center gap-1 px-2 font-medium hover:text-[#121316] transition-colors text-left">
+            className="flex items-center gap-1 px-2 font-medium text-[#3F4145CC] transition-colors text-[14px]">
             Огноо
             <SortArrow active={sort.key === "date"} dir={sort.dir} />
           </button>
-          <span className="px-2 font-medium">Төлөв</span>
-          <span className="px-2 font-medium">Имэйл</span>
-          <span className="px-2 font-medium">Үйлдэл</span>
+          <span className="px-2  font-medium text-[#3F4145CC] transition-colors text-[14px]">
+            Төлөв
+          </span>
+          <span className="px-2  font-medium text-[#3F4145CC] transition-colors text-[14px]">
+            Имэйл
+          </span>
+          <span className="px-2 font-medium text-[#3F4145CC] transition-colors text-[14px]">
+            Үйлдэл
+          </span>
         </div>
 
         {/* Body */}
@@ -700,7 +794,10 @@ export function AuditlogComponent() {
 
                   {/* Төлөв (status dots) */}
                   <div className="px-2">
-                    <StatusDots log={log} />
+                    <DocumentStatusDots
+                      log={log}
+                      documents={documentsByEmployeeId[log.employeeId] ?? []}
+                    />
                   </div>
 
                   {/* Имэйл */}
@@ -732,7 +829,7 @@ export function AuditlogComponent() {
 
         {/* Footer */}
         {!auditLoading && auditLogs.length > 0 && (
-          <div className="shrink-0 border-t border-dashed border-black/12 px-5 py-3 text-[13px] text-[#3f4145]">
+          <div className="shrink-0 border-t border-dashed border-black/12 px-5 py-3 text-[14px] text-[#3f4145]">
             Нийт {auditLogs.length} баримт
           </div>
         )}
