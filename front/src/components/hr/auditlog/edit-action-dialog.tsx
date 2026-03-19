@@ -1,13 +1,15 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useMutation } from "@apollo/client/react";
 import { FiX, FiPlus, FiTrash2 } from "react-icons/fi";
+import { createPortal } from "react-dom";
 
 import { UPDATE_REGISTRY } from "@/graphql/mutations/actions";
 import { GET_ACTIONS } from "@/graphql/queries";
 import { buildGraphQLHeaders } from "@/lib/apollo-client";
 import type { ActionConfig } from "@/lib/types";
+import { useHrOverlay } from "../overlay-context";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -192,6 +194,7 @@ export function EditActionDialog({
   open,
   onOpenChange,
 }: EditActionDialogProps) {
+  const { setBlurred } = useHrOverlay();
   const [phase, setPhase] = useState("");
   const [triggerCondition, setTriggerCondition] = useState("");
   const [triggerFields, setTriggerFields] = useState<string[]>([]);
@@ -203,6 +206,11 @@ export function EditActionDialog({
   const [error, setError] = useState<string | null>(null);
 
   const [prevAction, setPrevAction] = useState<ActionConfig | null>(null);
+
+  useEffect(() => {
+    setBlurred(open);
+    return () => setBlurred(false);
+  }, [open, setBlurred]);
 
   if (action !== prevAction) {
     setPrevAction(action);
@@ -301,9 +309,15 @@ export function EditActionDialog({
     offboard_employee: "Ажлаас чөлөөлөх",
   };
 
-  return (
+  const dialog = (
     <div className="fixed inset-0 z-100 flex items-center justify-center bg-black/50 p-4">
-      <div className="w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-[24px] border border-black/12 bg-white shadow-2xl">
+      <button
+        type="button"
+        aria-label="Close edit action overlay"
+        className="absolute inset-0"
+        onClick={() => onOpenChange(false)}
+      />
+      <div className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-[24px] border border-black/12 bg-white shadow-2xl">
         {/* Header */}
         <div className="sticky top-0 z-10 flex items-center justify-between border-b border-black/12 bg-white px-6 py-4 rounded-t-[24px]">
           <div>
@@ -415,4 +429,6 @@ export function EditActionDialog({
       </div>
     </div>
   );
+
+  return typeof document !== "undefined" ? createPortal(dialog, document.body) : dialog;
 }

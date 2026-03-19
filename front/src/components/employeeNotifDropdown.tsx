@@ -53,15 +53,14 @@ export const EmployeeNotifDropdown = () => {
   async function handleMarkRead(id: string) {
     if (useMockNotifications) {
       setMockNotifications((current) =>
-        current.map((notification) =>
-          notification.id === id
-            ? {
-                ...notification,
-                status: "read",
-                readAt: new Date().toISOString(),
-              }
-            : notification,
-        ),
+        current.map<EmployeeNotification>((notification) => {
+          if (notification.id !== id) return notification;
+          return {
+            ...notification,
+            status: "read",
+            readAt: new Date().toISOString(),
+          };
+        }),
       );
       return;
     }
@@ -78,6 +77,25 @@ export const EmployeeNotifDropdown = () => {
     if (notification.status === "unread") {
       await handleMarkRead(notification.id);
     }
+  }
+
+  async function handleMarkAllRead() {
+    const unread = notifications.filter((n) => n.status === "unread");
+    if (unread.length === 0) return;
+
+    if (useMockNotifications) {
+      setMockNotifications((current) =>
+        current.map<EmployeeNotification>((notification) => ({
+          ...notification,
+          status: "read",
+          readAt: notification.readAt ?? new Date().toISOString(),
+        })),
+      );
+      return;
+    }
+
+    await Promise.all(unread.map((n) => markRead({ variables: { id: n.id } })));
+    await refetch();
   }
 
   return (
@@ -97,7 +115,9 @@ export const EmployeeNotifDropdown = () => {
       >
         <GrNotification className="h-4 w-4" />
         {unreadCount > 0 ? (
-          <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-[#fc171b]" />
+          <span className="absolute -right-1 -top-1 flex h-5 min-w-[20px] items-center justify-center rounded-full border border-transparent bg-[#de3b3d] px-1 text-[12px] font-medium text-[#eaeff5]">
+            {unreadCount}
+          </span>
         ) : null}
       </button>
 
@@ -106,6 +126,8 @@ export const EmployeeNotifDropdown = () => {
         loading={loading}
         notifications={notifications}
         selectedId={selectedId}
+        unreadCount={unreadCount}
+        onMarkAllRead={handleMarkAllRead}
         onOpenChange={(nextOpen) => {
           setOpen(nextOpen);
           if (!nextOpen) {

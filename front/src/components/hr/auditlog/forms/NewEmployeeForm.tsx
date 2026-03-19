@@ -110,9 +110,39 @@ export function NewEmployeeForm({
     errors[key]
       ? `${inputClass} border-red-300 focus:border-red-400`
       : inputClass;
+  const fillMock = () => {
+    const defaultDept = departments?.[0] ?? "Engineering";
+    setCompanyAddress("Сүхбаатар дүүрэг, Гурван гол оффис 3 давхар");
+    setCompanyRegisterNo("31234567345");
+    setCompanyName("Pinecone Academy");
+    setEmployeeCode("EMP0003");
+    setBranch("Гурван гол");
+    setLastName("Дорж");
+    setFirstName("Эрдэнэ");
+    setEmail("dorj.erde@gmail.com");
+    setRegisterNo("УХ04272036");
+    setPhone("99999999");
+    setDept(defaultDept);
+    setJobTitle("Senior Engineer");
+    setWorkSchedule("Бүтэн цагаар");
+    setWorkdays("Даваа-Баасан");
+    setSalaryAmount("4200000");
+    setContractStart("2026-04-01");
+    setContractEnd("2027-04-01");
+    setContractDuration("1 жил");
+  };
 
   return (
     <div className="flex min-w-0 flex-col gap-[16px]">
+      <div className="flex items-center justify-end">
+        <button
+          type="button"
+          onClick={fillMock}
+          className="rounded-[10px] border border-black/12 px-3 py-1.5 text-[12px] font-medium text-[#3f4145] transition-colors hover:bg-[#f5f5f5]"
+        >
+          Demo бөглөх
+        </button>
+      </div>
       <div className="flex min-w-0 gap-[16px] shrink-0">
         <button
           onClick={() => setTab("hr")}

@@ -1,55 +1,33 @@
 "use client";
 
+import { useQuery } from "@apollo/client/react";
 import { useMemo, useState } from "react";
-import {
-  BiChevronDown,
-  BiChevronRight,
-  BiDownload,
-  BiSearch,
-  BiX,
-} from "react-icons/bi";
-import { FiCheckCircle, FiEye, FiFileText } from "react-icons/fi";
+import { BiChevronRight, BiSearch, BiX } from "react-icons/bi";
+import { FiFileText, FiCheckCircle } from "react-icons/fi";
 
-type AuditView = "newEmployee" | "documentReview" | "statusUpdate";
-type ListFilter =
-  | "all"
-  | "engineering"
-  | "fourDocs"
-  | "updates"
-  | "newDocs"
-  | "gold";
+import { useEmployeeSession } from "@/components/pages/employee/useEmployeeSession";
+import { GET_AUDIT_LOGS } from "@/graphql/queries/audit-logs";
+import { buildGraphQLHeaders } from "@/lib/apollo-client";
+import type { AuditLog } from "@/lib/types";
 
-type EmployeeRequest = {
-  id: string;
-  firstName: string;
-  lastName: string;
-  email: string;
-  department: string;
-  role: string;
-  submittedAt: string;
-  files: { id: string; title: string; fileName: string }[];
+// ---------------------------------------------------------------------------
+// Constants
+// ---------------------------------------------------------------------------
+
+const ACTION_LABELS: Record<string, string> = {
+  add_employee: "Шинэ ажилтан авах",
+  promote_employee: "Тушаал дэвшүүлэх",
+  change_position: "Албан тушаал солих",
+  offboard_employee: "Ажлаас чөлөөлөх",
 };
 
-type DocumentReview = {
-  id: string;
-  title: string;
-  modalTitle: string;
-  description: string;
-  fileTitle: string;
-  fileName: string;
-  badge: string;
-  badgeTone: "blue" | "gold";
-  avatarColor: string;
-  avatarLabel: string;
+const PHASE_LABELS: Record<string, string> = {
+  onboarding: "Ажилд орох",
+  working: "Ажиллах",
+  offboarding: "Ажлаас гарах",
 };
 
-type StatusUpdate = {
-  id: string;
-  title: string;
-  subtitle: string;
-  status: string;
-  tone: "gold" | "emerald";
-};
+type FilterAction = "" | "add_employee" | "promote_employee" | "change_position" | "offboard_employee";
 
 const newEmployeeRequests: EmployeeRequest[] = [
   {
@@ -234,88 +212,74 @@ const FILTER_OPTIONS: Record<
   ],
 };
 
-function summaryCardTone(active: boolean, color: "blue" | "green") {
-  if (color === "blue") {
-    return active
-      ? "border-[#98C1FF] bg-white"
-      : "border-[#EAECF0] bg-white hover:border-[#98C1FF]";
+function AuditStatusBadge({ log }: { log: AuditLog }) {
+  if (log.notificationError) {
+    return (
+      <span className="rounded-full border border-[#FF8A80] bg-white px-3 py-1 text-[12px] font-medium text-[#FF3B30]">
+        Алдаатай
+      </span>
+    );
   }
-
-  return active
-    ? "border-[#86EFAC] bg-white"
-    : "border-[#EAECF0] bg-white hover:border-[#86EFAC]";
-}
-
-function sectionLabel(type: AuditView) {
-  if (type === "newEmployee") return "Шинэ Ажилтан";
-  if (type === "documentReview") return "Баримт бичиг баталгаажуулалт";
-  return "Статус шинэчлэлт";
-}
-
-function SectionPill({ count }: { count: number }) {
+  if (log.documentsGenerated && log.recipientsNotified) {
+    return (
+      <span className="rounded-full border border-[#86EFAC] bg-white px-3 py-1 text-[12px] font-medium text-[#22C55E]">
+        Амжилттай
+      </span>
+    );
+  }
   return (
-    <span className="rounded-full border border-[#D0D5DD] bg-[#F9FAFB] px-3 py-1 text-xs text-[#98A2B3]">
-      {count} хүсэлт
+    <span className="rounded-full border border-[#FDE68A] bg-white px-3 py-1 text-[12px] font-medium text-[#D97706]">
+      Хэсэгчлэн
     </span>
   );
 }
 
-function Field({
-  label,
-  value,
-  full = false,
-}: {
-  label: string;
-  value: string;
-  full?: boolean;
-}) {
-  return (
-    <div className={full ? "w-full" : ""}>
-      <p className="mb-2 text-sm text-[#344054]">{label}</p>
-      <div className="rounded-xl border border-[#D0D5DD] bg-white px-4 py-3 text-[15px] text-[#101828]">
-        {value}
-      </div>
-    </div>
-  );
-}
+// ---------------------------------------------------------------------------
+// Detail modal
+// ---------------------------------------------------------------------------
 
-function EmployeeRequestModal({
-  entry,
+function AuditDetailModal({
+  log,
   onClose,
 }: {
-  entry: EmployeeRequest;
+  log: AuditLog;
   onClose: () => void;
 }) {
+  const dateStr = new Date(log.timestamp).toLocaleString("mn-MN", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/65 p-4 backdrop-blur-sm">
-      <div className="w-full max-w-[612px] rounded-[28px] border border-[#EAECF0] bg-white p-7 shadow-[0_24px_80px_rgba(0,0,0,0.18)]">
-        <div className="mb-8 flex items-start justify-between">
+      <div className="w-full max-w-[560px] rounded-[28px] border border-[#EAECF0] bg-white p-7 shadow-[0_24px_80px_rgba(0,0,0,0.18)]">
+        <div className="mb-6 flex items-start justify-between">
           <div>
-            <p className="text-[13px] text-[#98A2B3]">Add Employee request</p>
-            <h2 className="mt-3 text-[20px] font-semibold text-[#101828]">
-              Шинэ ажилтан
+            <p className="text-[13px] text-[#98A2B3]">Аудит бүртгэл</p>
+            <h2 className="mt-2 text-[20px] font-semibold text-[#101828]">
+              {ACTION_LABELS[log.action] ?? log.action}
             </h2>
+            <p className="mt-1 text-[13px] text-[#667085]">{dateStr}</p>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="text-[#101828] transition hover:opacity-70"
-          >
+            className="text-[#101828] transition hover:opacity-70">
             <BiX className="h-7 w-7" />
           </button>
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
-          <Field label="Овог" value={entry.lastName} />
-          <Field label="Нэр" value={entry.firstName} />
-        </div>
-        <div className="mt-4">
-          <Field label="Имэйл" value={entry.email} full />
-        </div>
-        <div className="mt-4 grid grid-cols-2 gap-4">
-          <Field label="Хэлтэс" value={entry.department} />
-          <Field label="Албан тушаал" value={entry.role} />
-        </div>
+        <div className="flex flex-col gap-5">
+          {/* Phase */}
+          <div className="flex items-center justify-between text-[14px]">
+            <span className="text-[#667085]">Үе шат</span>
+            <span className="font-medium text-[#101828]">
+              {PHASE_LABELS[log.phase] ?? log.phase}
+            </span>
+          </div>
 
         <div className="mt-6">
           <p className="mb-3 text-sm font-medium text-[#101828]">
@@ -337,61 +301,12 @@ function EmployeeRequestModal({
                     </p>
                     <p className="text-xs text-[#98A2B3]">{file.fileName}</p>
                   </div>
-                </div>
-                <button
-                  type="button"
-                  className="rounded-full p-2 text-[#667085] transition hover:bg-[#F2F4F7] hover:text-[#101828]"
-                >
-                  <FiEye className="h-4 w-4" />
-                </button>
+                ))}
               </div>
-            ))}
+            ) : (
+              <p className="text-[13px] text-[#98A2B3]">Баримт үүсээгүй</p>
+            )}
           </div>
-        </div>
-
-        <div className="mt-8 flex justify-end gap-4">
-          <button
-            type="button"
-            onClick={onClose}
-            className="rounded-2xl border border-[#FF5C5C] px-6 py-3 text-[15px] font-medium text-[#FF3B30] transition hover:bg-[#FFF1F1]"
-          >
-            Татгалзах
-          </button>
-          <button
-            type="button"
-            onClick={onClose}
-            className="rounded-2xl bg-[#101828] px-6 py-3 text-[15px] font-medium text-white transition hover:bg-[#1D2939]"
-          >
-            Баталгаажуулах
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function DocumentReviewModal({
-  entry,
-  onClose,
-}: {
-  entry: DocumentReview;
-  onClose: () => void;
-}) {
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/65 p-4 backdrop-blur-sm">
-      <div className="w-full max-w-[500px] rounded-[28px] border border-[#EAECF0] bg-white px-8 py-9 shadow-[0_24px_80px_rgba(0,0,0,0.18)]">
-        <div className="mb-8 flex items-start justify-between gap-4">
-          <h2 className="text-[32px] font-medium leading-none text-[#101828]">
-            {entry.modalTitle}
-          </h2>
-          <button
-            type="button"
-            onClick={onClose}
-            className="text-[#101828] transition hover:opacity-70"
-          >
-            <BiX className="h-9 w-9" />
-          </button>
-        </div>
 
         <div>
           <p className="mb-3 text-[18px] font-semibold text-[#101828]">
@@ -400,7 +315,6 @@ function DocumentReviewModal({
           <div className="min-h-[120px] rounded-[18px] border border-[#D0D5DD] bg-[#FCFCFD] px-5 py-4 text-[18px] leading-[1.35] text-[#667085]">
             {entry.description}
           </div>
-        </div>
 
         <div className="mt-8">
           <p className="mb-4 text-[18px] font-semibold text-[#101828]">
@@ -420,29 +334,15 @@ function DocumentReviewModal({
                 </p>
               </div>
             </div>
-            <button
-              type="button"
-              className="rounded-full p-3 text-[#667085] transition hover:bg-[#F2F4F7] hover:text-[#101828]"
-            >
-              <FiEye className="h-6 w-6" />
-            </button>
-          </div>
+          )}
         </div>
 
-        <div className="mt-8 flex justify-end gap-4">
+        <div className="mt-7 flex justify-end">
           <button
             type="button"
             onClick={onClose}
-            className="rounded-[18px] border border-[#FF5C5C] px-7 py-3 text-[16px] font-medium text-[#FF3B30] transition hover:bg-[#FFF1F1]"
-          >
-            Татгалзах
-          </button>
-          <button
-            type="button"
-            onClick={onClose}
-            className="rounded-[18px] bg-[#101828] px-8 py-3 text-[16px] font-medium text-white transition hover:bg-[#1D2939]"
-          >
-            Баталгаажуулах
+            className="rounded-2xl bg-[#101828] px-6 py-3 text-[15px] font-medium text-white transition hover:bg-[#1D2939]">
+            Хаах
           </button>
         </div>
       </div>
@@ -450,39 +350,56 @@ function DocumentReviewModal({
   );
 }
 
-function NewEmployeeRow({
-  entry,
+// ---------------------------------------------------------------------------
+// Audit row
+// ---------------------------------------------------------------------------
+
+function AuditRow({
+  log,
   onOpen,
 }: {
-  entry: EmployeeRequest;
-  onOpen: (entry: EmployeeRequest) => void;
+  log: AuditLog;
+  onOpen: (log: AuditLog) => void;
 }) {
+  const dateStr = new Date(log.timestamp).toLocaleDateString("mn-MN", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  });
+
   return (
     <button
       type="button"
-      onClick={() => onOpen(entry)}
-      className="flex w-full items-center justify-between rounded-[20px] border border-[#EAECF0] bg-white px-5 py-5 text-left transition hover:border-[#D0D5DD] hover:bg-[#FCFCFD]"
-    >
+      onClick={() => onOpen(log)}
+      className="flex w-full items-center justify-between rounded-[20px] border border-[#EAECF0] bg-white px-5 py-5 text-left transition hover:border-[#D0D5DD] hover:bg-[#FCFCFD]">
       <div className="flex items-center gap-4">
-        <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-[#B7EAC7] bg-[#F0FDF4] text-[#22C55E]">
-          <FiCheckCircle className="h-5 w-5" />
+        <div
+          className={`flex h-12 w-12 items-center justify-center rounded-2xl border ${
+            log.documentsGenerated
+              ? "border-[#B7EAC7] bg-[#F0FDF4] text-[#22C55E]"
+              : "border-[#FDE68A] bg-[#FFFBEB] text-[#D97706]"
+          }`}>
+          {log.documentsGenerated ? (
+            <FiCheckCircle className="h-5 w-5" />
+          ) : (
+            <FiFileText className="h-5 w-5" />
+          )}
         </div>
         <div>
-          <p className="text-[18px] font-semibold text-[#101828]">
-            {entry.lastName.charAt(0)}. {entry.firstName}
+          <p className="text-[16px] font-semibold text-[#101828]">
+            {ACTION_LABELS[log.action] ?? log.action}
           </p>
           <div className="mt-1 flex items-center gap-2 text-[13px] text-[#98A2B3]">
-            <FiFileText className="h-3.5 w-3.5" />
-            <span>{entry.files.length} баримт хавсаргасан</span>
+            <span>{PHASE_LABELS[log.phase] ?? log.phase}</span>
+            <span>·</span>
+            <span>{log.documentIds.length} баримт</span>
           </div>
         </div>
       </div>
 
-      <div className="flex items-center gap-6">
-        <span className="rounded-full border border-[#FF8A80] bg-white px-3 py-1.5 text-[13px] font-medium text-[#FF3B30]">
-          Ажилтан нэмэх
-        </span>
-        <span className="text-[13px] text-[#98A2B3]">{entry.submittedAt}</span>
+      <div className="flex items-center gap-4">
+        <AuditStatusBadge log={log} />
+        <span className="text-[13px] text-[#98A2B3]">{dateStr}</span>
         <BiChevronRight className="h-6 w-6 text-[#98A2B3]" />
       </div>
     </button>
@@ -715,9 +632,7 @@ export function EmployeeAuditComponent() {
                 </span>
               </div>
             </div>
-            <BiChevronRight className="h-8 w-8 text-[#98A2B3]" />
-          </button>
-        </div>
+          </div>
 
         <div className="flex w-full flex-col mt-[38px]">
           <div className="flex w-full items-center gap-3">
@@ -774,46 +689,68 @@ export function EmployeeAuditComponent() {
               ) : null}
             </div>
           </div>
-
-          <div className="flex items-center gap-4">
-            <h2 className="text-[22px] font-semibold text-[#101828]">
-              {sectionLabel(selectedView)}
-            </h2>
-            <SectionPill count={selectedList} />
-          </div>
-
-          {selectedView === "newEmployee" ? (
-            <div className="flex flex-col gap-4">
-              {filteredEmployees.map((entry) => (
-                <NewEmployeeRow
-                  key={entry.id}
-                  entry={entry}
-                  onOpen={setSelectedEmployee}
-                />
-              ))}
-            </div>
-          ) : null}
-
-          {selectedView === "documentReview" ? (
-            <div className="flex flex-col rounded-[24px] border border-[#EAECF0] bg-white">
-              {filteredDocuments.map((entry) => (
-                <DocumentRow
-                  key={entry.id}
-                  entry={entry}
-                  onOpen={setSelectedDocument}
-                />
-              ))}
-            </div>
-          ) : null}
-
-          {selectedView === "statusUpdate" ? (
-            <div className="flex flex-col gap-4">
-              {filteredStatusUpdates.map((entry) => (
-                <StatusRow key={entry.id} entry={entry} />
-              ))}
-            </div>
-          ) : null}
         </div>
+
+        {/* Search + Filter */}
+        <div className="flex w-full items-center gap-3">
+          <div className="flex h-[44px] flex-1 items-center gap-3 rounded-[12px] border border-[#D0D5DD] bg-white px-4">
+            <BiSearch className="h-5 w-5 text-[#667085]" />
+            <input
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="w-full bg-transparent text-[15px] text-[#101828] outline-none placeholder:text-[#98A2B3]"
+              placeholder="Хайх..."
+            />
+          </div>
+          <select
+            value={filterAction}
+            onChange={(e) => setFilterAction(e.target.value as FilterAction)}
+            className="h-[44px] w-[220px] appearance-none rounded-[12px] border border-[#D0D5DD] bg-white px-4 text-[15px] text-[#667085] outline-none">
+            <option value="">Бүх үйлдэл</option>
+            <option value="add_employee">Шинэ ажилтан авах</option>
+            <option value="promote_employee">Тушаал дэвшүүлэх</option>
+            <option value="change_position">Албан тушаал солих</option>
+            <option value="offboard_employee">Ажлаас чөлөөлөх</option>
+          </select>
+        </div>
+
+        {/* Error */}
+        {error && (
+          <div className="rounded-2xl border border-red-200 bg-red-50 px-5 py-4 text-sm text-red-500">
+            {error.message}
+          </div>
+        )}
+
+        {/* List */}
+        <div className="flex items-center gap-4">
+          <h2 className="text-[22px] font-semibold text-[#101828]">
+            Аудит бүртгэлүүд
+          </h2>
+          <span className="rounded-full border border-[#D0D5DD] bg-[#F9FAFB] px-3 py-1 text-xs text-[#98A2B3]">
+            {auditLogs.length} бүртгэл
+          </span>
+        </div>
+
+        {isLoading ? (
+          <div className="flex flex-col gap-4">
+            {[1, 2, 3].map((i) => (
+              <div
+                key={i}
+                className="h-[82px] rounded-[20px] border border-[#EAECF0] bg-[#F9FAFB] skeleton"
+              />
+            ))}
+          </div>
+        ) : auditLogs.length === 0 ? (
+          <div className="py-16 text-center text-[#98A2B3] text-[15px]">
+            Аудит бүртгэл олдсонгүй
+          </div>
+        ) : (
+          <div className="flex flex-col gap-4">
+            {auditLogs.map((log) => (
+              <AuditRow key={log.id} log={log} onOpen={setDetailLog} />
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
