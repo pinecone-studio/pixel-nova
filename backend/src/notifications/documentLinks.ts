@@ -73,6 +73,7 @@ async function createSignature(secret: string, payload: string) {
 
 export async function buildDocumentDeliveryUrl(input: DocumentLinkInput) {
   const origin = normalizeOrigin(input.publicOrigin);
+  const isPublicStorageUrl = isHttpUrl(input.storageUrl);
 
   if (origin && input.signingSecret) {
     const now = input.now ?? Date.now();
@@ -85,11 +86,7 @@ export async function buildDocumentDeliveryUrl(input: DocumentLinkInput) {
     return `${origin}/documents/${input.documentId}?expires=${expiresAt}&signature=${signature}`;
   }
 
-  if (origin && !input.signingSecret) {
-    return `${origin}/documents/${input.documentId}`;
-  }
-
-  if (isHttpUrl(input.storageUrl)) {
+  if (isPublicStorageUrl) {
     return input.storageUrl;
   }
 
