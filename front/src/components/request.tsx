@@ -1,4 +1,4 @@
-import { useMutation } from "@apollo/client/react";
+﻿import { useMutation } from "@apollo/client/react";
 import { useState } from "react";
 import { BiCalendar, BiChevronDown, BiPlus } from "react-icons/bi";
 import { FiCheck, FiSend, FiUploadCloud, FiX } from "react-icons/fi";
@@ -20,7 +20,7 @@ function CloseBtn({ onClick }: { onClick: () => void }) {
   return (
     <button
       onClick={onClick}
-      className="h-6 w-6 text-[#000000] transition-colors hover:text-white"
+      className="h-6 w-6 text-[#000000] transition-colors cursor-pointer "
     >
       <FiX className="h-6 w-6" />
     </button>
@@ -38,7 +38,7 @@ function SendBtn({
     <button
       onClick={onClick}
       disabled={disabled}
-      className="flex w-[108px] items-center justify-evenly gap-2 rounded-lg bg-[#111827] text-4 font-medium text-white transition-colors hover:bg-[#0b1220] disabled:cursor-not-allowed disabled:opacity-50"
+      className="flex w-[108px] items-center justify-evenly gap-1 rounded-lg bg-[#111827] text-4 font-medium text-white transition-colors cursor-pointer hover:bg-[#0b1220] disabled:cursor-not-allowed disabled:opacity-50"
     >
       <FiSend className="h-[18px] w-[18px]" />
       <span className="flex h-5 w-[54px] items-center justify-center">
@@ -52,7 +52,7 @@ function BackBtn({ onClick }: { onClick: () => void }) {
   return (
     <button
       onClick={onClick}
-      className="h-9 w-[78px] rounded-lg border border-[#1a2035] text-sm text-gray-400 transition-colors hover:bg-white/5 hover:text-white"
+      className="h-9 w-[78px] rounded-lg border border-[#1a2035] text-sm text-gray-400 transition-colors hover:bg-white/5 cursor-pointer"
     >
       Буцах
     </button>
@@ -158,7 +158,9 @@ function UploadArea({
         />
         <div className="flex h-10 w-[445px] flex-col items-center">
           {fileName ? (
-            <p className={`flex h-5 items-center text-4 font-medium text-[#00CC99]`}>
+            <p
+              className={`flex h-5 items-center text-4 font-medium text-[#00CC99]`}
+            >
               {fileName}
             </p>
           ) : (
@@ -185,7 +187,7 @@ function UploadArea({
             e.stopPropagation();
             document.getElementById(inputId)?.click();
           }}
-          className={`h-8 w-[105px] rounded-lg border text-[14px] transition-colors ${
+          className={`h-8 w-[105px] rounded-lg border text-[14px] transition-colors cursor-pointer ${
             isLight
               ? "border-[#E5E7EB] text-[#6B7280] hover:bg-[#F3F4F6] hover:text-[#111827]"
               : "border-[#1a2035] text-gray-300 hover:bg-white/5"
@@ -375,7 +377,7 @@ export const Request = ({ employee }: { employee?: Employee }) => {
               <button
                 type="button"
                 onClick={() => setActiveTab(action.title)}
-                className="absolute right-5 top-1/2 flex h-5 w-5 -translate-y-1/2 items-center justify-center text-[#6B7280] transition-colors hover:bg-[#F3F4F6] hover:text-[#111827]"
+                className="absolute right-5 top-1/2 flex h-6 w-6 rounded-full cursor-pointer -translate-y-1/2 items-center justify-center text-[#6B7280] transition-colors hover:bg-[#F3F4F6] hover:text-[#111827]"
               >
                 <BiPlus className="h-5 w-5" />
               </button>
