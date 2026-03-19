@@ -686,11 +686,11 @@ export function AddEmployeeRequestDialog({
 
       {typeof document !== "undefined" && previewOpen
         ? createPortal(
-            <div className="fixed inset-0 z-120 flex items-center justify-center overflow-y-auto backdrop-blur-sm">
+            <div className="fixed inset-0 z-120 flex items-center justify-center overflow-y-auto bg-black/60 backdrop-blur-sm">
               <button
                 type="button"
                 aria-label="Preview close overlay"
-                className="absolute inset-0 bg-black/60"
+                className="absolute inset-0"
                 onClick={() => setPreviewOpen(false)}
               />
               <div className="relative w-[920px] max-w-[95vw] h-[82vh] overflow-y-auto bg-white border border-slate-200 rounded-2xl shadow-2xl">
