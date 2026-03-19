@@ -6,11 +6,16 @@ import { createPortal } from "react-dom";
 
 import { ArrowUpRightIcon, UsersIcon } from "@/components/icons";
 import type { LeaveRequest } from "@/lib/types";
-import { APPROVE_LEAVE_REQUEST, REJECT_LEAVE_REQUEST } from "@/graphql/mutations";
+import {
+  APPROVE_LEAVE_REQUEST,
+  REJECT_LEAVE_REQUEST,
+} from "@/graphql/mutations";
 import { buildGraphQLHeaders } from "@/lib/apollo-client";
 import { useHrOverlay } from "./overlay-context";
 
 import type { DashboardStats } from "./dashboard-data";
+import { FiPaperclip } from "react-icons/fi";
+import { HiOutlineLightningBolt } from "react-icons/hi";
 
 export function HrDashboardOverview({
   auditCount,
@@ -29,10 +34,23 @@ export function HrDashboardOverview({
   const [selected, setSelected] = useState<LeaveRequest | null>(null);
   const [note, setNote] = useState("");
   const [acting, setActing] = useState(false);
-  const [localRequests, setLocalRequests] = useState<LeaveRequest[]>(
-    pendingRequests,
-  );
+  const [localRequests, setLocalRequests] =
+    useState<LeaveRequest[]>(pendingRequests);
   const { setBlurred } = useHrOverlay();
+  const overviewCards = [
+    {
+      title: "PROMOTE EMPLOYEE",
+      status: "working",
+      description: "Шаардлагатай баримт",
+      items: ["Үндсэн цалин нэмэх тушаал"],
+    },
+    {
+      title: "CHANGE POSITION",
+      status: "working",
+      description: "Шаардлагатай баримт",
+      items: ["Ажлын байрны тодорхойлолт", "Ажлын байр шинэчлэх тушаал"],
+    },
+  ];
 
   useEffect(() => {
     setLocalRequests(pendingRequests);
@@ -136,6 +154,44 @@ export function HrDashboardOverview({
             ))}
           </div>
         </div>
+        <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+          {overviewCards.map((card) => (
+            <div
+              key={card.title}
+              className="flex min-h-[136px] flex-col items-start rounded-[16px] border border-black/12 bg-white p-[25px] text-left">
+              <div className="flex w-full items-start justify-between gap-3">
+                <p className="text-[16px] font-bold leading-5 tracking-[-0.096px] text-[#3f4145]">
+                  {card.title}
+                </p>
+                <span className="flex items-center gap-1 rounded-[10px] border border-[#121316] px-[9px] py-[3px] text-[12px] leading-5 text-[#121316]">
+                  <HiOutlineLightningBolt className="h-3 w-3" />
+                  {card.status}
+                </span>
+              </div>
+
+              <div className="mt-3 flex flex-col gap-2">
+                <p className="text-[14px] font-semibold leading-5 tracking-[-0.084px] text-[#77818c]">
+                  {card.description}
+                </p>
+                {card.items.map((item) => (
+                  <div
+                    key={item}
+                    className="flex items-center gap-2 text-[14px] leading-4 text-[#3f414599]">
+                    <FiPaperclip className="h-[14px] w-[14px] shrink-0" />
+                    <span>{item}</span>
+                  </div>
+                ))}
+              </div>
+
+              <div className="mt-auto flex w-full justify-center pt-4">
+                <button className="flex h-8 w-full items-center justify-center gap-2 rounded-[10px] bg-[#121316] px-3 text-[14px] leading-4 text-white">
+                  <FiPaperclip className="h-4 w-4" />
+                  Хүсэлт илгээх
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
 
       <div className="rounded-3xl border border-slate-200 bg-white shadow-[0_10px_30px_rgba(15,23,42,0.06)]">
@@ -168,8 +224,7 @@ export function HrDashboardOverview({
                   setSelected(req);
                   setNote(req.note ?? "");
                 }}
-                className="w-full text-left flex items-center gap-3 px-6 py-4 hover:bg-slate-50 transition-colors cursor-pointer"
-              >
+                className="w-full text-left flex items-center gap-3 px-6 py-4 hover:bg-slate-50 transition-colors cursor-pointer">
                 <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-600 text-white text-sm font-semibold">
                   {req.employee.firstName?.[0] ?? "А"}
                 </div>
@@ -212,7 +267,8 @@ export function HrDashboardOverview({
                     </div>
                     <div>
                       <p className="text-slate-900 font-bold text-xl leading-6">
-                        {selected.employee.lastName} {selected.employee.firstName}
+                        {selected.employee.lastName}{" "}
+                        {selected.employee.firstName}
                       </p>
                       <p className="text-slate-500 text-sm mt-1">
                         {selected.employee.employeeCode} •{" "}
@@ -227,8 +283,7 @@ export function HrDashboardOverview({
                     <button
                       type="button"
                       onClick={() => setSelected(null)}
-                      className="text-slate-400 hover:text-slate-700 transition-colors text-xl leading-none"
-                    >
+                      className="text-slate-400 hover:text-slate-700 transition-colors text-xl leading-none">
                       ✕
                     </button>
                   </div>
@@ -265,7 +320,9 @@ export function HrDashboardOverview({
                 <div className="flex flex-col gap-2">
                   <p className="text-slate-900 font-semibold text-base">
                     Тайлбар{" "}
-                    <span className="text-slate-500 font-normal">(Заавал биш)</span>
+                    <span className="text-slate-500 font-normal">
+                      (Заавал биш)
+                    </span>
                   </p>
                   <textarea
                     value={note}
@@ -281,16 +338,14 @@ export function HrDashboardOverview({
                     type="button"
                     onClick={handleReject}
                     disabled={acting}
-                    className="flex items-center gap-2 px-5 py-2.5 rounded-xl border border-red-200 text-red-500 text-sm font-medium hover:bg-red-50 disabled:opacity-50 transition-colors"
-                  >
+                    className="flex items-center gap-2 px-5 py-2.5 rounded-xl border border-red-200 text-red-500 text-sm font-medium hover:bg-red-50 disabled:opacity-50 transition-colors">
                     <span>✕</span> Татгалзах
                   </button>
                   <button
                     type="button"
                     onClick={handleApprove}
                     disabled={acting}
-                    className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-slate-900 text-white text-sm font-medium hover:bg-slate-800 disabled:opacity-50 transition-colors"
-                  >
+                    className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-slate-900 text-white text-sm font-medium hover:bg-slate-800 disabled:opacity-50 transition-colors">
                     <span>✓</span> {acting ? "Түр хүлээнэ үү..." : "Батлах"}
                   </button>
                 </div>
