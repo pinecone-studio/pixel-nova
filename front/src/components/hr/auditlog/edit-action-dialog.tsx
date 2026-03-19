@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { useMutation } from "@apollo/client/react";
 import { FiX, FiPlus, FiTrash2 } from "react-icons/fi";
 
@@ -66,14 +66,12 @@ function ChipInput({
         {values.map((val) => (
           <span
             key={val}
-            className="inline-flex items-center gap-1 rounded-full border border-black/12 bg-[#f5f5f5] px-2.5 py-1 text-[12px] text-[#121316]"
-          >
+            className="inline-flex items-center gap-1 rounded-full border border-black/12 bg-[#f5f5f5] px-2.5 py-1 text-[12px] text-[#121316]">
             {val}
             <button
               type="button"
               onClick={() => onChange(values.filter((v) => v !== val))}
-              className="ml-0.5 text-[#77818c] hover:text-red-500"
-            >
+              className="ml-0.5 text-[#77818c] hover:text-red-500">
               <FiX className="h-3 w-3" />
             </button>
           </span>
@@ -91,8 +89,7 @@ function ChipInput({
         <button
           type="button"
           onClick={handleAdd}
-          className="flex h-8 w-8 items-center justify-center rounded-[8px] border border-black/12 text-[#77818c] hover:bg-[#f5f5f5] hover:text-[#121316]"
-        >
+          className="flex h-8 w-8 items-center justify-center rounded-[8px] border border-black/12 text-[#77818c] hover:bg-[#f5f5f5] hover:text-[#121316]">
           <FiPlus className="h-3.5 w-3.5" />
         </button>
       </div>
@@ -112,11 +109,16 @@ function DocumentsEditor({
   onChange: (docs: DocEntry[]) => void;
 }) {
   const addDoc = () => {
-    const nextOrder = docs.length > 0 ? Math.max(...docs.map((d) => d.order)) + 1 : 1;
+    const nextOrder =
+      docs.length > 0 ? Math.max(...docs.map((d) => d.order)) + 1 : 1;
     onChange([...docs, { id: "", template: "", order: nextOrder }]);
   };
 
-  const updateDoc = (index: number, field: keyof DocEntry, value: string | number) => {
+  const updateDoc = (
+    index: number,
+    field: keyof DocEntry,
+    value: string | number,
+  ) => {
     const updated = [...docs];
     updated[index] = { ...updated[index], [field]: value };
     onChange(updated);
@@ -137,12 +139,13 @@ function DocumentsEditor({
           .map((doc, idx) => (
             <div
               key={idx}
-              className="flex items-center gap-2 rounded-[10px] border border-black/12 bg-[#fafafa] px-3 py-2"
-            >
+              className="flex items-center gap-2 rounded-[10px] border border-black/12 bg-[#fafafa] px-3 py-2">
               <input
                 type="number"
                 value={doc.order}
-                onChange={(e) => updateDoc(idx, "order", Number(e.target.value))}
+                onChange={(e) =>
+                  updateDoc(idx, "order", Number(e.target.value))
+                }
                 className="h-7 w-12 rounded-[6px] border border-black/12 bg-white px-2 text-center text-[12px] outline-none"
                 min={1}
               />
@@ -163,8 +166,7 @@ function DocumentsEditor({
               <button
                 type="button"
                 onClick={() => removeDoc(idx)}
-                className="flex h-7 w-7 items-center justify-center rounded-[6px] text-[#77818c] hover:bg-red-50 hover:text-red-500"
-              >
+                className="flex h-7 w-7 items-center justify-center rounded-[6px] text-[#77818c] hover:bg-red-50 hover:text-red-500">
                 <FiTrash2 className="h-3.5 w-3.5" />
               </button>
             </div>
@@ -173,8 +175,7 @@ function DocumentsEditor({
       <button
         type="button"
         onClick={addDoc}
-        className="mt-2 flex items-center gap-1.5 rounded-[8px] border border-dashed border-black/20 px-3 py-1.5 text-[12px] text-[#3f4145] hover:border-[#121316]/30 hover:text-[#121316]"
-      >
+        className="mt-2 flex items-center gap-1.5 rounded-[8px] border border-dashed border-black/20 px-3 py-1.5 text-[12px] text-[#3f4145] hover:border-[#121316]/30 hover:text-[#121316]">
         <FiPlus className="h-3 w-3" />
         Баримт нэмэх
       </button>
@@ -194,12 +195,17 @@ export function EditActionDialog({
   const [phase, setPhase] = useState("");
   const [triggerCondition, setTriggerCondition] = useState("");
   const [triggerFields, setTriggerFields] = useState<string[]>([]);
-  const [requiredEmployeeFields, setRequiredEmployeeFields] = useState<string[]>([]);
+  const [requiredEmployeeFields, setRequiredEmployeeFields] = useState<
+    string[]
+  >([]);
   const [recipients, setRecipients] = useState<string[]>([]);
   const [docs, setDocs] = useState<DocEntry[]>([]);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
+  const [prevAction, setPrevAction] = useState<ActionConfig | null>(null);
+
+  if (action !== prevAction) {
+    setPrevAction(action);
     if (action) {
       setPhase(action.phase);
       setTriggerCondition(action.triggerCondition ?? "");
@@ -209,25 +215,38 @@ export function EditActionDialog({
       setDocs(action.documents.map((d) => ({ ...d })));
       setError(null);
     }
-  }, [action]);
+  }
 
   const [updateRegistry, { loading }] = useMutation(UPDATE_REGISTRY, {
     context: { headers: buildGraphQLHeaders({ actorRole: "hr" }) },
-    refetchQueries: [{ query: GET_ACTIONS, context: { headers: buildGraphQLHeaders({ actorRole: "hr" }) } }],
+    refetchQueries: [
+      {
+        query: GET_ACTIONS,
+        context: { headers: buildGraphQLHeaders({ actorRole: "hr" }) },
+      },
+    ],
   });
 
   // ---- Validation ----
   const validationErrors = useMemo(() => {
     const errors: string[] = [];
     if (!phase) errors.push("Үе шат сонгоно уу");
-    if (triggerFields.length === 0) errors.push("Идэвхлүүлэх талбар хоосон байна");
+    if (triggerFields.length === 0)
+      errors.push("Идэвхлүүлэх талбар хоосон байна");
     if (recipients.length === 0) errors.push("Хүлээн авагч нэмнэ үү");
     const validDocs = docs.filter((d) => d.id && d.template);
-    if (validDocs.length === 0) errors.push("Дор хаяж нэг баримт бичиг нэмнэ үү");
-    const dupDocIds = validDocs.map((d) => d.id).filter((id, i, arr) => arr.indexOf(id) !== i);
-    if (dupDocIds.length > 0) errors.push(`Давхардсан баримт ID: ${dupDocIds.join(", ")}`);
-    const incompleteDocs = docs.filter((d) => (d.id && !d.template) || (!d.id && d.template));
-    if (incompleteDocs.length > 0) errors.push("Баримтын ID болон файл хоёуланг бөглөнө үү");
+    if (validDocs.length === 0)
+      errors.push("Дор хаяж нэг баримт бичиг нэмнэ үү");
+    const dupDocIds = validDocs
+      .map((d) => d.id)
+      .filter((id, i, arr) => arr.indexOf(id) !== i);
+    if (dupDocIds.length > 0)
+      errors.push(`Давхардсан баримт ID: ${dupDocIds.join(", ")}`);
+    const incompleteDocs = docs.filter(
+      (d) => (d.id && !d.template) || (!d.id && d.template),
+    );
+    if (incompleteDocs.length > 0)
+      errors.push("Баримтын ID болон файл хоёуланг бөглөнө үү");
     return errors;
   }, [phase, triggerFields, recipients, docs]);
 
@@ -260,7 +279,18 @@ export function EditActionDialog({
     } catch (err) {
       setError(err instanceof Error ? err.message : "Алдаа гарлаа");
     }
-  }, [action, phase, triggerCondition, triggerFields, requiredEmployeeFields, recipients, docs, validationErrors, updateRegistry, onOpenChange]);
+  }, [
+    action,
+    phase,
+    triggerCondition,
+    triggerFields,
+    requiredEmployeeFields,
+    recipients,
+    docs,
+    validationErrors,
+    updateRegistry,
+    onOpenChange,
+  ]);
 
   if (!open || !action) return null;
 
@@ -272,7 +302,7 @@ export function EditActionDialog({
   };
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 p-4">
+    <div className="fixed inset-0 z-100 flex items-center justify-center bg-black/50 p-4">
       <div className="w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-[24px] border border-black/12 bg-white shadow-2xl">
         {/* Header */}
         <div className="sticky top-0 z-10 flex items-center justify-between border-b border-black/12 bg-white px-6 py-4 rounded-t-[24px]">
@@ -284,8 +314,7 @@ export function EditActionDialog({
           </div>
           <button
             onClick={() => onOpenChange(false)}
-            className="flex h-8 w-8 items-center justify-center rounded-[10px] text-[#77818c] transition-colors hover:bg-[#f5f5f5] hover:text-[#121316]"
-          >
+            className="flex h-8 w-8 items-center justify-center rounded-[10px] text-[#77818c] transition-colors hover:bg-[#f5f5f5] hover:text-[#121316]">
             <FiX className="h-5 w-5" />
           </button>
         </div>
@@ -300,8 +329,7 @@ export function EditActionDialog({
             <select
               value={phase}
               onChange={(e) => setPhase(e.target.value)}
-              className="h-9 w-full rounded-[8px] border border-black/12 bg-white px-3 text-[13px] text-[#121316] outline-none focus:border-[#121316]/30"
-            >
+              className="h-9 w-full rounded-[8px] border border-black/12 bg-white px-3 text-[13px] text-[#121316] outline-none focus:border-[#121316]/30">
               <option value="onboarding">onboarding</option>
               <option value="working">working</option>
               <option value="offboarding">offboarding</option>
@@ -362,7 +390,9 @@ export function EditActionDialog({
           {validationErrors.length > 0 && !error && (
             <div className="flex flex-wrap gap-1.5">
               {validationErrors.map((msg) => (
-                <span key={msg} className="rounded-full border border-amber-200 bg-amber-50 px-2.5 py-0.5 text-[11px] text-amber-700">
+                <span
+                  key={msg}
+                  className="rounded-full border border-amber-200 bg-amber-50 px-2.5 py-0.5 text-[11px] text-amber-700">
                   {msg}
                 </span>
               ))}
@@ -371,15 +401,13 @@ export function EditActionDialog({
           <div className="flex items-center justify-end gap-3">
             <button
               onClick={() => onOpenChange(false)}
-              className="rounded-[10px] border border-black/12 px-4 py-2 text-[13px] font-medium text-[#3f4145] transition-colors hover:bg-[#f5f5f5]"
-            >
+              className="rounded-[10px] border border-black/12 px-4 py-2 text-[13px] font-medium text-[#3f4145] transition-colors hover:bg-[#f5f5f5]">
               Болих
             </button>
             <button
               onClick={handleSave}
               disabled={loading || validationErrors.length > 0}
-              className="rounded-[10px] bg-[#121316] px-5 py-2 text-[13px] font-medium text-white transition-colors hover:bg-[#1f2126] disabled:opacity-50"
-            >
+              className="rounded-[10px] bg-[#121316] px-5 py-2 text-[13px] font-medium text-white transition-colors hover:bg-[#1f2126] disabled:opacity-50">
               {loading ? "Хадгалж байна..." : "Хадгалах"}
             </button>
           </div>
