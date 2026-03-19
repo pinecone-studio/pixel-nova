@@ -31,7 +31,8 @@ export function ApolloAppProvider({
 
     if (authSignatureRef.current !== nextSignature) {
       authSignatureRef.current = nextSignature;
-      void appApolloClient.clearStore();
+      // Avoid resetting the store while queries are in flight.
+      // Queries already use fresh headers; most are network-only.
     }
   }, [pathname]);
 
