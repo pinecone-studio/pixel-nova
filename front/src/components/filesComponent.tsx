@@ -163,10 +163,10 @@ function FilePreviewModal({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/45 backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/45"
       onClick={onClose}>
       <div
-        className="relative w-190 max-w-[95vw] bg-white rounded-3xl border border-slate-200 shadow-[0_28px_60px_rgba(15,23,42,0.12)] overflow-hidden"
+        className="relative w-[920px] max-w-[95vw] h-[82vh] bg-white rounded-3xl border border-slate-200 shadow-[0_28px_60px_rgba(15,23,42,0.12)] overflow-hidden"
         onClick={(e) => e.stopPropagation()}>
         <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200">
           <div>
@@ -186,7 +186,7 @@ function FilePreviewModal({
           </button>
         </div>
 
-        <div className="h-[70vh] bg-slate-50 p-6">
+        <div className="h-[calc(82vh-64px)] bg-slate-50 p-6">
           {loading ? (
             <div className="w-full h-full rounded-2xl border border-slate-200 flex items-center justify-center text-slate-400 text-sm">
               Уншиж байна...
@@ -452,9 +452,9 @@ export function FilesComponent() {
   const { setBlurred } = useHrOverlay();
 
   useEffect(() => {
-    setBlurred(Boolean(previewRow || downloadRow));
+    setBlurred(Boolean(previewRow || downloadRow || showModal));
     return () => setBlurred(false);
-  }, [previewRow, downloadRow, setBlurred]);
+  }, [previewRow, downloadRow, showModal, setBlurred]);
   const [rows, setRows] = useState<FileRow[]>([]);
   const [loadingRows, setLoadingRows] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -582,13 +582,16 @@ export function FilesComponent() {
 
   return (
     <div className="flex min-h-full flex-col gap-6 text-slate-900 animate-fade-up xl:h-[calc(100vh-7rem)] xl:min-h-0 xl:overflow-hidden xl:flex-row">
-      {showModal && (
-        <NewDocModal
-          employees={employees}
-          onClose={() => setShowModal(false)}
-          onUploaded={loadRows}
-        />
-      )}
+      {typeof document !== "undefined" && showModal
+        ? createPortal(
+            <NewDocModal
+              employees={employees}
+              onClose={() => setShowModal(false)}
+              onUploaded={loadRows}
+            />,
+            document.body,
+          )
+        : null}
       {typeof document !== "undefined" && previewRow
         ? createPortal(
             <FilePreviewModal
