@@ -9,12 +9,14 @@ import {
   UsersIcon,
 } from "@/components/icons";
 import { GrDocument } from "react-icons/gr";
+import { FiFileText } from "react-icons/fi";
 
 export type HrSectionKey =
   | "dashboard"
   | "employees"
   | "requests"
   | "documents"
+  | "templates"
   | "audit-log"
   | "notif"
   | "settings";
@@ -50,6 +52,12 @@ export const HR_NAV_ITEMS: HrNavItem[] = [
     label: "Баримтууд",
     href: "/hr/documents",
     icon: <CubaIcon />,
+  },
+  {
+    key: "templates",
+    label: "Загварууд",
+    href: "/hr/templates",
+    icon: <FiFileText />,
   },
   {
     key: "audit-log",

@@ -5,6 +5,7 @@ import { phaseBadge } from "@/utils/auditlog";
 
 import { EditIcon } from "@/components/icons";
 import { HiOutlineLightningBolt } from "react-icons/hi";
+import { GrDocument } from "react-icons/gr";
 
 export function AuditActionCard({
   action,
@@ -76,11 +77,11 @@ export function AuditActionCard({
         </div>
       </div>
 
-      {/* <div className="flex flex-col gap-2">
-        <p className="text-slate-700 text-sm font-semibold">
-          Шаардлагатай баримт
+      <div className="flex flex-col gap-3">
+        <p className="text-[11px] uppercase tracking-[0.2em] text-slate-400">
+          Баримт бичиг
         </p>
-        <div className="flex flex-col gap-2">
+        <div className="flex flex-col gap-1.5">
           {action.documents.length > 0 ? (
             [...action.documents]
               .sort((left, right) => left.order - right.order)
@@ -88,8 +89,8 @@ export function AuditActionCard({
                 <div
                   key={doc.id}
                   className="flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2">
-                  <DocRowIcon />
-                  <span className="text-slate-600 text-xs">
+                  <GrDocument className="h-3.5 w-3.5 text-slate-500 shrink-0" />
+                  <span className="text-slate-600 text-xs truncate">
                     {doc.template.replace(/\.html$/, ".pdf")}
                   </span>
                 </div>
@@ -98,7 +99,7 @@ export function AuditActionCard({
             <span className="text-slate-500 text-xs">-</span>
           )}
         </div>
-      </div> */}
+      </div>
 
       <button
         onClick={() => onSendRequest(action)}
