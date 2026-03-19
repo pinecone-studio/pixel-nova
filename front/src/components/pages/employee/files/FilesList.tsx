@@ -4,7 +4,7 @@ import type { Document } from "@/lib/types";
 
 import { emptyBoxStyle } from "./filesUtils";
 import { FactIcon } from "@/components/icons";
-import { ContractPreview } from "@/components/contractPreview";
+import { FilesDocumentRow } from "./FilesDocumentRow";
 
 const HIDDEN_ACTIONS = new Set(["offboard_employee"]);
 
@@ -51,13 +51,14 @@ export function FilesList({
   }
 
   return (
-    <div className="flex flex-col  divide-y divide-[#E5E7EB] w-[1056px] mt-4 rounded-2xl border border-[#E5E7EB] bg-white">
-      {documents.length > 0 ? (
-        documents.map((document) => (
-          <ContractPreview
+    <div className="mt-4 flex w-[1056px] flex-col overflow-hidden rounded-[24px] bg-white">
+      {visible.length > 0 ? (
+        visible.map((document, index) => (
+          <FilesDocumentRow
             key={document.id}
             document={document}
             authToken={authToken}
+            isLast={index === visible.length - 1}
           />
         ))
       ) : (

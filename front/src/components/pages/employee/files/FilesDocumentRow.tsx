@@ -84,48 +84,46 @@ export function FilesDocumentRow({
       <div
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
-        className={`grid items-center px-5 py-3 transition-colors ${hovered ? "bg-[#fafafa]" : "bg-white"} ${
+        className={`grid h-[89px] items-center px-5 py-5 transition-colors ${hovered ? "bg-[#fafafa]" : "bg-white"} ${
           isLast ? "" : "border-b border-[#DFDFDF]"
         }`}
         style={{
-          gridTemplateColumns:
-            "minmax(220px,2fr) minmax(140px,1fr) 72px",
+          gridTemplateColumns: "minmax(220px,1fr) auto",
         }}
       >
-        <div className="flex items-center gap-2.5 px-2">
-          <div className="flex h-10 w-10 items-center justify-center rounded-[14px] border border-black/12 bg-white text-[#121316]">
-            <ReqIcon className="h-4 w-4 text-[#121316]" />
+        <div className="flex items-center gap-4">
+          <div className="flex h-12 w-12 items-center justify-center rounded-[16px] border-2 border-black/12 bg-white text-[#121316]">
+            <ReqIcon className="h-5 w-5 text-[#121316]" />
           </div>
-          <div>
-            <p className="text-[14px] font-medium text-[#121316]">
+          <div className="flex flex-col gap-1">
+            <p className="text-[16px] font-medium tracking-[-0.096px] text-black">
               {document.documentName}
             </p>
-            <p className="text-[12px] text-[#3f4145b3]">
+            <p className="text-[14px] tracking-[-0.084px] text-[rgba(63,65,69,0.7)]">
               {document.action}
             </p>
           </div>
         </div>
-        <div className="flex items-center gap-2 px-2">
-          <CalIcon className="h-4 w-4 text-[#77818c]" />
-          <span className="text-[14px] text-[#3f4145]">
+        <div className="flex items-center gap-[30px]">
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => void handlePreview()}
+              className="flex h-10 w-10 items-center justify-center rounded-[10px] text-[#121316] transition-colors hover:bg-[#f5f5f5] cursor-pointer"
+              aria-label="Урьдчилж харах"
+            >
+              <EyeIcon />
+            </button>
+            <button
+              onClick={() => void handleDownload()}
+              className="flex h-10 w-10 items-center justify-center rounded-[10px] text-[#121316] transition-colors hover:bg-[#f5f5f5] cursor-pointer"
+              aria-label="Татах"
+            >
+              <DownloadIcon className="text-[#121316]" />
+            </button>
+          </div>
+          <span className="text-[14px] font-medium leading-5 text-black">
             {formatDate(document.createdAt)}
           </span>
-        </div>
-        <div className="flex items-center gap-0">
-          <button
-            onClick={() => void handlePreview()}
-            className="flex h-8 w-8 items-center justify-center rounded-[10px] text-[#77818c] transition-colors hover:bg-[#f5f5f5] hover:text-[#121316] cursor-pointer"
-            aria-label="Урьдчилж харах"
-          >
-            <EyeIcon />
-          </button>
-          <button
-            onClick={() => void handleDownload()}
-            className="flex h-8 w-8 items-center justify-center rounded-[10px] text-[#77818c] transition-colors hover:bg-[#f5f5f5] hover:text-[#121316] cursor-pointer"
-            aria-label="Татах"
-          >
-            <DownloadIcon className="text-[#77818c]" />
-          </button>
         </div>
       </div>
 
