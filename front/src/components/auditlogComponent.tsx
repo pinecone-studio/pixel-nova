@@ -149,6 +149,15 @@ function EmailStatus({ log }: { log: AuditLog }) {
   );
 }
 
+function formatNotificationError(message: string) {
+  const text = message.trim();
+  const lower = text.toLowerCase();
+  if (lower.includes("no deliverable document urls")) {
+    return "Илгээх боломжтой баримтын холбоос үүсээгүй байна. Баримт бүрэн үүссэний дараа дахин илгээнэ үү.";
+  }
+  return text;
+}
+
 // ---------------------------------------------------------------------------
 // Detail modal
 // ---------------------------------------------------------------------------
@@ -255,7 +264,7 @@ function AuditDetailModal({
                   <div className="flex items-center justify-between gap-2">
                     <div>
                       <span className="font-medium">Алдаа: </span>
-                      {log.notificationError}
+                      {formatNotificationError(log.notificationError)}
                     </div>
                     {onRetry && (
                       <button
