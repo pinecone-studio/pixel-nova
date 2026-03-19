@@ -47,8 +47,19 @@ export async function createTriggeredActionRecords(
   if (actor?.id) {
     const employerSig = await getEmployerSignatureByUserId(db, actor.id);
     if (employerSig?.signatureData) {
-      signatureOverrides.issuer_signature = `<img src="${employerSig.signatureData}" style="height:40px;" />`;
-      signatureOverrides.issuer_date = now.slice(0, 10);
+      const employerSignatureHtml = `<img src="${employerSig.signatureData}" style="height:40px; filter: brightness(0) saturate(100%);" />`;
+      const signDate = now.slice(0, 10);
+
+      Object.assign(signatureOverrides, {
+        issuer_signature: employerSignatureHtml,
+        issuer_sign_line: employerSignatureHtml,
+        issuer_date: signDate,
+        employer_signature: employerSignatureHtml,
+        employer_sign_line: employerSignatureHtml,
+        employer_sign_date: signDate,
+        company_ceo_sign_line: employerSignatureHtml,
+        hr_manager_signature: employerSignatureHtml,
+      });
     }
   }
 
