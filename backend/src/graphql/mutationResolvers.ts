@@ -293,7 +293,17 @@ export const mutationResolvers = {
 
   submitLeaveRequest: async (
     _: unknown,
-    args: { type: string; startTime: string; endTime: string; reason: string },
+    args: {
+      type: string;
+      startTime: string;
+      endTime: string;
+      reason: string;
+      attachments?: Array<{
+        documentName: string;
+        contentType: string;
+        contentBase64: string;
+      }> | null;
+    },
     ctx: Ctx,
   ) => {
     if (ctx.actor.role !== "employee" || !ctx.actor.id) {
@@ -307,6 +317,65 @@ export const mutationResolvers = {
       reason: args.reason,
     });
     if (!row) throw new Error("Failed to create leave request");
+
+    const employee = await getEmployeeById(ctx.db, ctx.actor.id);
+    if (!employee) {
+      throw new Error("Employee not found");
+    }
+
+    const attachments = (args.attachments ?? []).filter(
+      (attachment) =>
+        attachment.documentName?.trim() &&
+        attachment.contentType?.trim() &&
+        attachment.contentBase64?.trim(),
+    );
+
+    if (attachments.length > 0) {
+      const bucket = (ctx.env as CloudflareBindings & { epas_documents?: R2Bucket })
+        .epas_documents;
+      const action = `leave-request:${row.id}`;
+
+      for (const [index, attachment] of attachments.entries()) {
+        const createdAt = new Date().toISOString();
+        const documentId = crypto.randomUUID();
+        let storageUrl: string;
+
+        if (bucket) {
+          const r2Key = await uploadEmployeeDocumentToR2({
+            bucket,
+            employeeId: employee.id,
+            employeeCode: employee.employeeCode,
+            lastName: employee.lastName,
+            firstName: employee.firstName,
+            phase: "leave-request",
+            action,
+            order: String(index + 1),
+            templateId: documentId,
+            documentId,
+            documentName: attachment.documentName.trim(),
+            content: Uint8Array.from(
+              Buffer.from(attachment.contentBase64.trim(), "base64"),
+            ),
+            contentType: attachment.contentType.trim(),
+            createdAt,
+          });
+
+          storageUrl = `r2://${r2Key}`;
+        } else {
+          storageUrl = `data:${attachment.contentType.trim()};base64,${attachment.contentBase64.trim()}`;
+        }
+
+        await insertDocument(ctx.db, {
+          id: documentId,
+          employeeId: employee.id,
+          action,
+          documentName: attachment.documentName.trim(),
+          storageUrl,
+          createdAt,
+        });
+      }
+    }
+
     return getLeaveRequestById(ctx.db, row.id);
   },
 

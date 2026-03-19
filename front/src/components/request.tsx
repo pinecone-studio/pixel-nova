@@ -120,16 +120,22 @@ function UploadArea({
 }: {
   label: string;
   subtitle?: string;
-  value?: File | null;
+  value?: File[];
   variant?: "dark" | "light";
-  onChange?: (file: File | null) => void;
+  onChange?: (files: File[]) => void;
   error?: string;
   disabled?: boolean;
 }) {
   const inputRef = useRef<HTMLInputElement | null>(null);
   const isLight = variant === "light";
   const inputId = `upload-${label.replace(/\s+/g, "-").toLowerCase()}`;
-  const fileName = value?.name ?? "";
+  const fileCount = value?.length ?? 0;
+  const fileName =
+    fileCount === 0
+      ? ""
+      : fileCount === 1
+        ? value?.[0]?.name ?? ""
+        : `${value?.[0]?.name ?? "Файл"} +${fileCount - 1}`;
   const handlePickFile = () => {
     if (disabled) return;
     inputRef.current?.click();
@@ -149,9 +155,10 @@ function UploadArea({
         className="hidden"
         ref={inputRef}
         disabled={disabled}
+        multiple
         onChange={(event) => {
-          const file = event.target.files?.[0] ?? null;
-          onChange?.(file);
+          const files = Array.from(event.target.files ?? []);
+          onChange?.(files);
         }}
       />
       <div
@@ -204,7 +211,7 @@ function UploadArea({
               : "border-[#1a2035] text-gray-300 hover:bg-white/5"
           }`}
         >
-          {fileName ? "Солих" : "Оруулах"}
+          {fileCount > 0 ? "Солих" : "Оруулах"}
         </button>
       </div>
       {error ? <p className="text-xs text-red-500">{error}</p> : null}
@@ -219,8 +226,8 @@ export const Request = ({ employee }: { employee?: Employee }) => {
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [clearanceType, setClearanceType] = useState("");
   const [clearanceReason, setClearanceReason] = useState("");
-  const [clearanceFile, setClearanceFile] = useState<File | null>(null);
-  const [tripFile, setTripFile] = useState<File | null>(null);
+  const [clearanceFiles, setClearanceFiles] = useState<File[]>([]);
+  const [tripFiles, setTripFiles] = useState<File[]>([]);
   const [toasts, setToasts] = useState<Array<{ id: string; text: string }>>([]);
 
   void employee;
@@ -245,8 +252,17 @@ export const Request = ({ employee }: { employee?: Employee }) => {
     setActiveTab(null);
     setClearanceType("");
     setClearanceReason("");
-    setClearanceFile(null);
-    setTripFile(null);
+    setClearanceFiles([]);
+    setTripFiles([]);
+  }
+
+  async function fileToBase64(file: File) {
+    const buffer = await file.arrayBuffer();
+    let binary = "";
+    for (const byte of new Uint8Array(buffer)) {
+      binary += String.fromCharCode(byte);
+    }
+    return btoa(binary);
   }
 
   async function sendRequest(payload: {
@@ -254,6 +270,11 @@ export const Request = ({ employee }: { employee?: Employee }) => {
     startTime: string;
     endTime: string;
     reason: string;
+    attachments?: Array<{
+      documentName: string;
+      contentType: string;
+      contentBase64: string;
+    }>;
   }) {
     const token = window.localStorage.getItem(TOKEN_KEY);
     if (!token) {
@@ -277,7 +298,8 @@ export const Request = ({ employee }: { employee?: Employee }) => {
         const nextErrors: Record<string, string> = {};
         if (!clearanceType.trim())
           nextErrors.clearanceType = "Төрөл сонгоно уу.";
-        if (!clearanceFile) nextErrors.clearanceFile = "Файл хавсаргана уу.";
+        if (clearanceFiles.length === 0)
+          nextErrors.clearanceFile = "Файл хавсаргана уу.";
         if (!clearanceReason.trim()) {
           nextErrors.clearanceReason = "Шалтгаанаа бичнэ үү.";
         }
@@ -286,26 +308,44 @@ export const Request = ({ employee }: { employee?: Employee }) => {
           return;
         }
 
+        const attachments = await Promise.all(
+          clearanceFiles.map(async (file) => ({
+            documentName: file.name,
+            contentType: file.type || "application/octet-stream",
+            contentBase64: await fileToBase64(file),
+          })),
+        );
+
         await sendRequest({
           type: `Тойрох хуудас${clearanceType ? ` - ${clearanceType}` : ""}`,
           startTime: new Date().toISOString(),
           endTime: new Date().toISOString(),
           reason: clearanceReason,
+          attachments,
         });
       } else if (activeTab === "Томилолт") {
         const nextErrors: Record<string, string> = {};
-        if (!tripFile) nextErrors.tripFile = "Файл хавсаргана уу.";
+        if (tripFiles.length === 0) nextErrors.tripFile = "Файл хавсаргана уу.";
 
         if (Object.keys(nextErrors).length > 0) {
           setFieldErrors(nextErrors);
           return;
         }
 
+        const attachments = await Promise.all(
+          tripFiles.map(async (file) => ({
+            documentName: file.name,
+            contentType: file.type || "application/octet-stream",
+            contentBase64: await fileToBase64(file),
+          })),
+        );
+
         await sendRequest({
           type: "Томилолт",
           startTime: new Date().toISOString(),
           endTime: new Date().toISOString(),
           reason: clearanceReason,
+          attachments,
         });
       } else {
         return;
@@ -454,9 +494,9 @@ export const Request = ({ employee }: { employee?: Employee }) => {
             <UploadArea
               label="Файл хавсаргах"
               variant="light"
-              value={clearanceFile}
-              onChange={(file) => {
-                setClearanceFile(file);
+              value={clearanceFiles}
+              onChange={(files) => {
+                setClearanceFiles(files);
                 setFieldErrors((prev) => ({ ...prev, clearanceFile: "" }));
               }}
               error={fieldErrors.clearanceFile}
@@ -522,12 +562,12 @@ export const Request = ({ employee }: { employee?: Employee }) => {
               label="Файл хавсаргах"
               subtitle="Файл хавсаргана уу."
               variant="light"
-              onChange={(file) => {
-                setTripFile(file);
+              onChange={(files) => {
+                setTripFiles(files);
                 setFieldErrors((prev) => ({ ...prev, tripFile: "" }));
               }}
               error={fieldErrors.tripFile}
-              value={tripFile}
+              value={tripFiles}
             />
 
             {sendError && (

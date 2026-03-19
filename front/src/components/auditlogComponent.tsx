@@ -1,6 +1,6 @@
 "use client";
 
-import { useMutation, useQuery } from "@apollo/client/react";
+import { useApolloClient, useMutation, useQuery } from "@apollo/client/react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 import { FiUser, FiDownload, FiTrash2, FiRefreshCw } from "react-icons/fi";
@@ -12,9 +12,10 @@ import { useHrOverlay } from "@/components/hr/overlay-context";
 import { CalIcon, ReqIcon } from "@/components/icons";
 import { GET_ACTIONS, GET_EMPLOYEES } from "@/graphql/queries";
 import { GET_AUDIT_LOGS } from "@/graphql/queries/audit-logs";
+import { GET_DOCUMENTS } from "@/graphql/queries/documents";
 import { RETRY_NOTIFICATION } from "@/graphql/mutations";
 import { buildGraphQLHeaders } from "@/lib/apollo-client";
-import type { ActionConfig, AuditLog, Employee } from "@/lib/types";
+import type { ActionConfig, AuditLog, Document, Employee } from "@/lib/types";
 import { HiOutlineLightningBolt } from "react-icons/hi";
 
 // ---------------------------------------------------------------------------
@@ -165,12 +166,14 @@ function formatNotificationError(message: string) {
 function AuditDetailModal({
   log,
   employee,
+  documentsById,
   onClose,
   onRetry,
   retrying,
 }: {
   log: AuditLog;
   employee?: Employee;
+  documentsById: Map<string, Document>;
   onClose: () => void;
   onRetry?: () => void;
   retrying?: boolean;
@@ -223,7 +226,9 @@ function AuditDetailModal({
                     key={docId}
                     className="flex items-center gap-2 rounded-[10px] border border-black/6 bg-[#fafafa] px-3 py-2 text-[13px]">
                     <ReqIcon className="h-3.5 w-3.5 text-[#77818c]" />
-                    <span className="text-[#121316] truncate">{docId}</span>
+                    <span className="truncate text-[#121316]">
+                      {documentsById.get(docId)?.documentName ?? docId}
+                    </span>
                   </div>
                 ))}
               </div>
@@ -320,11 +325,15 @@ function AuditDetailModal({
 // ---------------------------------------------------------------------------
 
 export function AuditlogComponent() {
+  const apolloClient = useApolloClient();
   const [search, setSearch] = useState("");
   const [sendRequestAction, setSendRequestAction] =
     useState<ActionConfig | null>(null);
   const [editAction, setEditAction] = useState<ActionConfig | null>(null);
   const [detailLog, setDetailLog] = useState<AuditLog | null>(null);
+  const [documentsByEmployeeId, setDocumentsByEmployeeId] = useState<
+    Record<string, Document[]>
+  >({});
   const { setBlurred } = useHrOverlay();
   const [sort, setSort] = useState<{ key: SortKey; dir: SortDir }>({
     key: "date",
@@ -382,6 +391,15 @@ export function AuditlogComponent() {
     }
     return map;
   }, [empData]);
+  const detailDocumentsById = useMemo(() => {
+    const map = new Map<string, Document>();
+    for (const document of detailLog
+      ? (documentsByEmployeeId[detailLog.employeeId] ?? [])
+      : []) {
+      map.set(document.id, document);
+    }
+    return map;
+  }, [detailLog, documentsByEmployeeId]);
 
   // ---- Actions (bottom cards) ----
   const actionOrder = useMemo(
@@ -455,9 +473,46 @@ export function AuditlogComponent() {
     setBlurred(!!detailLog);
   }, [detailLog, setBlurred]);
 
+  useEffect(() => {
+    const employeeIds = [
+      ...new Set((auditData?.auditLogs ?? []).map((log) => log.employeeId)),
+    ].filter((employeeId) => !documentsByEmployeeId[employeeId]);
+
+    if (employeeIds.length === 0) return;
+
+    let cancelled = false;
+
+    void Promise.allSettled(
+      employeeIds.map(async (employeeId) => {
+        const result = await apolloClient.query<{ documents: Document[] }>({
+          query: GET_DOCUMENTS,
+          variables: { employeeId },
+          context: headers,
+          fetchPolicy: "cache-first",
+        });
+        return { employeeId, documents: result.data!.documents };
+      }),
+    ).then((results) => {
+      if (cancelled) return;
+
+      setDocumentsByEmployeeId((current) => {
+        const next = { ...current };
+        for (const result of results) {
+          if (result.status !== "fulfilled") continue;
+          next[result.value.employeeId] = result.value.documents;
+        }
+        return next;
+      });
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [apolloClient, auditData, documentsByEmployeeId, headers]);
+
   // ---- Render ----
   return (
-    <div className="min-h-screen bg-[#F4F5F7] text-slate-900 font-sans flex flex-col gap-6 p-0">
+    <div className="flex flex-1 flex-col gap-4 bg-[#F4F5F7] p-0 pr-1 font-sans text-slate-900">
       {/* Dialogs */}
       <AddEmployeeRequestDialog
         key={sendRequestAction?.id ?? "empty"}
@@ -478,17 +533,54 @@ export function AuditlogComponent() {
         <AuditDetailModal
           log={detailLog}
           employee={employeeMap.get(detailLog.employeeId)}
+          documentsById={detailDocumentsById}
           onClose={() => setDetailLog(null)}
           onRetry={detailLog.notificationError ? handleRetry : undefined}
           retrying={retrying}
         />
       )}
 
-      {/* ═══════════ AUDIT TABLE (TOP) ═══════════ */}
-      <div className="overflow-hidden rounded-[24px] border border-black/12 bg-white">
+      {/* ═══════════ ACTION CARDS (TOP) ═══════════ */}
+      <div className="shrink-0">
+        <p className="text-[#3F4145] text-sm font-medium mb-3">
+          Нийт {filteredActions.length} үйлдэл
+        </p>
+
+        {actionsError && (
+          <div className="rounded-2xl border border-red-200 bg-red-50 px-5 py-4 text-sm text-red-500">
+            {actionsError.message}
+          </div>
+        )}
+
+        {actionsLoading ? (
+          <div className="py-8 px-4 flex flex-col gap-3">
+            <div className="h-4 w-64 rounded-full skeleton" />
+            <div className="h-3 w-80 rounded-full skeleton" />
+            <div className="h-3 w-72 rounded-full skeleton" />
+          </div>
+        ) : filteredActions.length === 0 ? (
+          <div className="py-12 text-center text-slate-400 text-sm">
+            Үйлдэл олдсонгүй
+          </div>
+        ) : (
+          <div className="grid grid-cols-4 gap-4">
+            {filteredActions.map((action) => (
+              <AuditActionCard
+                key={action.id}
+                action={action}
+                onSendRequest={setSendRequestAction}
+                onEdit={setEditAction}
+              />
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* ═══════════ AUDIT TABLE ═══════════ */}
+      <div className="flex flex-col overflow-hidden rounded-[24px] border border-black/12 bg-white">
         {/* Header */}
         <div
-          className="grid items-center border-b border-dashed border-black/12 px-3 py-3 text-[13px] text-[#3f4145] md:px-5"
+          className="shrink-0 grid items-center border-b border-dashed border-black/12 px-3 py-3 text-[13px] text-[#3f4145] md:px-5"
           style={{
             gridTemplateColumns:
               "minmax(160px,2fr) minmax(140px,1.5fr) minmax(120px,1fr) minmax(110px,1fr) minmax(140px,1.2fr) minmax(120px,1fr) 80px",
@@ -518,7 +610,7 @@ export function AuditlogComponent() {
         </div>
 
         {/* Body */}
-        <div className="max-h-[389px] overflow-y-auto">
+        <div className="max-h-[325px] overflow-y-auto">
           {auditLoading ? (
             <div className="flex flex-col gap-3 px-5 py-8">
               <div className="h-4 w-56 rounded-full skeleton" />
@@ -601,7 +693,9 @@ export function AuditlogComponent() {
                   {/* Огноо */}
                   <div className="flex items-center gap-1.5 px-2">
                     <CalIcon className="h-3.5 w-3.5 text-[#77818c]" />
-                    <span className="text-[13px] text-[#3f4145]">{dateStr}</span>
+                    <span className="text-[13px] text-[#3f4145]">
+                      {dateStr}
+                    </span>
                   </div>
 
                   {/* Төлөв (status dots) */}
@@ -638,45 +732,11 @@ export function AuditlogComponent() {
 
         {/* Footer */}
         {!auditLoading && auditLogs.length > 0 && (
-          <div className="border-t border-dashed border-black/12 px-5 py-3 text-[13px] text-[#3f4145]">
+          <div className="shrink-0 border-t border-dashed border-black/12 px-5 py-3 text-[13px] text-[#3f4145]">
             Нийт {auditLogs.length} баримт
           </div>
         )}
       </div>
-
-      {/* ═══════════ ACTION CARDS (BOTTOM) ═══════════ */}
-      <p className="text-[#3F4145] text-sm font-medium">
-        Нийт {filteredActions.length} үйлдэл
-      </p>
-
-      {actionsError && (
-        <div className="rounded-2xl border border-red-200 bg-red-50 px-5 py-4 text-sm text-red-500">
-          {actionsError.message}
-        </div>
-      )}
-
-      {actionsLoading ? (
-        <div className="py-8 px-4 flex flex-col gap-3">
-          <div className="h-4 w-64 rounded-full skeleton" />
-          <div className="h-3 w-80 rounded-full skeleton" />
-          <div className="h-3 w-72 rounded-full skeleton" />
-        </div>
-      ) : filteredActions.length === 0 ? (
-        <div className="py-12 text-center text-slate-400 text-sm">
-          Үйлдэл олдсонгүй
-        </div>
-      ) : (
-        <div className="grid grid-cols-4 gap-4">
-          {filteredActions.map((action) => (
-            <AuditActionCard
-              key={action.id}
-              action={action}
-              onSendRequest={setSendRequestAction}
-              onEdit={setEditAction}
-            />
-          ))}
-        </div>
-      )}
     </div>
   );
 }
