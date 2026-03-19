@@ -354,7 +354,13 @@ export function EmployeeAuditComponent() {
   const {
     data: signatureStatusData,
     refetch: refetchSignatureStatus,
-  } = useQuery(GET_SIGNATURE_STATUS, {
+  } = useQuery<{
+    mySignatureStatus: {
+      hasSignature: boolean;
+      hasPasscode: boolean;
+      updatedAt?: string | null;
+    };
+  }>(GET_SIGNATURE_STATUS, {
     skip: !authToken,
     context: { headers: buildGraphQLHeaders({ authToken }) },
     fetchPolicy: "network-only",
