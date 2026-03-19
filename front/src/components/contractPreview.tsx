@@ -2,7 +2,6 @@
 
 import { useLazyQuery } from "@apollo/client/react";
 import { useMemo, useState } from "react";
-import { VscPreview } from "react-icons/vsc";
 import { BiDownload } from "react-icons/bi";
 
 import { buildGraphQLHeaders } from "@/lib/apollo-client";
@@ -69,7 +68,7 @@ export const ContractPreview = ({
 
     const nextContent = result.data?.documentContent ?? null;
     if (!nextContent) {
-      throw new Error("???????? ??????? ?????????.");
+      throw new Error("Баримтын агуулга олдсонгүй.");
     }
     return nextContent;
   }
@@ -81,7 +80,7 @@ export const ContractPreview = ({
     try {
       await ensureContent();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "???????? ???? ?????????.");
+      setError(err instanceof Error ? err.message : "Баримтыг нээж чадсангүй.");
     }
   }
 
@@ -98,7 +97,7 @@ export const ContractPreview = ({
       link.click();
       link.remove();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "???? ????? ?????????.");
+      setError(err instanceof Error ? err.message : "Файл татаж чадсангүй.");
     }
   }
 
