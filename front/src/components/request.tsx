@@ -1,5 +1,5 @@
 ﻿import { useMutation } from "@apollo/client/react";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { BiCalendar, BiChevronDown, BiPlus } from "react-icons/bi";
 import { FiCheck, FiSend, FiUploadCloud, FiX } from "react-icons/fi";
 
@@ -22,7 +22,7 @@ function CloseBtn({ onClick }: { onClick: () => void }) {
   return (
     <button
       onClick={onClick}
-      className="h-6 w-6 text-gray-400 transition-colors hover:text-black cursor-pointer"
+      className="h-6 w-6 shrink-0 text-black transition-colors hover:opacity-70 cursor-pointer"
     >
       <FiX className="h-6 w-6" />
     </button>
@@ -40,10 +40,10 @@ function SendBtn({
     <button
       onClick={onClick}
       disabled={disabled}
-      className="flex w-[108px] items-center justify-evenly rounded-lg bg-[#111827] text-4 font-medium text-white transition-colors hover:bg-[#0b1220] disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer"
+      className="flex h-[38px] items-center gap-3 rounded-[10px] bg-black px-3 py-2 text-[16px] font-medium tracking-[-0.096px] text-white transition-colors hover:bg-[#1f2937] disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer"
     >
       <FiSend className="h-[18px] w-[18px]" />
-      <span className="flex h-5 w-[54px] items-center justify-center">
+      <span className="leading-5">
         {disabled ? "Илгээж байна..." : "Илгээх"}
       </span>
     </button>
@@ -54,7 +54,7 @@ function BackBtn({ onClick }: { onClick: () => void }) {
   return (
     <button
       onClick={onClick}
-      className="h-9 w-[78px] rounded-lg border border-[#1a2035] text-sm text-gray-600 transition-colors hover:bg-white/5 hover:text-black cursor-pointer"
+      className="flex h-[38px] items-center rounded-[10px] border border-[#DFDFDF] px-4 py-2 text-[16px] font-medium tracking-[-0.096px] text-black/70 transition-colors hover:bg-[#F3F4F6] hover:text-black cursor-pointer"
     >
       Буцах
     </button>
@@ -80,29 +80,82 @@ function SelectField({
   labelClassName?: string;
   inputClassName?: string;
 }) {
+  const [open, setOpen] = useState(false);
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const selectedLabel = value || placeholder;
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (!containerRef.current?.contains(event.target as Node)) {
+        setOpen(false);
+      }
+    }
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
   return (
-    <div className="mt-9 flex h-[72px] w-[477px] flex-col gap-2">
+    <div ref={containerRef} className="mt-9 flex w-[477px] flex-col gap-2">
       <label
-        htmlFor={id}
         className={`${labelClassName} h-[24px] w-full text-[18px]`}
       >
         {label}
       </label>
-      <div className="relative h-[35px]">
-        <select
+      <div className="relative">
+        <button
           id={id}
-          className={`${inputClassName} text-[16px]`}
-          value={value}
-          onChange={(e) => onChange?.(e.target.value)}
+          type="button"
+          aria-haspopup="listbox"
+          aria-expanded={open}
+          onClick={() => setOpen((prev) => !prev)}
+          className={`${inputClassName} flex h-[50px] items-center justify-between rounded-[16px] px-4 py-3 text-[15px]`}
         >
-          <option value="">{placeholder}</option>
-          {options.map((opt) => (
-            <option key={opt} value={opt}>
-              {opt}
-            </option>
-          ))}
-        </select>
-        <BiChevronDown className="pointer-events-none absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500" />
+          <span className={value ? "text-[#111827]" : "text-[#6B7280]"}>
+            {selectedLabel}
+          </span>
+          <BiChevronDown
+            className={`h-4 w-4 text-[#6B7280] transition-transform ${
+              open ? "rotate-180" : ""
+            }`}
+          />
+        </button>
+
+        {open ? (
+          <div className="absolute left-0 right-0 top-[56px] z-20 overflow-hidden rounded-[14px] border border-[#E5E7EB] bg-white shadow-[0_10px_24px_rgba(15,23,42,0.12)]">
+            <button
+              type="button"
+              className={`flex w-full items-center px-4 py-2.5 text-left text-[15px] transition-colors ${
+                !value
+                  ? "bg-[#F3F4F6] font-medium text-[#111827]"
+                  : "text-[#3F4145] hover:bg-[#F9FAFB]"
+              }`}
+              onClick={() => {
+                onChange?.("");
+                setOpen(false);
+              }}
+            >
+              {placeholder}
+            </button>
+            {options.map((opt) => (
+              <button
+                key={opt}
+                type="button"
+                className={`flex w-full items-center px-4 py-2.5 text-left text-[15px] transition-colors ${
+                  value === opt
+                    ? "bg-[#EEF4FF] font-medium text-[#111827]"
+                    : "text-[#3F4145] hover:bg-[#F9FAFB]"
+                }`}
+                onClick={() => {
+                  onChange?.(opt);
+                  setOpen(false);
+                }}
+              >
+                {opt}
+              </button>
+            ))}
+          </div>
+        ) : null}
       </div>
     </div>
   );
@@ -141,9 +194,9 @@ function UploadArea({
     inputRef.current?.click();
   };
   return (
-    <div className="mt-9 flex h-[202px] w-[477px] flex-col justify-between gap-1.5">
+    <div className="flex w-[477px] flex-col gap-[10px]">
       <span
-        className={`flex h-6 items-center text-[18px] font-medium ${
+        className={`text-[18px] font-medium leading-6 tracking-[-0.09px] ${
           isLight ? "text-[#000000]" : "text-white"
         }`}
       >
@@ -163,26 +216,26 @@ function UploadArea({
       />
       <div
         onClick={handlePickFile}
-        className={`mt-[10px] flex h-[168px] w-[477px] cursor-pointer flex-col items-center justify-evenly rounded-xl border border-dashed transition-colors ${
+        className={`flex w-[477px] cursor-pointer flex-col items-center gap-5 rounded-[12px] border border-dashed p-4 transition-colors ${
           isLight
-            ? "border-[#E5E7EB] hover:border-[#111827]/20"
+            ? "border-black/60 hover:border-black/80"
             : "border-[#1a2035] hover:border-[#00CC99]/30"
         }`}
       >
         <FiUploadCloud
-          className={`h-6 w-6 ${isLight ? "text-[#000000]" : "text-gray-500"}`}
+          className={`h-6 w-6 ${isLight ? "text-black" : "text-gray-500"}`}
         />
-        <div className="flex h-10 w-[445px] flex-col items-center">
+        <div className="flex w-full flex-col items-center text-center leading-5">
           {fileName ? (
             <p
-              className={`flex h-5 items-center text-4 font-medium text-[#00CC99]`}
+              className="text-[16px] font-medium tracking-[-0.096px] text-[#00CC99]"
             >
               {fileName}
             </p>
           ) : (
             <p
-              className={`flex h-5 items-center text-4 font-medium ${
-                isLight ? "text-[#111827]" : "text-white"
+              className={`text-[16px] font-medium tracking-[-0.096px] ${
+                isLight ? "text-black" : "text-white"
               }`}
             >
               {fileName
@@ -191,11 +244,11 @@ function UploadArea({
             </p>
           )}
           <p
-            className={`flex h-5 items-center text-3 ${
-              isLight ? "text-[#9CA3AF]" : "text-gray-500"
+            className={`text-[12px] tracking-[-0.072px] ${
+              isLight ? "text-black/70" : "text-gray-500"
             }`}
           >
-            {fileName || "JPEG, PNG, PDF, MP4 төрлүүд — 50MB хүртэл"}
+            {fileName || "JPEG, PNG, PDG, and MP4 formats, up to 50MB"}
           </p>
         </div>
 
@@ -205,9 +258,9 @@ function UploadArea({
             e.stopPropagation();
             handlePickFile();
           }}
-          className={`h-8 w-[105px] rounded-lg border text-[14px] transition-colors cursor-pointer ${
+          className={`rounded-[10px] border px-6 py-1.5 text-[14px] font-medium leading-5 transition-colors cursor-pointer ${
             isLight
-              ? "border-[#E5E7EB] text-[#6B7280] hover:bg-[#F3F4F6] hover:text-[#111827]"
+              ? "border-black/60 text-black/60 hover:bg-[#F3F4F6] hover:text-black"
               : "border-[#1a2035] text-gray-300 hover:bg-white/5"
           }`}
         >
@@ -391,12 +444,12 @@ export const Request = ({ employee }: { employee?: Employee }) => {
 
   return (
     <div className="flex w-[1056px] max-w-full flex-col gap-5">
-      <div className="flex h-[46px] items-center justify-between">
-        <div className="flex flex-col gap-2">
-          <h2 className="h-[24px] flex items-center w-[190px] text-[20px] font-semibold text-[#111827]">
+      <div className="flex items-center justify-between">
+        <div className="flex w-[190px] flex-col gap-[2px]">
+          <h2 className="w-[190px] text-[20px] font-semibold leading-6 text-[#121316]">
             Шуурхай үйлдлүүд
           </h2>
-          <p className="h-[20px] items-center flex w-[190px] text-[14px] text-[#6B7280]">
+          <p className="w-[190px] text-[14px] leading-5 tracking-[-0.084px] text-black/70">
             Хүсэлт илгээх
           </p>
         </div>
@@ -406,20 +459,20 @@ export const Request = ({ employee }: { employee?: Employee }) => {
         {quickActions.map((action) => (
           <div
             key={action.title}
-            className="flex h-[136px] w-[520px] rounded-[16px] border border-[#E5E7EB] bg-white p-6 shadow-[0_4px_14px_rgba(15,23,42,0.06)]"
+            className="flex h-[136px] w-[520px] rounded-[24px] bg-white p-6"
           >
-            <div className="relative flex h-[88px] w-[470px] box-border items-center gap-5 p-5">
+            <div className="relative flex w-full items-center gap-4 p-5">
               <div
-                className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-lg border ${action.iconBg}`}
+                className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-[16px] border-2 bg-white ${action.iconBg}`}
               >
                 {action.icon}
               </div>
 
-              <div className="flex h-[42px] w-[332px] flex-col justify-between">
-                <p className="h-[24px] text-[18px] font-semibold leading-5 text-[#111827]">
+              <div className="flex min-w-0 flex-1 flex-col">
+                <p className="text-[18px] font-semibold leading-6 tracking-[-0.09px] text-[#3F4145]">
                   {action.title}
                 </p>
-                <p className="h-[18px] text-[12px] leading-4 text-[#6B7280]">
+                <p className="text-[12px] font-medium leading-[18px] text-[rgba(63,65,69,0.7)]">
                   {action.desc}
                 </p>
               </div>
@@ -427,7 +480,7 @@ export const Request = ({ employee }: { employee?: Employee }) => {
               <button
                 type="button"
                 onClick={() => setActiveTab(action.title)}
-                className="absolute right-5 top-1/2 flex h-5 w-5 -translate-y-1/2 items-center justify-center text-[#6B7280] hover:rounded-lg hover:h-7 hover: w-7 cursor-pointer transition-colors hover:bg-[#F3F4F6] hover:text-[#111827]"
+                className="flex h-5 w-5 shrink-0 items-center justify-center text-[#9CA3AF] transition-colors hover:text-[#3F4145]"
               >
                 <BiPlus className="h-5 w-5" />
               </button>
@@ -491,16 +544,18 @@ export const Request = ({ employee }: { employee?: Employee }) => {
               </p>
             ) : null}
 
-            <UploadArea
-              label="Файл хавсаргах"
-              variant="light"
-              value={clearanceFiles}
-              onChange={(files) => {
-                setClearanceFiles(files);
-                setFieldErrors((prev) => ({ ...prev, clearanceFile: "" }));
-              }}
-              error={fieldErrors.clearanceFile}
-            />
+            <div className="mt-9">
+              <UploadArea
+                label="Файл хавсаргах"
+                variant="light"
+                value={clearanceFiles}
+                onChange={(files) => {
+                  setClearanceFiles(files);
+                  setFieldErrors((prev) => ({ ...prev, clearanceFile: "" }));
+                }}
+                error={fieldErrors.clearanceFile}
+              />
+            </div>
 
             <div className="mt-9 flex h-[108px] w-[477px] flex-col">
               <label className="flex h-6 w-full items-center text-[18px] font-medium text-[#111827]">
@@ -543,42 +598,44 @@ export const Request = ({ employee }: { employee?: Employee }) => {
 
       {activeTab === "Томилолт" && !submitted && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-          <div
-            className={`flex h-[428px] w-[525px] flex-col rounded-2xl border px-6 py-[30px] text-[#111827] shadow-2xl ${LIGHT_DIALOG_BG} ${LIGHT_DIALOG_BORDER}`}
-          >
-            <div className="flex h-[58px] w-[477px] justify-between">
-              <div className="flex h-[58px] w-[453px] flex-col justify-between">
-                <h2 className="flex h-6 w-[453px] items-center text-[20px] font-semibold">
-                  Томилолтын мэдээлэл
-                </h2>
-                <p className="flex h-6 w-[453px] items-center text-[16px] text-[#6B7280]">
-                  Томилолтын мэдээллээ оруулна уу.
-                </p>
+          <div className="flex h-[677px] w-[525px] flex-col items-start gap-9">
+            <div
+              className={`flex h-[428px] w-[525px] flex-col justify-between rounded-[12px] border px-6 py-[30px] text-[#111827] shadow-2xl ${LIGHT_DIALOG_BG} ${LIGHT_DIALOG_BORDER}`}
+            >
+              <div className="flex w-full items-start justify-between">
+                <div className="flex flex-1 flex-col gap-[10px]">
+                  <h2 className="text-[20px] font-semibold leading-6 text-black">
+                    Томилолтын мэдээлэл
+                  </h2>
+                  <p className="text-[16px] leading-6 tracking-[-0.16px] text-[#3F4145B2]">
+                    Томилолтын мэдээллээ оруулна уу.
+                  </p>
+                </div>
+                <CloseBtn onClick={closeDialog} />
               </div>
-              <CloseBtn onClick={closeDialog} />
-            </div>
 
-            <UploadArea
-              label="Файл хавсаргах"
-              subtitle="Файл хавсаргана уу."
-              variant="light"
-              onChange={(files) => {
-                setTripFiles(files);
-                setFieldErrors((prev) => ({ ...prev, tripFile: "" }));
-              }}
-              error={fieldErrors.tripFile}
-              value={tripFiles}
-            />
+              <UploadArea
+                label="Файл хавсаргах"
+                subtitle="Файл хавсаргана уу."
+                variant="light"
+                onChange={(files) => {
+                  setTripFiles(files);
+                  setFieldErrors((prev) => ({ ...prev, tripFile: "" }));
+                }}
+                error={fieldErrors.tripFile}
+                value={tripFiles}
+              />
 
-            {sendError && (
-              <p className="rounded-lg border border-red-500/20 bg-red-500/10 px-3 py-2 text-xs text-red-400">
-                {sendError}
-              </p>
-            )}
+              {sendError && (
+                <p className="rounded-lg border border-red-500/20 bg-red-500/10 px-3 py-2 text-xs text-red-400">
+                  {sendError}
+                </p>
+              )}
 
-            <div className="mt-9 flex justify-end gap-3">
-              <BackBtn onClick={closeDialog} />
-              <SendBtn onClick={handleSend} disabled={sending} />
+              <div className="flex justify-end gap-5">
+                <BackBtn onClick={closeDialog} />
+                <SendBtn onClick={handleSend} disabled={sending} />
+              </div>
             </div>
           </div>
         </div>

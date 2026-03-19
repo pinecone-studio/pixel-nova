@@ -6,6 +6,7 @@ import { useState } from "react";
 
 import { LOGIN_WITH_CODE } from "@/graphql/mutations";
 import { notifyAuthStateChanged } from "@/lib/auth-events";
+import { resolveApiUrl } from "@/lib/apollo-client";
 import type { AuthSession } from "@/lib/types";
 
 import { EmployeeAuthForm } from "./employee/EmployeeAuthForm";
@@ -51,7 +52,7 @@ export default function EmployeeAuthPage() {
         message.toLowerCase().includes("failed")
       ) {
         setError(
-          "Backend-т холбогдож чадсангүй. API ажиллаж байгаа эсэхийг шалгана уу.",
+          `Backend-т холбогдож чадсангүй. API endpoint: ${resolveApiUrl()}`,
         );
       } else {
         setError(message);
