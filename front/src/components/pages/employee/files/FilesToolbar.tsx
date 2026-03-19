@@ -1,6 +1,7 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { BiChevronDown } from "react-icons/bi";
 
 export function FilesToolbar({
   search,
@@ -14,6 +15,7 @@ export function FilesToolbar({
   onFilterChange: (value: string) => void;
 }) {
   const [open, setOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement | null>(null);
   const options = useMemo(
     () => [
       { value: "all", label: "Сонгоно уу" },
@@ -25,6 +27,17 @@ export function FilesToolbar({
   );
   const activeLabel =
     options.find((opt) => opt.value === filter)?.label ?? "Сонгоно уу";
+
+  useEffect(() => {
+    function handlePointerDown(event: MouseEvent) {
+      if (!dropdownRef.current?.contains(event.target as Node)) {
+        setOpen(false);
+      }
+    }
+
+    document.addEventListener("mousedown", handlePointerDown);
+    return () => document.removeEventListener("mousedown", handlePointerDown);
+  }, []);
 
   return (
     <div className="mt-10 flex">
@@ -70,27 +83,21 @@ export function FilesToolbar({
           }}
         />
       </div>
-      <div className="relative ml-4" tabIndex={0} onBlur={() => setOpen(false)}>
+      <div ref={dropdownRef} className="relative ml-4">
         <button
           type="button"
           onClick={() => setOpen((prev) => !prev)}
           className="flex h-[47px] w-[186px] items-center justify-between rounded-lg border border-solid border-[#e5e7eb] bg-white pl-3 pr-2 text-[14px] text-[#6b7280] outline-none"
         >
           <span>{activeLabel}</span>
-          <span className="text-[#6b7280]">
-            <svg width="12" height="12" viewBox="0 0 20 20" fill="none">
-              <path
-                d="M6 8l4 4 4-4"
-                stroke="currentColor"
-                strokeWidth="1.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-          </span>
+          <BiChevronDown
+            className={`h-4 w-4 text-[#6b7280] transition-transform ${
+              open ? "rotate-180" : ""
+            }`}
+          />
         </button>
         {open ? (
-          <div className="absolute right-0 mt-2 w-[186px] rounded-sm border border-[#e5e7eb] bg-white shadow-md">
+          <div className="absolute right-0 z-10 mt-2 w-[186px] rounded-xl border border-[#E5E7EB] bg-white p-1 shadow-[0_16px_40px_rgba(15,23,42,0.12)]">
             {options.map((opt) => {
               const active = opt.value === filter;
               return (
@@ -102,9 +109,9 @@ export function FilesToolbar({
                     onFilterChange(opt.value);
                     setOpen(false);
                   }}
-                  className={`flex w-full px-3 py-2 text-left text-[14px] transition-colors ${
+                  className={`flex w-full rounded-lg bg-white px-3 py-2 text-left text-[14px] transition-colors ${
                     active
-                      ? "bg-[#E6F0FF] text-[#1D4ED8]"
+                      ? "bg-[#F3F4F6] text-[#111827]"
                       : "text-[#4B5563] hover:bg-[#F3F4F6] hover:text-[#111827]"
                   }`}
                 >
