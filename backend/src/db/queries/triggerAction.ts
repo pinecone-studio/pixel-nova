@@ -28,9 +28,7 @@ export async function createTriggeredActionRecords(
   }
 
   const rendererUrl = pdfRenderer?.serviceUrl?.trim();
-  if (!rendererUrl) {
-    throw new Error("PDF renderer service URL is not configured");
-  }
+  const hasRenderer = Boolean(rendererUrl);
 
   const now = new Date().toISOString();
   const normalizedAction = actionName.trim();
@@ -93,12 +91,24 @@ export async function createTriggeredActionRecords(
       templateFile: tmpl.template,
       templateData: patchedTemplateData,
     });
-    const pdfBytes = await renderPdfFromService({
-      html: generated.html,
-      documentName: generated.documentName,
-      serviceUrl: rendererUrl,
-      secret: pdfRenderer?.secret,
-    });
+    let renderedPdf = hasRenderer;
+    let pdfBytes: Uint8Array;
+    if (hasRenderer) {
+      try {
+        pdfBytes = await renderPdfFromService({
+          html: generated.html,
+          documentName: generated.documentName,
+          serviceUrl: rendererUrl,
+          secret: pdfRenderer?.secret,
+        });
+      } catch (err) {
+        console.error(`PDF render failed for ${tmpl.id}:`, err);
+        renderedPdf = false;
+        pdfBytes = new TextEncoder().encode(generated.html);
+      }
+    } else {
+      pdfBytes = new TextEncoder().encode(generated.html);
+    }
 
     let storageUrl = "";
 
@@ -117,16 +127,20 @@ export async function createTriggeredActionRecords(
           documentId,
           documentName: `${orderPrefix}_${tmpl.id}.pdf`,
           content: pdfBytes,
-          contentType: "application/pdf",
+          contentType: renderedPdf ? "application/pdf" : "text/html",
           createdAt: now,
         });
         storageUrl = `r2://${r2Key}`;
       } catch (err) {
         console.error(`R2 upload failed for ${tmpl.id}:`, err);
-        storageUrl = `data:application/pdf;base64,${Buffer.from(pdfBytes).toString("base64")}`;
+        storageUrl = renderedPdf
+          ? `data:application/pdf;base64,${Buffer.from(pdfBytes).toString("base64")}`
+          : `data:text/html;charset=utf-8,${encodeURIComponent(generated.html)}`;
       }
     } else {
-      storageUrl = `data:application/pdf;base64,${Buffer.from(pdfBytes).toString("base64")}`;
+      storageUrl = renderedPdf
+        ? `data:application/pdf;base64,${Buffer.from(pdfBytes).toString("base64")}`
+        : `data:text/html;charset=utf-8,${encodeURIComponent(generated.html)}`;
     }
 
     documentInserts.push({
