@@ -5,26 +5,28 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 
 import { buildGraphQLHeaders } from "@/lib/apollo-client";
-import { UPLOAD_HR_DOCUMENT } from "@/graphql/mutations";
+import { UPLOAD_HR_DOCUMENT, DELETE_DOCUMENT } from "@/graphql/mutations";
 import {
   GET_DOCUMENT_CONTENT,
   GET_DOCUMENTS,
   GET_EMPLOYEES,
 } from "@/graphql/queries";
 import type { Document, DocumentContent, Employee } from "@/lib/types";
-import { buildDocumentTree, getUrlTtlStatus, getUrlRemainingDays, urlTtlLabel } from "@/lib/documentTree";
-import { DocumentTreeView } from "@/components/hr/documents/DocumentTreeView";
+import {
+  getUrlTtlStatus,
+  getUrlRemainingDays,
+  urlTtlLabel,
+} from "@/lib/documentTree";
 import {
   ActiveIcon,
   CalIcon,
   DownloadIcon,
-  EyeIcon,
   OnboardIcon,
   PlusIcon,
   ReqIcon,
 } from "./icons";
 import { CiWarning } from "react-icons/ci";
-import { FiList, FiFolder } from "react-icons/fi";
+import { FiTrash2 } from "react-icons/fi";
 import { useHrOverlay } from "./hr/overlay-context";
 
 // ── Types ──────────────────────────────────────────────
@@ -47,7 +49,10 @@ function buildDataUrl(content: DocumentContent) {
 }
 
 function formatDate(value: string) {
-  return new Date(value).toLocaleDateString("mn-MN", {
+  if (!value) return "—";
+  const d = new Date(value);
+  if (isNaN(d.getTime())) return "—";
+  return d.toLocaleDateString("mn-MN", {
     year: "numeric",
     month: "2-digit",
     day: "2-digit",
@@ -77,10 +82,14 @@ function statusLabel(document: Document) {
 function statusColor(document: Document) {
   const ttlStatus = getUrlTtlStatus(document);
   switch (ttlStatus) {
-    case "expired": return "border-red-300 text-red-500";
-    case "expiring": return "border-amber-300 text-amber-500";
-    case "valid": return "border-[#1aba5280] text-[#1aba52]";
-    case "none": return "border-black/12 text-[#77818c]";
+    case "expired":
+      return "border-red-300 text-red-500";
+    case "expiring":
+      return "border-amber-300 text-amber-500";
+    case "valid":
+      return "border-[#1aba5280] text-[#1aba52]";
+    case "none":
+      return "border-black/12 text-[#77818c]";
   }
 }
 
@@ -338,18 +347,16 @@ function NewDocModal({
 
         {/* Баримтын нэр */}
         <div className="flex flex-col gap-2">
-          <label className="text-slate-900 text-sm font-medium">
-            Ажилтан
-          </label>
+          <label className="text-slate-900 text-sm font-medium">Ажилтан</label>
           <select
             value={selectedEmployeeId}
             onChange={(e) => setSelectedEmployeeId(e.target.value)}
-            className="w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-700 outline-none transition-colors focus:border-slate-300"
-          >
+            className="w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-700 outline-none transition-colors focus:border-slate-300">
             <option value="">Ажилтан сонгох</option>
             {employees.map((employee) => (
               <option key={employee.id} value={employee.id}>
-                {employee.employeeCode} - {employee.lastName} {employee.firstName}
+                {employee.employeeCode} - {employee.lastName}{" "}
+                {employee.firstName}
               </option>
             ))}
           </select>
@@ -479,7 +486,6 @@ export function FilesComponent() {
   const [showModal, setShowModal] = useState(false);
   const [previewRow, setPreviewRow] = useState<FileRow | null>(null);
   const [downloadRow, setDownloadRow] = useState<FileRow | null>(null);
-  const [viewMode, setViewMode] = useState<"flat" | "tree">("tree");
   const { setBlurred } = useHrOverlay();
 
   useEffect(() => {
@@ -502,6 +508,19 @@ export function FilesComponent() {
   });
 
   const employees = useMemo(() => data?.employees ?? [], [data]);
+
+  const [deleteDocMutation] = useMutation(DELETE_DOCUMENT, {
+    context: queryContext,
+  });
+
+  async function handleDelete(docId: string) {
+    try {
+      await deleteDocMutation({ variables: { id: docId } });
+      setRows((prev) => prev.filter((r) => r.document.id !== docId));
+    } catch {
+      // silent
+    }
+  }
 
   const loadRows = useCallback(async () => {
     setLoadingRows(true);
@@ -583,8 +602,6 @@ export function FilesComponent() {
       ? 0
       : Math.round((verifiedCount / filtered.length) * 100);
 
-  const documentTree = useMemo(() => buildDocumentTree(rows), [rows]);
-
   const stages = [
     {
       label: "Ажилд орох үе",
@@ -644,23 +661,20 @@ export function FilesComponent() {
           )
         : null}
 
-      <div className="w-full shrink-0 xl:w-[415px]">
+      <div className="w-full shrink-0 xl:w-[320px]">
         <div className="flex flex-col gap-4 xl:h-full xl:overflow-y-auto xl:pr-1">
-          <p className="mb-4 text-[16px] font-semibold leading-5 text-[#3f4145]">
-            Нийт баримт
-          </p>
-          <div className="rounded-[24px] border border-black/12 bg-white p-6">
+          <div className="rounded-[20px] border border-black/12 bg-white p-5">
             <div className="flex items-center justify-between">
-              <p className="text-[56px] font-bold leading-[56px] tracking-[-0.05em] text-[#121316]">
+              <p className="text-[48px] font-bold leading-[48px] tracking-[-0.05em] text-[#121316]">
                 {filtered.length}
               </p>
-              <div className="flex h-14 w-14 items-center border-2 border-[#3F4145CC] justify-center rounded-2xl text-black">
-                <ReqIcon className="h-7 w-7" />
+              <div className="flex h-12 w-12 items-center border-2 border-[#3F4145CC] justify-center rounded-2xl text-black">
+                <ReqIcon className="h-6 w-6" />
               </div>
             </div>
-            <div className="mt-4 flex items-center justify-between gap-3">
-              <p className="text-xl font-medium leading-7 text-[#3F4145CC]">
-                Баримт
+            <div className="mt-3 flex items-center justify-between gap-2">
+              <p className="text-[16px] font-medium leading-7 text-[#3F4145CC]">
+                Нийт баримт
               </p>
               <div className="flex items-baseline gap-1 text-xl font-semibold text-[#1aba52]">
                 <span>{verifiedPercent}%</span>
@@ -679,7 +693,7 @@ export function FilesComponent() {
               {stages.map((stage) => (
                 <div
                   key={stage.label}
-                  className="rounded-[24px] border flex justify-between border-black/12 bg-white p-6">
+                  className="rounded-[20px] border flex justify-between items-center border-black/12 bg-white px-5 py-4">
                   <div className="flex items-center gap-3">
                     <div
                       className={`flex h-10 w-10 shrink-0 items-center border justify-center rounded-[14px] ${stage.bgColor} ${stage.borderColor}`}>
@@ -701,147 +715,109 @@ export function FilesComponent() {
         </div>
       </div>
 
-      <div className="flex min-w-0 flex-1 flex-col xl:overflow-hidden">
-        {/* View mode toggle */}
-        <div className="mb-4 flex items-center justify-between">
-          <div className="flex items-center gap-1 rounded-[12px] border border-black/12 bg-white p-1">
-            <button
-              onClick={() => setViewMode("tree")}
-              className={`flex items-center gap-1.5 rounded-[8px] px-3 py-1.5 text-[13px] font-medium transition-colors ${
-                viewMode === "tree"
-                  ? "bg-[#121316] text-white"
-                  : "text-[#3f4145] hover:bg-[#f5f5f5]"
-              }`}>
-              <FiFolder className="h-3.5 w-3.5" />
-              Хавтас
-            </button>
-            <button
-              onClick={() => setViewMode("flat")}
-              className={`flex items-center gap-1.5 rounded-[8px] px-3 py-1.5 text-[13px] font-medium transition-colors ${
-                viewMode === "flat"
-                  ? "bg-[#121316] text-white"
-                  : "text-[#3f4145] hover:bg-[#f5f5f5]"
-              }`}>
-              <FiList className="h-3.5 w-3.5" />
-              Жагсаалт
-            </button>
-          </div>
+      <div className="h-full w-px bg-[#0000001F]" />
 
-          <button
-            onClick={() => setShowModal(true)}
-            className="flex items-center gap-2 rounded-[10px] bg-[#121316] px-4 py-2.5 text-[14px] font-medium text-white transition-colors hover:bg-[#1f2126]">
-            <PlusIcon />
-            Шинэ баримт
-          </button>
-        </div>
-
-        {/* Tree view */}
-        {viewMode === "tree" ? (
-          <div className="xl:min-h-0 xl:flex-1 xl:overflow-y-auto xl:pr-1">
-            <DocumentTreeView
-              tree={documentTree}
-              onPreview={(doc, emp) =>
-                setPreviewRow({ document: doc, employee: emp })
-              }
-              onDownload={(doc, emp) =>
-                setDownloadRow({ document: doc, employee: emp })
-              }
-              loading={isLoading}
-              error={error}
-            />
-          </div>
-        ) : (
-          /* Flat list view (existing) */
-          <div className="flex flex-col overflow-hidden rounded-[24px] border border-black/12 bg-white xl:min-h-0 xl:flex-1">
+      <div className="flex min-w-0 flex-1 flex-col xl:overflow-hidden gap-2">
+        <div className="flex min-w-0 flex-col overflow-hidden rounded-[24px] border border-black/12 bg-white xl:min-h-0 xl:flex-1">
+          {/* Scrollable table (header + body together so columns align) */}
+          <div className="xl:min-h-0 xl:flex-1 xl:overflow-y-auto">
+            {/* Table header */}
             <div
-              className="grid shrink-0 items-center border-b border-black/12 px-3 py-3 text-[14px] text-[#3f4145b3] md:px-5"
+              className="sticky top-0 z-10 grid items-center border-b border-black/12 bg-white px-3 py-3 text-[14px] text-[#3f4145b3] md:px-5"
               style={{
                 gridTemplateColumns:
-                  "minmax(220px,2fr) minmax(150px,1.25fr) minmax(140px,1fr) minmax(150px,1fr) 72px",
+                  "minmax(200px,2fr) minmax(120px,1fr) minmax(120px,1fr) minmax(130px,1fr) 60px",
               }}>
-              <div className="flex items-center gap-2 px-2 font-medium text-[#121316]">
+              <div className="flex items-center gap-1 px-2 font-medium text-[#121316]">
                 <span>Баримт бичиг</span>
+                <span className="text-[#77818c]">&#8597;</span>
               </div>
-              <span className="px-2 font-medium">Үе</span>
-              <span className="px-2 font-medium">Огноо</span>
+              <span className="px-2 ml-2 font-medium">Үе</span>
+              <div className="flex items-center gap-1 px-2 font-medium">
+                <span>Огноо</span>
+                <span className="text-[#77818c]">&#8597;</span>
+              </div>
               <span className="px-2 font-medium">Төлөв</span>
               <span className="px-2 font-medium">Үйлдэл</span>
             </div>
 
-            <div className="xl:min-h-0 xl:flex-1 xl:overflow-y-auto">
-              {isLoading ? (
-                <div className="flex flex-col gap-3 px-5 py-8">
-                  <div className="h-4 w-56 rounded-full skeleton" />
-                  <div className="h-3 w-80 rounded-full skeleton" />
-                  <div className="h-3 w-72 rounded-full skeleton" />
-                </div>
-              ) : error ? (
-                <div className="py-12 text-center text-red-400 text-sm">
-                  {error}
-                </div>
-              ) : filtered.length === 0 ? (
-                <div className="py-12 text-center text-slate-400 text-sm">
-                  Баримт олдсонгүй
-                </div>
-              ) : (
-                filtered.map((row) => (
-                  <div
-                    key={row.document.id}
-                    className="grid items-center border-b border-black/12 px-3 py-3 transition-colors hover:bg-[#fafafa] md:px-5"
-                    style={{
-                      gridTemplateColumns:
-                        "minmax(220px,2fr) minmax(150px,1.25fr) minmax(140px,1fr) minmax(150px,1fr) 72px",
-                    }}>
-                    <div className="flex items-center gap-2.5 px-2">
-                      <div className="flex h-10 w-10 items-center justify-center rounded-[14px] border border-black/12 bg-white text-[#121316]">
-                        <ReqIcon className="h-4 w-4 text-[#121316]" />
-                      </div>
-                      <div>
-                        <p className="text-[14px] font-medium text-[#121316]">
-                          {row.document.documentName}
-                        </p>
-                        <p className="text-[12px] text-[#3f4145b3]">
-                          {row.document.action}
-                        </p>
-                      </div>
+            {/* Table body */}
+            {isLoading ? (
+              <div className="flex flex-col gap-3 px-5 py-8">
+                <div className="h-4 w-56 rounded-full skeleton" />
+                <div className="h-3 w-80 rounded-full skeleton" />
+                <div className="h-3 w-72 rounded-full skeleton" />
+              </div>
+            ) : error ? (
+              <div className="py-12 text-center text-red-400 text-sm">
+                {error}
+              </div>
+            ) : filtered.length === 0 ? (
+              <div className="py-12 text-center text-slate-400 text-sm">
+                Баримт олдсонгүй
+              </div>
+            ) : (
+              filtered.map((row) => (
+                <div
+                  key={row.document.id}
+                  className="grid items-center border-b border-black/12 px-3 py-3 transition-colors hover:bg-[#fafafa] md:px-5"
+                  style={{
+                    gridTemplateColumns:
+                      "minmax(200px,2fr) minmax(120px,1fr) minmax(120px,1fr) minmax(130px,1fr) 60px",
+                  }}>
+                  <div className="flex items-center gap-2.5 px-2">
+                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[12px] border border-black/12 bg-white text-[#121316]">
+                      <ReqIcon className="h-4 w-4 text-[#121316]" />
                     </div>
-                    <div className="px-2">
-                      <div className="inline-flex items-center rounded-full border border-black/12 px-3 py-1 text-[12px] text-[#3f4145]">
-                        {stageLabel(row.employee)}
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2 px-2">
-                      <CalIcon className="h-4 w-4 text-[#77818c]" />
-                      <span className="text-[14px] text-[#3f4145]">
-                        {formatDate(row.document.createdAt)}
-                      </span>
-                    </div>
-                    <div className="px-2">
-                      <span className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-[12px] font-medium ${statusColor(row.document)}`}>
-                        {getUrlTtlStatus(row.document) === "expiring" || getUrlTtlStatus(row.document) === "expired" ? "⚠ " : ""}
-                        {statusLabel(row.document)}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-0">
-                      <button
-                        onClick={() => setPreviewRow(row)}
-                        className="flex h-8 w-8 items-center justify-center rounded-[10px] text-[#77818c] transition-colors hover:bg-[#f5f5f5] hover:text-[#121316]"
-                        aria-label="Урьдчилж харах">
-                        <EyeIcon />
-                      </button>
-                      <button
-                        onClick={() => setDownloadRow(row)}
-                        className="flex h-8 w-8 items-center justify-center rounded-[10px] text-[#77818c] transition-colors hover:bg-[#f5f5f5] hover:text-[#121316]"
-                        aria-label="Татах">
-                        <DownloadIcon />
-                      </button>
+                    <p className="truncate text-[14px] font-medium text-[#121316]">
+                      {row.document.documentName}
+                    </p>
+                  </div>
+                  <div className="px-2">
+                    <div className="inline-flex items-center rounded-full border border-black/12 px-3 py-1 text-[12px] text-[#3f4145]">
+                      {stageLabel(row.employee)}
                     </div>
                   </div>
-                ))
-              )}
-            </div>
+                  <div className="flex items-center gap-2 px-2">
+                    <CalIcon className="h-4 w-4 shrink-0 text-[#77818c]" />
+                    <span className="text-[14px] text-[#3f4145]">
+                      {formatDate(row.document.createdAt)}
+                    </span>
+                  </div>
+                  <div className="px-2">
+                    <span className="inline-flex items-center gap-1.5 rounded-full border border-[#1aba5280] px-3 py-1 text-[12px] font-medium text-[#1aba52]">
+                      <span className="h-2 w-2 rounded-full bg-[#1aba52]" />
+                      Баталгаажсан
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-center">
+                    <button
+                      onClick={() => setDownloadRow(row)}
+                      className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-[10px] text-[#77818c] transition-colors hover:bg-[#f5f5f5] hover:text-[#121316]"
+                      aria-label="Татах">
+                      <DownloadIcon />
+                    </button>
+                  </div>
+                </div>
+              ))
+            )}
           </div>
-        )}
+
+          {/* Footer */}
+          <div className="flex shrink-0 items-center justify-between border-t border-black/12 px-5 py-3">
+            <p className="text-[13px] text-[#77818c]">
+              Нийт {filtered.length} баримт
+            </p>
+          </div>
+        </div>
+        <div className="flex items-center justify-end">
+          <button
+            onClick={() => setShowModal(true)}
+            className="flex cursor-pointer items-center gap-2 rounded-[12px] bg-[#121316] px-4 py-2.5 text-[14px] font-medium text-white transition-colors hover:bg-[#1f2126]">
+            <PlusIcon />
+            Шинэ Баримт
+          </button>
+        </div>
       </div>
     </div>
   );

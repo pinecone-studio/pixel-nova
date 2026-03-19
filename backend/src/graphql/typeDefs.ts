@@ -300,6 +300,7 @@ export const typeDefs = /* GraphQL */ `
     updateAnnouncementDraft(id: ID!, title: String!, body: String!, audience: String): Announcement!
     publishAnnouncement(id: ID!): Announcement!
     uploadHrDocument(input: UploadHrDocumentInput!): Document!
+    deleteDocument(id: ID!): Document
     retryNotification(auditLogId: ID!): AuditLog!
     signAuditLog(
       auditLogId: ID!

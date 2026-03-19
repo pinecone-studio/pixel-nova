@@ -1,5 +1,6 @@
 import {
   createEmployeeCodeSession,
+  deleteDocument,
   deleteSessionByToken,
   ensureDefaultActionConfigs,
   getAuditLogById,
@@ -781,6 +782,17 @@ export const mutationResolvers = {
     }
 
     return inserted;
+  },
+
+  deleteDocument: async (
+    _: unknown,
+    args: { id: string },
+    ctx: Ctx,
+  ) => {
+    if (ctx.actor.role !== "hr" && ctx.actor.role !== "admin") {
+      throw new Error("Unauthorized");
+    }
+    return deleteDocument(ctx.db, args.id);
   },
 
   retryNotification: async (
