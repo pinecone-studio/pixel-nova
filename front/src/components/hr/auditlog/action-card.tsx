@@ -6,13 +6,16 @@ import { phaseBadge } from "@/utils/auditlog";
 import { EditIcon } from "@/components/icons";
 import { HiOutlineLightningBolt } from "react-icons/hi";
 import { GrDocument } from "react-icons/gr";
+import { FiSettings } from "react-icons/fi";
 
 export function AuditActionCard({
   action,
   onSendRequest,
+  onEdit,
 }: {
   action: ActionConfig;
   onSendRequest: (action: ActionConfig) => void;
+  onEdit?: (action: ActionConfig) => void;
 }) {
   const actionLabelMap: Record<string, string> = {
     add_employee: "Шинэ ажилтан",
@@ -101,12 +104,22 @@ export function AuditActionCard({
         </div>
       </div>
 
-      <button
-        onClick={() => onSendRequest(action)}
-        className="mt-auto flex items-center justify-center gap-2 py-2.5 rounded-xl bg-slate-900 text-white text-sm font-medium transition-colors hover:bg-slate-800">
-        <EditIcon />
-        Хүсэлт илгээх
-      </button>
+      <div className="mt-auto flex flex-col gap-2">
+        {onEdit && (
+          <button
+            onClick={() => onEdit(action)}
+            className="flex items-center justify-center gap-2 py-2 rounded-xl border border-slate-200 text-slate-600 text-sm font-medium transition-colors hover:bg-slate-50 hover:text-slate-900">
+            <FiSettings className="h-3.5 w-3.5" />
+            Тохиргоо засах
+          </button>
+        )}
+        <button
+          onClick={() => onSendRequest(action)}
+          className="flex items-center justify-center gap-2 py-2.5 rounded-xl bg-slate-900 text-white text-sm font-medium transition-colors hover:bg-slate-800">
+          <EditIcon />
+          Хүсэлт илгээх
+        </button>
+      </div>
     </div>
   );
 }
