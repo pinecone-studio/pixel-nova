@@ -117,7 +117,7 @@ export function SalaryChangeForm({
             />
             <FieldError message={errors.employeeCode} />
           </div>
-          <div className="flex min-w-0 flex-col gap-[8px]">
+          <div className="flex min-w-0 flex-col gap-2">
             <label className={labelClass}>Овог</label>
             <input
               value={lastName}
@@ -127,7 +127,7 @@ export function SalaryChangeForm({
             />
             <FieldError message={errors.lastName} />
           </div>
-          <div className="flex min-w-0 flex-col gap-[8px]">
+          <div className="flex min-w-0 flex-col gap-2">
             <label className={labelClass}>Нэр</label>
             <input
               value={firstName}
@@ -137,7 +137,7 @@ export function SalaryChangeForm({
             />
             <FieldError message={errors.firstName} />
           </div>
-          <div className="flex min-w-0 flex-col gap-[8px]">
+          <div className="flex min-w-0 flex-col gap-2">
             <label className={labelClass}>Имэйл</label>
             <input
               value={email}
@@ -147,8 +147,8 @@ export function SalaryChangeForm({
             />
             <FieldError message={errors.email} />
           </div>
-          <div className="grid min-w-0 grid-cols-2 gap-[16px]">
-            <div className="flex min-w-0 flex-col gap-[8px]">
+          <div className="grid min-w-0 grid-cols-2 gap-4">
+            <div className="flex min-w-0 flex-col gap-2">
               <label className={labelClass}>Ажиллаж эхэлсэн хугацаа</label>
               <DatePickerField
                 value={workStartDate}
@@ -157,7 +157,7 @@ export function SalaryChangeForm({
               />
               <FieldError message={errors.workStartDate} />
             </div>
-            <div className="flex min-w-0 flex-col gap-[8px]">
+            <div className="flex min-w-0 flex-col gap-4">
               <label className={labelClass}>Ажилласан нийт хугацаа</label>
               <input
                 value={workTotalDuration}
@@ -168,8 +168,8 @@ export function SalaryChangeForm({
               <FieldError message={errors.workTotalDuration} />
             </div>
           </div>
-          <div className="grid min-w-0 grid-cols-2 gap-[16px]">
-            <div className="flex min-w-0 flex-col gap-[8px]">
+          <div className="grid min-w-0 grid-cols-2 gap-4">
+            <div className="flex min-w-0 flex-col gap-2">
               <label className={labelClass}>Өмнөх цалин</label>
               <input
                 value={prevSalary}
@@ -179,7 +179,7 @@ export function SalaryChangeForm({
               />
               <FieldError message={errors.prevSalary} />
             </div>
-            <div className="flex min-w-0 flex-col gap-[8px]">
+            <div className="flex min-w-0 flex-col gap-2">
               <label className={labelClass}>Шинэ цалин</label>
               <input
                 value={nextSalary}
@@ -190,7 +190,7 @@ export function SalaryChangeForm({
               <FieldError message={errors.nextSalary} />
             </div>
           </div>
-          <div className="flex min-w-0 flex-col gap-[8px]">
+          <div className="flex min-w-0 flex-col gap-2">
             <label className={labelClass}>Цалин өөрчлөгдсөн дүн</label>
             <input
               value={salaryDelta}
