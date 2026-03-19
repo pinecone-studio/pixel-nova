@@ -679,7 +679,7 @@ export function FilesComponent() {
   const isLoading = loading || loadingRows;
 
   return (
-    <div className="flex min-h-full flex-col gap-6 text-slate-900 animate-fade-up xl:h-[calc(100vh-7rem)] xl:min-h-0 xl:overflow-hidden xl:flex-row">
+    <div className="flex flex-col gap-6 text-slate-900 animate-fade-up xl:h-[calc(100vh-7rem)] xl:min-h-0 xl:flex-row">
       {typeof document !== "undefined" && showModal
         ? createPortal(
             <NewDocModal

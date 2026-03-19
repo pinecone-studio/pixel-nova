@@ -1,7 +1,7 @@
 "use client";
 
 import { useApolloClient, useMutation, useQuery } from "@apollo/client/react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   DownIcon,
   DownloadIcon,
@@ -232,11 +232,11 @@ const RequestRow = ({
               {row.employee.employeeCode} •{" "}
               {formatDepartment(row.employee.department)}
             </p>
+            </div>
           </div>
-        </div>
         <div className="flex items-center gap-3">
           <span className="text-blue-600 text-[11px] px-2.5 py-1 rounded-full bg-blue-50 border border-blue-200 hidden sm:block">
-            {documentsLoading ? "..." : documentCount} гэрээ
+            {documentsLoading ? "..." : documentCount} файл
           </span>
           <DownIcon
             className={
@@ -355,6 +355,12 @@ export const RequestsComponent = () => {
 
   const requests = data?.leaveRequests ?? [];
 
+  function getRequestDocuments(row: LeaveRequest) {
+    return (documentsByEmployee[row.employeeId] ?? []).filter(
+      (document) => document.action === `leave-request:${row.id}`,
+    );
+  }
+
   async function handleApprove(id: string, note: string) {
     try {
       await approveMutation({ variables: { id, note: note || null } });
@@ -415,6 +421,22 @@ export const RequestsComponent = () => {
     }
   }
 
+  useEffect(() => {
+    const employeeIds = Array.from(new Set(requests.map((request) => request.employeeId)));
+    if (employeeIds.length === 0) {
+      return;
+    }
+
+    void Promise.all(
+      employeeIds.map(async (employeeId) => {
+        if (documentsByEmployee[employeeId] || documentsLoading[employeeId]) {
+          return;
+        }
+        await loadDocuments(employeeId);
+      }),
+    );
+  }, [requests, documentsByEmployee, documentsLoading]);
+
   return (
     <div className="min-h-screen bg-[#F4F5F7] text-slate-900 font-sans p-6 flex flex-col gap-4 animate-fade-up">
       {previewRow && (
@@ -470,7 +492,7 @@ export const RequestsComponent = () => {
                 row={row}
                 expanded={expandedId === row.id}
                 onToggle={handleToggle}
-                documents={documentsByEmployee[row.employeeId] ?? []}
+                documents={getRequestDocuments(row)}
                 documentsLoading={documentsLoading[row.employeeId] ?? false}
                 divider={i < filtered.length - 1}
               />

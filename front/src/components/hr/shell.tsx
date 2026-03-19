@@ -62,9 +62,9 @@ function HrShellInner({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <div className="hr-scope h-screen overflow-hidden bg-[#fafafa]">
+    <div className="hr-scope h-screen bg-[#fafafa]">
       <div
-        className={`flex h-full overflow-hidden transition-[filter] duration-200 ${blurred ? "blur-sm pointer-events-none select-none" : ""}`}>
+        className={`flex h-full transition-[filter] duration-200 ${blurred ? "blur-sm pointer-events-none select-none" : ""}`}>
         <aside className="scrollbar-hidden group sticky top-0 h-screen overflow-y-auto overflow-x-hidden w-20 hover:w-[232px] transition-[width] duration-300 border-r border-black/12 bg-white flex flex-col py-4 px-2 shrink-0">
           <div className="mb-8 flex min-h-[48px] items-center gap-3 px-2">
             <EpasLogo className="w-9 h-9 rounded-xl shrink-0" />
@@ -150,7 +150,7 @@ function HrShellInner({ children }: { children: React.ReactNode }) {
             </div>
           </header>
 
-          <div className="flex min-w-0 flex-1 flex-col gap-5 overflow-x-hidden px-4 py-4 sm:px-6 sm:py-6">
+          <div className="flex min-w-0 flex-1 flex-col gap-5 overflow-x-hidden overflow-y-auto px-4 py-4 sm:px-6 sm:py-6">
             <div
               key={pathname}
               className="hr-page-transition flex flex-col gap-5">

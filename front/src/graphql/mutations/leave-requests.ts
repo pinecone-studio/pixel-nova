@@ -8,12 +8,14 @@ export const SUBMIT_LEAVE_REQUEST = gql`
     $startTime: String!
     $endTime: String!
     $reason: String!
+    $attachments: [LeaveRequestAttachmentInput!]
   ) {
     submitLeaveRequest(
       type: $type
       startTime: $startTime
       endTime: $endTime
       reason: $reason
+      attachments: $attachments
     ) {
       ...LeaveRequestFields
     }

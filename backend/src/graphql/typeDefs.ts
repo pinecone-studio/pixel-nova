@@ -171,6 +171,12 @@ export const typeDefs = /* GraphQL */ `
     contentBase64: String!
   }
 
+  input LeaveRequestAttachmentInput {
+    documentName: String!
+    contentType: String!
+    contentBase64: String!
+  }
+
   type DocumentContent {
     id: ID!
     documentName: String!
@@ -292,7 +298,13 @@ export const typeDefs = /* GraphQL */ `
     resolveEmployeeAction(input: ResolveEmployeeActionInput!): ResolvedEmployeeAction
     updateRegistry(input: UpdateActionRegistryInput!): ActionConfig!
     updateMyDocumentProfile(input: JSON!): Employee!
-    submitLeaveRequest(type: String!, startTime: String!, endTime: String!, reason: String!): LeaveRequest!
+    submitLeaveRequest(
+      type: String!
+      startTime: String!
+      endTime: String!
+      reason: String!
+      attachments: [LeaveRequestAttachmentInput!]
+    ): LeaveRequest!
     approveLeaveRequest(id: ID!, note: String): LeaveRequest!
     rejectLeaveRequest(id: ID!, note: String): LeaveRequest!
     submitContractRequest(
