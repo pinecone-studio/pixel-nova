@@ -14,7 +14,7 @@ export function useEmployeeDocuments({
   authToken: string;
   employeeId?: string | null;
 }) {
-  const { data, loading, error } = useQuery<{ documents: Document[] }>(
+  const { data, loading, error, refetch } = useQuery<{ documents: Document[] }>(
     GET_DOCUMENTS,
     {
       skip: !authToken || !employeeId,
@@ -30,5 +30,6 @@ export function useEmployeeDocuments({
     documents,
     loading: Boolean(employeeId && loading),
     errorMessage: error?.message ?? null,
+    refetch,
   };
 }

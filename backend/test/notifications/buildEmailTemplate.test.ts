@@ -7,6 +7,7 @@ const singleDoc = {
   employeeCode: "EMP-0042",
   action: "add_employee",
   generatedAt: "2024-02-24T10:00:00.000Z",
+  kind: "employee" as const,
   documents: [
     { name: "Хөдөлмөрийн гэрээ", url: "https://cdn.example.com/doc-1.pdf" },
   ],
@@ -21,24 +22,20 @@ const multiDoc = {
   ],
 };
 
-// ── subject ───────────────────────────────────────────────────────────────────
-
 test("subject contains employee name", () => {
   const { subject } = buildEmailTemplate(singleDoc);
   expect(subject).toContain("Бат-Эрдэнэ Дорж");
 });
 
-test("subject contains action", () => {
+test("subject starts with [EPAS]", () => {
   const { subject } = buildEmailTemplate(singleDoc);
-  expect(subject).toContain("add_employee");
+  expect(subject.startsWith("[EPAS]")).toBe(true);
 });
 
-test("subject starts with [HR System]", () => {
+test("subject says documents are ready", () => {
   const { subject } = buildEmailTemplate(singleDoc);
-  expect(subject.startsWith("[HR System]")).toBe(true);
+  expect(subject).toContain("гары");
 });
-
-// ── text ──────────────────────────────────────────────────────────────────────
 
 test("text contains employee name", () => {
   const { text } = buildEmailTemplate(singleDoc);
@@ -50,19 +47,14 @@ test("text contains employee code", () => {
   expect(text).toContain("EMP-0042");
 });
 
+test("text contains signing instruction", () => {
+  const { text } = buildEmailTemplate(singleDoc);
+  expect(text).toContain("гарын үсэглэх боломжтой");
+});
+
 test("text contains document url", () => {
   const { text } = buildEmailTemplate(singleDoc);
   expect(text).toContain("https://cdn.example.com/doc-1.pdf");
-});
-
-test("text contains document name", () => {
-  const { text } = buildEmailTemplate(singleDoc);
-  expect(text).toContain("Хөдөлмөрийн гэрээ");
-});
-
-test("text contains generatedAt timestamp", () => {
-  const { text } = buildEmailTemplate(singleDoc);
-  expect(text).toContain("2024-02-24T10:00:00.000Z");
 });
 
 test("text lists all documents when multiple", () => {
@@ -71,8 +63,6 @@ test("text lists all documents when multiple", () => {
   expect(text).toContain("NDA");
   expect(text).toContain("Дүрэм журам");
 });
-
-// ── html ──────────────────────────────────────────────────────────────────────
 
 test("html contains employee name", () => {
   const { html } = buildEmailTemplate(singleDoc);
@@ -89,9 +79,9 @@ test("html contains document url as href", () => {
   expect(html).toContain('href="https://cdn.example.com/doc-1.pdf"');
 });
 
-test("html contains Татаж авах link text", () => {
+test("html contains open link text", () => {
   const { html } = buildEmailTemplate(singleDoc);
-  expect(html).toContain("Татаж авах");
+  expect(html).toContain("Нээх");
 });
 
 test("html contains generatedAt in footer", () => {
@@ -99,9 +89,9 @@ test("html contains generatedAt in footer", () => {
   expect(html).toContain("2024-02-24T10:00:00.000Z");
 });
 
-test("html contains action text in body", () => {
+test("html prompts the employee to sign", () => {
   const { html } = buildEmailTemplate(singleDoc);
-  expect(html).toContain("add_employee");
+  expect(html).toContain("гарын үсэглэх боломжтой");
 });
 
 test("html lists all document urls when multiple", () => {

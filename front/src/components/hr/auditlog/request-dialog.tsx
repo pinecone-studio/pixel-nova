@@ -1,18 +1,18 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { createPortal } from "react-dom";
-import { FiEye, FiFileText, FiX } from "react-icons/fi";
+import { FiCheckCircle, FiEye, FiFileText, FiX } from "react-icons/fi";
 import { useLazyQuery, useMutation, useQuery } from "@apollo/client/react";
+import { Root as VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
-  DialogPortal,
   DialogTitle,
 } from "@/components/ui/dialog";
 import { GET_CONTRACT_TEMPLATE, GET_EMPLOYEES } from "@/graphql/queries";
 import { TRIGGER_ACTION } from "@/graphql/mutations";
+import { SIGN_DOCUMENT } from "@/graphql/mutations/documents";
 import { buildGraphQLHeaders } from "@/lib/apollo-client";
 import type { ActionConfig, DocumentContent, Employee } from "@/lib/types";
 import { ChangePositionForm } from "./forms/ChangePositionForm";
@@ -68,8 +68,7 @@ const SelectWrapper = ({
     <select
       value={value}
       onChange={onChange}
-      className={hasError ? errorSelectClass : selectClass}
-    >
+      className={hasError ? errorSelectClass : selectClass}>
       {children}
     </select>
     <div className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2">
@@ -126,6 +125,10 @@ export function AddEmployeeRequestDialog({
   const previewSignatureDrawingRef = useRef(false);
   const previewFrameRef = useRef<HTMLIFrameElement | null>(null);
   const [previewFrameHeight, setPreviewFrameHeight] = useState(1200);
+  const [signedDocIds, setSignedDocIds] = useState<Set<string>>(
+    () => new Set(),
+  );
+  const [signatureNotice, setSignatureNotice] = useState<string | null>(null);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [currentDept, setCurrentDept] = useState("Engineering");
   const [currentPosition, setCurrentPosition] = useState("");
@@ -141,6 +144,14 @@ export function AddEmployeeRequestDialog({
     ActionConfig["documents"][number] | null
   >(null);
   const [previewError, setPreviewError] = useState<string | null>(null);
+
+  function handleDialogOpenChange(nextOpen: boolean) {
+    if (!nextOpen && previewOpen) {
+      return;
+    }
+
+    onOpenChange(nextOpen);
+  }
 
   const documents = action?.documents ?? [];
   const actionKey = action?.name?.toLowerCase() ?? "";
@@ -198,7 +209,6 @@ export function AddEmployeeRequestDialog({
     );
   }, [employeesData, searchKey]);
 
-  /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
     if (!action) return;
     setEmployeeCode("");
@@ -210,6 +220,13 @@ export function AddEmployeeRequestDialog({
     setSalaryStep("person");
     setErrors({});
     setChangeEmail("");
+    setSignedDocIds(new Set());
+    setSignatureNotice(null);
+    setPreviewSignatureData("");
+    setPreviewSignatureOpen(false);
+    setPreviewOpen(false);
+    setPreviewDoc(null);
+    setPreviewError(null);
   }, [action]);
 
   useEffect(() => {
@@ -244,9 +261,15 @@ export function AddEmployeeRequestDialog({
     setHireDate(matchedEmployee.hireDate ?? "");
     setTerminationDate(matchedEmployee.terminationDate ?? "");
   }, [employeeCode, matchedEmployee]);
-  /* eslint-enable react-hooks/set-state-in-effect */
 
   const [triggerAction, { loading: submitting }] = useMutation(TRIGGER_ACTION, {
+    context: { headers: buildGraphQLHeaders({ actorRole: "hr" }) },
+  });
+  const [signDocument, { loading: signingDocument }] = useMutation<{
+    signDocument: {
+      allSigned: boolean;
+    };
+  }>(SIGN_DOCUMENT, {
     context: { headers: buildGraphQLHeaders({ actorRole: "hr" }) },
   });
 
@@ -329,12 +352,42 @@ export function AddEmployeeRequestDialog({
     ctx.clearRect(0, 0, canvas.width, canvas.height);
   }
 
-  function handleSavePreviewSignature() {
+  async function handleSavePreviewSignature() {
     const canvas = previewSignatureCanvasRef.current;
-    if (!canvas) return;
+    if (!canvas || !previewDoc) return;
     const dataUrl = canvas.toDataURL("image/png");
-    setPreviewSignatureData(dataUrl);
-    setPreviewSignatureOpen(false);
+
+    try {
+      const result = await signDocument({
+        variables: {
+          documentId: previewDoc.id,
+          signatureData: dataUrl,
+        },
+      });
+
+      const allSigned = result.data?.signDocument?.allSigned ?? false;
+      const nextCount = signedDocIds.has(previewDoc.id)
+        ? signedDocIds.size
+        : signedDocIds.size + 1;
+
+      setPreviewSignatureData(dataUrl);
+      setSignedDocIds((current) => {
+        const next = new Set(current);
+        next.add(previewDoc.id);
+        return next;
+      });
+      setSignatureNotice(
+        allSigned
+          ? "Бүх баримт гарын үсэг зурлаа."
+          : `${nextCount} баримт гарын үсэгтэй боллоо.`,
+      );
+      setPreviewSignatureOpen(false);
+    } catch (err) {
+      setSignatureNotice(null);
+      setPreviewError(
+        err instanceof Error ? err.message : "Гарын үсэг хадгалж чадсангүй.",
+      );
+    }
   }
 
   function handlePreviewFrameLoad() {
@@ -359,6 +412,8 @@ export function AddEmployeeRequestDialog({
     setPreviewOpen(true);
     setPreviewDoc(doc);
     setPreviewError(null);
+    setPreviewSignatureOpen(false);
+    setPreviewSignatureData("");
     try {
       const result = await loadTemplate({
         variables: { templateId: doc.id },
@@ -617,13 +672,11 @@ export function AddEmployeeRequestDialog({
         {recipients.map((recipient) => (
           <span
             key={recipient}
-            className="inline-flex max-w-full items-center gap-1 rounded-[10px] border border-slate-200 px-[9px] py-[3px] text-slate-500 text-[12px] leading-[20px] bg-slate-50"
-          >
+            className="inline-flex max-w-full items-center gap-1 rounded-[10px] border border-slate-200 px-[9px] py-[3px] text-slate-500 text-[12px] leading-[20px] bg-slate-50">
             {recipient}
             <button
               onClick={() => removeRecipient(recipient)}
-              className="text-slate-400 hover:text-slate-700 transition-colors leading-none"
-            >
+              className="text-slate-400 hover:text-slate-700 transition-colors leading-none">
               <FiX className="h-3 w-3" />
             </button>
           </span>
@@ -642,12 +695,17 @@ export function AddEmployeeRequestDialog({
   const DocumentsSection = (
     <div className="flex flex-col gap-[12px]">
       <label className={labelClass}>Хавсаргасан файл</label>
+      {signatureNotice ? (
+        <div className="flex items-center gap-2 rounded-[12px] border border-emerald-200 bg-emerald-50 px-3 py-2 text-[13px] text-emerald-700">
+          <FiCheckCircle className="h-4 w-4" />
+          <span>{signatureNotice}</span>
+        </div>
+      ) : null}
       {documents.length > 0 ? (
         documents.map((doc) => (
           <div
             key={doc.id}
-            className="bg-white flex min-w-0 items-center justify-between gap-[12px] rounded-[12px] px-[6px] py-[8px] border border-slate-200"
-          >
+            className="bg-white flex min-w-0 items-center justify-between gap-[12px] rounded-[12px] px-[6px] py-[8px] border border-slate-200">
             <div className="flex min-w-0 items-center gap-[16px]">
               <div className="bg-white border border-slate-200 rounded-[16px] size-[40px] flex items-center justify-center shrink-0">
                 <FiFileText className="h-[18px] w-[18px] text-slate-500" />
@@ -661,13 +719,21 @@ export function AddEmployeeRequestDialog({
                 </p>
               </div>
             </div>
-            <button
-              onClick={() => void handlePreview(doc)}
-              className="text-slate-400 hover:text-slate-700 transition-colors size-[40px] flex items-center justify-center"
-              aria-label="Preview template"
-            >
-              <FiEye className="h-5 w-5" />
-            </button>
+            <div className="flex items-center gap-1.5">
+              {signedDocIds.has(doc.id) ? (
+                <span className="inline-flex items-center gap-1 rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-[11px] font-medium text-emerald-700">
+                  <FiCheckCircle className="h-3.5 w-3.5" />
+                  Зурсан
+                </span>
+              ) : null}
+              <button
+                type="button"
+                onClick={() => void handlePreview(doc)}
+                className="text-slate-400 hover:text-slate-700 transition-colors size-[40px] flex items-center justify-center"
+                aria-label="Preview template">
+                <FiEye className="h-5 w-5" />
+              </button>
+            </div>
           </div>
         ))
       ) : (
@@ -677,7 +743,7 @@ export function AddEmployeeRequestDialog({
   );
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={handleDialogOpenChange}>
       <DialogContent className="bg-white border border-slate-200 rounded-[16px] flex min-h-0 w-full max-w-[calc(100vw-2rem)] sm:max-w-xl flex-col gap-[16px] p-[24px] max-h-[calc(100vh-2rem)] overflow-y-auto overflow-x-hidden overscroll-contain ring-0 scrollbar-hidden pointer-events-auto">
         <DialogHeader>
           <DialogTitle className="text-slate-900 font-semibold text-[20px] leading-6">
@@ -688,8 +754,7 @@ export function AddEmployeeRequestDialog({
           <button
             type="button"
             onClick={handleDemoFill}
-            className="rounded-[10px] border border-black/12 px-3 py-1.5 text-[12px] font-medium text-[#3f4145] transition-colors hover:bg-[#f5f5f5]"
-          >
+            className="rounded-[10px] border border-black/12 px-3 py-1.5 text-[12px] font-medium text-[#3f4145] transition-colors hover:bg-[#f5f5f5]">
             Demo бөглөх (EMP-0001)
           </button>
         </div>
@@ -845,166 +910,154 @@ export function AddEmployeeRequestDialog({
         <div className="flex flex-nowrap items-center gap-[20px] justify-end shrink-0">
           <button
             onClick={() => onOpenChange(false)}
-            className=" px-[20px] py-[10px] rounded-[12px] text-[#FF2B2B] text-[16px] hover:bg-slate-50 transition-colors cursor-pointer whitespace-nowrap border border-[#FF2B2B]"
-          >
+            className=" px-[20px] py-[10px] rounded-[12px] text-[#FF2B2B] text-[16px] hover:bg-slate-50 transition-colors cursor-pointer whitespace-nowrap border border-[#FF2B2B]">
             Болих
           </button>
           {useAddEmployeeLayout && newEmployeeStep === 1 ? (
             <button
               onClick={() => setNewEmployeeStep(2)}
-              className="bg-slate-900 px-[20px] py-[10px] rounded-[12px] text-white text-[16px] hover:bg-slate-800 transition-colors cursor-pointer whitespace-nowrap "
-            >
+              className="bg-slate-900 px-[20px] py-[10px] rounded-[12px] text-white text-[16px] hover:bg-slate-800 transition-colors cursor-pointer whitespace-nowrap ">
               Цааш
             </button>
           ) : useSalaryChangeLayout && salaryStep === "person" ? (
             <button
               onClick={() => setSalaryStep("salary")}
-              className="bg-slate-900 px-[20px] py-[10px] rounded-[12px] text-white text-[16px] hover:bg-slate-800 transition-colors cursor-pointer whitespace-nowrap"
-            >
+              className="bg-slate-900 px-[20px] py-[10px] rounded-[12px] text-white text-[16px] hover:bg-slate-800 transition-colors cursor-pointer whitespace-nowrap">
               Цааш
             </button>
           ) : (
             <button
               onClick={handleSubmit}
               disabled={submitting}
-              className="bg-slate-900 px-[20px] py-[10px] rounded-[12px] text-white text-[16px] hover:bg-slate-800 transition-colors cursor-pointer disabled:opacity-60 whitespace-nowrap"
-            >
+              className="bg-slate-900 px-[20px] py-[10px] rounded-[12px] text-white text-[16px] hover:bg-slate-800 transition-colors cursor-pointer disabled:opacity-60 whitespace-nowrap">
               {submitting ? "Илгээж байна..." : "Илгээх"}
             </button>
           )}
         </div>
       </DialogContent>
 
-      {typeof document !== "undefined" && previewOpen
-        ? createPortal(
-            <div className="fixed inset-0 z-120 flex items-center justify-center overflow-y-auto bg-black/60 backdrop-blur-sm">
-              <div
-                aria-label="Preview close overlay"
-                className="absolute inset-0"
-                onClick={() => {
-                  if (previewSignatureOpen) return;
-                  setPreviewOpen(false);
-                  setPreviewSignatureOpen(false);
-                }}
-              />
-              <div
-                className="relative w-[920px] max-w-[95vw] h-[82vh] max-h-[82vh] overflow-hidden bg-white border border-slate-200 rounded-2xl shadow-2xl flex flex-col"
-                onClick={(event) => event.stopPropagation()}
-              >
-                <div className="flex items-center justify-between px-5 py-4 border-b border-slate-200">
-                  <div className="flex flex-col">
-                    <p className="text-slate-900 text-sm font-semibold">
-                      {previewDoc?.template ?? "Баримт"}
-                    </p>
-                    <p className="text-slate-500 text-xs mt-0.5">Preview</p>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setPreviewSignatureData("");
-                        setPreviewSignatureOpen(true);
-                      }}
-                      className="rounded-lg border cursor-pointer border-slate-200 px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50"
-                    >
-                      Гарын үсэг зурах
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setPreviewOpen(false);
-                        setPreviewSignatureOpen(false);
-                      }}
-                      className="w-8 h-8 rounded-lg flex items-center justify-center text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors"
-                    >
-                      <FiX className="text-lg" />
-                    </button>
-                  </div>
+      <Dialog
+        open={previewOpen}
+        onOpenChange={(nextOpen) => {
+          setPreviewOpen(nextOpen);
+          if (!nextOpen) {
+            setPreviewSignatureOpen(false);
+          }
+        }}>
+        <DialogContent
+          showCloseButton={false}
+          className="flex h-[82vh] max-h-[82vh] w-[920px] max-w-[95vw] flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white p-0 shadow-2xl">
+          <VisuallyHidden>
+            <DialogTitle>Баримт</DialogTitle>
+          </VisuallyHidden>
+          <div className="flex h-full flex-col">
+            <div className="flex items-center justify-between px-5 py-4 border-b border-slate-200">
+              <div className="flex flex-col">
+                <p className="text-slate-900 text-sm font-semibold">
+                  {previewDoc?.template ?? "Баримт"}
+                </p>
+                <p className="text-slate-500 text-xs mt-0.5">Preview</p>
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setPreviewSignatureData("");
+                    setPreviewSignatureOpen(true);
+                  }}
+                  className="rounded-lg border cursor-pointer border-slate-200 px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50">
+                  Гарын үсэг зурах
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setPreviewOpen(false);
+                    setPreviewSignatureOpen(false);
+                  }}
+                  className="w-8 h-8 rounded-lg flex items-center justify-center text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors">
+                  <FiX className="text-lg" />
+                </button>
+              </div>
+            </div>
+            <div className="flex-1 min-h-0 overflow-y-auto bg-slate-50 p-4">
+              {previewLoading ? (
+                <div className="w-full h-full rounded-xl border border-slate-200 flex items-center justify-center text-sm text-slate-400">
+                  Уншиж байна...
                 </div>
-                <div className="flex-1 min-h-0 overflow-y-auto bg-slate-50 p-4">
-                  {previewLoading ? (
-                    <div className="w-full h-full rounded-xl border border-slate-200 flex items-center justify-center text-sm text-slate-400">
-                      Уншиж байна...
-                    </div>
-                  ) : previewError ? (
-                    <div className="w-full h-full rounded-xl border border-red-200 bg-red-50 flex items-center justify-center text-sm text-red-500">
-                      {previewError}
-                    </div>
+              ) : previewError ? (
+                <div className="w-full h-full rounded-xl border border-red-200 bg-red-50 flex items-center justify-center text-sm text-red-500">
+                  {previewError}
+                </div>
+              ) : (
+                <div
+                  ref={previewSignatureContainerRef}
+                  className="relative w-full rounded-xl border border-slate-200 bg-white">
+                  {previewContent?.contentType === "text/html" ? (
+                    <iframe
+                      title={previewDoc?.template ?? "Template preview"}
+                      ref={previewFrameRef}
+                      onLoad={handlePreviewFrameLoad}
+                      className="w-full bg-white"
+                      style={{ height: previewFrameHeight }}
+                      srcDoc={previewContent.content}
+                    />
+                  ) : previewUrl ? (
+                    <iframe
+                      title={previewDoc?.template ?? "Template preview"}
+                      className="w-full h-[70vh] bg-white"
+                      src={previewUrl}
+                      scrolling="yes"
+                    />
                   ) : (
-                    <div
-                      ref={previewSignatureContainerRef}
-                      className="relative w-full rounded-xl border border-slate-200 bg-white"
-                    >
-                      {previewContent?.contentType === "text/html" ? (
-                        <iframe
-                          title={previewDoc?.template ?? "Template preview"}
-                          ref={previewFrameRef}
-                          onLoad={handlePreviewFrameLoad}
-                          className="w-full bg-white"
-                          style={{ height: previewFrameHeight }}
-                          srcDoc={previewContent.content}
-                        />
-                      ) : previewUrl ? (
-                        <iframe
-                          title={previewDoc?.template ?? "Template preview"}
-                          className="w-full h-[70vh] bg-white"
-                          src={previewUrl}
-                          scrolling="yes"
-                        />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center text-sm text-slate-400">
-                          Preview бэлэн биш байна.
-                        </div>
-                      )}
-
-                      {previewSignatureData ? (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img
-                          src={previewSignatureData}
-                          alt="Signature"
-                          className="absolute bottom-6 right-6 h-16 max-w-[160px] object-contain"
-                        />
-                      ) : null}
-
-                      {previewSignatureOpen ? (
-                        <div
-                          className="absolute inset-0"
-                          onClick={(event) => event.stopPropagation()}
-                        >
-                          <canvas
-                            ref={previewSignatureCanvasRef}
-                            className="h-full w-full cursor-crosshair"
-                            onPointerDown={handlePreviewSignaturePointerDown}
-                            onPointerMove={handlePreviewSignaturePointerMove}
-                            onPointerUp={handlePreviewSignaturePointerUp}
-                            onPointerLeave={handlePreviewSignaturePointerUp}
-                          />
-                          <div className="absolute bottom-4 right-4 flex items-center gap-2">
-                            <button
-                              type="button"
-                              onClick={handleClearPreviewSignature}
-                              className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50"
-                            >
-                              Цэвэрлэх
-                            </button>
-                            <button
-                              type="button"
-                              onClick={handleSavePreviewSignature}
-                              className="rounded-lg bg-slate-900 px-3 py-2 text-xs font-semibold text-white hover:bg-slate-800"
-                            >
-                              Дуусгах
-                            </button>
-                          </div>
-                        </div>
-                      ) : null}
+                    <div className="w-full h-full flex items-center justify-center text-sm text-slate-400">
+                      Preview бэлэн биш байна.
                     </div>
                   )}
+
+                  {previewSignatureData ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={previewSignatureData}
+                      alt="Signature"
+                      className="absolute bottom-6 right-6 h-16 max-w-[160px] object-contain"
+                    />
+                  ) : null}
+
+                  {previewSignatureOpen ? (
+                    <div
+                      className="absolute inset-0"
+                      onClick={(event) => event.stopPropagation()}>
+                      <canvas
+                        ref={previewSignatureCanvasRef}
+                        className="h-full w-full cursor-crosshair"
+                        onPointerDown={handlePreviewSignaturePointerDown}
+                        onPointerMove={handlePreviewSignaturePointerMove}
+                        onPointerUp={handlePreviewSignaturePointerUp}
+                        onPointerLeave={handlePreviewSignaturePointerUp}
+                      />
+                      <div className="absolute bottom-4 right-4 flex items-center gap-2">
+                        <button
+                          type="button"
+                          onClick={handleClearPreviewSignature}
+                          className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50">
+                          Цэвэрлэх
+                        </button>
+                        <button
+                          type="button"
+                          onClick={handleSavePreviewSignature}
+                          disabled={signingDocument}
+                          className="rounded-lg bg-slate-900 px-3 py-2 text-xs font-semibold text-white hover:bg-slate-800 disabled:opacity-60">
+                          {signingDocument ? "Хадгалж байна..." : "Дуусгах"}
+                        </button>
+                      </div>
+                    </div>
+                  ) : null}
                 </div>
-              </div>
-            </div>,
-            document.body,
-          )
-        : null}
+              )}
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </Dialog>
   );
 }

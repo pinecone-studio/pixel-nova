@@ -40,6 +40,17 @@ export const documents = sqliteTable(
     action: text("action").notNull(),
     documentName: text("document_name").notNull(),
     storageUrl: text("storage_url").notNull(),
+    templateId: text("template_id"),
+    templateFile: text("template_file"),
+    templateData: text("template_data"),
+    hrSigned: integer("hr_signed", { mode: "boolean" }).notNull().default(false),
+    hrSignatureData: text("hr_signature_data"),
+    hrSignedAt: text("hr_signed_at"),
+    employeeSigned: integer("employee_signed", { mode: "boolean" })
+      .notNull()
+      .default(false),
+    employeeSignatureData: text("employee_signature_data"),
+    employeeSignedAt: text("employee_signed_at"),
     createdAt: text("created_at").notNull(),
   },
   (table) => [index("documents_employee_id_idx").on(table.employeeId)],
@@ -70,6 +81,10 @@ export const auditLog = sqliteTable(
       .notNull()
       .default(false),
     notificationError: text("notification_error"),
+    hrSignedAll: integer("hr_signed_all", { mode: "boolean" })
+      .notNull()
+      .default(false),
+    hrSignedAllAt: text("hr_signed_all_at"),
     employeeSigned: integer("employee_signed", { mode: "boolean" })
       .notNull()
       .default(false),

@@ -15,6 +15,7 @@ export interface DispatchNotificationInput {
   documentLinkSecret?: string | null;
   overrideRecipients?: string[];
   recipientRoles?: string[];
+  templateKind?: "hr" | "employee";
 }
 
 export interface DispatchNotificationResult {
@@ -101,6 +102,7 @@ export async function dispatchNotification(
     action: input.action,
     documents: documentLinks,
     generatedAt: input.documents[0]?.createdAt ?? new Date().toISOString(),
+    kind: input.templateKind ?? "hr",
   });
 
   try {

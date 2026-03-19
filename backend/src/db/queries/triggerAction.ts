@@ -1,4 +1,4 @@
-import { and, eq } from "drizzle-orm";
+import { and, eq, inArray } from "drizzle-orm";
 
 import type { DbClient } from "../client";
 import { auditLog, documents } from "../schema";
@@ -11,7 +11,6 @@ import {
 import { uploadEmployeeDocumentToR2 } from "../../storage/r2";
 import type { NormalizedActionConfig } from "./actionConfig";
 import { getEmployeeById } from "./employee";
-import { getEmployerSignatureByUserId } from "./employerSignature";
 import type { Actor } from "./types";
 
 export async function createTriggeredActionRecords(
@@ -43,43 +42,14 @@ export async function createTriggeredActionRecords(
   const recipientRoles = actionConfig?.recipients ?? [];
   const requiredEmployeeFields = actionConfig?.requiredEmployeeFields ?? [];
 
-  // Inject employer signature as <img> tag if available
-  const signatureOverrides: Record<string, string> = {};
-  if (actor?.id) {
-    const employerSig = await getEmployerSignatureByUserId(db, actor.id);
-    if (employerSig?.signatureData) {
-      const employerSignatureHtml = `<img src="${employerSig.signatureData}" style="height:40px; filter: brightness(0) saturate(100%);" />`;
-      const signDate = now.slice(0, 10);
-
-      Object.assign(signatureOverrides, {
-        issuer_signature: employerSignatureHtml,
-        issuer_sign_line: employerSignatureHtml,
-        issuer_date: signDate,
-        employer_signature: employerSignatureHtml,
-        employer_sign_line: employerSignatureHtml,
-        employer_sign_date: signDate,
-        company_ceo_sign_line: employerSignatureHtml,
-        hr_manager_signature: employerSignatureHtml,
-      });
-    }
-  }
-
   const templateData = {
     ...buildTemplateData(employee, now),
-    ...signatureOverrides,
     ...(templateDataOverrides ?? {}),
   };
   const { data: patchedTemplateData, incompleteFields } =
     validateRequiredFields(templateData, requiredEmployeeFields);
 
-  const documentInserts: Array<{
-    id: string;
-    employeeId: string;
-    action: string;
-    documentName: string;
-    storageUrl: string;
-    createdAt: string;
-  }> = [];
+  const documentInserts: Array<typeof documents.$inferInsert> = [];
 
   for (const tmpl of docTemplates.sort((a, b) => a.order - b.order)) {
     const documentId = crypto.randomUUID();
@@ -150,6 +120,9 @@ export async function createTriggeredActionRecords(
       action: normalizedAction,
       documentName: `${orderPrefix}_${tmpl.id}.pdf`,
       storageUrl,
+      templateId: tmpl.id,
+      templateFile: tmpl.template,
+      templateData: JSON.stringify(patchedTemplateData),
       createdAt: now,
     });
   }
@@ -171,6 +144,8 @@ export async function createTriggeredActionRecords(
       notificationAttempted: false,
       recipientsNotified: false,
       notificationError: null,
+      hrSignedAll: false,
+      hrSignedAllAt: null,
       timestamp: now,
     }),
   ];
@@ -181,10 +156,10 @@ export async function createTriggeredActionRecords(
     .select()
     .from(documents)
     .where(
-      and(
-        eq(documents.employeeId, employeeId),
-        eq(documents.action, normalizedAction),
-      ),
+      and(eq(documents.employeeId, employeeId), inArray(
+        documents.id,
+        documentInserts.map((doc) => doc.id),
+      )),
     )
     .orderBy(documents.documentName);
 

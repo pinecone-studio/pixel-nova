@@ -1,30 +1,40 @@
 import {
   createEmployeeCodeSession,
+  getActionConfigByName,
+  getAuditLogByDocumentId,
   deleteDocument,
   deleteSessionByToken,
   ensureDefaultActionConfigs,
   getAuditLogById,
+  getDocumentById,
   getEmployeeById,
   getEmployeeSignatureByEmployeeId,
   getEmployerSignatureByUserId,
   getContractRequestById,
   getLeaveRequestById,
   getDocuments,
+  getDocumentsByIds,
   insertDocument,
   insertContractRequest,
   insertLeaveRequest,
   insertEmployeeNotification,
   insertAnnouncementNotificationsForAudience,
+  areAllDocumentsEmployeeSigned,
+  areAllDocumentsHrSigned,
   insertAnnouncementDraft as insertAnnouncementDraftRecord,
   updateAnnouncementDraft as updateAnnouncementDraftRecord,
   publishAnnouncement as publishAnnouncementRecord,
   listActionConfigs,
   requestEmployeeOtp,
   updateAuditLogDelivery,
+  updateAuditLogHrSigned,
   updateAuditLogSignature,
   updateContractRequestStatus,
+  updateDocumentEmployeeSignature,
+  updateDocumentHrSignature,
   updateLeaveRequestStatus,
   updateEmployeeDocumentProfile,
+  updateEmployeeStatus,
   upsertActionConfig,
   upsertEmployeeRecord,
   upsertEmployeeSignature,
@@ -42,6 +52,8 @@ import {
 } from "../services/actionResolver";
 import { dispatchNotification } from "../notifications/dispatchNotification";
 import { sendEmailWithRetry } from "../notifications/sendEmailWithRetry";
+import { generateEmployeeDocument } from "../document/generator";
+import { renderPdfFromService } from "../document/pdfRenderer";
 import { uploadEmployeeDocumentToR2 } from "../storage/r2";
 import type { GraphQLContext } from "./schema";
 import { executeTriggeredAction } from "./helpers";
@@ -50,6 +62,10 @@ import {
   buildContractActionConfig,
   normalizeContractTemplateIds,
 } from "../services/contractTemplates";
+import {
+  renderSignedDocumentArtifact,
+  type SigningRole,
+} from "./documentSigning";
 
 type Ctx = GraphQLContext;
 
@@ -114,6 +130,282 @@ interface UploadHrDocumentInput {
   documentName: string;
   contentType: string;
   contentBase64: string;
+}
+
+function requireHrActor(ctx: Ctx) {
+  if (ctx.actor.role !== "hr" && ctx.actor.role !== "admin") {
+    throw new Error("Unauthorized");
+  }
+}
+
+function buildSignatureHtml(signatureData: string) {
+  return `<img src="${signatureData}" style="height:40px; filter: brightness(0) saturate(100%);" />`;
+}
+
+function parseStoredTemplateData(document: {
+  templateData?: string | null;
+}) {
+  try {
+    const parsed = JSON.parse(document.templateData ?? "{}");
+    return parsed && typeof parsed === "object"
+      ? Object.fromEntries(
+          Object.entries(parsed).map(([key, value]) => [key, String(value ?? "")]),
+        )
+      : {};
+  } catch {
+    return {};
+  }
+}
+
+async function rerenderSignedDocument(
+  ctx: Ctx,
+  document: {
+    id: string;
+    employeeId: string;
+    action: string;
+    documentName: string;
+    storageUrl: string;
+    templateId?: string | null;
+    templateFile?: string | null;
+    templateData?: string | null;
+    createdAt: string;
+    hrSignatureData?: string | null;
+    hrSignedAt?: string | null;
+    employeeSignatureData?: string | null;
+    employeeSignedAt?: string | null;
+  },
+  employee: Awaited<ReturnType<typeof getEmployeeById>>,
+  signatureOverrides?: Record<string, string>,
+  phaseOverride?: string | null,
+) {
+  if (!employee) {
+    throw new Error("Employee not found");
+  }
+  if (!document.templateFile || !document.templateId) {
+    return document.storageUrl;
+  }
+
+  const mergedTemplateData = {
+    ...parseStoredTemplateData(document),
+    ...(document.hrSignatureData
+      ? {
+          employer_signature: buildSignatureHtml(document.hrSignatureData),
+          employer_sign_line: buildSignatureHtml(document.hrSignatureData),
+          issuer_signature: buildSignatureHtml(document.hrSignatureData),
+          issuer_sign_line: buildSignatureHtml(document.hrSignatureData),
+          company_ceo_sign_line: buildSignatureHtml(document.hrSignatureData),
+          hr_manager_signature: buildSignatureHtml(document.hrSignatureData),
+        }
+      : {}),
+    ...(document.employeeSignatureData
+      ? {
+          employee_signature: buildSignatureHtml(document.employeeSignatureData),
+          employee_sign_line: buildSignatureHtml(document.employeeSignatureData),
+        }
+      : {}),
+    ...(signatureOverrides ?? {}),
+  };
+
+  const generated = generateEmployeeDocument({
+    employee,
+    action: document.action,
+    generatedAt: document.createdAt,
+    documentId: document.id,
+    templateFile: document.templateFile,
+    templateData: mergedTemplateData,
+  });
+
+  const rendererUrl =
+    (ctx.env as CloudflareBindings & { PDF_RENDERER_URL?: string })
+      .PDF_RENDERER_URL ?? "";
+  const rendererSecret =
+    (ctx.env as CloudflareBindings & { PDF_RENDERER_SECRET?: string })
+      .PDF_RENDERER_SECRET ?? "";
+  const bucket = (ctx.env as CloudflareBindings & { epas_documents?: R2Bucket })
+    .epas_documents;
+
+  let renderedPdf = Boolean(rendererUrl.trim());
+  let bytes: Uint8Array;
+  if (renderedPdf) {
+    try {
+      bytes = await renderPdfFromService({
+        html: generated.html,
+        documentName: document.documentName,
+        serviceUrl: rendererUrl,
+        secret: rendererSecret,
+      });
+    } catch (error) {
+      console.error("Failed to re-render signed document", error);
+      renderedPdf = false;
+      bytes = new TextEncoder().encode(generated.html);
+    }
+  } else {
+    bytes = new TextEncoder().encode(generated.html);
+  }
+
+  if (bucket) {
+    const r2Key = await uploadEmployeeDocumentToR2({
+      bucket,
+      employeeId: employee.id,
+      employeeCode: employee.employeeCode,
+      lastName: employee.lastName,
+      firstName: employee.firstName,
+      phase: phaseOverride ?? "signed",
+      action: document.action,
+      order: document.documentName.split("_", 1)[0] || "01",
+      templateId: document.templateId,
+      documentId: document.id,
+      documentName: document.documentName,
+      content: bytes,
+      contentType: renderedPdf ? "application/pdf" : "text/html",
+      createdAt: document.createdAt,
+    });
+    return `r2://${r2Key}`;
+  }
+
+  return renderedPdf
+    ? `data:application/pdf;base64,${Buffer.from(bytes).toString("base64")}`
+    : `data:text/html;charset=utf-8,${encodeURIComponent(generated.html)}`;
+}
+
+async function signEmployeeDocumentCore(
+  ctx: Ctx,
+  documentId: string,
+  options?: {
+    signatureMode?: string | null;
+    signatureData?: string | null;
+    passcode?: string | null;
+  },
+) {
+  if (ctx.actor.role !== "employee" || !ctx.actor.id) {
+    throw new Error("Unauthorized");
+  }
+
+  const document = await getDocumentById(ctx.db, documentId);
+  if (!document) {
+    throw new Error("Document not found");
+  }
+  if (document.employeeId !== ctx.actor.id) {
+    throw new Error("Unauthorized");
+  }
+  if (!document.hrSigned) {
+    throw new Error("HR must sign this document first");
+  }
+
+  const signature = await getEmployeeSignatureByEmployeeId(
+    ctx.db,
+    ctx.actor.id,
+  );
+  const signatureMode = (options?.signatureMode ?? "").toLowerCase().trim();
+  const signatureData = options?.signatureData?.trim() ?? "";
+  const passcode = options?.passcode?.trim() ?? "";
+
+  const wantsRedraw =
+    signatureMode === "redraw" || (!signatureMode && Boolean(signatureData));
+  const wantsReuse =
+    signatureMode === "reuse" || (!signatureMode && !wantsRedraw);
+
+  let resolvedSignatureData = signature?.signatureData ?? "";
+  if (wantsReuse) {
+    if (!signature?.signatureData) {
+      throw new Error("Гарын үсэг олдсонгүй. Эхлээд гарын үсгээ зурна уу.");
+    }
+    if (signature.passcodeHash) {
+      if (!passcode) {
+        throw new Error("4 оронтой кодоо оруулна уу.");
+      }
+      const verification = await verifyEmployeeSignaturePasscode(
+        ctx.db,
+        ctx.actor.id,
+        passcode,
+      );
+      if (!verification.ok) {
+        throw new Error("Код буруу байна. Дахин оруулна уу.");
+      }
+    }
+  }
+
+  if (wantsRedraw) {
+    if (!signatureData) {
+      throw new Error("Гарын үсгээ зурна уу.");
+    }
+    if (passcode && !/^[0-9]{4}$/.test(passcode)) {
+      throw new Error("4 оронтой код шаардлагатай.");
+    }
+    await upsertEmployeeSignature(ctx.db, {
+      employeeId: ctx.actor.id,
+      signatureData,
+      passcode: passcode || undefined,
+    });
+    resolvedSignatureData = signatureData;
+  }
+
+  const employee = await getEmployeeById(ctx.db, document.employeeId);
+  if (!employee) {
+    throw new Error("Employee not found");
+  }
+
+  const actionConfig = await getActionConfigByName(ctx.db, document.action);
+  const nowIso = new Date().toISOString();
+  const storageUrl = await rerenderSignedDocument(
+    ctx,
+    {
+      ...document,
+      employeeSignatureData: resolvedSignatureData,
+      employeeSignedAt: nowIso,
+    },
+    employee,
+    {
+      employee_signature: buildSignatureHtml(resolvedSignatureData),
+      employee_sign_line: buildSignatureHtml(resolvedSignatureData),
+      employee_sign_date: nowIso.slice(0, 10),
+    },
+    actionConfig?.phase ?? null,
+  );
+
+  const updatedDocument = await updateDocumentEmployeeSignature(
+    ctx.db,
+    document.id,
+    {
+      employeeSignatureData: resolvedSignatureData,
+      employeeSignedAt: nowIso,
+      storageUrl,
+    },
+  );
+  if (!updatedDocument) {
+    throw new Error("Failed to update document");
+  }
+
+  const auditEntry = await getAuditLogByDocumentId(ctx.db, document.id);
+  if (!auditEntry) {
+    throw new Error("Audit log not found for document");
+  }
+
+  const allSigned = await areAllDocumentsEmployeeSigned(
+    ctx.db,
+    auditEntry.documentIds,
+  );
+  if (allSigned && !auditEntry.employeeSigned) {
+    await updateAuditLogSignature(ctx.db, auditEntry.id, {
+      employeeSigned: true,
+      employeeSignedAt: nowIso,
+    });
+
+    if (employee.status !== "ACTIVE") {
+      await updateEmployeeStatus(ctx.db, employee.id, "ACTIVE");
+    }
+  }
+
+  const updatedAuditLog = await getAuditLogById(ctx.db, auditEntry.id);
+  if (!updatedAuditLog) {
+    throw new Error("Failed to load audit log");
+  }
+
+  return {
+    document: updatedDocument,
+    auditLog: updatedAuditLog,
+    allSigned,
+  };
 }
 
 export const mutationResolvers = {
@@ -201,7 +493,7 @@ export const mutationResolvers = {
       : null;
 
     // Send employee code to new employee's email
-    const isNewEmployee = !persisted.previousEmployee;
+    const isNewEmployee = false;
     const employeeEmail = persisted.employee.email;
     if (isNewEmployee && employeeEmail) {
       const apiKey =
@@ -931,6 +1223,8 @@ export const mutationResolvers = {
       apiKey: resendApiKey,
       publicOrigin: ctx.publicOrigin,
       documentLinkSecret,
+      overrideRecipients: employee.email ? [employee.email] : [],
+      templateKind: "employee",
     });
 
     await updateAuditLogDelivery(ctx.db, entry.id, {
@@ -942,6 +1236,133 @@ export const mutationResolvers = {
 
     const updated = await getAuditLogById(ctx.db, entry.id);
     return updated ?? entry;
+  },
+
+  signDocument: async (
+    _: unknown,
+    args: { documentId: string; signatureData: string },
+    ctx: Ctx,
+  ) => {
+    requireHrActor(ctx);
+
+    const document = await getDocumentById(ctx.db, args.documentId);
+    if (!document) {
+      throw new Error("Document not found");
+    }
+
+    const employee = await getEmployeeById(ctx.db, document.employeeId);
+    if (!employee) {
+      throw new Error("Employee not found");
+    }
+
+    const actionConfig = await getActionConfigByName(ctx.db, document.action);
+    const nowIso = new Date().toISOString();
+    const storageUrl = await rerenderSignedDocument(
+      ctx,
+      {
+        ...document,
+        hrSignatureData: args.signatureData,
+        hrSignedAt: nowIso,
+      },
+      employee,
+      {
+        employer_signature: buildSignatureHtml(args.signatureData),
+        employer_sign_line: buildSignatureHtml(args.signatureData),
+        issuer_signature: buildSignatureHtml(args.signatureData),
+        issuer_sign_line: buildSignatureHtml(args.signatureData),
+        company_ceo_sign_line: buildSignatureHtml(args.signatureData),
+        hr_manager_signature: buildSignatureHtml(args.signatureData),
+        employer_sign_date: nowIso.slice(0, 10),
+        issuer_date: nowIso.slice(0, 10),
+      },
+      actionConfig?.phase ?? null,
+    );
+
+    const updatedDocument = await updateDocumentHrSignature(ctx.db, document.id, {
+      hrSignatureData: args.signatureData,
+      hrSignedAt: nowIso,
+      storageUrl,
+    });
+    if (!updatedDocument) {
+      throw new Error("Failed to update document");
+    }
+
+    const auditEntry = await getAuditLogByDocumentId(ctx.db, document.id);
+    if (!auditEntry) {
+      throw new Error("Audit log not found for document");
+    }
+
+    const allSigned = await areAllDocumentsHrSigned(ctx.db, auditEntry.documentIds);
+    if (allSigned && !auditEntry.employeeSigned) {
+      await updateAuditLogHrSigned(ctx.db, auditEntry.id, {
+        hrSignedAll: true,
+        hrSignedAllAt: nowIso,
+      });
+
+      const employeeEmail = employee.email?.trim() ?? "";
+      if (employeeEmail) {
+        const resendApiKey =
+          (ctx.env as CloudflareBindings & { RESEND_API_KEY?: string })
+            .RESEND_API_KEY ?? "";
+        const documentLinkSecret =
+          (ctx.env as CloudflareBindings & { DOCUMENT_LINK_SECRET?: string })
+            .DOCUMENT_LINK_SECRET ?? "";
+        const docs = await getDocumentsByIds(ctx.db, auditEntry.documentIds);
+        const result = await dispatchNotification({
+          db: ctx.db,
+          employee,
+          documents: docs,
+          action: auditEntry.action,
+          apiKey: resendApiKey,
+          publicOrigin: ctx.publicOrigin,
+          documentLinkSecret,
+          overrideRecipients: [employeeEmail],
+          templateKind: "employee",
+        });
+
+        await updateAuditLogDelivery(ctx.db, auditEntry.id, {
+          recipientEmails: result.recipientEmails,
+          notificationAttempted: result.notificationAttempted,
+          recipientsNotified: result.notified,
+          notificationError: result.error ?? null,
+        });
+      } else {
+        await updateAuditLogDelivery(ctx.db, auditEntry.id, {
+          recipientEmails: [],
+          notificationAttempted: false,
+          recipientsNotified: false,
+          notificationError: "Employee email missing for signing notification.",
+        });
+      }
+    }
+
+    const updatedAuditLog = await getAuditLogById(ctx.db, auditEntry.id);
+    if (!updatedAuditLog) {
+      throw new Error("Failed to load audit log");
+    }
+
+    return {
+      document: updatedDocument,
+      auditLog: updatedAuditLog,
+      allSigned,
+    };
+  },
+
+  employeeSignDocument: async (
+    _: unknown,
+    args: {
+      documentId: string;
+      signatureMode?: string | null;
+      signatureData?: string | null;
+      passcode?: string | null;
+    },
+    ctx: Ctx,
+  ) => {
+    return signEmployeeDocumentCore(ctx, args.documentId, {
+      signatureMode: args.signatureMode,
+      signatureData: args.signatureData,
+      passcode: args.passcode,
+    });
   },
 
   signAuditLog: async (
@@ -966,57 +1387,17 @@ export const mutationResolvers = {
       throw new Error("Unauthorized");
     }
 
-    const signature = await getEmployeeSignatureByEmployeeId(
-      ctx.db,
-      ctx.actor.id,
-    );
-    const signatureMode = (args.signatureMode ?? "").toLowerCase().trim();
-    const signatureData = args.signatureData?.trim() ?? "";
-    const passcode = args.passcode?.trim() ?? "";
-
-    const wantsRedraw =
-      signatureMode === "redraw" || (!signatureMode && Boolean(signatureData));
-    const wantsReuse =
-      signatureMode === "reuse" || (!signatureMode && !wantsRedraw);
-
-    if (wantsReuse) {
-      if (!signature?.signatureData) {
-        throw new Error("Гарын үсэг олдсонгүй. Эхлээд гарын үсгээ зурна уу.");
+    const documents = await getDocumentsByIds(ctx.db, entry.documentIds);
+    for (const document of documents) {
+      if (document.employeeSigned) {
+        continue;
       }
-      if (signature.passcodeHash) {
-        if (!passcode) {
-          throw new Error("4 оронтой кодоо оруулна уу.");
-        }
-        const verification = await verifyEmployeeSignaturePasscode(
-          ctx.db,
-          ctx.actor.id,
-          passcode,
-        );
-        if (!verification.ok) {
-          throw new Error("Код буруу байна. Дахин оролдоно уу.");
-        }
-      }
-    }
-
-    if (wantsRedraw) {
-      if (!signatureData) {
-        throw new Error("Гарын үсгээ зурна уу.");
-      }
-      if (passcode && !/^[0-9]{4}$/.test(passcode)) {
-        throw new Error("4 оронтой код шаардлагатай.");
-      }
-      await upsertEmployeeSignature(ctx.db, {
-        employeeId: ctx.actor.id,
-        signatureData,
-        passcode: passcode || undefined,
+      await signEmployeeDocumentCore(ctx, document.id, {
+        signatureMode: args.signatureMode,
+        signatureData: args.signatureData,
+        passcode: args.passcode,
       });
     }
-
-    const nowIso = new Date().toISOString();
-    await updateAuditLogSignature(ctx.db, entry.id, {
-      employeeSigned: true,
-      employeeSignedAt: nowIso,
-    });
 
     const updated = await getAuditLogById(ctx.db, entry.id);
     return updated ?? entry;
