@@ -25,14 +25,14 @@ export function FilesPreviewModal({
   }
 
   return createPortal(
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/45">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 p-4">
       <button
         type="button"
         aria-label="Preview close overlay"
         className="absolute inset-0"
         onClick={onClose}
       />
-      <div className="relative w-[920px] max-w-[95vw] h-[82vh] bg-white rounded-3xl border border-slate-200 shadow-[0_28px_60px_rgba(15,23,42,0.12)] overflow-hidden">
+      <div className="relative flex h-[82vh] w-[920px] max-w-[95vw] flex-col overflow-hidden rounded-[24px] border border-black/12 bg-white shadow-2xl">
         <FilesPreviewHeader document={document} onClose={onClose} />
         <FilesPreviewContent
           document={document}
