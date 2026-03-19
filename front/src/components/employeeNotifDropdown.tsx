@@ -53,15 +53,14 @@ export const EmployeeNotifDropdown = () => {
   async function handleMarkRead(id: string) {
     if (useMockNotifications) {
       setMockNotifications((current) =>
-        current.map((notification) =>
-          notification.id === id
-            ? {
-                ...notification,
-                status: "read",
-                readAt: new Date().toISOString(),
-              }
-            : notification,
-        ),
+        current.map<EmployeeNotification>((notification) => {
+          if (notification.id !== id) return notification;
+          return {
+            ...notification,
+            status: "read",
+            readAt: new Date().toISOString(),
+          };
+        }),
       );
       return;
     }
@@ -86,7 +85,7 @@ export const EmployeeNotifDropdown = () => {
 
     if (useMockNotifications) {
       setMockNotifications((current) =>
-        current.map((notification) => ({
+        current.map<EmployeeNotification>((notification) => ({
           ...notification,
           status: "read",
           readAt: notification.readAt ?? new Date().toISOString(),

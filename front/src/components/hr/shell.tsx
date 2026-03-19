@@ -10,7 +10,7 @@ import { EmployeeNotifDrawer } from "@/components/employee-notif/EmployeeNotifDr
 import { EpasLogo, NotifIcon } from "@/components/icons";
 import { GET_CONTRACT_REQUESTS } from "@/graphql/queries";
 import { buildGraphQLHeaders } from "@/lib/apollo-client";
-import type { ContractRequest } from "@/lib/types";
+import type { ContractRequest, EmployeeNotification } from "@/lib/types";
 
 import { getActiveHrNavItem, HR_NAV_ITEMS } from "./navigation";
 import { mapContractRequestToEmployeeNotification } from "./notif/hrNotifUtils";
@@ -45,11 +45,14 @@ function HrShellInner({ children }: { children: React.ReactNode }) {
   const displayNotifications = useMemo(() => {
     if (readIds.length === 0) return notifications;
     const readSet = new Set(readIds);
-    return notifications.map((n) =>
-      readSet.has(n.id)
-        ? { ...n, status: "read", readAt: n.readAt ?? new Date().toISOString() }
-        : n,
-    );
+    return notifications.map<EmployeeNotification>((n) => {
+      if (!readSet.has(n.id)) return n;
+      return {
+        ...n,
+        status: "read",
+        readAt: n.readAt ?? new Date().toISOString(),
+      };
+    });
   }, [notifications, readIds]);
 
   const unreadCount = displayNotifications.filter(
