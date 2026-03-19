@@ -49,7 +49,9 @@ export function EmployeeModal({
   const [signaturePasscode, setSignaturePasscode] = useState("");
   const [signatureMessage, setSignatureMessage] = useState<string | null>(null);
   const [signatureError, setSignatureError] = useState<string | null>(null);
-  const [signatureMode, setSignatureMode] = useState<"reuse" | "redraw">(
+  const [signatureModePreference, setSignatureModePreference] = useState<
+    "reuse" | "redraw"
+  >(
     "reuse",
   );
 
@@ -95,16 +97,10 @@ export function EmployeeModal({
 
   const hasSavedEmployerSignature =
     signatureStatusData?.employerSignatureStatus?.hasSignature ?? false;
-
-  useEffect(() => {
-    if (mode !== "add") return;
-
-    if (hasSavedEmployerSignature) {
-      setSignatureMode("reuse");
-    } else {
-      setSignatureMode("redraw");
-    }
-  }, [mode, hasSavedEmployerSignature]);
+  const signatureMode =
+    mode === "add" && hasSavedEmployerSignature
+      ? signatureModePreference
+      : "redraw";
 
   useEffect(() => {
     if (mode !== "add" || signatureMode !== "redraw") {
@@ -311,7 +307,7 @@ export function EmployeeModal({
                     <Button
                       type="button"
                       variant={signatureMode === "reuse" ? "default" : "outline"}
-                      onClick={() => setSignatureMode("reuse")}
+                      onClick={() => setSignatureModePreference("reuse")}
                       className={
                         signatureMode === "reuse"
                           ? "rounded-xl bg-amber-900 px-4 py-2 text-xs font-semibold text-white hover:bg-amber-800"
@@ -323,7 +319,7 @@ export function EmployeeModal({
                     <Button
                       type="button"
                       variant={signatureMode === "redraw" ? "default" : "outline"}
-                      onClick={() => setSignatureMode("redraw")}
+                      onClick={() => setSignatureModePreference("redraw")}
                       className={
                         signatureMode === "redraw"
                           ? "rounded-xl bg-amber-900 px-4 py-2 text-xs font-semibold text-white hover:bg-amber-800"
@@ -388,7 +384,12 @@ export function EmployeeModal({
               <Button
                 type="button"
                 onClick={() => void handleSaveSignature()}
-                disabled={signatureSaving || !signatureData}
+                disabled={
+                  signatureSaving ||
+                  (signatureMode === "reuse"
+                    ? !/^[0-9]{4}$/.test(signaturePasscode)
+                    : !signatureData)
+                }
                 className="self-start rounded-2xl bg-slate-900 px-5 py-2.5 text-white hover:bg-slate-800 disabled:opacity-60"
               >
                 {signatureSaving ? "Хадгалж байна..." : "Гарын үсэг хадгалах"}
