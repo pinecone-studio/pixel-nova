@@ -5,7 +5,10 @@ import { useEffect, useRef, useState } from "react";
 import { BiToggleLeft, BiToggleRight } from "react-icons/bi";
 
 import { GET_EMPLOYER_SIGNATURE_STATUS } from "@/graphql/queries";
-import { SAVE_EMPLOYER_SIGNATURE } from "@/graphql/mutations";
+import {
+  DELETE_EMPLOYER_SIGNATURE,
+  SAVE_EMPLOYER_SIGNATURE,
+} from "@/graphql/mutations";
 import { buildGraphQLHeaders } from "@/lib/apollo-client";
 
 const STORAGE_KEY = "epas_hr_settings";
@@ -43,6 +46,14 @@ export const SettingsComponent = () => {
 
   const [saveEmployerSignature, { loading: signatureSaving }] = useMutation(
     SAVE_EMPLOYER_SIGNATURE,
+    {
+      context: {
+        headers: buildGraphQLHeaders({ actorRole: "hr" }),
+      },
+    },
+  );
+  const [deleteEmployerSignature, { loading: signatureDeleting }] = useMutation(
+    DELETE_EMPLOYER_SIGNATURE,
     {
       context: {
         headers: buildGraphQLHeaders({ actorRole: "hr" }),
@@ -176,6 +187,26 @@ export const SettingsComponent = () => {
     }
   }
 
+  async function handleDeleteSignature() {
+    setSignatureError(null);
+    setSignatureMessage(null);
+
+    try {
+      await deleteEmployerSignature();
+      await refetch();
+      clearSignature();
+      setPasscode("");
+      setSignatureModeOverride(null);
+      setSignatureMessage("Ажил олгогчийн хадгалсан гарын үсэг устгагдлаа.");
+    } catch (error) {
+      setSignatureError(
+        error instanceof Error
+          ? error.message
+          : "Гарын үсэг устгах үед алдаа гарлаа.",
+      );
+    }
+  }
+
   return (
     <div className="flex flex-col gap-5">
       <div className="flex items-start justify-between gap-4">
@@ -223,8 +254,7 @@ export const SettingsComponent = () => {
                   signatureMode === "reuse"
                     ? "border-slate-900 bg-slate-900 text-white"
                     : "border-slate-200 bg-white text-slate-600 hover:border-slate-300"
-                }`}
-              >
+                }`}>
                 Одоогийн гарын үсэг
               </button>
               <button
@@ -233,8 +263,7 @@ export const SettingsComponent = () => {
                   signatureMode === "redraw"
                     ? "border-slate-900 bg-slate-900 text-white"
                     : "border-slate-200 bg-white text-slate-600 hover:border-slate-300"
-                }`}
-              >
+                }`}>
                 Шинээр зурах
               </button>
             </div>
@@ -270,8 +299,7 @@ export const SettingsComponent = () => {
                 {signatureData ? (
                   <button
                     onClick={clearSignature}
-                    className="absolute right-3 top-3 rounded-md bg-white/90 px-2 py-1 text-xs text-slate-500 hover:text-red-500"
-                  >
+                    className="absolute right-3 top-3 rounded-md bg-white/90 px-2 py-1 text-xs text-slate-500 hover:text-red-500">
                     Арилгах
                   </button>
                 ) : (
@@ -316,15 +344,23 @@ export const SettingsComponent = () => {
             </div>
           ) : null}
 
-          <div className="flex justify-end">
+          <div className="flex justify-end gap-3">
+            {hasSignature ? (
+              <button
+                onClick={handleDeleteSignature}
+                disabled={signatureDeleting || signatureSaving}
+                className="rounded-xl border border-red-200 px-4 py-2.5 text-sm font-medium text-red-600 transition-colors hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50">
+                {signatureDeleting ? "Устгаж байна..." : "Гарын үсэг устгах"}
+              </button>
+            ) : null}
             <button
               onClick={handleSaveSignature}
               disabled={
                 signatureSaving ||
+                signatureDeleting ||
                 (signatureMode === "redraw" && !signatureData)
               }
-              className="rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-medium text-white w-[116px] h-[36px] transition-colors hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50"
-            >
+              className="rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50">
               {signatureSaving ? "Хадгалж байна..." : "Хадгалах"}
             </button>
           </div>

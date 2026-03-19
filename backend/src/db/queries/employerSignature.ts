@@ -72,6 +72,21 @@ export async function upsertEmployerSignature(
   return getEmployerSignatureByUserId(db, input.userId);
 }
 
+export async function deleteEmployerSignatureByUserId(
+  db: DbClient,
+  userId: string,
+) {
+  await db
+    .delete(employerSignatures)
+    .where(eq(employerSignatures.userId, userId));
+
+  return {
+    hasSignature: false,
+    hasPasscode: false,
+    updatedAt: null,
+  };
+}
+
 export async function verifyEmployerSignaturePasscode(
   db: DbClient,
   userId: string,
