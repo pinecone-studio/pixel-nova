@@ -10,7 +10,6 @@ import {
   FiEdit3,
   FiEye,
   FiFileText,
-  FiFilter,
   FiRefreshCw,
   FiSearch,
 } from "react-icons/fi";
@@ -22,12 +21,22 @@ import {
 } from "@/graphql/mutations";
 import {
   GET_CONTRACT_REQUESTS,
+  GET_EMPLOYEES,
   GET_DOCUMENTS,
   GET_DOCUMENT_CONTENT,
+  GET_EMPLOYEE_SIGNATURE,
   GET_EMPLOYER_SIGNATURE_STATUS,
 } from "@/graphql/queries";
+import { GET_AUDIT_LOGS } from "@/graphql/queries/audit-logs";
 import { buildGraphQLHeaders } from "@/lib/apollo-client";
-import type { ContractRequest, Document, DocumentContent } from "@/lib/types";
+import type {
+  AuditLog,
+  ContractRequest,
+  Document,
+  DocumentContent,
+  EmployeeSignature,
+  Employee,
+} from "@/lib/types";
 import { formatDepartment } from "@/lib/labels";
 import { useHrOverlay } from "@/components/hr/overlay-context";
 
@@ -84,6 +93,20 @@ const TEMPLATE_LABELS: Record<string, string> = {
   termination_order: "Ажил дуусгавар болгох тушаал",
   handover_sheet: "Хүлээлгэн өгөх акт",
 };
+
+const ACTION_LABELS: Record<string, string> = {
+  add_employee: "Шинэ ажилтан",
+  promote_employee: "Тушаал дэвшүүлэх",
+  change_position: "Албан тушаал өөрчлөх",
+  offboard_employee: "Ажлаас чөлөөлөх",
+};
+
+const SIGNABLE_ACTIONS = new Set([
+  "add_employee",
+  "promote_employee",
+  "change_position",
+  "offboard_employee",
+]);
 
 function formatTemplateLabel(id: string) {
   return TEMPLATE_LABELS[id] ?? id;
@@ -152,6 +175,16 @@ const RequestModal = ({
   const sigStatus = sigStatusData?.employerSignatureStatus;
   const hasExistingSig = sigStatus?.hasSignature ?? false;
   const hasPasscode = sigStatus?.hasPasscode ?? false;
+
+  const { data: employeeSigData, loading: employeeSigLoading } = useQuery<{
+    employeeSignature: EmployeeSignature | null;
+  }>(GET_EMPLOYEE_SIGNATURE, {
+    variables: { employeeId: row.employeeId },
+    context: { headers: buildGraphQLHeaders({ actorRole: "hr" }) },
+    fetchPolicy: "network-only",
+  });
+
+  const employeeSignature = employeeSigData?.employeeSignature ?? null;
 
   // Auto-switch to redraw if no existing sig
   useEffect(() => {
@@ -436,6 +469,37 @@ const RequestModal = ({
           </div>
         ) : null}
 
+        <div className="bg-slate-50 rounded-2xl p-4 flex flex-col gap-3 border border-slate-200">
+          <p className="text-slate-900 font-semibold text-base">
+            Ажилтны гарын үсэг
+          </p>
+          {employeeSigLoading ? (
+            <p className="text-xs text-slate-500">Ачаалж байна...</p>
+          ) : employeeSignature?.signatureData ? (
+            <div className="flex flex-col gap-2">
+              <div className="h-24 w-full rounded-xl border border-slate-200 bg-white flex items-center justify-center">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={employeeSignature.signatureData}
+                  alt="Employee signature"
+                  className="max-h-20 max-w-[90%] object-contain"
+                />
+              </div>
+              <p className="text-xs text-slate-500">
+                {employeeSignature.updatedAt
+                  ? `Шинэчлэгдсэн: ${new Date(
+                      employeeSignature.updatedAt,
+                    ).toLocaleDateString("mn-MN")}`
+                  : "Гарын үсэг хадгалсан"}
+              </p>
+            </div>
+          ) : (
+            <p className="text-xs text-slate-500">
+              Ажилтны гарын үсэг олдсонгүй.
+            </p>
+          )}
+        </div>
+
         <div className="flex flex-col gap-2">
           <p className="text-slate-900 font-semibold text-base">
             Тайлбар{" "}
@@ -512,6 +576,26 @@ export const ContractRequestsComponent = () => {
     fetchPolicy: "network-only",
   });
 
+  const { data: auditData, loading: auditLoading } = useQuery<{
+    auditLogs: AuditLog[];
+  }>(GET_AUDIT_LOGS, {
+    context: { headers: buildGraphQLHeaders({ actorRole: "hr" }) },
+    fetchPolicy: "network-only",
+  });
+
+  const { data: employeeData } = useQuery<{ employees: Employee[] }>(
+    GET_EMPLOYEES,
+    { context: { headers: buildGraphQLHeaders({ actorRole: "hr" }) } },
+  );
+
+  const employeeMap = useMemo(() => {
+    const map = new Map<string, Employee>();
+    for (const emp of employeeData?.employees ?? []) {
+      map.set(emp.id, emp);
+    }
+    return map;
+  }, [employeeData]);
+
   const [approveContractRequest] = useMutation(APPROVE_CONTRACT_REQUEST, {
     context: {
       headers: buildGraphQLHeaders({ actorRole: "hr" }),
@@ -550,6 +634,17 @@ export const ContractRequestsComponent = () => {
       `${row.employee.firstName} ${row.employee.lastName} ${row.employee.employeeCode} ${row.employee.department}`.toLowerCase();
     return haystack.includes(search.trim().toLowerCase());
   });
+
+  const signedAuditLogs = useMemo(() => {
+    const logs = auditData?.auditLogs ?? [];
+    return logs
+      .filter((log) => log.employeeSigned && SIGNABLE_ACTIONS.has(log.action))
+      .sort((a, b) => {
+        const aTime = new Date(a.employeeSignedAt ?? a.timestamp).getTime();
+        const bTime = new Date(b.employeeSignedAt ?? b.timestamp).getTime();
+        return bTime - aTime;
+      });
+  }, [auditData]);
 
   async function handleApprove(
     id: string,
@@ -677,6 +772,26 @@ export const ContractRequestsComponent = () => {
     { key: "rejected", label: "Татгалзсан", count: rejectedCount },
   ];
 
+  function statusLabel(status: string) {
+    if (status === "pending") return "Яаралтай";
+    if (status === "approved") return "Амжилттай";
+    if (status === "rejected") return "Татгалзсан";
+    return status;
+  }
+
+  function statusClass(status: string) {
+    if (status === "pending") {
+      return "border-red-200 bg-red-50 text-red-500";
+    }
+    if (status === "approved") {
+      return "border-emerald-200 bg-emerald-50 text-emerald-600";
+    }
+    if (status === "rejected") {
+      return "border-slate-200 bg-slate-50 text-slate-500";
+    }
+    return "border-slate-200 bg-slate-50 text-slate-500";
+  }
+
   return (
     <div className="flex flex-col gap-6 animate-fade-up">
       <div className="flex flex-wrap items-center justify-between gap-3">
@@ -689,14 +804,23 @@ export const ContractRequestsComponent = () => {
           </span>
         </div>
         <div className="flex items-center gap-2">
-          {filters.map((filter) => (
-            <span
-              key={filter.key}
-              className="rounded-full border border-slate-200 bg-white px-3 py-1 text-[11px] font-medium text-slate-500"
-            >
-              {filter.label} {filter.count}
-            </span>
-          ))}
+          {filters.map((filter) => {
+            const isActive = activeStatus === filter.key;
+            return (
+              <button
+                key={filter.key}
+                type="button"
+                onClick={() => setActiveStatus(filter.key)}
+                className={`rounded-full border px-3 py-1 text-[11px] font-medium transition-colors ${
+                  isActive
+                    ? "border-[#121316] bg-[#121316] text-white"
+                    : "border-slate-200 bg-white text-slate-500 hover:bg-slate-50"
+                }`}
+              >
+                {filter.label} {filter.count}
+              </button>
+            );
+          })}
         </div>
       </div>
       {successMessage ? (
@@ -717,20 +841,6 @@ export const ContractRequestsComponent = () => {
         </div>
 
         <div className="flex items-center gap-2">
-          <div className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs text-slate-600">
-            <FiFilter className="text-slate-400" />
-            <select
-              value={activeStatus}
-              onChange={(event) => setActiveStatus(event.target.value)}
-              className="bg-transparent outline-none text-xs text-slate-600"
-            >
-              {filters.map((filter) => (
-                <option key={filter.key} value={filter.key}>
-                  {filter.label} ({filter.count})
-                </option>
-              ))}
-            </select>
-          </div>
           <button className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs text-slate-600 hover:text-slate-900">
             <FiDownload className="text-slate-400" />
             Татах
@@ -797,6 +907,13 @@ export const ContractRequestsComponent = () => {
                     <div className="flex items-center gap-3">
                       <span className="rounded-full border border-[#7aa7ff]/40 bg-[#7aa7ff]/15 px-3 py-1 text-[11px] text-[#a7c1ff]">
                         {row.templateIds.length} гэрээ
+                      </span>
+                      <span
+                        className={`rounded-full border px-3 py-1 text-[11px] font-medium ${statusClass(
+                          row.status,
+                        )}`}
+                      >
+                        {statusLabel(row.status)}
                       </span>
                       <button
                         onClick={(event) => {
@@ -879,6 +996,76 @@ export const ContractRequestsComponent = () => {
             })}
           </div>
         )}
+      </div>
+
+      <div className="rounded-2xl border border-slate-200 bg-white px-5 py-4 shadow-[0_1px_2px_rgba(15,23,42,0.06)]">
+        <div className="flex items-center justify-between gap-3">
+          <div>
+            <h2 className="text-base font-semibold text-slate-900">
+              Ажилтнаар баталгаажсан гэрээнүүд
+            </h2>
+            <p className="text-xs text-slate-500">
+              Ажилтан гарын үсэг зурж баталгаажуулсан хүсэлтүүд
+            </p>
+          </div>
+          <span className="rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-medium text-emerald-600">
+            {signedAuditLogs.length}
+          </span>
+        </div>
+
+        <div className="mt-4 divide-y divide-slate-200 rounded-xl border border-slate-200">
+          {auditLoading ? (
+            <div className="px-4 py-5 text-sm text-slate-400">
+              Ачаалж байна...
+            </div>
+          ) : signedAuditLogs.length === 0 ? (
+            <div className="px-4 py-5 text-sm text-slate-400">
+              Одоогоор баталгаажсан гэрээ алга байна.
+            </div>
+          ) : (
+            signedAuditLogs.map((log) => {
+              const emp = employeeMap.get(log.employeeId);
+              const name = emp
+                ? `${emp.lastName} ${emp.firstName}`
+                : log.employeeId;
+              const dateLabel = new Date(
+                log.employeeSignedAt ?? log.timestamp,
+              ).toLocaleDateString("mn-MN");
+              return (
+                <div
+                  key={log.id}
+                  className="flex items-center justify-between gap-4 px-4 py-4"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="h-10 w-10 rounded-full overflow-hidden shrink-0">
+                      <div
+                        className={`h-full w-full ${avatarColor(
+                          log.employeeId,
+                        )} flex items-center justify-center text-white text-sm font-semibold`}
+                      >
+                        {getInitials(emp?.firstName ?? "", emp?.lastName ?? "")}
+                      </div>
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-slate-900">
+                        {name}
+                      </p>
+                      <p className="text-xs text-slate-500">
+                        {ACTION_LABELS[log.action] ?? log.action}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <span className="rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-[11px] font-medium text-emerald-600">
+                      Амжилттай
+                    </span>
+                    <span className="text-xs text-slate-400">{dateLabel}</span>
+                  </div>
+                </div>
+              );
+            })
+          )}
+        </div>
       </div>
 
       {typeof document !== "undefined" && selected
