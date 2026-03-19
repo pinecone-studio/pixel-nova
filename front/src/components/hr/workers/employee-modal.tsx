@@ -49,6 +49,9 @@ export function EmployeeModal({
   const [signaturePasscode, setSignaturePasscode] = useState("");
   const [signatureMessage, setSignatureMessage] = useState<string | null>(null);
   const [signatureError, setSignatureError] = useState<string | null>(null);
+  const [signatureMode, setSignatureMode] = useState<"reuse" | "redraw">(
+    "reuse",
+  );
 
   function normalizeEmployeeCode(value: string) {
     const trimmed = value.trim().toUpperCase().replace(/\s+/g, "");
@@ -94,7 +97,17 @@ export function EmployeeModal({
     signatureStatusData?.employerSignatureStatus?.hasSignature ?? false;
 
   useEffect(() => {
-    if (mode !== "add" || hasSavedEmployerSignature) {
+    if (mode !== "add") return;
+
+    if (hasSavedEmployerSignature) {
+      setSignatureMode("reuse");
+    } else {
+      setSignatureMode("redraw");
+    }
+  }, [mode, hasSavedEmployerSignature]);
+
+  useEffect(() => {
+    if (mode !== "add" || signatureMode !== "redraw") {
       return;
     }
 
@@ -113,7 +126,7 @@ export function EmployeeModal({
     ctx.lineWidth = 2;
     ctx.lineCap = "round";
     ctx.strokeStyle = "#0F172A";
-  }, [mode, hasSavedEmployerSignature]);
+  }, [mode, signatureMode]);
 
   function updateField<K extends keyof EmployeeFormState>(
     key: K,
@@ -216,6 +229,15 @@ export function EmployeeModal({
     setSignatureError(null);
     setSignatureMessage(null);
 
+    if (signatureMode === "reuse") {
+      if (!/^[0-9]{4}$/.test(signaturePasscode)) {
+        setSignatureError("4 оронтой код оруулна уу.");
+        return;
+      }
+      setSignatureMessage("Хадгалсан гарын үсгийг ашиглахаар тохирууллаа.");
+      return;
+    }
+
     if (!signatureData) {
       setSignatureError("Гарын үсгээ зурна уу.");
       return;
@@ -269,43 +291,81 @@ export function EmployeeModal({
         </DialogHeader>
 
         <div className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto pr-1">
-          {mode === "add" && !signatureStatusLoading && !hasSavedEmployerSignature ? (
+          {mode === "add" && !signatureStatusLoading ? (
             <div className="flex flex-col gap-4 rounded-3xl border border-amber-200 bg-amber-50/70 p-5">
               <div className="flex flex-col gap-1">
                 <p className="text-sm font-semibold text-amber-950">
-                  Эхний удаа ажилтан нэмэхийн өмнө ажил олгогчийн гарын үсгээ хадгална уу
+                  Ажил олгогчийн гарын үсгээ хадгална уу
                 </p>
                 <p className="text-xs text-amber-900/80">
                   Энэ гарын үсгийг onboarding баримтууд дээр автоматаар ашиглана.
                 </p>
               </div>
 
-              <div className="rounded-2xl border border-amber-200 bg-white p-3">
-                <canvas
-                  ref={signatureCanvasRef}
-                  className="h-36 w-full cursor-crosshair rounded-xl bg-slate-50"
-                  onPointerDown={handleSignaturePointerDown}
-                  onPointerMove={handleSignaturePointerMove}
-                  onPointerUp={handleSignaturePointerUp}
-                  onPointerLeave={handleSignaturePointerUp}
-                />
-              </div>
+              {hasSavedEmployerSignature ? (
+                <div className="flex items-center justify-between gap-3">
+                  <p className="text-xs text-amber-900/80">
+                    Хадгалсан гарын үсэг байна. Код оруулж үргэлжлүүлнэ.
+                  </p>
+                  <div className="flex items-center gap-2">
+                    <Button
+                      type="button"
+                      variant={signatureMode === "reuse" ? "default" : "outline"}
+                      onClick={() => setSignatureMode("reuse")}
+                      className={
+                        signatureMode === "reuse"
+                          ? "rounded-xl bg-amber-900 px-4 py-2 text-xs font-semibold text-white hover:bg-amber-800"
+                          : "rounded-xl border-amber-200 bg-white px-4 py-2 text-xs font-semibold text-amber-900 hover:bg-amber-50"
+                      }
+                    >
+                      Хадгалснаар ашиглах
+                    </Button>
+                    <Button
+                      type="button"
+                      variant={signatureMode === "redraw" ? "default" : "outline"}
+                      onClick={() => setSignatureMode("redraw")}
+                      className={
+                        signatureMode === "redraw"
+                          ? "rounded-xl bg-amber-900 px-4 py-2 text-xs font-semibold text-white hover:bg-amber-800"
+                          : "rounded-xl border-amber-200 bg-white px-4 py-2 text-xs font-semibold text-amber-900 hover:bg-amber-50"
+                      }
+                    >
+                      Шинээр зурах
+                    </Button>
+                  </div>
+                </div>
+              ) : null}
 
-              <div className="flex items-center justify-between gap-3">
-                <p className="text-xs text-slate-500">Цагаан хэсэг дээр гарын үсгээ зурна уу.</p>
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={clearSignature}
-                  className="rounded-xl border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:bg-slate-50 hover:text-slate-900"
-                >
-                  Цэвэрлэх
-                </Button>
-              </div>
+              {signatureMode === "redraw" ? (
+                <div className="rounded-2xl border border-amber-200 bg-white p-3">
+                  <canvas
+                    ref={signatureCanvasRef}
+                    className="h-36 w-full cursor-crosshair rounded-xl bg-slate-50"
+                    onPointerDown={handleSignaturePointerDown}
+                    onPointerMove={handleSignaturePointerMove}
+                    onPointerUp={handleSignaturePointerUp}
+                    onPointerLeave={handleSignaturePointerUp}
+                  />
+                </div>
+              ) : null}
+
+              {signatureMode === "redraw" ? (
+                <div className="flex items-center justify-between gap-3">
+                  <p className="text-xs text-slate-500">Цагаан хэсэг дээр гарын үсгээ зурна уу.</p>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={clearSignature}
+                    className="rounded-xl border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:bg-slate-50 hover:text-slate-900"
+                  >
+                    Цэвэрлэх
+                  </Button>
+                </div>
+              ) : null}
 
               <div className="flex flex-col gap-1.5">
                 <Label className="text-sm font-medium text-slate-700">
-                  4 оронтой код (заавал биш)
+                  4 оронтой код {signatureMode === "reuse" ? "(шаардлагатай)" : "(заавал биш)"}
                 </Label>
                 <Input
                   value={signaturePasscode}

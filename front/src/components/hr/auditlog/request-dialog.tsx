@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { FiEye, FiFileText, FiX } from "react-icons/fi";
 import { useLazyQuery, useMutation, useQuery } from "@apollo/client/react";
@@ -118,6 +118,13 @@ export function AddEmployeeRequestDialog({
   const [terminationDate, setTerminationDate] = useState("");
   const [contractNo, setContractNo] = useState("");
   const [terminationReason, setTerminationReason] = useState("");
+  const [previewSignatureOpen, setPreviewSignatureOpen] = useState(false);
+  const [previewSignatureData, setPreviewSignatureData] = useState("");
+  const previewSignatureCanvasRef = useRef<HTMLCanvasElement | null>(null);
+  const previewSignatureContainerRef = useRef<HTMLDivElement | null>(null);
+  const previewSignatureDrawingRef = useRef(false);
+  const previewFrameRef = useRef<HTMLIFrameElement | null>(null);
+  const [previewFrameHeight, setPreviewFrameHeight] = useState(1200);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [currentDept, setCurrentDept] = useState("Engineering");
   const [currentPosition, setCurrentPosition] = useState("");
@@ -275,6 +282,88 @@ export function AddEmployeeRequestDialog({
     return `data:${previewContent.contentType};base64,${previewContent.content}`;
   }, [previewContent]);
 
+  useEffect(() => {
+    if (!previewSignatureOpen) return;
+    const canvas = previewSignatureCanvasRef.current;
+    const container = previewSignatureContainerRef.current;
+    if (!canvas || !container) return;
+    const rect = container.getBoundingClientRect();
+    if (!rect.width || !rect.height) return;
+    const ratio = window.devicePixelRatio || 1;
+    canvas.width = rect.width * ratio;
+    canvas.height = rect.height * ratio;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+    ctx.scale(ratio, ratio);
+    ctx.lineWidth = 2;
+    ctx.lineCap = "round";
+    ctx.strokeStyle = "#0F172A";
+  }, [previewSignatureOpen]);
+
+  function handlePreviewSignaturePointerDown(
+    event: React.PointerEvent<HTMLCanvasElement>,
+  ) {
+    const canvas = previewSignatureCanvasRef.current;
+    if (!canvas) return;
+    const rect = canvas.getBoundingClientRect();
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+    ctx.beginPath();
+    ctx.moveTo(event.clientX - rect.left, event.clientY - rect.top);
+    previewSignatureDrawingRef.current = true;
+  }
+
+  function handlePreviewSignaturePointerMove(
+    event: React.PointerEvent<HTMLCanvasElement>,
+  ) {
+    if (!previewSignatureDrawingRef.current) return;
+    const canvas = previewSignatureCanvasRef.current;
+    if (!canvas) return;
+    const rect = canvas.getBoundingClientRect();
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+    ctx.lineTo(event.clientX - rect.left, event.clientY - rect.top);
+    ctx.stroke();
+  }
+
+  function handlePreviewSignaturePointerUp() {
+    previewSignatureDrawingRef.current = false;
+  }
+
+  function handleClearPreviewSignature() {
+    const canvas = previewSignatureCanvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+  }
+
+  function handleSavePreviewSignature() {
+    const canvas = previewSignatureCanvasRef.current;
+    if (!canvas) return;
+    const dataUrl = canvas.toDataURL("image/png");
+    setPreviewSignatureData(dataUrl);
+    setPreviewSignatureOpen(false);
+  }
+
+  function handlePreviewFrameLoad() {
+    const iframe = previewFrameRef.current;
+    if (!iframe) return;
+    try {
+      const doc = iframe.contentDocument;
+      if (!doc) return;
+      const nextHeight =
+        doc.body?.scrollHeight ||
+        doc.documentElement?.scrollHeight ||
+        previewFrameHeight;
+      if (nextHeight > 0) {
+        setPreviewFrameHeight(nextHeight + 24);
+      }
+    } catch {
+      // Cross-origin (PDF) cannot measure; keep default height
+    }
+  }
+
   async function handlePreview(doc: ActionConfig["documents"][number]) {
     setPreviewOpen(true);
     setPreviewDoc(doc);
@@ -371,7 +460,12 @@ export function AddEmployeeRequestDialog({
       );
       requireValue(lastName, "lastName");
       requireValue(firstName, "firstName");
-      requirePattern(changeEmail, "email", emailRegex, "@gmail.com-оор төгсөнө.");
+      requirePattern(
+        changeEmail,
+        "email",
+        emailRegex,
+        "@gmail.com-оор төгсөнө.",
+      );
       requireValue(currentDept, "currentDept");
       requireValue(currentPosition, "currentPosition");
       requireValue(nextDept, "nextDept");
@@ -469,7 +563,10 @@ export function AddEmployeeRequestDialog({
       if (salaryDelta) overrides.increase_amount = salaryDelta;
       if (prevSalary && nextSalary && Number(prevSalary) > 0) {
         overrides.increase_percent = String(
-          Math.round(((Number(nextSalary) - Number(prevSalary)) / Number(prevSalary)) * 100),
+          Math.round(
+            ((Number(nextSalary) - Number(prevSalary)) / Number(prevSalary)) *
+              100,
+          ),
         );
       }
     }
@@ -507,7 +604,8 @@ export function AddEmployeeRequestDialog({
           employeeId: matchedEmployee.id,
           action: action.name,
           overrideRecipients,
-          templateDataOverrides: Object.keys(overrides).length > 0 ? overrides : undefined,
+          templateDataOverrides:
+            Object.keys(overrides).length > 0 ? overrides : undefined,
         },
       });
       onOpenChange(false);
@@ -771,13 +869,19 @@ export function AddEmployeeRequestDialog({
       {typeof document !== "undefined" && previewOpen
         ? createPortal(
             <div className="fixed inset-0 z-120 flex items-center justify-center overflow-y-auto bg-black/60 backdrop-blur-sm">
-              <button
-                type="button"
+              <div
                 aria-label="Preview close overlay"
                 className="absolute inset-0"
-                onClick={() => setPreviewOpen(false)}
+                onClick={() => {
+                  if (previewSignatureOpen) return;
+                  setPreviewOpen(false);
+                  setPreviewSignatureOpen(false);
+                }}
               />
-              <div className="relative w-[920px] max-w-[95vw] h-[82vh] overflow-y-auto bg-white border border-slate-200 rounded-2xl shadow-2xl">
+              <div
+                className="relative w-[920px] max-w-[95vw] h-[82vh] max-h-[82vh] overflow-hidden bg-white border border-slate-200 rounded-2xl shadow-2xl flex flex-col"
+                onClick={(event) => event.stopPropagation()}
+              >
                 <div className="flex items-center justify-between px-5 py-4 border-b border-slate-200">
                   <div className="flex flex-col">
                     <p className="text-slate-900 text-sm font-semibold">
@@ -785,15 +889,30 @@ export function AddEmployeeRequestDialog({
                     </p>
                     <p className="text-slate-500 text-xs mt-0.5">Preview</p>
                   </div>
-                  <button
-                    type="button"
-                    onClick={() => setPreviewOpen(false)}
-                    className="w-8 h-8 rounded-lg flex items-center justify-center text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors"
-                  >
-                    <FiX className="text-lg" />
-                  </button>
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setPreviewSignatureData("");
+                        setPreviewSignatureOpen(true);
+                      }}
+                      className="rounded-lg border cursor-pointer border-slate-200 px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50"
+                    >
+                      Гарын үсэг зурах
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setPreviewOpen(false);
+                        setPreviewSignatureOpen(false);
+                      }}
+                      className="w-8 h-8 rounded-lg flex items-center justify-center text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors"
+                    >
+                      <FiX className="text-lg" />
+                    </button>
+                  </div>
                 </div>
-                <div className="h-full bg-slate-50 p-4">
+                <div className="flex-1 min-h-0 overflow-y-auto bg-slate-50 p-4">
                   {previewLoading ? (
                     <div className="w-full h-full rounded-xl border border-slate-200 flex items-center justify-center text-sm text-slate-400">
                       Уншиж байна...
@@ -802,21 +921,73 @@ export function AddEmployeeRequestDialog({
                     <div className="w-full h-full rounded-xl border border-red-200 bg-red-50 flex items-center justify-center text-sm text-red-500">
                       {previewError}
                     </div>
-                  ) : previewContent?.contentType === "text/html" ? (
-                    <iframe
-                      title={previewDoc?.template ?? "Template preview"}
-                      className="w-full h-full rounded-xl border border-slate-200 bg-white"
-                      srcDoc={previewContent.content}
-                    />
-                  ) : previewUrl ? (
-                    <iframe
-                      title={previewDoc?.template ?? "Template preview"}
-                      className="w-full h-full rounded-xl border border-slate-200 bg-white"
-                      src={previewUrl}
-                    />
                   ) : (
-                    <div className="w-full h-full rounded-xl border border-slate-200 flex items-center justify-center text-sm text-slate-400">
-                      Preview бэлэн биш байна.
+                    <div
+                      ref={previewSignatureContainerRef}
+                      className="relative w-full rounded-xl border border-slate-200 bg-white"
+                    >
+                      {previewContent?.contentType === "text/html" ? (
+                        <iframe
+                          title={previewDoc?.template ?? "Template preview"}
+                          ref={previewFrameRef}
+                          onLoad={handlePreviewFrameLoad}
+                          className="w-full bg-white"
+                          style={{ height: previewFrameHeight }}
+                          srcDoc={previewContent.content}
+                        />
+                      ) : previewUrl ? (
+                        <iframe
+                          title={previewDoc?.template ?? "Template preview"}
+                          className="w-full h-[70vh] bg-white"
+                          src={previewUrl}
+                          scrolling="yes"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-sm text-slate-400">
+                          Preview бэлэн биш байна.
+                        </div>
+                      )}
+
+                      {previewSignatureData ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img
+                          src={previewSignatureData}
+                          alt="Signature"
+                          className="absolute bottom-6 right-6 h-16 max-w-[160px] object-contain"
+                        />
+                      ) : null}
+
+                      {previewSignatureOpen ? (
+                        <div
+                          className="absolute inset-0"
+                          onClick={(event) => event.stopPropagation()}
+                        >
+                          <canvas
+                            ref={previewSignatureCanvasRef}
+                            className="h-full w-full cursor-crosshair"
+                            onPointerDown={handlePreviewSignaturePointerDown}
+                            onPointerMove={handlePreviewSignaturePointerMove}
+                            onPointerUp={handlePreviewSignaturePointerUp}
+                            onPointerLeave={handlePreviewSignaturePointerUp}
+                          />
+                          <div className="absolute bottom-4 right-4 flex items-center gap-2">
+                            <button
+                              type="button"
+                              onClick={handleClearPreviewSignature}
+                              className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50"
+                            >
+                              Цэвэрлэх
+                            </button>
+                            <button
+                              type="button"
+                              onClick={handleSavePreviewSignature}
+                              className="rounded-lg bg-slate-900 px-3 py-2 text-xs font-semibold text-white hover:bg-slate-800"
+                            >
+                              Дуусгах
+                            </button>
+                          </div>
+                        </div>
+                      ) : null}
                     </div>
                   )}
                 </div>
