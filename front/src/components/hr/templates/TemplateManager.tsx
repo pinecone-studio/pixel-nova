@@ -52,7 +52,9 @@ export default function TemplateManager() {
 
   const filteredByPhase = useMemo(() => {
     const phases =
-      activePhase === "all" ? PHASES : ([activePhase] as typeof PHASES);
+      activePhase === "all"
+        ? PHASES
+        : ([activePhase] as unknown as typeof PHASES);
     return phases.map((phase) => ({
       phase,
       templates: getTemplatesByPhase(phase),
@@ -139,8 +141,7 @@ export default function TemplateManager() {
                 isActive
                   ? "border-[#121316] bg-[#121316] text-white"
                   : "border-black/12 bg-white text-[#3f4145] hover:bg-[#f5f5f5]"
-              }`}
-            >
+              }`}>
               {button.label}
             </button>
           );
@@ -163,20 +164,17 @@ export default function TemplateManager() {
             employeesWithIssues > 0
               ? "border-amber-200 bg-amber-50"
               : "border-emerald-200 bg-emerald-50"
-          }`}
-        >
+          }`}>
           <p
             className={`text-[24px] font-bold ${
               employeesWithIssues > 0 ? "text-amber-700" : "text-emerald-700"
-            }`}
-          >
+            }`}>
             {employeesWithIssues}
           </p>
           <p
             className={`text-[13px] ${
               employeesWithIssues > 0 ? "text-amber-600" : "text-emerald-600"
-            }`}
-          >
+            }`}>
             Дутуу мэдээлэлтэй ажилтан
           </p>
         </div>
@@ -230,8 +228,7 @@ export default function TemplateManager() {
               return (
                 <div
                   key={row.id}
-                  className="flex flex-col gap-2 rounded-[12px] border border-black/10 bg-slate-50/60 px-4 py-3"
-                >
+                  className="flex flex-col gap-2 rounded-[12px] border border-black/10 bg-slate-50/60 px-4 py-3">
                   <div className="flex flex-wrap items-center justify-between gap-3">
                     <div className="flex flex-col">
                       <span className="text-[14px] font-semibold text-[#121316]">
