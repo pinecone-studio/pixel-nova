@@ -1,12 +1,14 @@
 "use client";
 
 import { useQuery } from "@apollo/client/react";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { createPortal } from "react-dom";
 import { FiUser } from "react-icons/fi";
 
 import { AuditActionCard } from "@/components/hr/auditlog/action-card";
 import { EditActionDialog } from "@/components/hr/auditlog/edit-action-dialog";
 import { AddEmployeeRequestDialog } from "@/components/hr/auditlog/request-dialog";
+import { useHrOverlay } from "@/components/hr/overlay-context";
 import { CalIcon, ReqIcon, EyeIcon } from "@/components/icons";
 import { GET_ACTIONS, GET_EMPLOYEES } from "@/graphql/queries";
 import { GET_AUDIT_LOGS } from "@/graphql/queries/audit-logs";
@@ -51,7 +53,8 @@ function toggleSort(
 function SortArrow({ active, dir }: { active: boolean; dir: SortDir }) {
   return (
     <span
-      className={`ml-1 text-[10px] ${active ? "text-[#121316]" : "text-[#3f4145]/40"}`}>
+      className={`ml-1 text-[10px] ${active ? "text-[#121316]" : "text-[#3f4145]/40"}`}
+    >
       {dir === "asc" ? "↑↓" : "↓↑"}
     </span>
   );
@@ -116,7 +119,8 @@ function EmailStatus({ log }: { log: AuditLog }) {
         </span>
         <span
           className="truncate text-[10px] text-red-400 max-w-[140px]"
-          title={log.notificationError}>
+          title={log.notificationError}
+        >
           {log.notificationError}
         </span>
       </div>
@@ -164,9 +168,15 @@ function AuditDetailModal({
     minute: "2-digit",
   });
 
-  return (
+  const modal = (
     <div className="fixed inset-0 z-100 flex items-center justify-center bg-black/50 p-4">
-      <div className="w-full max-w-lg rounded-[24px] border border-black/12 bg-white shadow-2xl">
+      <button
+        type="button"
+        aria-label="Close detail overlay"
+        className="absolute inset-0"
+        onClick={onClose}
+      />
+      <div className="relative z-10 w-full max-w-lg rounded-[24px] border border-black/12 bg-white shadow-2xl">
         {/* Header */}
         <div className="flex items-center justify-between border-b border-black/12 px-6 py-4">
           <div>
@@ -179,7 +189,8 @@ function AuditDetailModal({
           </div>
           <button
             onClick={onClose}
-            className="flex h-8 w-8 items-center justify-center rounded-[10px] text-[#77818c] transition-colors hover:bg-[#f5f5f5] hover:text-[#121316]">
+            className="flex h-8 w-8 items-center justify-center rounded-[10px] text-[#77818c] transition-colors hover:bg-[#f5f5f5] hover:text-[#121316]"
+          >
             ✕
           </button>
         </div>
@@ -195,7 +206,8 @@ function AuditDetailModal({
                 {log.documentIds.map((docId) => (
                   <div
                     key={docId}
-                    className="flex items-center gap-2 rounded-[10px] border border-black/6 bg-[#fafafa] px-3 py-2 text-[13px]">
+                    className="flex items-center gap-2 rounded-[10px] border border-black/6 bg-[#fafafa] px-3 py-2 text-[13px]"
+                  >
                     <ReqIcon className="h-3.5 w-3.5 text-[#77818c]" />
                     <span className="text-[#121316] truncate">{docId}</span>
                   </div>
@@ -228,7 +240,8 @@ function AuditDetailModal({
                     {log.recipientEmails.map((email) => (
                       <span
                         key={email}
-                        className="rounded-full border border-black/12 bg-white px-2 py-0.5 text-[11px] text-[#3f4145]">
+                        className="rounded-full border border-black/12 bg-white px-2 py-0.5 text-[11px] text-[#3f4145]"
+                      >
                         {email}
                       </span>
                     ))}
@@ -255,7 +268,8 @@ function AuditDetailModal({
                 {log.incompleteFields.map((field) => (
                   <span
                     key={field}
-                    className="rounded-full border border-amber-200 bg-amber-50 px-2 py-0.5 text-[11px] text-amber-700">
+                    className="rounded-full border border-amber-200 bg-amber-50 px-2 py-0.5 text-[11px] text-amber-700"
+                  >
                     {field}
                   </span>
                 ))}
@@ -273,6 +287,10 @@ function AuditDetailModal({
       </div>
     </div>
   );
+
+  return typeof document !== "undefined"
+    ? createPortal(modal, document.body)
+    : modal;
 }
 
 // ---------------------------------------------------------------------------
@@ -285,6 +303,7 @@ export function AuditlogComponent() {
     useState<ActionConfig | null>(null);
   const [editAction, setEditAction] = useState<ActionConfig | null>(null);
   const [detailLog, setDetailLog] = useState<AuditLog | null>(null);
+  const { setBlurred } = useHrOverlay();
   const [sort, setSort] = useState<{ key: SortKey; dir: SortDir }>({
     key: "date",
     dir: "desc",
@@ -402,6 +421,10 @@ export function AuditlogComponent() {
     [],
   );
 
+  useEffect(() => {
+    setBlurred(!!detailLog);
+  }, [detailLog, setBlurred]);
+
   // ---- Render ----
   return (
     <div className="min-h-screen bg-[#F4F5F7] text-slate-900 font-sans flex flex-col gap-6 p-0">
@@ -472,23 +495,27 @@ export function AuditlogComponent() {
           style={{
             gridTemplateColumns:
               "minmax(160px,2fr) minmax(140px,1.25fr) minmax(90px,0.8fr) minmax(100px,0.9fr) minmax(120px,1fr) minmax(120px,1fr) 72px",
-          }}>
+          }}
+        >
           <button
             onClick={() => handleSort("documentName")}
-            className="flex items-center gap-1 px-2 font-medium hover:text-[#121316] transition-colors text-left">
+            className="flex items-center gap-1 px-2 font-medium hover:text-[#121316] transition-colors text-left"
+          >
             Баримт бичиг
             <SortArrow active={sort.key === "documentName"} dir={sort.dir} />
           </button>
           <button
             onClick={() => handleSort("employee")}
-            className="flex items-center gap-1 px-2 font-medium hover:text-[#121316] transition-colors text-left">
+            className="flex items-center gap-1 px-2 font-medium hover:text-[#121316] transition-colors text-left"
+          >
             Ажилтан
             <SortArrow active={sort.key === "employee"} dir={sort.dir} />
           </button>
           <span className="px-2 font-medium">Үе</span>
           <button
             onClick={() => handleSort("date")}
-            className="flex items-center gap-1 px-2 font-medium hover:text-[#121316] transition-colors text-left">
+            className="flex items-center gap-1 px-2 font-medium hover:text-[#121316] transition-colors text-left"
+          >
             Огноо
             <SortArrow active={sort.key === "date"} dir={sort.dir} />
           </button>
@@ -528,7 +555,8 @@ export function AuditlogComponent() {
                 style={{
                   gridTemplateColumns:
                     "minmax(160px,2fr) minmax(140px,1.25fr) minmax(90px,0.8fr) minmax(100px,0.9fr) minmax(120px,1fr) minmax(120px,1fr) 72px",
-                }}>
+                }}
+              >
                 {/* Баримт бичиг */}
                 <div className="flex items-center gap-2.5 px-2">
                   <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[12px] border border-black/12 bg-white">
@@ -561,7 +589,8 @@ export function AuditlogComponent() {
                 {/* Үе (Phase badge) */}
                 <div className="px-2">
                   <span
-                    className={`inline-flex items-center gap-1 rounded-full px-2 py-1 text-[11px] font-medium ${phaseBadge(log.phase)}`}>
+                    className={`inline-flex items-center gap-1 rounded-full px-2 py-1 text-[11px] font-medium ${phaseBadge(log.phase)}`}
+                  >
                     <span className="text-[10px]">◆</span>
                     {phaseKey}
                   </span>
@@ -588,7 +617,8 @@ export function AuditlogComponent() {
                   <button
                     onClick={() => setDetailLog(log)}
                     className="flex h-8 w-8 items-center justify-center rounded-[10px] text-[#77818c] transition-colors hover:bg-[#f5f5f5] hover:text-[#121316]"
-                    aria-label="Дэлгэрэнгүй">
+                    aria-label="Дэлгэрэнгүй"
+                  >
                     <EyeIcon />
                   </button>
                 </div>
