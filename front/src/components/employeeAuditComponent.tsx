@@ -33,6 +33,7 @@ const PHASE_LABELS: Record<string, string> = {
 };
 
 type FilterAction = "" | "add_employee" | "promote_employee" | "change_position";
+type AuditTab = "newEmployee" | "documentReview";
 
 function getDocumentSigningSummary(
   log: AuditLog,
@@ -378,6 +379,276 @@ function AuditRow({
   );
 }
 
+function EmployeeRequestListRow({
+  log,
+  employee,
+  onOpen,
+}: {
+  log: AuditLog;
+  employee: Employee | null;
+  onOpen: (log: AuditLog) => void;
+}) {
+  const displayName = employee
+    ? `${employee.lastName} ${employee.firstName}`
+    : ACTION_LABELS[log.action] ?? log.action;
+
+  return (
+    <button
+      type="button"
+      onClick={() => onOpen(log)}
+      className="group flex w-full items-center justify-between rounded-[20px] border border-[#EAECF0] bg-white px-5 py-5 text-left transition-colors"
+    >
+      <div className="flex items-center gap-4">
+        <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-[#86EFAC] bg-[#F0FDF4] text-[#22C55E]">
+          <FiCheckCircle className="h-5 w-5" />
+        </div>
+        <div>
+          <p className="text-[16px] font-semibold text-[#101828]">
+            {displayName}
+          </p>
+          <div className="mt-1 flex items-center gap-2 text-[13px] text-[#98A2B3]">
+            <FiFileText className="h-3.5 w-3.5" />
+            <span>{log.documentIds.length} баримт хавсаргасан</span>
+          </div>
+        </div>
+      </div>
+
+      <div className="flex items-center gap-5">
+        <span
+          className={`rounded-full border px-4 py-1.5 text-[13px] font-medium ${
+            log.employeeSigned
+              ? "border-[#86EFAC] bg-white text-[#22C55E]"
+              : "border-[#FF8A80] bg-white text-[#FF3B30]"
+          }`}
+        >
+          {log.employeeSigned ? "Ажилтан нэмсэн" : "Ажилтан нэмэх"}
+        </span>
+        <FiEye className="h-5 w-5 text-[#98A2B3]" />
+        <BiChevronRight className="h-5 w-5 text-[#98A2B3]" />
+      </div>
+    </button>
+  );
+}
+
+function NewEmployeeAuditDetailModal({
+  log,
+  employee,
+  documentsById,
+  onClose,
+  onPreview,
+  onOpenSignature,
+}: {
+  log: AuditLog;
+  employee?: Employee | null;
+  documentsById: Map<string, Document>;
+  onClose: () => void;
+  onPreview: (document: Document) => void;
+  onOpenSignature: (document: Document) => void;
+}) {
+  const files = log.documentIds
+    .map((documentId) => documentsById.get(documentId))
+    .filter((document): document is Document => Boolean(document));
+  const signableDocument =
+    files.find((document) => !document.employeeSigned) ?? files[0] ?? null;
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/65 p-4 backdrop-blur-sm">
+      <button
+        type="button"
+        aria-label="Close detail overlay"
+        className="absolute inset-0"
+        onClick={onClose}
+      />
+      <div className="relative z-10 w-full max-w-[500px] rounded-[24px] border border-[#EAECF0] bg-white px-6 py-6 shadow-[0_24px_80px_rgba(0,0,0,0.18)]">
+        <div className="mx-auto w-full max-w-[452px]">
+          <div className="mb-6 flex items-start justify-between">
+            <h2 className="text-[20px] font-semibold text-[#101828]">Шинэ ажилтан</h2>
+            <button
+              type="button"
+              onClick={onClose}
+              className="text-[#101828] transition hover:opacity-70"
+            >
+              <BiX className="h-7 w-7" />
+            </button>
+          </div>
+
+          <div className="grid grid-cols-2 gap-x-5 gap-y-4">
+            <div>
+              <p className="mb-1.5 text-[14px] leading-5 text-[#101828]">Овог</p>
+              <div className="rounded-[12px] border border-[#D0D5DD] px-3 py-2.5 text-[15px] leading-6 text-[#101828]">
+                {employee?.lastName ?? "Мэдээлэлгүй"}
+              </div>
+            </div>
+            <div>
+              <p className="mb-1.5 text-[14px] leading-5 text-[#101828]">Нэр</p>
+              <div className="rounded-[12px] border border-[#D0D5DD] px-3 py-2.5 text-[15px] leading-6 text-[#101828]">
+                {employee?.firstName ?? "Мэдээлэлгүй"}
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-4">
+            <p className="mb-1.5 text-[14px] leading-5 text-[#101828]">Имэйл</p>
+            <div className="rounded-[12px] border border-[#D0D5DD] px-3 py-2.5 text-[15px] leading-6 text-[#101828]">
+              {employee?.email ?? "Мэдээлэлгүй"}
+            </div>
+          </div>
+
+          <div className="mt-4 grid grid-cols-2 gap-x-5 gap-y-4">
+            <div>
+              <p className="mb-1.5 text-[14px] leading-5 text-[#101828]">Хэлтэс</p>
+              <div className="rounded-[12px] border border-[#D0D5DD] px-3 py-2.5 text-[15px] leading-6 text-[#101828]">
+                {employee?.department ?? "Мэдээлэлгүй"}
+              </div>
+            </div>
+            <div>
+              <p className="mb-1.5 text-[14px] leading-5 text-[#101828]">Албан тушаал</p>
+              <div className="rounded-[12px] border border-[#D0D5DD] px-3 py-2.5 text-[15px] leading-6 text-[#101828]">
+                {employee?.jobTitle ?? "Мэдээлэлгүй"}
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-4">
+            <p className="mb-2 text-[14px] leading-5 text-[#101828]">Хавсаргасан файл</p>
+            <div className="flex flex-col gap-2.5">
+              {files.map((document) => (
+                <div
+                  key={document.id}
+                  className="flex items-center justify-between rounded-[16px] border border-[#D0D5DD] bg-white px-3 py-2.5"
+                >
+                  <div className="flex min-w-0 items-center gap-4">
+                    <div className="flex h-[48px] w-[48px] shrink-0 items-center justify-center rounded-[16px] border border-[#D0D5DD] bg-white text-[#667085]">
+                      <FiFileText className="h-5 w-5" />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="truncate text-[14px] font-medium leading-5 text-[#101828]">
+                        {document.documentName.replace(/\.pdf$/i, "")}
+                      </p>
+                      <p className="mt-0.5 truncate text-[12px] leading-5 text-[#98A2B3]">
+                        {document.documentName}
+                      </p>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => onPreview(document)}
+                    className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-[#667085] transition hover:bg-[#F3F4F6] hover:text-[#101828]"
+                  >
+                    <FiEye className="h-4.5 w-4.5" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="mt-3 flex items-center justify-between">
+            <div className="text-[14px] leading-5 text-[#101828]">
+              Гарын үсэг
+            </div>
+            <div className="text-[14px] leading-5 text-[#98A2B3]">
+              {log.employeeSigned ? "Зурсан" : "Зураагүй"}
+            </div>
+          </div>
+
+          <div className="mt-10 flex justify-end gap-3">
+            <button
+              type="button"
+              onClick={() => {
+                if (signableDocument) {
+                  onOpenSignature(signableDocument);
+                }
+              }}
+              disabled={!signableDocument}
+              className="rounded-[16px] border border-[#D0D5DD] px-6 py-2.5 text-[14px] font-medium text-[#101828] disabled:opacity-50"
+            >
+              Гарын үсэг зурах
+            </button>
+            <button
+              type="button"
+              onClick={onClose}
+              className="rounded-[16px] bg-[#101828] px-6 py-2.5 text-[14px] font-medium text-white"
+            >
+              Баталгаажуулах
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function DocumentReviewRow({
+  document,
+  onOpen,
+}: {
+  document: Document;
+  onOpen: (document: Document) => void;
+}) {
+  const title = document.documentName
+    .replace(/\.pdf$/i, "")
+    .replace(/[_-]+/g, " ")
+    .trim();
+  const isNewDocument = !document.employeeSigned;
+
+  return (
+    <div
+      role="button"
+      tabIndex={0}
+      onClick={() => onOpen(document)}
+      onKeyDown={(event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          onOpen(document);
+        }
+      }}
+      className="group flex w-full cursor-pointer items-center justify-between rounded-[20px] border border-[#EAECF0] bg-white px-5 py-5 text-left transition-colors">
+      <div className="flex items-center gap-4">
+        <div className="flex h-14 w-14 items-center justify-center rounded-[18px] border border-[#98C1FF] bg-white text-[#3B82F6]">
+          <FiFileText className="h-6 w-6" />
+        </div>
+        <div>
+          <p className="text-[16px] font-medium text-[#101828]">{title}</p>
+          <p className="mt-1 text-[14px] text-[#98A2B3]">{document.documentName}</p>
+        </div>
+      </div>
+
+      <div className="flex items-center gap-5">
+        <span
+          className={`rounded-full border px-4 py-1.5 text-[13px] font-medium ${
+            isNewDocument
+              ? "border-[#FF8A80] bg-white text-[#FF3B30]"
+              : "border-[#86EFAC] bg-white text-[#22C55E]"
+          }`}
+        >
+          {isNewDocument ? "Шинэ баримт" : "Шинэчлэлт"}
+        </span>
+        <button
+          type="button"
+          onClick={(event) => {
+            event.stopPropagation();
+            onOpen(document);
+          }}
+          className="flex h-8 w-8 items-center justify-center rounded-[10px] text-[#98A2B3] transition hover:bg-[#F3F4F6] hover:text-[#101828]"
+          aria-label="Урьдчилж харах"
+        >
+          <FiEye className="h-5 w-5" />
+        </button>
+        <button
+          type="button"
+          onClick={(event) => {
+            event.stopPropagation();
+          }}
+          className="flex h-8 w-8 items-center justify-center rounded-[10px] text-[#98A2B3] transition hover:bg-[#F3F4F6] hover:text-[#101828]"
+          aria-label="Татах"
+        >
+          <FiFileText className="h-5 w-5" />
+        </button>
+      </div>
+    </div>
+  );
+}
+
 // ---------------------------------------------------------------------------
 // Main component
 // ---------------------------------------------------------------------------
@@ -389,7 +660,6 @@ function DocumentAuditDetailModal({
   onClose,
   onPreview,
   onSignDocument,
-  signing,
 }: {
   log: AuditLog;
   employee?: Employee | null;
@@ -397,12 +667,10 @@ function DocumentAuditDetailModal({
   onClose: () => void;
   onPreview: (document: Document) => void;
   onSignDocument: (document: Document) => void;
-  signing: boolean;
 }) {
   const empName = employee
     ? `${employee.lastName} ${employee.firstName}`
     : log.employeeId;
-  const summary = getDocumentSigningSummary(log, documentsById);
   const dateStr = new Date(log.timestamp).toLocaleDateString("mn-MN", {
     year: "numeric",
     month: "2-digit",
@@ -419,16 +687,12 @@ function DocumentAuditDetailModal({
         className="absolute inset-0"
         onClick={onClose}
       />
-      <div className="relative z-10 w-full max-w-[640px] rounded-[28px] border border-[#EAECF0] bg-white p-7 shadow-[0_24px_80px_rgba(0,0,0,0.18)]">
-        <div className="mb-6 flex items-start justify-between">
+      <div className="relative z-10 w-full max-w-[500px] rounded-[24px] border border-[#EAECF0] bg-white px-6 py-5 shadow-[0_24px_80px_rgba(0,0,0,0.18)]">
+        <div className="mb-5 flex items-start justify-between">
           <div>
-            <p className="text-[13px] text-[#98A2B3]">Аудит бүртгэл</p>
-            <h2 className="mt-2 text-[20px] font-semibold text-[#101828]">
-              {ACTION_LABELS[log.action] ?? log.action}
+            <h2 className="text-[20px] font-semibold text-[#101828]">
+              Шинэ баримт
             </h2>
-            <p className="mt-1 text-[13px] text-[#667085]">
-              {empName} · {dateStr}
-            </p>
           </div>
           <button
             type="button"
@@ -439,55 +703,44 @@ function DocumentAuditDetailModal({
           </button>
         </div>
 
-        <div className="mb-5 flex items-center justify-between rounded-2xl border border-[#EAECF0] bg-[#FCFCFD] px-4 py-3 text-[14px]">
-          <span className="text-[#667085]">Статус</span>
-          {summary.allHrSigned && summary.allEmployeeSigned ? (
-            <span className="rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-emerald-700">
-              Баталгаажсан
-            </span>
-          ) : !summary.allHrSigned ? (
-            <span className="rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-amber-700">
-              {summary.unsignedCount} дутуу
-            </span>
-          ) : (
-            <span className="rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-amber-700">
-              Ажилтан хүлээгдэж байна
-            </span>
-          )}
-        </div>
-
-        <div className="flex flex-col gap-5">
+        <div className="flex flex-col gap-4">
           <div>
-            <p className="mb-2 text-[13px] font-medium text-[#344054]">
-              Баримтууд ({log.documentIds.length})
-            </p>
+            <p className="mb-2 text-[14px] text-[#101828]">Тайлбар</p>
+            <div className="min-h-[114px] rounded-[14px] border border-[#D0D5DD] px-4 py-3 text-[14px] leading-8 text-[#667085]">
+              {empName} · {dateStr}
+            </div>
+          </div>
+          <div>
+            <p className="mb-2 text-[14px] text-[#101828]">Хавсаргасан файл</p>
             {log.documentIds.length > 0 ? (
               <div className="flex flex-col gap-2">
                 {log.documentIds.map((docId) => {
                   const document = documentsById.get(docId);
                   const status = document ? getDocumentStatus(document) : null;
-                  const canSign =
-                    Boolean(document?.hrSigned) && !Boolean(document?.employeeSigned);
-
                   return (
                     <div
                       key={docId}
-                      className="flex items-center justify-between gap-3 rounded-2xl border border-[#EAECF0] bg-white px-3 py-3">
-                      <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-[#D0D5DD] bg-[#F9FAFB] text-[#667085]">
-                        <FiFileText className="h-4 w-4" />
+                      className="flex items-center justify-between gap-3 rounded-[16px] border border-[#D0D5DD] bg-white px-3 py-2.5">
+                      <div className="flex items-center gap-4 min-w-0 flex-1">
+                        <div className="flex h-[48px] w-[48px] items-center justify-center rounded-[16px] border border-[#D0D5DD] bg-white text-[#667085]">
+                          <FiFileText className="h-5 w-5" />
+                        </div>
+                        <div className="min-w-0">
+                          <p className="truncate text-[14px] font-medium leading-5 text-[#101828]">
+                            {(document?.documentName ?? docId).replace(/\.pdf$/i, "")}
+                          </p>
+                          <p className="mt-0.5 text-[12px] text-[#98A2B3]">
+                            {document?.documentName ?? docId}
+                          </p>
+                        </div>
                       </div>
-                      <div className="min-w-0 flex-1">
-                        <p className="truncate text-[13px] text-[#101828]">
-                          {document?.documentName ?? docId}
-                        </p>
+                      <div className="flex items-center gap-1.5">
                         {status ? (
                           <span
-                            className={`mt-1 inline-flex w-fit rounded-full border px-2 py-0.5 text-[11px] font-medium ${status.className}`}>
+                            className={`mr-2 inline-flex w-fit rounded-full border px-3 py-1 text-[11px] font-medium ${status.className}`}>
                             {status.label}
                           </span>
                         ) : null}
-                      </div>
-                      <div className="flex items-center gap-1.5">
                         <button
                           type="button"
                           onClick={() => {
@@ -498,16 +751,6 @@ function DocumentAuditDetailModal({
                           aria-label="Үр дүнг харах">
                           <FiEye className="h-4 w-4" />
                         </button>
-                        {canSign && document ? (
-                          <button
-                            type="button"
-                            onClick={() => onSignDocument(document)}
-                            disabled={signing}
-                            className="rounded-[10px] border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-[11px] font-medium text-emerald-700 transition-colors hover:bg-emerald-100 disabled:opacity-50"
-                          >
-                            Гарын үсэг
-                          </button>
-                        ) : null}
                       </div>
                     </div>
                   );
@@ -519,12 +762,28 @@ function DocumentAuditDetailModal({
           </div>
         </div>
 
-        <div className="mt-7 flex justify-end">
+        <div className="mt-6 flex justify-end gap-4">
           <button
             type="button"
             onClick={onClose}
-            className="rounded-2xl bg-[#101828] px-6 py-3 text-[15px] font-medium text-white transition hover:bg-[#1D2939]">
-            Хаах
+            className="rounded-[16px] border border-[#FF8A80] px-5 py-2.5 text-[14px] font-medium text-[#FF3B30]"
+          >
+            Татгалзах
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              const firstUnsigned = log.documentIds
+                .map((docId) => documentsById.get(docId))
+                .find((document): document is Document => Boolean(document) && Boolean(document.hrSigned) && !Boolean(document.employeeSigned));
+              if (firstUnsigned) {
+                onSignDocument(firstUnsigned);
+              } else {
+                onClose();
+              }
+            }}
+            className="rounded-[16px] bg-[#101828] px-5 py-2.5 text-[14px] font-medium text-white transition hover:bg-[#1D2939]">
+            Баталгаажуулах
           </button>
         </div>
       </div>
@@ -539,6 +798,7 @@ function DocumentAuditDetailModal({
 export function EmployeeAuditComponent() {
   const { authToken, employee, loading: sessionLoading } = useEmployeeSession();
   const [search, setSearch] = useState("");
+  const [activeTab, setActiveTab] = useState<AuditTab>("newEmployee");
   const [filterAction, setFilterAction] = useState<FilterAction>("");
   const [filterOpen, setFilterOpen] = useState(false);
   const [detailLog, setDetailLog] = useState<AuditLog | null>(null);
@@ -552,6 +812,7 @@ export function EmployeeAuditComponent() {
   const [signatureError, setSignatureError] = useState<string | null>(null);
   const [signatureTargetDocument, setSignatureTargetDocument] =
     useState<Document | null>(null);
+  const [selectedDocument, setSelectedDocument] = useState<Document | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const drawingRef = useRef(false);
   const filterRef = useRef<HTMLDivElement | null>(null);
@@ -780,6 +1041,16 @@ export function EmployeeAuditComponent() {
       (log) => log.action !== "offboard_employee" && log.phase !== "offboarding",
     );
 
+    logs = logs.filter((log) =>
+      activeTab === "newEmployee"
+        ? log.action === "add_employee"
+        : log.action === "promote_employee" || log.action === "change_position",
+    );
+
+    if (filterAction) {
+      logs = logs.filter((log) => log.action === filterAction);
+    }
+
     if (search) {
       const q = search.toLowerCase();
       logs = logs.filter((log) => {
@@ -796,32 +1067,83 @@ export function EmployeeAuditComponent() {
     return [...logs].sort(
       (a, b) => b.timestamp.localeCompare(a.timestamp),
     );
-  }, [data, search]);
+  }, [activeTab, data, filterAction, search]);
 
-  // Summary counts
+  const documentReviewItems = useMemo(() => {
+    let items = [...documents].filter(
+      (document) =>
+        document.action === "promote_employee" ||
+        document.action === "change_position",
+    );
+
+    if (filterAction) {
+      items = items.filter((document) => document.action === filterAction);
+    }
+
+    if (search) {
+      const q = search.toLowerCase();
+      items = items.filter((document) =>
+        document.documentName.toLowerCase().includes(q),
+      );
+    }
+
+    return items.sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+  }, [documents, filterAction, search]);
+
   const counts = useMemo(() => {
     const all = data?.auditLogs ?? [];
+    const newEmployeeLogs = all.filter((log) => log.action === "add_employee");
+    const documentReviewLogs = all.filter(
+      (log) =>
+        log.action === "promote_employee" || log.action === "change_position",
+    );
+
     return {
-      total: all.length,
-      docs: all.reduce((sum, l) => sum + l.documentIds.length, 0),
-      success: all.filter((l) => l.employeeSigned).length,
+      newEmployee: newEmployeeLogs.length,
+      documentReview: documentReviewItems.length || documentReviewLogs.length,
     };
-  }, [data]);
+  }, [data, documentReviewItems.length]);
 
   const isLoading = sessionLoading || loading || documentsLoading;
-  const actionOptions: Array<{ value: FilterAction; label: string }> = [
-    { value: "", label: "Бүх үйлдэл" },
-    { value: "add_employee", label: "Шинэ ажилтан авах" },
-    { value: "promote_employee", label: "Тушаал дэвшүүлэх" },
-    { value: "change_position", label: "Албан тушаал солих" },
-  ];
+  const actionOptions: Array<{ value: FilterAction; label: string }> =
+    activeTab === "newEmployee"
+      ? [
+          { value: "", label: "Бүгд" },
+          { value: "add_employee", label: "Шинэ ажилтан авах" },
+        ]
+      : [
+          { value: "", label: "Бүгд" },
+          { value: "promote_employee", label: "Тушаал дэвшүүлэх" },
+          { value: "change_position", label: "Албан тушаал солих" },
+        ];
   const activeActionLabel =
     actionOptions.find((option) => option.value === filterAction)?.label ??
-    "Бүх үйлдэл";
+    "Бүгд";
+  const selectedDocumentLog = useMemo(() => {
+    if (!selectedDocument) return null;
+    return (
+      auditLogs.find((log) => log.documentIds.includes(selectedDocument.id)) ?? null
+    );
+  }, [auditLogs, selectedDocument]);
 
   return (
     <div className="min-h-screen bg-white px-6 py-8 text-[#101828]">
-      {detailLog && (
+      {detailLog &&
+        (activeTab === "newEmployee" ? (
+          <NewEmployeeAuditDetailModal
+            log={detailLog}
+            employee={employee}
+            documentsById={documentsById}
+            onClose={() => setDetailLog(null)}
+            onPreview={(document) => {
+              void handlePreviewDocument(document);
+            }}
+            onOpenSignature={(document) => {
+              setDetailLog(null);
+              openSignatureModal(document);
+            }}
+          />
+        ) : (
         <DocumentAuditDetailModal
           log={detailLog}
           employee={employee}
@@ -832,9 +1154,22 @@ export function EmployeeAuditComponent() {
             void handlePreviewDocument(document);
             openSignatureModal(document);
           }}
-          signing={signing}
         />
-      )}
+      ))}
+
+      {selectedDocument && selectedDocumentLog ? (
+        <DocumentAuditDetailModal
+          log={selectedDocumentLog}
+          employee={employee}
+          documentsById={documentsById}
+          onClose={() => setSelectedDocument(null)}
+          onPreview={handlePreviewDocument}
+          onSignDocument={(document) => {
+            void handlePreviewDocument(document);
+            openSignatureModal(document);
+          }}
+        />
+      ) : null}
 
       {previewDoc ? (
         <FilesPreviewModal
@@ -858,14 +1193,14 @@ export function EmployeeAuditComponent() {
               setSignatureTargetDocument(null);
             }}
           />
-          <div className="relative w-[520px] max-w-[92vw] rounded-[24px] border border-[#EAECF0] bg-white p-6 shadow-[0_24px_80px_rgba(0,0,0,0.18)]">
-            <div className="mb-5 flex items-start justify-between">
+          <div
+            className={`relative w-[505px] max-w-[92vw] rounded-[24px] border border-[#EAECF0] bg-white px-7 py-6 shadow-[0_24px_80px_rgba(0,0,0,0.18)] ${
+              signatureMode === "redraw" ? "min-h-[553px]" : "min-h-[327px]"
+            }`}>
+            <div className="mb-7 flex items-start justify-between">
               <div>
-                <p className="text-[13px] text-[#98A2B3]">Гарын үсэг</p>
-                <h3 className="mt-2 text-[18px] font-semibold text-[#101828]">
-                  {signatureTargetDocument?.documentName
-                    ? `Гарын үсэг: ${signatureTargetDocument.documentName}`
-                    : "Гарын үсгээ баталгаажуулах"}
+                <h3 className="text-[18px] font-semibold text-[#101828]">
+                  Гарын үсэг баталгаажуулах
                 </h3>
               </div>
               <button
@@ -881,21 +1216,47 @@ export function EmployeeAuditComponent() {
             </div>
 
             {hasSignature ? (
-              <div className="mb-4 flex gap-3">
-                <label className="flex items-center gap-2 text-[13px] text-[#344054]">
+              <div className="mb-5 flex gap-10">
+                <label className="flex cursor-pointer items-center gap-3 text-[14px] text-[#101828]">
                   <input
                     type="radio"
                     checked={signatureMode === "reuse"}
                     onChange={() => setSignatureMode("reuse")}
+                    className="sr-only"
                   />
+                  <span
+                    className={`flex h-6 w-6 items-center justify-center rounded-full border ${
+                      signatureMode === "reuse"
+                        ? "border-[#2F80FF]"
+                        : "border-[#98A2B3]"
+                    }`}>
+                    <span
+                      className={`h-3 w-3 rounded-full ${
+                        signatureMode === "reuse" ? "bg-[#2F80FF]" : "bg-transparent"
+                      }`}
+                    />
+                  </span>
                   Өмнөх гарын үсэг ашиглах
                 </label>
-                <label className="flex items-center gap-2 text-[13px] text-[#344054]">
+                <label className="flex cursor-pointer items-center gap-3 text-[14px] text-[#101828]">
                   <input
                     type="radio"
                     checked={signatureMode === "redraw"}
                     onChange={() => setSignatureMode("redraw")}
+                    className="sr-only"
                   />
+                  <span
+                    className={`flex h-6 w-6 items-center justify-center rounded-full border ${
+                      signatureMode === "redraw"
+                        ? "border-[#2F80FF]"
+                        : "border-[#98A2B3]"
+                    }`}>
+                    <span
+                      className={`h-3 w-3 rounded-full ${
+                        signatureMode === "redraw" ? "bg-[#2F80FF]" : "bg-transparent"
+                      }`}
+                    />
+                  </span>
                   Дахин зурах
                 </label>
               </div>
@@ -903,8 +1264,8 @@ export function EmployeeAuditComponent() {
 
             {signatureMode === "redraw" ? (
               <div className="mb-4">
-                <div className="mb-2 flex items-center justify-between">
-                  <p className="text-[13px] text-[#667085]">Гарын үсгээ зурна уу</p>
+                <div className="mb-3 mt-2 flex items-center justify-between">
+                  <p className="text-[14px] text-[#667085]">Гарын үсгээ зурна уу</p>
                   <button
                     type="button"
                     onClick={clearSignature}
@@ -913,7 +1274,7 @@ export function EmployeeAuditComponent() {
                     Арилгах
                   </button>
                 </div>
-                <div className="h-40 w-full rounded-2xl border border-[#D0D5DD] bg-white">
+                <div className="h-[222px] w-full rounded-[14px] border border-[#D0D5DD] bg-white">
                   <canvas
                     ref={canvasRef}
                     className="h-full w-full"
@@ -923,12 +1284,21 @@ export function EmployeeAuditComponent() {
                     onPointerLeave={handlePointerUp}
                   />
                 </div>
-                <label className="mt-3 flex items-center gap-2 text-[13px] text-[#344054]">
+                <label className="mt-6 flex cursor-pointer items-center gap-3 text-[14px] text-[#344054]">
                   <input
                     type="checkbox"
                     checked={usePasscode}
                     onChange={(e) => setUsePasscode(e.target.checked)}
+                    className="sr-only"
                   />
+                  <span
+                    className={`flex h-7 w-7 items-center justify-center rounded-[10px] border transition-colors ${
+                      usePasscode
+                        ? "border-[#98A2B3] bg-white text-[#344054]"
+                        : "border-[#98A2B3] bg-white text-transparent"
+                    }`}>
+                    <span className="text-[15px] leading-none">✓</span>
+                  </span>
                   4 оронтой код хадгалах
                 </label>
                 {usePasscode ? (
@@ -936,23 +1306,23 @@ export function EmployeeAuditComponent() {
                     value={passcode}
                     onChange={(e) => setPasscode(e.target.value)}
                     placeholder="0000"
-                    className="mt-2 h-10 w-full rounded-[10px] border border-[#D0D5DD] px-3 text-[14px] outline-none"
+                    className="mt-4 h-11 w-full rounded-[12px] border border-[#D0D5DD] px-4 text-[14px] text-[#101828] outline-none placeholder:text-[#98A2B3]"
                     maxLength={4}
                   />
                 ) : null}
               </div>
             ) : (
-              <div className="mb-4">
+              <div className="mb-4 mt-2">
                 {hasPasscode ? (
                   <input
                     value={passcode}
                     onChange={(e) => setPasscode(e.target.value)}
                     placeholder="4 оронтой код"
-                    className="h-10 w-full rounded-[10px] border border-[#D0D5DD] px-3 text-[14px] outline-none"
+                    className="h-11 w-full rounded-[12px] border border-[#D0D5DD] px-4 text-[14px] text-[#101828] outline-none placeholder:text-[#98A2B3]"
                     maxLength={4}
                   />
                 ) : (
-                  <p className="text-[13px] text-[#667085]">
+                  <p className="text-[14px] text-[#667085]">
                     Өмнөх гарын үсгийг ашиглана.
                   </p>
                 )}
@@ -965,14 +1335,14 @@ export function EmployeeAuditComponent() {
               </div>
             ) : null}
 
-            <div className="flex justify-end gap-3">
+            <div className={`${signatureMode === "redraw" ? "mt-8" : "mt-10"} flex justify-end gap-3`}>
               <button
                 type="button"
                 onClick={() => {
                   setSignatureOpen(false);
                   setSignatureTargetDocument(null);
                 }}
-                className="rounded-xl border border-[#D0D5DD] px-5 py-2 text-[14px] text-[#344054]"
+                className="rounded-[14px] border border-[#D0D5DD] px-5 py-2.5 text-[14px] text-[#344054]"
               >
                 Болих
               </button>
@@ -980,7 +1350,7 @@ export function EmployeeAuditComponent() {
                 type="button"
                 onClick={handleSaveSignature}
                 disabled={signing}
-                className="rounded-xl bg-[#101828] px-5 py-2 text-[14px] font-medium text-white disabled:opacity-50"
+                className="rounded-[14px] bg-[#101828] px-5 py-2.5 text-[14px] font-medium text-white disabled:opacity-50"
               >
                 {signing ? "Илгээж байна..." : "Баталгаажуулах"}
               </button>
@@ -993,44 +1363,67 @@ export function EmployeeAuditComponent() {
         {/* Header */}
         <div className="flex w-full flex-col gap-1.5">
           <h1 className="text-[34px] font-semibold leading-[1.1] tracking-[-0.03em] text-[#101828]">
-            Миний аудит бүртгэл
+            Аудит хүсэлтүүд
           </h1>
           <p className="text-[16px] text-[#667085]">
-            {employee
-              ? `${employee.lastName} ${employee.firstName} — аудит түүх`
-              : "Таны баримт бичиг, мэдэгдлийн түүх"}
+            Хүний нөөцийн ажилчдаас илгээсэн хүсэлтүүд
           </p>
         </div>
 
-        {/* Summary cards */}
-        <div className="flex w-full flex-col gap-4 lg:flex-row">
-          <div className="flex h-[92px] min-w-0 flex-1 items-center gap-5 rounded-[24px] border border-[#98C1FF] bg-white px-7">
-            <div className="flex h-14 w-14 items-center justify-center rounded-[18px] bg-[#2F7BFF] text-white shadow-[0_10px_30px_rgba(47,123,255,0.35)]">
-              <FiFileText className="h-6 w-6" />
+        <div className="flex w-full flex-col gap-4 lg:flex-row lg:items-center">
+          <button
+            type="button"
+            onClick={() => {
+              setActiveTab("newEmployee");
+              setFilterAction("");
+            }}
+            className={`group relative flex h-[120px] min-w-0 flex-1 items-center overflow-hidden rounded-[26px] border px-8 text-left transition-all duration-300 ${
+              activeTab === "newEmployee"
+                ? "border-[#86EFAC] bg-white"
+                : "border-[#D0D5DD] bg-white hover:border-[#B7EAC7] hover:bg-[#FBFFFC]"
+            }`}
+          >
+            <div className="flex min-w-0 items-center gap-5">
+              <div className="flex h-16 w-16 items-center justify-center rounded-[20px] border border-[#86EFAC] bg-white text-[#22C55E] shadow-[0_10px_24px_rgba(34,197,94,0.10)]">
+                <FiCheckCircle className="h-8 w-8" />
+              </div>
+              <div className="flex min-w-0 items-end gap-3">
+                  <span className="text-[46px] font-semibold leading-none text-[#3F4145]">
+                    {counts.newEmployee}
+                  </span>
+                  <span className="truncate pb-1 text-[14px] text-[#667085]">
+                    Шинэ ажилтны хүсэлт
+                  </span>
+              </div>
             </div>
-            <div className="flex min-w-0 items-end gap-3">
-              <span className="text-[46px] font-semibold leading-none text-[#101828]">
-                {counts.total}
-              </span>
-              <span className="truncate pb-1 text-[14px] text-[#667085]">
-                Нийт бүртгэл
-              </span>
-            </div>
-          </div>
+          </button>
 
-          <div className="flex h-[92px] min-w-0 flex-1 items-center gap-5 rounded-[24px] border border-[#86EFAC] bg-white px-7">
-            <div className="flex h-14 w-14 items-center justify-center rounded-[18px] bg-[#12C95E] text-white shadow-[0_10px_30px_rgba(18,201,94,0.28)]">
-              <FiCheckCircle className="h-6 w-6" />
+          <button
+            type="button"
+            onClick={() => {
+              setActiveTab("documentReview");
+              setFilterAction("");
+            }}
+            className={`group relative flex h-[120px] min-w-0 flex-1 items-center overflow-hidden rounded-[26px] border px-8 text-left transition-all duration-300 ${
+              activeTab === "documentReview"
+                ? "border-[#98C1FF] bg-white"
+                : "border-[#D0D5DD] bg-white hover:border-[#B8D4FF] hover:bg-[#FBFDFF]"
+            }`}
+          >
+            <div className="flex min-w-0 items-center gap-5">
+              <div className="flex h-16 w-16 items-center justify-center rounded-[20px] border border-[#98C1FF] bg-white text-[#3B82F6] shadow-[0_10px_24px_rgba(47,123,255,0.10)]">
+                <FiFileText className="h-8 w-8" />
+              </div>
+              <div className="flex min-w-0 items-end gap-3">
+                  <span className="text-[46px] font-semibold leading-none text-[#3F4145]">
+                    {counts.documentReview}
+                  </span>
+                  <span className="truncate pb-1 text-[14px] text-[#667085]">
+                    Баримт бичиг баталгаажуулах
+                  </span>
+              </div>
             </div>
-            <div className="flex min-w-0 items-end gap-3">
-              <span className="text-[46px] font-semibold leading-none text-[#101828]">
-                {counts.success}
-              </span>
-              <span className="truncate pb-1 text-[14px] text-[#667085]">
-                Амжилттай
-              </span>
-            </div>
-          </div>
+          </button>
         </div>
 
         {/* Search + Filter */}
@@ -1094,10 +1487,14 @@ export function EmployeeAuditComponent() {
         {/* List */}
         <div className="flex items-center gap-4">
           <h2 className="text-[22px] font-semibold text-[#101828]">
-            Аудит бүртгэлүүд
+            {activeTab === "newEmployee"
+              ? "Шинэ Ажилтан"
+              : "Баримт бичиг баталгаажуулах"}
           </h2>
           <span className="rounded-full border border-[#D0D5DD] bg-[#F9FAFB] px-3 py-1 text-xs text-[#98A2B3]">
-            {auditLogs.length} бүртгэл
+            {activeTab === "newEmployee"
+              ? `${auditLogs.length} хүсэлт`
+              : `${documentReviewItems.length} хүсэлт`}
           </span>
         </div>
 
@@ -1110,20 +1507,34 @@ export function EmployeeAuditComponent() {
               />
             ))}
           </div>
-        ) : auditLogs.length === 0 ? (
+        ) : activeTab === "newEmployee" && auditLogs.length === 0 ? (
           <div className="py-16 text-center text-[#98A2B3] text-[15px]">
             Аудит бүртгэл олдсонгүй
           </div>
+        ) : activeTab === "documentReview" && documentReviewItems.length === 0 ? (
+          <div className="py-16 text-center text-[#98A2B3] text-[15px]">
+            Баримт бичиг олдсонгүй
+          </div>
         ) : (
           <div className="flex flex-col gap-4">
-            {auditLogs.map((log) => (
-              <AuditRow
-                key={log.id}
-                log={log}
-                documentsById={documentsById}
-                onOpen={setDetailLog}
-              />
-            ))}
+            {activeTab === "newEmployee"
+              ? auditLogs.map((log) => (
+                  <EmployeeRequestListRow
+                    key={log.id}
+                    log={log}
+                    employee={employee}
+                    onOpen={setDetailLog}
+                  />
+                ))
+              : documentReviewItems.map((document) => (
+                  <DocumentReviewRow
+                    key={document.id}
+                    document={document}
+                    onOpen={(doc) => {
+                      setSelectedDocument(doc);
+                    }}
+                  />
+                ))}
           </div>
         )}
       </div>
