@@ -4,7 +4,10 @@ import type { DbClient } from "../client";
 import { auditLog, documents } from "../schema";
 import { generateEmployeeDocument } from "../../document/generator";
 import { renderPdfFromService } from "../../document/pdfRenderer";
-import { buildTemplateData, validateRequiredFields } from "../../document/templateData";
+import {
+  buildTemplateData,
+  validateRequiredFields,
+} from "../../document/templateData";
 import { uploadEmployeeDocumentToR2 } from "../../storage/r2";
 import type { NormalizedActionConfig } from "./actionConfig";
 import { getEmployeeById } from "./employee";
@@ -17,7 +20,7 @@ export async function createTriggeredActionRecords(
   actionName: string,
   bucket?: R2Bucket,
   actor?: Actor,
-  pdfRenderer?: { serviceUrl?: string | null; secret?: string | null },
+  pdfRenderer?: { serviceUrl?: any | null; secret?: string | null },
   actionConfig?: NormalizedActionConfig | null,
   templateDataOverrides?: Record<string, string>,
 ) {
@@ -66,10 +69,8 @@ export async function createTriggeredActionRecords(
     ...signatureOverrides,
     ...(templateDataOverrides ?? {}),
   };
-  const {
-    data: patchedTemplateData,
-    incompleteFields,
-  } = validateRequiredFields(templateData, requiredEmployeeFields);
+  const { data: patchedTemplateData, incompleteFields } =
+    validateRequiredFields(templateData, requiredEmployeeFields);
 
   const documentInserts: Array<{
     id: string;
@@ -174,12 +175,17 @@ export async function createTriggeredActionRecords(
     }),
   ];
 
-  await db.batch(batchOps as [typeof batchOps[0], ...typeof batchOps]);
+  await db.batch(batchOps as [(typeof batchOps)[0], ...typeof batchOps]);
 
   const createdDocuments = await db
     .select()
     .from(documents)
-    .where(and(eq(documents.employeeId, employeeId), eq(documents.action, normalizedAction)))
+    .where(
+      and(
+        eq(documents.employeeId, employeeId),
+        eq(documents.action, normalizedAction),
+      ),
+    )
     .orderBy(documents.documentName);
 
   const [auditEntry] = await db
