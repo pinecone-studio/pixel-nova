@@ -2,7 +2,7 @@
 
 import { useLazyQuery, useMutation, useQuery } from "@apollo/client/react";
 import { useMemo, useRef, useState, useEffect } from "react";
-import { BiChevronDown, BiChevronRight, BiSearch, BiX } from "react-icons/bi";
+import { BiChevronRight, BiSearch, BiX } from "react-icons/bi";
 import { FiFileText, FiCheckCircle, FiEye } from "react-icons/fi";
 
 import { useEmployeeDocuments } from "@/components/pages/employee/useEmployeeDocuments";
@@ -288,7 +288,6 @@ export function EmployeeAuditComponent() {
   const { authToken, employee, loading: sessionLoading } = useEmployeeSession();
   const [search, setSearch] = useState("");
   const [filterAction, setFilterAction] = useState<FilterAction>("");
-  const [filterOpen, setFilterOpen] = useState(false);
   const [detailLog, setDetailLog] = useState<AuditLog | null>(null);
   const [previewDoc, setPreviewDoc] = useState<Document | null>(null);
   const [previewError, setPreviewError] = useState<string | null>(null);
@@ -301,7 +300,6 @@ export function EmployeeAuditComponent() {
   const [activeSignLog, setActiveSignLog] = useState<AuditLog | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const drawingRef = useRef(false);
-  const filterRef = useRef<HTMLDivElement | null>(null);
 
   const [loadContent, { data: previewData, loading: previewLoading }] =
     useLazyQuery<{ documentContent: DocumentContent | null }>(
@@ -386,17 +384,6 @@ export function EmployeeAuditComponent() {
     ctx.lineCap = "round";
     ctx.strokeStyle = "#0B0E14";
   }, [signatureOpen, signatureMode]);
-
-  useEffect(() => {
-    function handlePointerDown(event: MouseEvent) {
-      if (!filterRef.current?.contains(event.target as Node)) {
-        setFilterOpen(false);
-      }
-    }
-
-    document.addEventListener("mousedown", handlePointerDown);
-    return () => document.removeEventListener("mousedown", handlePointerDown);
-  }, []);
 
   function clearSignature() {
     const canvas = canvasRef.current;
@@ -543,15 +530,6 @@ export function EmployeeAuditComponent() {
   }, [data]);
 
   const isLoading = sessionLoading || loading || documentsLoading;
-  const actionOptions: Array<{ value: FilterAction; label: string }> = [
-    { value: "", label: "Бүх үйлдэл" },
-    { value: "add_employee", label: "Шинэ ажилтан авах" },
-    { value: "promote_employee", label: "Тушаал дэвшүүлэх" },
-    { value: "change_position", label: "Албан тушаал солих" },
-  ];
-  const activeActionLabel =
-    actionOptions.find((option) => option.value === filterAction)?.label ??
-    "Бүх үйлдэл";
 
   return (
     <div className="min-h-screen bg-white px-6 py-8 text-[#101828]">
@@ -763,44 +741,15 @@ export function EmployeeAuditComponent() {
               placeholder="Хайх..."
             />
           </div>
-          <div ref={filterRef} className="relative w-[220px]">
-            <button
-              type="button"
-              onClick={() => setFilterOpen((prev) => !prev)}
-              className="flex h-[44px] w-full items-center justify-between rounded-[12px] border border-[#D0D5DD] bg-white px-4 text-[15px] text-[#667085] outline-none"
-            >
-              <span>{activeActionLabel}</span>
-              <BiChevronDown
-                className={`h-4 w-4 text-[#667085] transition-transform ${
-                  filterOpen ? "rotate-180" : ""
-                }`}
-              />
-            </button>
-            {filterOpen ? (
-              <div className="absolute right-0 z-10 mt-2 w-full rounded-[12px] border border-[#E5E7EB] bg-white p-1 shadow-[0_16px_40px_rgba(15,23,42,0.12)]">
-                {actionOptions.map((option) => {
-                  const active = option.value === filterAction;
-                  return (
-                    <button
-                      key={option.label}
-                      type="button"
-                      onClick={() => {
-                        setFilterAction(option.value);
-                        setFilterOpen(false);
-                      }}
-                      className={`flex w-full rounded-[10px] bg-white px-3 py-2 text-left text-[14px] transition-colors ${
-                        active
-                          ? "bg-[#F3F4F6] text-[#111827]"
-                          : "text-[#344054] hover:bg-[#F3F4F6] hover:text-[#111827]"
-                      }`}
-                    >
-                      {option.label}
-                    </button>
-                  );
-                })}
-              </div>
-            ) : null}
-          </div>
+          <select
+            value={filterAction}
+            onChange={(e) => setFilterAction(e.target.value as FilterAction)}
+            className="h-[44px] w-[220px] appearance-none rounded-[12px] border border-[#D0D5DD] bg-white px-4 text-[15px] text-[#667085] outline-none">
+            <option value="">Бүх үйлдэл</option>
+            <option value="add_employee">Шинэ ажилтан авах</option>
+            <option value="promote_employee">Тушаал дэвшүүлэх</option>
+            <option value="change_position">Албан тушаал солих</option>
+          </select>
         </div>
 
         {/* Error */}

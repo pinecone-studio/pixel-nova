@@ -141,7 +141,7 @@ export default function EmployeePage() {
                 </span>
               </div>
             </div>
-            <span className="inline-flex h-[24px] w-fit items-center whitespace-nowrap rounded-full border border-[#BFD7FF] bg-[#EAF2FF] px-3 py-1 text-[12px] font-semibold text-[#2A8CFF]">
+            <span className="h-[24px] w-[113px] rounded-full border border-[#BFD7FF] bg-[#EAF2FF] px-3 py-1 text-[12px] font-semibold text-[#2A8CFF]">
               Хүлээгдэж буй
             </span>
           </div>
@@ -149,19 +149,19 @@ export default function EmployeePage() {
 
         <section className="mx-auto mt-9 flex w-full max-w-264 flex-col gap-4 animate-fade-up">
           <div className="flex items-center justify-between">
-            <div className="flex h-8 min-w-0 items-center gap-3">
+            <div className="flex h-8 w-[365px] items-center justify-between">
               <h2 className="h-8 w-[246px] text-[20px] font-semibold tracking-[-0.02em] text-[#111827]">
                 Баримт бичиг шинэчлэлт
               </h2>
               <span className="rounded-full border min-w-[79px] h-[24px] border-[#E5E7EB] bg-white px-3 py-1 text-[12px] font-medium text-[#6B7280]">
-                {documents.length} баримт
+                {Math.min(documents.length)} баримт
               </span>
             </div>
             <Link
               href="/employee/files"
               className="flex h-8 w-[175px] items-center justify-evenly text-[14px] font-medium transition-colors hover:text-[#111827]"
             >
-              <span className="whitespace-nowrap">Бүх баримт бичгүүд</span>
+              <span className="h-5 w-[133px]">Бүх баримт бичгүүд</span>
               <span className="flex h-5 items-end">
                 <Righticon />
               </span>

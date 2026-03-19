@@ -2,6 +2,7 @@
 
 import { useLazyQuery } from "@apollo/client/react";
 import { useMemo, useState } from "react";
+import { VscPreview } from "react-icons/vsc";
 import { BiDownload } from "react-icons/bi";
 
 import { buildGraphQLHeaders } from "@/lib/apollo-client";
