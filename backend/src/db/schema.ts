@@ -70,6 +70,10 @@ export const auditLog = sqliteTable(
       .notNull()
       .default(false),
     notificationError: text("notification_error"),
+    employeeSigned: integer("employee_signed", { mode: "boolean" })
+      .notNull()
+      .default(false),
+    employeeSignedAt: text("employee_signed_at"),
     timestamp: text("timestamp").notNull(),
   },
   (table) => [index("audit_log_employee_id_idx").on(table.employeeId)],
