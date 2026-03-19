@@ -61,9 +61,29 @@ export function ChangePositionForm({
 }: ChangePositionFormProps) {
   const getInputClass = (key: keyof typeof errors) =>
     errors[key] ? `${inputClass} border-red-300 focus:border-red-400` : inputClass;
+  const fillMock = () => {
+    const defaultDept = departments?.[0] ?? "Engineering";
+    setEmployeeCode("EMP0003");
+    setLastName("Дорж");
+    setFirstName("Эрдэнэ");
+    setCurrentDept(defaultDept);
+    setCurrentPosition("Junior Engineer");
+    setNextDept(defaultDept);
+    setNextPosition("Mid Engineer");
+    setChangeReason("Гүйцэтгэлийн үнэлгээ");
+  };
 
   return (
     <div className="flex min-w-0 flex-col gap-[16px]">
+      <div className="flex items-center justify-end">
+        <button
+          type="button"
+          onClick={fillMock}
+          className="rounded-[10px] border border-black/12 px-3 py-1.5 text-[12px] font-medium text-[#3f4145] transition-colors hover:bg-[#f5f5f5]"
+        >
+          Demo бөглөх
+        </button>
+      </div>
       <div className="flex min-w-0 flex-col gap-[8px]">
         <label className={labelClass}>Ажилтны код</label>
         <input
