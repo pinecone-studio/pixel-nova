@@ -46,7 +46,9 @@ export function FilesList({
 
   if (visible.length === 0) {
     return (
-      <div style={{ ...emptyBoxStyle, marginBottom: 24 }}>Баримт олдсонгүй</div>
+      <div style={{ ...emptyBoxStyle, marginBottom: 24, marginTop: 10 }}>
+        Баримт олдсонгүй
+      </div>
     );
   }
 
@@ -68,7 +70,7 @@ export function FilesList({
           </div>
           <div className="flex flex-col items-center gap-1">
             <h3 className="text-[13px] font-semibold text-[#6B7280]">
-              Ð‘Ð°Ñ€Ð¸Ð¼Ñ‚ Ð¾Ð»Ð´ÑÐ¾Ð½Ð³Ò¯Ð¹
+              Баримт бичиг байхгүй
             </h3>
           </div>
         </div>
