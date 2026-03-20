@@ -17,6 +17,7 @@ export function EmployeeNotifRow({
   theme?: "dark" | "light";
 }) {
   void theme;
+  const hasBody = notification.body.trim().length > 0;
   return (
     <div className="border-b border-[#EAECF0] last:border-b-0">
       <button
@@ -44,7 +45,7 @@ export function EmployeeNotifRow({
             </span>
           </div>
 
-          {expanded ? (
+          {hasBody ? (
             <p className="mt-2 break-words whitespace-pre-line text-[13px] leading-6 text-[#667085]">
               {notification.body}
             </p>
