@@ -67,6 +67,10 @@ import {
   renderSignedDocumentArtifact,
   type SigningRole,
 } from "./documentSigning";
+import {
+  ensureEmployeeSignatureTable,
+  ensureEmployerSignatureTable,
+} from "../db/ensureRuntimeTables";
 
 type Ctx = GraphQLContext;
 
@@ -278,6 +282,8 @@ async function signEmployeeDocumentCore(
     passcode?: string | null;
   },
 ) {
+  await ensureEmployeeSignatureTable(ctx.env);
+
   if (ctx.actor.role !== "employee" || !ctx.actor.id) {
     throw new Error("Unauthorized");
   }
@@ -799,6 +805,8 @@ export const mutationResolvers = {
     args: { signatureData: string; passcode?: string | null },
     ctx: Ctx,
   ) => {
+    await ensureEmployeeSignatureTable(ctx.env);
+
     if (ctx.actor.role !== "employee" || !ctx.actor.id) {
       throw new Error("Unauthorized");
     }
@@ -826,6 +834,8 @@ export const mutationResolvers = {
     args: { signatureData: string; passcode?: string | null },
     ctx: Ctx,
   ) => {
+    await ensureEmployerSignatureTable(ctx.env);
+
     if (ctx.actor.role !== "hr" && ctx.actor.role !== "admin") {
       throw new Error("Unauthorized");
     }
@@ -1261,6 +1271,8 @@ export const mutationResolvers = {
     },
     ctx: Ctx,
   ) => {
+    await ensureEmployerSignatureTable(ctx.env);
+
     requireHrActor(ctx);
 
     const document = await getDocumentById(ctx.db, args.documentId);

@@ -246,7 +246,9 @@ export function AddEmployeeRequestDialog({
     setSalaryAmount("4200000");
     setContractStart("2026-04-01");
     setContractDuration("1 жил");
-    setRecipients(action?.recipients.length ? [...action.recipients] : ["hr_manager"]);
+    setRecipients(
+      action?.recipients.length ? [...action.recipients] : ["hr_manager"],
+    );
     setRecipientInput("");
   };
 
@@ -1319,11 +1321,11 @@ export function AddEmployeeRequestDialog({
                         type="button"
                         onClick={handleClearPreviewSignature}
                         className="absolute right-3 top-3 rounded-md bg-white/90 px-2 py-1 text-xs text-slate-500 hover:text-red-500">
-                        ???????
+                        Хадгалах
                       </button>
                     ) : (
                       <p className="pointer-events-none absolute inset-0 flex items-center justify-center text-xs text-slate-300">
-                        ??? ????? ????? ????? ??
+                        Гарын үсэг зурах
                       </p>
                     )}
                   </div>
