@@ -13,7 +13,6 @@ import {
 import { GET_EMPLOYER_SIGNATURE_STATUS } from "@/graphql/queries/contract-requests";
 import { GET_CONTRACT_TEMPLATE, GET_EMPLOYEES } from "@/graphql/queries";
 import { TRIGGER_ACTION } from "@/graphql/mutations";
-import { SIGN_DOCUMENT } from "@/graphql/mutations/documents";
 import { buildGraphQLHeaders } from "@/lib/apollo-client";
 import type { ActionConfig, DocumentContent, Employee } from "@/lib/types";
 import { ChangePositionForm } from "./forms/ChangePositionForm";
@@ -274,13 +273,7 @@ export function AddEmployeeRequestDialog({
   const [triggerAction, { loading: submitting }] = useMutation(TRIGGER_ACTION, {
     context: { headers: buildGraphQLHeaders({ actorRole: "hr" }) },
   });
-  const [signDocument, { loading: signingDocument }] = useMutation<{
-    signDocument: {
-      allSigned: boolean;
-    };
-  }>(SIGN_DOCUMENT, {
-    context: { headers: buildGraphQLHeaders({ actorRole: "hr" }) },
-  });
+  const signingDocument = false;
   const { data: employerSignatureStatusData } = useQuery<{
     employerSignatureStatus: {
       hasSignature: boolean;
@@ -340,6 +333,7 @@ export function AddEmployeeRequestDialog({
 
   async function handleSavePreviewSignature() {
     if (!previewDoc) return;
+
     if (
       hasSavedEmployerSignature &&
       savedSignatureHasPasscode &&
@@ -348,10 +342,12 @@ export function AddEmployeeRequestDialog({
       setSignatureModalError("4 ??????? ????? ????? ??????? ??.");
       return;
     }
+
     if (!hasSavedEmployerSignature && !previewSignatureData) {
       setSignatureModalError("????? ????? ????? ??.");
       return;
     }
+
     if (
       !hasSavedEmployerSignature &&
       useSignaturePasscode &&
@@ -361,48 +357,13 @@ export function AddEmployeeRequestDialog({
       return;
     }
 
-    try {
-      setSignatureModalError(null);
-      const result = await signDocument({
-        variables: {
-          documentId: previewDoc.id,
-          signatureMode: hasSavedEmployerSignature ? "reuse" : "redraw",
-          signatureData: hasSavedEmployerSignature ? null : previewSignatureData,
-          passcode: hasSavedEmployerSignature
-            ? savedSignatureHasPasscode
-              ? signaturePasscode
-              : null
-            : useSignaturePasscode
-              ? signaturePasscode
-              : null,
-        },
-      });
-
-      const allSigned = result.data?.signDocument?.allSigned ?? false;
-      const nextCount = signedDocIds.has(previewDoc.id)
-        ? signedDocIds.size
-        : signedDocIds.size + 1;
-
-      setSignedDocIds((current) => {
-        const next = new Set(current);
-        next.add(previewDoc.id);
-        return next;
-      });
-      setSignaturePasscode("");
-      setUseSignaturePasscode(false);
-      setPreviewSignatureData("");
-      setSignatureModalOpen(false);
-      setSignatureNotice(
-        allSigned
-          ? "??? ?????? ????? ???? ?????????."
-          : `${nextCount} ?????? ????? ??????? ??????.`,
-      );
-    } catch (err) {
-      setSignatureNotice(null);
-      setSignatureModalError(
-        err instanceof Error ? err.message : "????? ???? ??????? ?????????.",
-      );
-    }
+    setSignatureModalError(null);
+    setSignaturePasscode("");
+    setUseSignaturePasscode(false);
+    setSignatureModalOpen(false);
+    setSignatureNotice(
+      "??? preview ?? ?????? ?????? ??? ?????? ?????????. ?????? ???????? ????? Audit log ???? ????? ?????? ???? ????? ???? ?????.",
+    );
   }
 
   function handlePreviewSignaturePointerDown(
@@ -644,7 +605,7 @@ export function AddEmployeeRequestDialog({
     if (!action?.name) {
       return;
     }
-    if (!matchedEmployee?.id) {
+    if (!useAddEmployeeLayout && !matchedEmployee?.id) {
       setErrors((prev) => ({
         ...prev,
         employeeCode: "Ажилтны кодоор ажилтан олдсонгүй.",
@@ -1102,7 +1063,7 @@ export function AddEmployeeRequestDialog({
                         <button
                           type="button"
                           onClick={handleSavePreviewSignature}
-                          disabled={signingDocument}
+                          disabled={false}
                           className="rounded-lg bg-slate-900 px-3 py-2 text-xs font-semibold text-white hover:bg-slate-800 disabled:opacity-60">
                           {signingDocument ? "Хадгалж байна..." : "Дуусгах"}
                         </button>
@@ -1255,7 +1216,7 @@ export function AddEmployeeRequestDialog({
               <button
                 type="button"
                 onClick={handleSavePreviewSignature}
-                disabled={signingDocument}
+                disabled={false}
                 className="rounded-xl bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60">
                 {signingDocument ? "Баталгаажуулж байна..." : "Баталгаажуулах"}
               </button>
