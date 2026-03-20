@@ -471,7 +471,9 @@ function NewEmployeeAuditDetailModal({
     .map((documentId) => documentsById.get(documentId))
     .filter((document): document is Document => Boolean(document));
   const signableDocument =
-    files.find((document) => !document.employeeSigned) ?? files[0] ?? null;
+    files.find(
+      (document) => Boolean(document.hrSigned) && !Boolean(document.employeeSigned),
+    ) ?? null;
 
   return (
     <div className="fixed inset-0 z-50 flex justify-center bg-black/65 p-4 backdrop-blur-sm">
