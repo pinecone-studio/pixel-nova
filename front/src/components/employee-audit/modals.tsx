@@ -39,13 +39,8 @@ export function EmployeeRequestModal({
       >
         <div className="mb-6 flex items-start justify-between">
           <div>
-<<<<<<< Updated upstream
-            <p className="text-[13px] text-[#9AA7BA]">Шинэ ажилтны хүсэлт</p>
-            <h2 className="mt-3 text-[20px] font-semibold text-white">
-=======
-            <p className="text-[13px] text-[#98A2B3]">Add Employee request</p>
+            <p className="text-[13px] text-[#98A2B3]">Шинэ ажилтны хүсэлт</p>
             <h2 className="mt-3 text-[20px] font-semibold text-[#101828]">
->>>>>>> Stashed changes
               Шинэ ажилтан
             </h2>
           </div>
