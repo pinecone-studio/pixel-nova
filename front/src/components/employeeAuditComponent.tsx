@@ -30,18 +30,21 @@ const ACTION_LABELS: Record<string, string> = {
   add_employee: "Шинэ ажилтан авах",
   promote_employee: "Тушаал дэвшүүлэх",
   change_position: "Албан тушаал солих",
+  offboard_employee: "Ажлаас чөлөөлөх",
 };
 
 const PHASE_LABELS: Record<string, string> = {
   onboarding: "Ажилд орох",
   working: "Ажиллах",
+  offboarding: "Ажлаас гарах",
 };
 
 type FilterAction =
   | ""
   | "add_employee"
   | "promote_employee"
-  | "change_position";
+  | "change_position"
+  | "offboard_employee";
 type AuditTab = "newEmployee" | "documentReview";
 
 function getDocumentSigningSummary(
