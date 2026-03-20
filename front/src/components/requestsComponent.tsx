@@ -1,6 +1,6 @@
 "use client";
 
-import { useApolloClient, useMutation, useQuery } from "@apollo/client/react";
+import { useApolloClient, useLazyQuery, useMutation, useQuery } from "@apollo/client/react";
 import { useEffect, useMemo, useState } from "react";
 import {
   DownIcon,
@@ -15,10 +15,11 @@ import {
   APPROVE_LEAVE_REQUEST,
   REJECT_LEAVE_REQUEST,
 } from "@/graphql/mutations";
-import { GET_DOCUMENTS, GET_LEAVE_REQUESTS } from "@/graphql/queries";
-import type { Document, LeaveRequest } from "@/lib/types";
+import { GET_DOCUMENT_CONTENT, GET_DOCUMENTS, GET_LEAVE_REQUESTS } from "@/graphql/queries";
+import type { Document, DocumentContent, LeaveRequest } from "@/lib/types";
 import { formatDepartment, formatLeaveRequestStatus } from "@/lib/labels";
 import { Download, Filter } from "lucide-react";
+import { FilesPreviewModal } from "@/components/pages/employee/files/FilesPreviewModal";
 
 const StatusBadge = ({ status }: { status: string }) => {
   const styles: Record<string, string> = {
@@ -34,6 +35,18 @@ const StatusBadge = ({ status }: { status: string }) => {
     </span>
   );
 };
+
+function buildDataUrl(content: DocumentContent) {
+  if (content.contentType === "application/pdf") {
+    return `data:${content.contentType};base64,${content.content}`;
+  }
+
+  if (content.contentType.startsWith("text/")) {
+    return `data:${content.contentType};charset=utf-8,${encodeURIComponent(content.content)}`;
+  }
+
+  return `data:${content.contentType};base64,${content.content}`;
+}
 
 function getInitials(firstName: string, lastName: string) {
   return `${lastName.charAt(0)}${firstName.charAt(0)}`;
@@ -209,6 +222,8 @@ const RequestRow = ({
   onToggle,
   documents,
   documentsLoading,
+  onPreviewDocument,
+  onDownloadDocument,
   divider = true,
 }: {
   row: LeaveRequest;
@@ -216,6 +231,8 @@ const RequestRow = ({
   onToggle: (row: LeaveRequest) => void;
   documents: Document[];
   documentsLoading: boolean;
+  onPreviewDocument: (doc: Document) => void;
+  onDownloadDocument: (doc: Document) => void;
   divider?: boolean;
 }) => {
   const initials = getInitials(row.employee.firstName, row.employee.lastName);
@@ -292,8 +309,28 @@ const RequestRow = ({
                     </div>
                   </div>
                   <div className="flex items-center gap-4 text-slate-500 text-xs">
-                    <PreviewIcon className="text-black w-4 h-4" />
-                    <Download className="text-black w-4 h-4" />
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onPreviewDocument(doc);
+                      }}
+                      className="cursor-pointer"
+                      aria-label="Preview"
+                    >
+                      <PreviewIcon className="text-black w-4 h-4" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onDownloadDocument(doc);
+                      }}
+                      className="cursor-pointer"
+                      aria-label="Download"
+                    >
+                      <Download className="text-black w-4 h-4" />
+                    </button>
                     <span className="min-w-18 text-right">
                       {new Date(doc.createdAt).toLocaleDateString("mn-MN")}
                     </span>
@@ -313,6 +350,8 @@ export const RequestsComponent = () => {
   const [search, setSearch] = useState("");
   const [previewRow, setPreviewRow] = useState<LeaveRequest | null>(null);
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [previewDocument, setPreviewDocument] = useState<Document | null>(null);
+  const [previewError, setPreviewError] = useState<string | null>(null);
   const [documentsByEmployee, setDocumentsByEmployee] = useState<
     Record<string, Document[]>
   >({});
@@ -328,6 +367,18 @@ export const RequestsComponent = () => {
   );
 
   const apolloClient = useApolloClient();
+
+  const [loadDocumentContent, { data: previewData, loading: previewLoading }] =
+    useLazyQuery<{ documentContent: DocumentContent | null }>(
+      GET_DOCUMENT_CONTENT,
+      { fetchPolicy: "network-only" },
+    );
+
+  const previewContent = previewData?.documentContent ?? null;
+  const previewUrl = useMemo(() => {
+    if (!previewContent) return null;
+    return buildDataUrl(previewContent);
+  }, [previewContent]);
 
   const { data, loading } = useQuery<{ leaveRequests: LeaveRequest[] }>(
     GET_LEAVE_REQUESTS,
@@ -436,6 +487,51 @@ export const RequestsComponent = () => {
     }
   }
 
+  async function ensureDocumentContent(document: Document) {
+    if (previewContent?.id === document.id) return previewContent;
+
+    const result = await loadDocumentContent({
+      variables: { documentId: document.id },
+      context: queryContext,
+    });
+
+    const nextContent = result.data?.documentContent ?? null;
+    if (!nextContent) {
+      throw new Error("Баримтын агуулга олдсонгүй.");
+    }
+    return nextContent;
+  }
+
+  async function handlePreviewDocument(document: Document) {
+    setPreviewDocument(document);
+    setPreviewError(null);
+    try {
+      await ensureDocumentContent(document);
+    } catch (err) {
+      setPreviewError(
+        err instanceof Error ? err.message : "Preview нээж чадсангүй.",
+      );
+    }
+  }
+
+  async function handleDownloadDocument(document: Document) {
+    setPreviewError(null);
+    try {
+      const currentContent = await ensureDocumentContent(document);
+      const href = buildDataUrl(currentContent);
+      const link = window.document.createElement("a");
+      link.href = href;
+      link.download = currentContent.documentName;
+      window.document.body.appendChild(link);
+      link.click();
+      link.remove();
+    } catch (err) {
+      setPreviewError(
+        err instanceof Error ? err.message : "Файл татаж чадсангүй.",
+      );
+    }
+  }
+
   useEffect(() => {
     const employeeIds = Array.from(
       new Set(requests.map((request) => request.employeeId)),
@@ -462,6 +558,16 @@ export const RequestsComponent = () => {
           onClose={() => setPreviewRow(null)}
           onApprove={handleApprove}
           onReject={handleReject}
+        />
+      )}
+      {previewDocument && (
+        <FilesPreviewModal
+          document={previewDocument}
+          content={previewContent}
+          previewUrl={previewUrl}
+          loading={previewLoading}
+          error={previewError}
+          onClose={() => setPreviewDocument(null)}
         />
       )}
 
@@ -511,6 +617,8 @@ export const RequestsComponent = () => {
                 onToggle={handleToggle}
                 documents={getRequestDocuments(row)}
                 documentsLoading={documentsLoading[row.employeeId] ?? false}
+                onPreviewDocument={handlePreviewDocument}
+                onDownloadDocument={handleDownloadDocument}
                 divider={i < filtered.length - 1}
               />
             ))
