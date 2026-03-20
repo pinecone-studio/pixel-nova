@@ -295,10 +295,11 @@ export function NewEmployeeForm({
             </div>
             <div className="flex min-w-0 flex-col gap-[8px]">
               <label className={labelClass}>Гэрээ дуусах хугацаа</label>
-              <DatePickerField
+              <input
                 value={contractEnd}
-                onChange={setContractEnd}
-                inputClass={getInputClass("contractEnd")}
+                readOnly
+                placeholder="Ð­Ñ…Ð»ÑÑ… Ð¾Ð³Ð½Ð¾Ð¾ Ð±Ð¾Ð»Ð¾Ð½ Ñ…Ò¯Ñ‡Ð¸Ð½Ñ‚ÑÐ¹ Ñ…ÑƒÐ³Ð°Ñ†Ð°Ð°Ð³ ÑÐ¾Ð½Ð³Ð¾Ð½Ð¾ ÑƒÑƒ"
+                className={`${getInputClass("contractEnd")} bg-slate-50 text-slate-500`}
               />
               <FieldError message={errors.contractEnd} />
             </div>

@@ -46,24 +46,21 @@ function toggleSort(
 }
 
 function getAuditSigningSummary(log: AuditLog, documents: Document[]) {
-  const hrSignedCount = documents.filter((document) =>
-    Boolean(document.hrSigned),
+  const relatedDocuments = documents.filter((document) =>
+    log.documentIds.includes(document.id),
+  );
+  const totalCount = log.documentIds.length;
+  const completedCount = relatedDocuments.filter(
+    (document) => Boolean(document.hrSigned) && Boolean(document.employeeSigned),
   ).length;
-  const employeeSignedCount = documents.filter((document) =>
-    Boolean(document.employeeSigned),
-  ).length;
-  const unsignedCount = Math.max(log.documentIds.length - hrSignedCount, 0);
-  const allHrSigned =
-    log.hrSignedAll ??
-    (log.documentIds.length > 0 && hrSignedCount === log.documentIds.length);
-  const allEmployeeSigned =
-    Boolean(log.employeeSigned) ||
-    (documents.length > 0 && employeeSignedCount === documents.length);
+  const remainingCount = Math.max(totalCount - completedCount, 0);
+  const allCompleted = totalCount > 0 && remainingCount === 0;
 
   return {
-    unsignedCount,
-    allHrSigned,
-    allEmployeeSigned,
+    totalCount,
+    completedCount,
+    remainingCount,
+    allCompleted,
   };
 }
 
@@ -92,10 +89,49 @@ function DocumentStatusDots({
   documents: Document[];
 }) {
   const summary = getAuditSigningSummary(log, documents);
+  const totalSegments = Math.max(summary.totalCount, 1);
+  const completedSegments = Math.min(summary.completedCount, totalSegments);
+  const finalStatusLabel = summary.allCompleted
+    ? "Баталгаажсан"
+    : `${summary.remainingCount} дутуу`;
+  const finalStatusClass = summary.allCompleted
+    ? "text-emerald-600"
+    : "text-[#121316]";
+  let statusLabel = `${summary.unsignedCount} дутуу`;
+  let statusClass = "text-[#121316]";
+
+  if (summary.allHrSigned && summary.allEmployeeSigned) {
+    statusLabel = "Баталгаажсан";
+    statusClass = "text-emerald-600";
+  } else if (summary.allHrSigned) {
+    statusLabel = "Ажилтан хүлээгдэж байна";
+    statusClass = "text-amber-600";
+  }
+
+  void statusLabel;
+  void statusClass;
 
   if (!log.documentsGenerated) {
     return <span className="text-[12px] text-[#3f4145]">Бэлдээгүй</span>;
   }
+
+  return (
+    <div className="inline-flex items-center gap-2">
+      <div className="flex items-center gap-1">
+        {Array.from({ length: totalSegments }).map((_, index) => (
+          <span
+            key={`${log.id}-status-${index}`}
+            className={`h-[5px] w-[18px] rounded-full ${
+              index < completedSegments ? "bg-[#22C55E]" : "bg-[#707070]"
+            }`}
+          />
+        ))}
+      </div>
+      <span className={`text-[12px] font-medium ${finalStatusClass}`}>
+        {finalStatusLabel}
+      </span>
+    </div>
+  );
 
   if (summary.allHrSigned && summary.allEmployeeSigned) {
     return (

@@ -12,9 +12,14 @@ import {
 } from "@/components/ui/dialog";
 import { GET_EMPLOYER_SIGNATURE_STATUS } from "@/graphql/queries/contract-requests";
 import { GET_CONTRACT_TEMPLATE, GET_EMPLOYEES } from "@/graphql/queries";
-import { TRIGGER_ACTION } from "@/graphql/mutations";
+import { TRIGGER_ACTION, UPSERT_EMPLOYEE } from "@/graphql/mutations";
 import { buildGraphQLHeaders } from "@/lib/apollo-client";
-import type { ActionConfig, DocumentContent, Employee } from "@/lib/types";
+import type {
+  ActionConfig,
+  DocumentContent,
+  Employee,
+  UpsertEmployeeInput,
+} from "@/lib/types";
 import { ChangePositionForm } from "./forms/ChangePositionForm";
 import { NewEmployeeForm } from "./forms/NewEmployeeForm";
 import { OffboardForm } from "./forms/OffboardForm";
@@ -77,6 +82,37 @@ const SelectWrapper = ({
   </div>
 );
 
+function formatIsoDate(date: Date) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+function calculateContractEndDate(start: string, duration: string) {
+  if (!start || !duration) return "";
+  const [year, month, day] = start.split("-").map(Number);
+  if (!year || !month || !day) return "";
+  const baseDate = new Date(year, month - 1, day);
+
+  if (duration === "6 ÑÐ°Ñ€") {
+    baseDate.setMonth(baseDate.getMonth() + 6);
+    return formatIsoDate(baseDate);
+  }
+
+  if (duration === "1 Ð¶Ð¸Ð»") {
+    baseDate.setFullYear(baseDate.getFullYear() + 1);
+    return formatIsoDate(baseDate);
+  }
+
+  if (duration === "2 Ð¶Ð¸Ð»") {
+    baseDate.setFullYear(baseDate.getFullYear() + 2);
+    return formatIsoDate(baseDate);
+  }
+
+  return "";
+}
+
 export function AddEmployeeRequestDialog({
   action,
   open,
@@ -123,7 +159,7 @@ export function AddEmployeeRequestDialog({
   const [signedDocIds, setSignedDocIds] = useState<Set<string>>(
     () => new Set(),
   );
-  const [signatureNotice, setSignatureNotice] = useState<string | null>(null);
+  const [signatureToast, setSignatureToast] = useState<string | null>(null);
   const [signatureModalOpen, setSignatureModalOpen] = useState(false);
   const [signaturePasscode, setSignaturePasscode] = useState("");
   const [signatureModalError, setSignatureModalError] = useState<string | null>(
@@ -149,6 +185,9 @@ export function AddEmployeeRequestDialog({
   const [previewSignatureData, setPreviewSignatureData] = useState("");
   const previewSignatureCanvasRef = useRef<HTMLCanvasElement | null>(null);
   const previewSignatureDrawingRef = useRef(false);
+  const signatureToastTimerRef = useRef<ReturnType<typeof setTimeout> | null>(
+    null,
+  );
 
   function handleDialogOpenChange(nextOpen: boolean) {
     if (!nextOpen && previewOpen) {
@@ -188,8 +227,27 @@ export function AddEmployeeRequestDialog({
     setErrors({});
     setTab("employee");
     setSalaryStep("person");
-    setNewEmployeeStep(1);
-    setEmployeeCode("EMP-0001");
+    setNewEmployeeStep(2);
+    setEmployeeCode("");
+    setLastName("Дорж");
+    setFirstName("Эрдэнэ");
+    setEmail("dorj.erdene@gmail.com");
+    setChangeEmail("dorj.erdene@gmail.com");
+    setRegisterNo("УХ04272036");
+    setPhone("99999999");
+    setBranch("Гурван гол");
+    setDept("Engineering");
+    setJobTitle("Senior Engineer");
+    setCompanyAddress("Сүхбаатар дүүрэг, Гурван гол оффис 3 давхар");
+    setCompanyRegisterNo("31234567345");
+    setCompanyName("Pinecone Academy");
+    setWorkSchedule("Бүтэн цагаар");
+    setWorkdays("Даваа-Баасан");
+    setSalaryAmount("4200000");
+    setContractStart("2026-04-01");
+    setContractDuration("1 жил");
+    setRecipients(action?.recipients.length ? [...action.recipients] : ["hr_manager"]);
+    setRecipientInput("");
   };
 
   const searchKey = employeeCode.trim();
@@ -226,7 +284,7 @@ export function AddEmployeeRequestDialog({
     setErrors({});
     setChangeEmail("");
     setSignedDocIds(new Set());
-    setSignatureNotice(null);
+    setSignatureToast(null);
     setSignatureModalOpen(false);
     setSignaturePasscode("");
     setSignatureModalError(null);
@@ -241,6 +299,14 @@ export function AddEmployeeRequestDialog({
     setBlurred(open || previewOpen);
     return () => setBlurred(false);
   }, [open, previewOpen, setBlurred]);
+
+  useEffect(() => {
+    return () => {
+      if (signatureToastTimerRef.current) {
+        clearTimeout(signatureToastTimerRef.current);
+      }
+    };
+  }, []);
 
   useEffect(() => {
     if (!open) {
@@ -270,9 +336,20 @@ export function AddEmployeeRequestDialog({
     setTerminationDate(matchedEmployee.terminationDate ?? "");
   }, [employeeCode, matchedEmployee]);
 
+  useEffect(() => {
+    if (!useAddEmployeeLayout) return;
+    setContractEnd(calculateContractEndDate(contractStart, contractDuration));
+  }, [contractDuration, contractStart, useAddEmployeeLayout]);
+
   const [triggerAction, { loading: submitting }] = useMutation(TRIGGER_ACTION, {
     context: { headers: buildGraphQLHeaders({ actorRole: "hr" }) },
   });
+  const [saveEmployee, { loading: savingEmployee }] = useMutation(
+    UPSERT_EMPLOYEE,
+    {
+      context: { headers: buildGraphQLHeaders({ actorRole: "hr" }) },
+    },
+  );
   const signingDocument = false;
   const { data: employerSignatureStatusData } = useQuery<{
     employerSignatureStatus: {
@@ -360,10 +437,29 @@ export function AddEmployeeRequestDialog({
     setSignatureModalError(null);
     setSignaturePasscode("");
     setUseSignaturePasscode(false);
+    setSignedDocIds((prev) => new Set(prev).add(previewDoc.id));
+    setSignatureToast("Гарын үсэг нэмэгдлээ.");
+    if (signatureToastTimerRef.current) {
+      clearTimeout(signatureToastTimerRef.current);
+    }
+    signatureToastTimerRef.current = setTimeout(() => {
+      closeSignatureFlow();
+    }, 2000);
+  }
+
+  function closeSignatureFlow() {
+    if (signatureToastTimerRef.current) {
+      clearTimeout(signatureToastTimerRef.current);
+      signatureToastTimerRef.current = null;
+    }
+    setSignatureToast(null);
     setSignatureModalOpen(false);
-    setSignatureNotice(
-      "??? preview ?? ?????? ?????? ??? ?????? ?????????. ?????? ???????? ????? Audit log ???? ????? ?????? ???? ????? ???? ?????.",
-    );
+    setPreviewOpen(false);
+    setSignaturePasscode("");
+    setSignatureModalError(null);
+    setUseSignaturePasscode(false);
+    setPreviewSignatureData("");
+    handleClearPreviewSignature();
   }
 
   function handlePreviewSignaturePointerDown(
@@ -476,22 +572,7 @@ export function AddEmployeeRequestDialog({
     };
 
     if (useAddEmployeeLayout) {
-      requireValue(companyAddress, "companyAddress");
-      requirePattern(
-        companyRegisterNo,
-        "companyRegisterNo",
-        numberOnlyRegex,
-        "?????? ??? ??????? ??.",
-      );
-      requireValue(companyName, "companyName");
-
       if (newEmployeeStep === 1) {
-        requirePattern(
-          employeeCode,
-          "employeeCode",
-          employeeCodeRegex,
-          "EMP0001 ????????? ??????? ??.",
-        );
         requireValue(branch, "branch");
         requireValue(lastName, "lastName");
         requireValue(firstName, "firstName");
@@ -515,7 +596,6 @@ export function AddEmployeeRequestDialog({
           "?????? ??? ??????? ??.",
         );
         requireValue(contractStart, "contractStart");
-        requireValue(contractEnd, "contractEnd");
         requireValue(contractDuration, "contractDuration");
         if (contractStart && contractEnd && contractEnd < contractStart) {
           nextErrors.contractEnd = "?????? ????? ????? ????????? ???? ?????.";
@@ -688,15 +768,62 @@ export function AddEmployeeRequestDialog({
       const overrideRecipients =
         useChangePositionLayout && changeEmail ? [changeEmail] : recipients;
 
-      await triggerAction({
-        variables: {
-          employeeId: matchedEmployee!.id,
-          action: action.name,
-          overrideRecipients,
-          templateDataOverrides:
-            Object.keys(overrides).length > 0 ? overrides : undefined,
-        },
-      });
+      if (useAddEmployeeLayout) {
+        const [workdayFrom = "", workdayTo = ""] = workdays
+          .split("-")
+          .map((value) => value.trim());
+        const employeeInput: UpsertEmployeeInput = {
+          id: matchedEmployee?.id ?? globalThis.crypto.randomUUID(),
+          employeeCode: employeeCode.trim() || null,
+          firstName: firstName.trim(),
+          lastName: lastName.trim(),
+          firstNameEng: null,
+          lastNameEng: null,
+          entraId: null,
+          email: email.trim() || null,
+          imageUrl: null,
+          github: null,
+          department: dept.trim(),
+          branch: branch.trim(),
+          jobTitle: jobTitle.trim() || null,
+          level: matchedEmployee?.level ?? "Junior",
+          hireDate: contractStart || new Date().toISOString().slice(0, 10),
+          terminationDate: null,
+          status: matchedEmployee?.status ?? "Ирсэн",
+          numberOfVacationDays: null,
+          isSalaryCompany: null,
+          isKpi: null,
+          birthDayAndMonth: null,
+          birthdayPoster: null,
+          documentProfile: {
+            company_address: companyAddress.trim(),
+            company_register_no: companyRegisterNo.trim(),
+            company_name: companyName.trim(),
+            employee_register_no: registerNo.trim(),
+            employee_legal_phone: phone.trim(),
+            employee_phone: phone.trim(),
+            contract_term: contractDuration.trim(),
+            work_schedule_type: workSchedule.trim(),
+            workday_from: workdayFrom,
+            workday_to: workdayTo,
+            monthly_base_salary_amount: salaryAmount.trim(),
+          },
+        };
+
+        await saveEmployee({
+          variables: { input: employeeInput },
+        });
+      } else {
+        await triggerAction({
+          variables: {
+            employeeId: matchedEmployee!.id,
+            action: action.name,
+            overrideRecipients,
+            templateDataOverrides:
+              Object.keys(overrides).length > 0 ? overrides : undefined,
+          },
+        });
+      }
       onOpenChange(false);
     } catch (err) {
       setErrors((prev) => ({
@@ -732,18 +859,17 @@ export function AddEmployeeRequestDialog({
         placeholder="Хүлээн авагч нэмэх..."
         className="border border-slate-200 rounded-[8px] px-[12px] py-[8px] bg-white text-slate-600 text-[14px] placeholder:text-slate-400 outline-none focus:border-slate-300 tracking-[-0.084px]"
       />
+      {errors.recipients ? (
+        <p className="mt-1 text-[12px] leading-[16px] text-red-500">
+          {errors.recipients}
+        </p>
+      ) : null}
     </div>
   );
 
   const DocumentsSection = (
     <div className="flex flex-col gap-[12px]">
       <label className={labelClass}>Хавсаргасан файл</label>
-      {signatureNotice ? (
-        <div className="flex items-center gap-2 rounded-[12px] border border-emerald-200 bg-emerald-50 px-3 py-2 text-[13px] text-emerald-700">
-          <FiCheckCircle className="h-4 w-4" />
-          <span>{signatureNotice}</span>
-        </div>
-      ) : null}
       {documents.length > 0 ? (
         documents.map((doc) => (
           <div
@@ -787,193 +913,201 @@ export function AddEmployeeRequestDialog({
 
   return (
     <Dialog open={open} onOpenChange={handleDialogOpenChange}>
-      <DialogContent className="bg-white border border-slate-200 rounded-[16px] flex min-h-0 w-full max-w-[calc(100vw-2rem)] sm:max-w-xl flex-col gap-[16px] p-[24px] max-h-[calc(100vh-2rem)] overflow-y-auto overflow-x-hidden overscroll-contain ring-0 scrollbar-hidden pointer-events-auto">
+      <DialogContent className="bg-white border border-slate-200 rounded-[16px] flex min-h-0 w-full max-w-[calc(100vw-2rem)] sm:max-w-xl flex-col gap-[16px] p-[24px] max-h-[calc(100vh-2rem)] overflow-hidden ring-0 pointer-events-auto">
         <DialogHeader>
           <DialogTitle className="text-slate-900 font-semibold text-[20px] leading-6">
             {actionLabel}
           </DialogTitle>
         </DialogHeader>
-        <div className="flex items-center justify-end">
+        <div className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden overscroll-contain pr-1 scrollbar-hidden">
+          <div className="flex flex-col gap-[16px]">
+            <div className="flex items-center justify-end">
+              <button
+                type="button"
+                onClick={handleDemoFill}
+                className="rounded-[10px] border border-black/12 px-3 py-1.5 text-[12px] font-medium text-[#3f4145] transition-colors hover:bg-[#f5f5f5]">
+                Demo бөглөх
+              </button>
+            </div>
+
+            {/* ── ҮНДСЭН ЦАЛИН ӨӨРЧЛӨХ (2 алхам) ── */}
+            {useSalaryChangeLayout ? (
+              <SalaryChangeForm
+                salaryStep={salaryStep}
+                employeeCode={employeeCode}
+                setEmployeeCode={setEmployeeCode}
+                lastName={lastName}
+                setLastName={setLastName}
+                firstName={firstName}
+                setFirstName={setFirstName}
+                email={email}
+                setEmail={setEmail}
+                dept={dept}
+                setDept={setDept}
+                currentPosition={currentPosition}
+                setCurrentPosition={setCurrentPosition}
+                nextPosition={nextPosition}
+                setNextPosition={setNextPosition}
+                workStartDate={workStartDate}
+                setWorkStartDate={setWorkStartDate}
+                workTotalDuration={workTotalDuration}
+                setWorkTotalDuration={setWorkTotalDuration}
+                prevSalary={prevSalary}
+                setPrevSalary={setPrevSalary}
+                nextSalary={nextSalary}
+                setNextSalary={setNextSalary}
+                salaryDelta={salaryDelta}
+                setSalaryDelta={setSalaryDelta}
+                departments={DEPARTMENTS}
+                errors={errors}
+                labelClass={labelClass}
+                inputClass={inputClass}
+                SelectWrapper={SelectWrapper}
+                RecipientsSection={RecipientsSection}
+                DocumentsSection={DocumentsSection}
+              />
+            ) : useChangePositionLayout ? (
+              <ChangePositionForm
+                employeeCode={employeeCode}
+                setEmployeeCode={setEmployeeCode}
+                lastName={lastName}
+                setLastName={setLastName}
+                firstName={firstName}
+                setFirstName={setFirstName}
+                email={changeEmail}
+                setEmail={setChangeEmail}
+                currentDept={currentDept}
+                setCurrentDept={setCurrentDept}
+                currentPosition={currentPosition}
+                setCurrentPosition={setCurrentPosition}
+                nextDept={nextDept}
+                setNextDept={setNextDept}
+                nextPosition={nextPosition}
+                setNextPosition={setNextPosition}
+                changeReason={changeReason}
+                setChangeReason={setChangeReason}
+                departments={DEPARTMENTS}
+                errors={errors}
+                labelClass={labelClass}
+                inputClass={inputClass}
+                SelectWrapper={SelectWrapper}
+                RecipientsSection={RecipientsSection}
+                DocumentsSection={DocumentsSection}
+              />
+            ) : useOffboardLayout ? (
+              <OffboardForm
+                employeeCode={employeeCode}
+                setEmployeeCode={setEmployeeCode}
+                lastName={lastName}
+                setLastName={setLastName}
+                firstName={firstName}
+                setFirstName={setFirstName}
+                registerNo={registerNo}
+                setRegisterNo={setRegisterNo}
+                phone={phone}
+                setPhone={setPhone}
+                jobTitle={jobTitle}
+                setJobTitle={setJobTitle}
+                hireDate={hireDate}
+                setHireDate={setHireDate}
+                terminationDate={terminationDate}
+                setTerminationDate={setTerminationDate}
+                contractNo={contractNo}
+                setContractNo={setContractNo}
+                terminationReason={terminationReason}
+                setTerminationReason={setTerminationReason}
+                errors={errors}
+                labelClass={labelClass}
+                inputClass={inputClass}
+                RecipientsSection={RecipientsSection}
+                DocumentsSection={DocumentsSection}
+              />
+            ) : useAddEmployeeLayout ? (
+              <NewEmployeeForm
+                step={newEmployeeStep}
+                setStep={setNewEmployeeStep}
+                tab={tab}
+                setTab={setTab}
+                companyAddress={companyAddress}
+                setCompanyAddress={setCompanyAddress}
+                companyRegisterNo={companyRegisterNo}
+                setCompanyRegisterNo={setCompanyRegisterNo}
+                companyName={companyName}
+                setCompanyName={setCompanyName}
+                employeeCode={employeeCode}
+                setEmployeeCode={setEmployeeCode}
+                branch={branch}
+                setBranch={setBranch}
+                lastName={lastName}
+                setLastName={setLastName}
+                firstName={firstName}
+                setFirstName={setFirstName}
+                email={email}
+                setEmail={setEmail}
+                registerNo={registerNo}
+                setRegisterNo={setRegisterNo}
+                phone={phone}
+                setPhone={setPhone}
+                dept={dept}
+                setDept={setDept}
+                jobTitle={jobTitle}
+                setJobTitle={setJobTitle}
+                workSchedule={workSchedule}
+                setWorkSchedule={setWorkSchedule}
+                workdays={workdays}
+                setWorkdays={setWorkdays}
+                salaryAmount={salaryAmount}
+                setSalaryAmount={setSalaryAmount}
+                contractStart={contractStart}
+                setContractStart={setContractStart}
+                contractEnd={contractEnd}
+                setContractEnd={setContractEnd}
+                contractDuration={contractDuration}
+                setContractDuration={setContractDuration}
+                departments={DEPARTMENTS}
+                errors={errors}
+                labelClass={labelClass}
+                inputClass={inputClass}
+                SelectWrapper={SelectWrapper}
+                RecipientsSection={RecipientsSection}
+                DocumentsSection={DocumentsSection}
+              />
+            ) : (
+              <div className="text-sm text-slate-500">
+                Энэ үйлдэлд form тохируулаагүй байна.
+              </div>
+            )}
+          </div>
+        </div>
+        {/* ── Товчлуурууд ── */}
+        <div className="sticky bottom-0 z-10 -mx-[24px] mt-2 flex shrink-0 flex-nowrap items-center justify-end gap-[20px] border-t border-slate-200 bg-white px-[24px] pb-[4px] pt-[16px]">
           <button
             type="button"
-            onClick={handleDemoFill}
-            className="rounded-[10px] border border-black/12 px-3 py-1.5 text-[12px] font-medium text-[#3f4145] transition-colors hover:bg-[#f5f5f5]">
-            Demo бөглөх (EMP-0001)
-          </button>
-        </div>
-
-        {/* ── ҮНДСЭН ЦАЛИН ӨӨРЧЛӨХ (2 алхам) ── */}
-        {useSalaryChangeLayout ? (
-          <SalaryChangeForm
-            salaryStep={salaryStep}
-            employeeCode={employeeCode}
-            setEmployeeCode={setEmployeeCode}
-            lastName={lastName}
-            setLastName={setLastName}
-            firstName={firstName}
-            setFirstName={setFirstName}
-            email={email}
-            setEmail={setEmail}
-            dept={dept}
-            setDept={setDept}
-            currentPosition={currentPosition}
-            setCurrentPosition={setCurrentPosition}
-            nextPosition={nextPosition}
-            setNextPosition={setNextPosition}
-            workStartDate={workStartDate}
-            setWorkStartDate={setWorkStartDate}
-            workTotalDuration={workTotalDuration}
-            setWorkTotalDuration={setWorkTotalDuration}
-            prevSalary={prevSalary}
-            setPrevSalary={setPrevSalary}
-            nextSalary={nextSalary}
-            setNextSalary={setNextSalary}
-            salaryDelta={salaryDelta}
-            setSalaryDelta={setSalaryDelta}
-            departments={DEPARTMENTS}
-            errors={errors}
-            labelClass={labelClass}
-            inputClass={inputClass}
-            SelectWrapper={SelectWrapper}
-            RecipientsSection={RecipientsSection}
-            DocumentsSection={DocumentsSection}
-          />
-        ) : useChangePositionLayout ? (
-          <ChangePositionForm
-            employeeCode={employeeCode}
-            setEmployeeCode={setEmployeeCode}
-            lastName={lastName}
-            setLastName={setLastName}
-            firstName={firstName}
-            setFirstName={setFirstName}
-            email={changeEmail}
-            setEmail={setChangeEmail}
-            currentDept={currentDept}
-            setCurrentDept={setCurrentDept}
-            currentPosition={currentPosition}
-            setCurrentPosition={setCurrentPosition}
-            nextDept={nextDept}
-            setNextDept={setNextDept}
-            nextPosition={nextPosition}
-            setNextPosition={setNextPosition}
-            changeReason={changeReason}
-            setChangeReason={setChangeReason}
-            departments={DEPARTMENTS}
-            errors={errors}
-            labelClass={labelClass}
-            inputClass={inputClass}
-            SelectWrapper={SelectWrapper}
-            RecipientsSection={RecipientsSection}
-            DocumentsSection={DocumentsSection}
-          />
-        ) : useOffboardLayout ? (
-          <OffboardForm
-            employeeCode={employeeCode}
-            setEmployeeCode={setEmployeeCode}
-            lastName={lastName}
-            setLastName={setLastName}
-            firstName={firstName}
-            setFirstName={setFirstName}
-            registerNo={registerNo}
-            setRegisterNo={setRegisterNo}
-            phone={phone}
-            setPhone={setPhone}
-            jobTitle={jobTitle}
-            setJobTitle={setJobTitle}
-            hireDate={hireDate}
-            setHireDate={setHireDate}
-            terminationDate={terminationDate}
-            setTerminationDate={setTerminationDate}
-            contractNo={contractNo}
-            setContractNo={setContractNo}
-            terminationReason={terminationReason}
-            setTerminationReason={setTerminationReason}
-            errors={errors}
-            labelClass={labelClass}
-            inputClass={inputClass}
-            RecipientsSection={RecipientsSection}
-            DocumentsSection={DocumentsSection}
-          />
-        ) : useAddEmployeeLayout ? (
-          <NewEmployeeForm
-            step={newEmployeeStep}
-            setStep={setNewEmployeeStep}
-            tab={tab}
-            setTab={setTab}
-            companyAddress={companyAddress}
-            setCompanyAddress={setCompanyAddress}
-            companyRegisterNo={companyRegisterNo}
-            setCompanyRegisterNo={setCompanyRegisterNo}
-            companyName={companyName}
-            setCompanyName={setCompanyName}
-            employeeCode={employeeCode}
-            setEmployeeCode={setEmployeeCode}
-            branch={branch}
-            setBranch={setBranch}
-            lastName={lastName}
-            setLastName={setLastName}
-            firstName={firstName}
-            setFirstName={setFirstName}
-            email={email}
-            setEmail={setEmail}
-            registerNo={registerNo}
-            setRegisterNo={setRegisterNo}
-            phone={phone}
-            setPhone={setPhone}
-            dept={dept}
-            setDept={setDept}
-            jobTitle={jobTitle}
-            setJobTitle={setJobTitle}
-            workSchedule={workSchedule}
-            setWorkSchedule={setWorkSchedule}
-            workdays={workdays}
-            setWorkdays={setWorkdays}
-            salaryAmount={salaryAmount}
-            setSalaryAmount={setSalaryAmount}
-            contractStart={contractStart}
-            setContractStart={setContractStart}
-            contractEnd={contractEnd}
-            setContractEnd={setContractEnd}
-            contractDuration={contractDuration}
-            setContractDuration={setContractDuration}
-            departments={DEPARTMENTS}
-            errors={errors}
-            labelClass={labelClass}
-            inputClass={inputClass}
-            SelectWrapper={SelectWrapper}
-            RecipientsSection={RecipientsSection}
-            DocumentsSection={DocumentsSection}
-          />
-        ) : (
-          <div className="text-sm text-slate-500">
-            Энэ үйлдэлд form тохируулаагүй байна.
-          </div>
-        )}
-        {/* ── Товчлуурууд ── */}
-        <div className="flex flex-nowrap items-center gap-[20px] justify-end shrink-0">
-          <button
             onClick={() => onOpenChange(false)}
             className=" px-[20px] py-[10px] rounded-[12px] text-[#FF2B2B] text-[16px] hover:bg-slate-50 transition-colors cursor-pointer whitespace-nowrap border border-[#FF2B2B]">
             Болих
           </button>
           {useAddEmployeeLayout && newEmployeeStep === 1 ? (
             <button
+              type="button"
               onClick={() => setNewEmployeeStep(2)}
               className="bg-slate-900 px-[20px] py-[10px] rounded-[12px] text-white text-[16px] hover:bg-slate-800 transition-colors cursor-pointer whitespace-nowrap ">
               Цааш
             </button>
           ) : useSalaryChangeLayout && salaryStep === "person" ? (
             <button
+              type="button"
               onClick={() => setSalaryStep("salary")}
               className="bg-slate-900 px-[20px] py-[10px] rounded-[12px] text-white text-[16px] hover:bg-slate-800 transition-colors cursor-pointer whitespace-nowrap">
               Цааш
             </button>
           ) : (
             <button
+              type="button"
               onClick={handleSubmit}
-              disabled={submitting}
-              className="bg-slate-900 px-[20px] py-[10px] rounded-[12px] text-white text-[16px] hover:bg-slate-800 transition-colors cursor-pointer disabled:opacity-60 whitespace-nowrap">
-              {submitting ? "Илгээж байна..." : "Илгээх"}
+              disabled={submitting || savingEmployee}
+              className="bg-slate-900 px-[20px] py-[10px] rounded-[12px] text-white text-[16px] hover:bg-slate-800 transition-colors cursor-pointer disabled:opacity-60 whitespace-nowrap z-100">
+              {submitting || savingEmployee ? "Илгээж байна..." : "Илгээх"}
             </button>
           )}
         </div>
@@ -984,6 +1118,11 @@ export function AddEmployeeRequestDialog({
         onOpenChange={(nextOpen) => {
           setPreviewOpen(nextOpen);
           if (!nextOpen) {
+            if (signatureToastTimerRef.current) {
+              clearTimeout(signatureToastTimerRef.current);
+              signatureToastTimerRef.current = null;
+            }
+            setSignatureToast(null);
             setSignatureModalOpen(false);
             setSignaturePasscode("");
             setSignatureModalError(null);
@@ -1108,6 +1247,11 @@ export function AddEmployeeRequestDialog({
         onOpenChange={(nextOpen) => {
           setSignatureModalOpen(nextOpen);
           if (!nextOpen) {
+            if (signatureToastTimerRef.current) {
+              clearTimeout(signatureToastTimerRef.current);
+              signatureToastTimerRef.current = null;
+            }
+            setSignatureToast(null);
             setSignaturePasscode("");
             setSignatureModalError(null);
             setUseSignaturePasscode(false);
@@ -1128,9 +1272,9 @@ export function AddEmployeeRequestDialog({
             {hasSavedEmployerSignature ? (
               <>
                 <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
-                  ????????? ????? ???? ????? ?????.
+                  Хадгалсан гарын үсэг бэлэн байна.
                   {employerSignatureStatus?.updatedAt
-                    ? ` ${new Date(employerSignatureStatus.updatedAt).toLocaleDateString("mn-MN")} ??????????.`
+                    ? ` ${new Date(employerSignatureStatus.updatedAt).toLocaleDateString("mn-MN")} шинэчилсэн.`
                     : ""}
                 </div>
 
@@ -1138,9 +1282,7 @@ export function AddEmployeeRequestDialog({
                   <div className="space-y-2">
                     <label
                       htmlFor="hr-signature-passcode"
-                      className="text-sm font-medium text-slate-700">
-                      4 ??????? ???
-                    </label>
+                      className="text-sm font-medium text-slate-700"></label>
                     <input
                       id="hr-signature-passcode"
                       value={signaturePasscode}
@@ -1159,9 +1301,7 @@ export function AddEmployeeRequestDialog({
               </>
             ) : (
               <>
-                <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-700">
-                  ????????? ????? ???? ???? ?????. ??? ???? ???? ??????? ?????.
-                </div>
+                <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-700"></div>
 
                 <div className="space-y-3">
                   <div className="relative overflow-hidden rounded-xl border border-slate-200 bg-white">
@@ -1197,16 +1337,13 @@ export function AddEmployeeRequestDialog({
                       }
                       className="h-4 w-4 rounded border-slate-300 text-slate-900"
                     />
-                    4 ??????? ??? ?????
                   </label>
 
                   {useSignaturePasscode ? (
                     <div className="space-y-2">
                       <label
                         htmlFor="hr-signature-passcode"
-                        className="text-sm font-medium text-slate-700">
-                        4 ??????? ???
-                      </label>
+                        className="text-sm font-medium text-slate-700"></label>
                       <input
                         id="hr-signature-passcode"
                         value={signaturePasscode}
@@ -1252,6 +1389,22 @@ export function AddEmployeeRequestDialog({
           </div>
         </DialogContent>
       </Dialog>
+
+      {signatureToast ? (
+        <div className="fixed right-6 top-6 z-[120]">
+          <div className="flex items-center gap-3 rounded-xl border border-emerald-200 bg-white px-4 py-3 text-sm text-slate-700 shadow-lg">
+            <FiCheckCircle className="h-4 w-4 shrink-0 text-emerald-600" />
+            <span>{signatureToast}</span>
+            <button
+              type="button"
+              onClick={closeSignatureFlow}
+              className="flex h-6 w-6 items-center justify-center rounded-md text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700"
+              aria-label="Close success toast">
+              <FiX className="h-4 w-4" />
+            </button>
+          </div>
+        </div>
+      ) : null}
     </Dialog>
   );
 }
