@@ -3,6 +3,8 @@
 import {
   AnalyticsIcon,
   AuditLog as AuditLogIcon,
+  BoxerIcon,
+  ClipboardsIcon,
   CubaIcon,
   InsightIcon,
   SettingsIcon,
@@ -10,7 +12,7 @@ import {
   StatisticIcon,
   UsersIcon,
 } from "@/components/icons";
-import { BoxIcon, ClipboardIcon } from "lucide-react";
+import { BoxesIcon, BoxIcon, ClipboardIcon } from "lucide-react";
 export type HrSectionKey =
   | "dashboard"
   | "employees"
@@ -43,13 +45,13 @@ export const HR_NAV_ITEMS: HrNavItem[] = [
     key: "requests",
     label: "Гэрээний сан",
     href: "/hr/requests",
-    icon: <ClipboardIcon />,
+    icon: <ClipboardsIcon />,
   },
   {
     key: "documents",
     label: "Нийт баримт бичиг",
     href: "/hr/documents",
-    icon: <BoxIcon />,
+    icon: <BoxerIcon />,
   },
   {
     key: "audit-log",

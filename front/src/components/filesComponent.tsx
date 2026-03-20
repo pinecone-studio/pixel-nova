@@ -15,6 +15,7 @@ import type { Document, DocumentContent, Employee } from "@/lib/types";
 import {
   ActiveIcon,
   CalIcon,
+  CloudIcon,
   DownloadIcon,
   PlusIcon,
   RedirectIcon,
@@ -109,7 +110,8 @@ function UploadCloudIcon() {
       height="36"
       fill="none"
       viewBox="0 0 24 24"
-      className="text-slate-400">
+      className="text-slate-400"
+    >
       <path
         d="M12 16V8M12 8l-3 3M12 8l3 3"
         stroke="currentColor"
@@ -167,10 +169,12 @@ function FilePreviewModal({
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/45"
-      onClick={onClose}>
+      onClick={onClose}
+    >
       <div
         className="relative w-[920px] max-w-[95vw] h-[82vh] bg-white rounded-3xl border border-slate-200 shadow-[0_28px_60px_rgba(15,23,42,0.12)] overflow-hidden"
-        onClick={(e) => e.stopPropagation()}>
+        onClick={(e) => e.stopPropagation()}
+      >
         <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200">
           <div>
             <p className="text-slate-900 font-semibold text-base">
@@ -184,7 +188,8 @@ function FilePreviewModal({
           </div>
           <button
             onClick={onClose}
-            className="text-slate-400 hover:text-slate-700 transition-colors text-lg cursor-pointer">
+            className="text-slate-400 hover:text-slate-700 transition-colors text-lg cursor-pointer"
+          >
             ✕
           </button>
         </div>
@@ -206,7 +211,8 @@ function FilePreviewModal({
               </p>
               <button
                 onClick={handleDownload}
-                className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black font-semibold text-sm transition-colors">
+                className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black font-semibold text-sm transition-colors"
+              >
                 <DownloadIcon />
                 Татах
               </button>
@@ -322,11 +328,13 @@ function NewDocModal({
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/45 backdrop-blur-sm"
-      onClick={onClose}>
+      onClick={onClose}
+    >
       <div
-        className="relative bg-white rounded-3xl border border-slate-200 shadow-[0_28px_60px_rgba(15,23,42,0.12)] flex flex-col gap-5 overflow-hidden"
+        className="relative bg-white rounded-3xl border border-slate-200h max-w-[500px] min-h-[514px] shadow-[0_28px_60px_rgba(15,23,42,0.12)] flex flex-col gap-4 overflow-hidden"
         style={{ width: 520, padding: "28px 28px 24px" }}
-        onClick={(e) => e.stopPropagation()}>
+        onClick={(e) => e.stopPropagation()}
+      >
         {/* Header */}
         <div className="flex items-center justify-between">
           <h2 className="text-slate-900 text-lg font-semibold">
@@ -334,7 +342,8 @@ function NewDocModal({
           </h2>
           <button
             onClick={onClose}
-            className="text-slate-400 hover:text-slate-700 transition-colors cursor-pointer">
+            className="text-slate-400 hover:text-slate-700 transition-colors cursor-pointer"
+          >
             <svg width="22" height="22" fill="none" viewBox="0 0 24 24">
               <path
                 d="M18 6L6 18M6 6l12 12"
@@ -367,11 +376,13 @@ function NewDocModal({
             {recipients.map((r) => (
               <span
                 key={r}
-                className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full border border-slate-200 text-slate-500 text-xs bg-slate-50">
+                className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full border border-slate-200 text-slate-500 text-xs bg-slate-50"
+              >
                 {r}
                 <button
                   onClick={() => removeRecipient(r)}
-                  className="text-slate-400 hover:text-slate-600 transition-colors leading-none ml-0.5 cursor-pointer">
+                  className="text-slate-400 hover:text-slate-600 transition-colors leading-none ml-0.5 cursor-pointer"
+                >
                   ×
                 </button>
               </span>
@@ -407,7 +418,8 @@ function NewDocModal({
               dragging
                 ? "border-emerald-400 bg-emerald-50/60"
                 : "border-slate-200 hover:border-slate-300"
-            }`}>
+            }`}
+          >
             <UploadCloudIcon />
             {file ? (
               <p className="text-emerald-600 text-sm font-semibold text-center">
@@ -426,7 +438,8 @@ function NewDocModal({
                     e.stopPropagation();
                     fileRef.current?.click();
                   }}
-                  className="mt-1 px-5 py-2 rounded-full border border-slate-200 text-slate-600 text-xs hover:border-slate-300 transition-colors bg-white cursor-pointer">
+                  className="mt-1 px-5 py-2 rounded-full border border-slate-200 text-slate-600 text-xs hover:border-slate-300 transition-colors bg-white cursor-pointer"
+                >
                   Оруулах
                 </button>
               </>
@@ -440,13 +453,15 @@ function NewDocModal({
         <div className="flex items-center justify-end gap-3 pt-1">
           <button
             onClick={onClose}
-            className="px-6 py-2.5 rounded-2xl border border-slate-200 text-slate-500 text-sm font-medium hover:bg-slate-50 transition-colors cursor-pointer">
+            className="px-6 py-2.5 rounded-2xl border border-slate-200 text-slate-500 text-sm font-medium hover:bg-slate-50 transition-colors cursor-pointer"
+          >
             Татгалзах
           </button>
           <button
             onClick={handleSubmit}
             disabled={saving}
-            className="flex items-center gap-2 px-6 py-2.5 rounded-2xl bg-[#1F2126] hover:bg-slate-800 disabled:opacity-60 text-white text-sm font-semibold transition-colors shadow-lg cursor-pointer">
+            className="flex items-center gap-2 px-6 py-2.5 rounded-2xl bg-[#1F2126] hover:bg-slate-800 disabled:opacity-60 text-white text-sm font-semibold transition-colors shadow-lg cursor-pointer"
+          >
             <svg width="16" height="16" fill="none" viewBox="0 0 24 24">
               <path
                 d="M12 5v14M5 12h14"
@@ -664,10 +679,12 @@ export function FilesComponent() {
               {stages.map((stage) => (
                 <div
                   key={stage.label}
-                  className="rounded-[20px] border flex justify-between items-center border-black/12 bg-white px-5 py-4">
+                  className="rounded-[20px] border flex justify-between items-center border-black/12 bg-white px-5 py-4"
+                >
                   <div className="flex items-center gap-3">
                     <div
-                      className={`flex h-[40px] w-10 shrink-0 items-center border justify-center rounded-[14px] ${stage.bgColor} ${stage.borderColor}`}>
+                      className={`flex h-[40px] w-10 shrink-0 items-center border justify-center rounded-[14px] ${stage.bgColor} ${stage.borderColor}`}
+                    >
                       {stage.icon}
                     </div>
                     <div className="min-w-0">
@@ -688,16 +705,17 @@ export function FilesComponent() {
 
       <div className="h-full w-px bg-[#0000001F]" />
 
-      <div className="flex min-w-0 flex-1 flex-col xl:overflow-hidden gap-2">
-        <div className="flex min-w-0 flex-col overflow-hidden rounded-[24px] border border-black/12 bg-white xl:min-h-0 xl:flex-1">
-          <div className="h-[40px] xl:flex-1 xl:overflow-y-auto w-[904px]  ">
+      <div className="flex min-w-0 flex-1 flex-col xl:overflow-hidden  gap-2">
+        <div className="flex min-w-0 flex-col overflow-hidden rounded-[24px]   border border-black/12 bg-white xl:min-h-0 xl:flex-1">
+          <div className=" xl:flex-1 xl:overflow-y-auto max-w-[904px] ">
             <div
               className="sticky top-0 z-10 grid items-center border-b border-black/12 bg-white px-3 py-3 text-[14px] text-[#3f4145b3] md:px-5"
               style={{
                 gridTemplateColumns:
                   "minmax(200px,2fr) minmax(120px,1fr) minmax(120px,1fr) minmax(130px,1fr) 60px",
-              }}>
-              <div className="flex items-center gap-1  font-medium text-[#121316] ">
+              }}
+            >
+              <div className="flex items-center gap-1 font-medium text-[#121316]">
                 <span>Баримт бичиг</span>
                 <span className="text-[#77818c]">&#8597;</span>
               </div>
@@ -722,18 +740,19 @@ export function FilesComponent() {
                 {error}
               </div>
             ) : filtered.length === 0 ? (
-              <div className="py-12 text-center text-slate-400 text-sm ">
+              <div className="py-12 text-center text-slate-400 text-sm">
                 Баримт олдсонгүй
               </div>
             ) : (
               filtered.map((row) => (
                 <div
                   key={row.document.id}
-                  className="grid items-center border-b border-black/12 px-3 py-3 transition-colors hover:bg-[#fafafa] md:px-5"
+                  className="grid items-center border-b border-black/12 min-h-[40px] px-3 py-3 transition-colors hover:bg-[#fafafa] md:px-5"
                   style={{
                     gridTemplateColumns:
                       "minmax(200px,2fr) minmax(120px,1fr) minmax(120px,1fr) minmax(130px,1fr) 60px",
-                  }}>
+                  }}
+                >
                   <div className="flex items-center gap-2.5 px-2">
                     <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[12px] border border-black/12 bg-white text-[#121316]">
                       <ReqIcon className="h-4 w-4 text-[#121316]" />
@@ -742,28 +761,36 @@ export function FilesComponent() {
                       {row.document.documentName}
                     </p>
                   </div>
+
                   <div className="px-2">
                     <div className="inline-flex items-center rounded-full border border-black/12 px-3 py-1 text-[12px] text-[#3f4145]">
                       {stageLabel(row.employee)}
                     </div>
                   </div>
+
                   <div className="flex items-center gap-2 px-2">
                     <CalIcon className="h-4 w-4 shrink-0 text-[#77818c]" />
                     <span className="text-[14px] text-[#3f4145]">
-                      {formatDate(row.document.createdAt)}
+                      {new Date(row.document.createdAt)
+                        .toISOString()
+                        .slice(0, 10)
+                        .replace(/-/g, ".")}
                     </span>
                   </div>
+
                   <div className="px-2">
                     <span className="inline-flex items-center gap-1.5 rounded-full border border-[#1aba5280] px-3 py-1 text-[12px] font-medium text-[#1aba52]">
                       <span className="h-2 w-2 rounded-full bg-[#1aba52]" />
                       Баталгаажсан
                     </span>
                   </div>
+
                   <div className="flex items-center justify-center">
                     <button
                       onClick={() => setDownloadRow(row)}
                       className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-[10px] text-[#77818c] transition-colors hover:bg-[#f5f5f5] hover:text-[#121316]"
-                      aria-label="Татах">
+                      aria-label="Татах"
+                    >
                       <DownloadIcon />
                     </button>
                   </div>
@@ -773,16 +800,18 @@ export function FilesComponent() {
           </div>
 
           {/* Footer */}
-          <div className="flex shrink-0 items-center justify-between border-t border-black/12 px-5 py-3  ">
+          <div className="flex shrink-0 items-center justify-between border-t border-black/12 px-5 py-3">
             <p className="text-[13px] text-[#77818c]">
               Нийт {filtered.length} баримт
             </p>
           </div>
         </div>
+
         <div className="flex items-center justify-end">
           <button
             onClick={() => setShowModal(true)}
-            className="flex cursor-pointer items-center gap-2 rounded-[12px] bg-[#121316] px-4 py-2.5 text-[14px] font-medium text-white transition-colors hover:bg-[#1f2126] w-[167px] h-[40px]  ">
+            className="flex cursor-pointer items-center gap-2 rounded-[12px] bg-[#121316] px-4 py-2.5 text-[14px] font-medium text-white transition-colors hover:bg-[#1f2126] w-[167px] h-[40px]  "
+          >
             <PlusIcon />
             Шинэ Баримт
           </button>

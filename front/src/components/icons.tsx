@@ -90,6 +90,7 @@ export const Planeicon = () => {
 export const AnalyticsIcon = () => {
   return (
     <svg
+      className="w-5 h-5"
       width="20"
       height="20"
       viewBox="0 0 20 20"
@@ -127,7 +128,7 @@ export const AnalyticsIcon = () => {
     </svg>
   );
 };
-export const ClipboardIcon = () => {
+export const ClipboardsIcon = () => {
   return (
     <svg
       width="20"
@@ -181,7 +182,27 @@ export const ClipboardIcon = () => {
     </svg>
   );
 };
-export const BoxIcon = () => {
+export const CloudIcon = () => {
+  return (
+    <svg
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        d="M12.0003 13V21M12.0003 13L8.00034 17M12.0003 13L16.0003 17M4.00034 14.899C3.25738 14.1399 2.69691 13.2217 2.36137 12.214C2.02584 11.2062 1.92405 10.1353 2.0637 9.08232C2.20335 8.02938 2.5808 7.02202 3.16743 6.13655C3.75407 5.25109 4.53452 4.51074 5.44967 3.97157C6.36482 3.43241 7.39067 3.10857 8.44951 3.0246C9.50835 2.94062 10.5724 3.09871 11.5611 3.48688C12.5498 3.87505 13.4372 4.48313 14.1561 5.26506C14.8749 6.04698 15.4065 6.98225 15.7103 8.00002H17.5003C18.4659 7.99991 19.4058 8.31034 20.1813 8.88546C20.9569 9.46058 21.5269 10.2699 21.8071 11.1938C22.0874 12.1178 22.063 13.1074 21.7377 14.0164C21.4123 14.9254 20.8032 15.7057 20.0003 16.242"
+        stroke="black"
+        strokeOpacity="0.9"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+};
+export const BoxerIcon = () => {
   return (
     <svg
       width="20"
@@ -205,14 +226,14 @@ export const BoxIcon = () => {
         strokeLinejoin="round"
       />
       <path
-        d="M2.7417 5.83325L10 9.99992L17.2584 5.83325"
+        d="M2.7417 5.8335L10 10.0002L17.2584 5.8335"
         stroke="#121316"
         strokeWidth="1.66667"
         strokeLinecap="round"
         strokeLinejoin="round"
       />
       <path
-        d="M6.25 3.55835L13.75 7.85002"
+        d="M6.25 3.55811L13.75 7.84977"
         stroke="#121316"
         strokeWidth="1.66667"
         strokeLinecap="round"
