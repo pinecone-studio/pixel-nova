@@ -532,7 +532,12 @@ export function AddEmployeeRequestDialog({
       );
       requireValue(lastName, "lastName");
       requireValue(firstName, "firstName");
-      requirePattern(changeEmail, "email", emailRegex, "@gmail.com-??? ???????.");
+      requirePattern(
+        changeEmail,
+        "email",
+        emailRegex,
+        "@gmail.com-??? ???????.",
+      );
       requireValue(currentDept, "currentDept");
       requireValue(currentPosition, "currentPosition");
       requireValue(nextDept, "nextDept");
@@ -555,9 +560,24 @@ export function AddEmployeeRequestDialog({
       } else {
         requireValue(workStartDate, "workStartDate");
         requireValue(workTotalDuration, "workTotalDuration");
-        requirePattern(prevSalary, "prevSalary", numberOnlyRegex, "?????? ??? ??????? ??.");
-        requirePattern(nextSalary, "nextSalary", numberOnlyRegex, "?????? ??? ??????? ??.");
-        requirePattern(salaryDelta, "salaryDelta", numberOnlyRegex, "?????? ??? ??????? ??.");
+        requirePattern(
+          prevSalary,
+          "prevSalary",
+          numberOnlyRegex,
+          "?????? ??? ??????? ??.",
+        );
+        requirePattern(
+          nextSalary,
+          "nextSalary",
+          numberOnlyRegex,
+          "?????? ??? ??????? ??.",
+        );
+        requirePattern(
+          salaryDelta,
+          "salaryDelta",
+          numberOnlyRegex,
+          "?????? ??? ??????? ??.",
+        );
         if (
           prevSalary &&
           nextSalary &&
@@ -584,10 +604,16 @@ export function AddEmployeeRequestDialog({
       requireValue(jobTitle, "jobTitle");
       requireValue(hireDate, "hireDate");
       requireValue(terminationDate, "terminationDate");
-      requirePattern(contractNo, "contractNo", numberOnlyRegex, "?????? ??? ??????? ??.");
+      requirePattern(
+        contractNo,
+        "contractNo",
+        numberOnlyRegex,
+        "?????? ??? ??????? ??.",
+      );
       requireValue(terminationReason, "terminationReason");
       if (hireDate && terminationDate && terminationDate < hireDate) {
-        nextErrors.terminationDate = "???????? ????? ????? ????? ????????? ???? ?????.";
+        nextErrors.terminationDate =
+          "???????? ????? ????? ????? ????????? ???? ?????.";
       }
     }
 
@@ -664,7 +690,7 @@ export function AddEmployeeRequestDialog({
 
       await triggerAction({
         variables: {
-          employeeId: matchedEmployee.id,
+          employeeId: matchedEmployee!.id,
           action: action.name,
           overrideRecipients,
           templateDataOverrides:
@@ -1166,7 +1192,9 @@ export function AddEmployeeRequestDialog({
                     <input
                       type="checkbox"
                       checked={useSignaturePasscode}
-                      onChange={(event) => setUseSignaturePasscode(event.target.checked)}
+                      onChange={(event) =>
+                        setUseSignaturePasscode(event.target.checked)
+                      }
                       className="h-4 w-4 rounded border-slate-300 text-slate-900"
                     />
                     4 ??????? ??? ?????
