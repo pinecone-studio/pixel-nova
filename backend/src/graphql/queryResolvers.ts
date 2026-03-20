@@ -14,6 +14,10 @@ import {
   listActionConfigs,
   listProcessedEvents,
 } from "../db/queries";
+import {
+  ensureEmployeeSignatureTable,
+  ensureEmployerSignatureTable,
+} from "../db/ensureRuntimeTables";
 import { getTemplateFileById } from "../services/contractTemplates";
 import { getTemplateHtml } from "../document/generator";
 import type { GraphQLContext } from "./schema";
@@ -133,7 +137,9 @@ export const queryResolvers = {
     if (ctx.actor.role !== "employee" || !ctx.actor.id) {
       throw new Error("Unauthorized");
     }
-    return getEmployeeSignatureStatus(ctx.db, ctx.actor.id);
+    return ensureEmployeeSignatureTable(ctx.env).then(() =>
+      getEmployeeSignatureStatus(ctx.db, ctx.actor.id!),
+    );
   },
 
   employeeSignature: async (
@@ -163,7 +169,9 @@ export const queryResolvers = {
     if (!ctx.actor.id) {
       throw new Error("Actor ID required");
     }
-    return getEmployerSignatureStatus(ctx.db, ctx.actor.id);
+    return ensureEmployerSignatureTable(ctx.env).then(() =>
+      getEmployerSignatureStatus(ctx.db, ctx.actor.id!),
+    );
   },
 
   myNotifications: (_: unknown, __: unknown, ctx: Ctx) => {
