@@ -481,7 +481,7 @@ function NewEmployeeAuditDetailModal({
         className="absolute inset-0"
         onClick={onClose}
       />
-      <div className="relative z-10 w-full max-w-[500px] max-h-[770px] rounded-[24px] border border-[#EAECF0] bg-white px-6 py-[30px] shadow-[0_24px_80px_rgba(0,0,0,0.18)]">
+      <div className="relative z-10 max-w-[500px] max-h-[770px] rounded-[24px] border border-[#EAECF0] bg-white px-6 py-[30px] shadow-[0_24px_80px_rgba(0,0,0,0.18)]">
         <div className=" flex items-center w-[452px] h-[24px] justify-between">
           <p className="text-[20px] font-semibold text-[#101828]">
             Шинэ ажилтан
@@ -516,82 +516,74 @@ function NewEmployeeAuditDetailModal({
               {employee?.email ?? "Мэдээлэлгүй"}
             </div>
           </div>
-          {employee?.email ?? "Мэдээлэлгүй"}
         </div>
-      </div>
 
-      <div className="mt-[14px] w-full h-[68px] flex justify-between">
-        <div className="w-[218px] h-full flex flex-col justify-between">
-          <p className="h-5 text-[16px] leading-5 text-[#101828]">Хэлтэс</p>
-          <div className="rounded-[12px] border flex items-center px-2 border-[#D0D5DD] h-10 text-[16px] leading-6 text-[#101828]">
-            {employee?.department ?? "Мэдээлэлгүй"}
-          </div>
-        </div>
-        <div className="w-[218px] h-full flex flex-col justify-between">
-          <p className="mb-1.5 text-[14px] leading-5 text-[#101828]">
-            Албан тушаал
-          </p>
-          <div className="rounded-[12px] border flex items-center px-2 border-[#D0D5DD] h-10 text-[16px] leading-6 text-[#101828]">
-            {employee?.jobTitle ?? "Мэдээлэлгүй"}
-          </div>
-        </div>
-      </div>
-
-      <p className="mt-[14px] text-[16px] leading-5 text-[#101828]">
-        Хавсаргасан файл
-      </p>
-      <div className="mt-[12px] max-h-[292px] overflow-scroll">
-        <div className="flex flex-col gap-2.5">
-          {files.map((document) => (
-            <div
-              key={document.id}
-              className="flex items-center w-[452px] h-[64px] justify-between rounded-[16px] border border-[#D0D5DD] bg-white px-3 py-2.5"
-            >
-              <div className="flex min-w-0 items-center gap-4">
-                <div className="flex h-[48px] w-[48px] shrink-0 items-center justify-center rounded-[16px] border border-[#D0D5DD] bg-white text-[#667085]">
-                  <FiFileText className="h-5 w-5" />
-                </div>
-                <div className="min-w-0">
-                  <p className="truncate text-[16px] font-medium leading-5 text-[#101828]">
-                    {document.documentName.replace(/\.pdf$/i, "")}
-                  </p>
-                  <p className="mt-0.5 truncate text-[14px] leading-5 text-[#98A2B3]">
-                    {document.documentName}
-                  </p>
-                </div>
-              </div>
-              <button
-                type="button"
-                onClick={() => onPreview(document)}
-                className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-[#667085] transition hover:bg-[#F3F4F6] hover:text-[#101828]"
-              >
-                <FiEye className="h-4.5 w-4.5" />
-              </button>
+        <div className="mt-[14px] w-full h-[68px] flex justify-between">
+          <div className="w-[218px] h-full flex flex-col justify-between">
+            <p className="h-5 text-[16px] leading-5 text-[#101828]">Хэлтэс</p>
+            <div className="rounded-[12px] border flex items-center px-2 border-[#D0D5DD] h-10 text-[16px] leading-6 text-[#101828]">
+              {employee?.department ?? "Мэдээлэлгүй"}
             </div>
-          ))}
+          </div>
+          <div className="w-[218px] h-full flex flex-col justify-between">
+            <p className="mb-1.5 text-[14px] leading-5 text-[#101828]">
+              Албан тушаал
+            </p>
+            <div className="rounded-[12px] border flex items-center px-2 border-[#D0D5DD] h-10 text-[16px] leading-6 text-[#101828]">
+              {employee?.jobTitle ?? "Мэдээлэлгүй"}
+            </div>
+          </div>
         </div>
-      </div>
 
-      <div className="mt-[36px] flex justify-end gap-5">
-        <button
-          type="button"
-          onClick={() => {
-            if (signableDocument) {
-              onOpenSignature(signableDocument);
-            }
-          }}
-          disabled={!signableDocument}
-          className="rounded-[16px] border border-[#D0D5DD] w-[158px] h-11 text-[16px] text-[#101828] disabled:opacity-50"
-        >
-          Гарын үсэг зурах
-        </button>
-        <button
-          type="button"
-          onClick={onClose}
-          className="rounded-[16px] bg-[#101828] w-[146px] h-11 text-[16px] text-white"
-        >
-          Баталгаажуулах
-        </button>
+        <p className="mt-[14px] text-[16px] leading-5 text-[#101828]">
+          Хавсаргасан файл
+        </p>
+        <div className="mt-[12px] max-h-[292px] overflow-scroll">
+          <div className="flex flex-col gap-2.5">
+            {files.map((document) => (
+              <div
+                key={document.id}
+                className="flex items-center w-[452px] h-[64px] justify-between rounded-[16px] border border-[#D0D5DD] bg-white px-3 py-2.5"
+              >
+                <div className="flex min-w-0 items-center gap-4">
+                  <div className="flex h-[48px] w-[48px] shrink-0 items-center justify-center rounded-[16px] border border-[#D0D5DD] bg-white text-[#667085]">
+                    <FiFileText className="h-5 w-5" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="truncate text-[16px] font-medium leading-5 text-[#101828]">
+                      {document.documentName.replace(/\.pdf$/i, "")}
+                    </p>
+                    <p className="mt-0.5 truncate text-[14px] leading-5 text-[#98A2B3]">
+                      {document.documentName}
+                    </p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => onPreview(document)}
+                  className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-[#667085] transition hover:bg-[#F3F4F6] hover:text-[#101828]"
+                >
+                  <FiEye className="h-4.5 w-4.5" />
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="mt-[36px] flex justify-end gap-5">
+          <button
+            type="button"
+            onClick={() => {
+              if (signableDocument) {
+                onOpenSignature(signableDocument);
+              }
+            }}
+            disabled={!signableDocument}
+            className="rounded-[16px] border border-[#D0D5DD] w-[158px] h-11 text-[16px] text-[#101828] disabled:opacity-50"
+          >
+            Гарын үсэг зурах
+          </button>
+        </div>
       </div>
     </div>
   );
