@@ -579,7 +579,7 @@ function NewEmployeeAuditDetailModal({
               }
             }}
             disabled={!signableDocument}
-            className="rounded-[16px] border border-[#D0D5DD] w-[158px] h-11 text-[16px] text-[#101828] disabled:opacity-50"
+            className="rounded-[16px] w-[158px] bg-black text-white cursor-pointer h-11 text-[16px] text-[#101828] disabled:opacity-50"
           >
             Гарын үсэг зурах
           </button>
