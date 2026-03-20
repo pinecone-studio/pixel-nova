@@ -185,6 +185,10 @@ export function AddEmployeeRequestDialog({
   const [previewSignatureData, setPreviewSignatureData] = useState("");
   const previewSignatureCanvasRef = useRef<HTMLCanvasElement | null>(null);
   const previewSignatureDrawingRef = useRef(false);
+  const [demoActive, setDemoActive] = useState(false);
+  const [demoOverrides, setDemoOverrides] = useState<Record<string, string> | null>(
+    null,
+  );
   const signatureToastTimerRef = useRef<ReturnType<typeof setTimeout> | null>(
     null,
   );
@@ -225,6 +229,70 @@ export function AddEmployeeRequestDialog({
 
   const handleDemoFill = () => {
     setErrors({});
+    setRecipientInput("");
+    setRecipients(
+      action?.recipients.length ? [...action.recipients] : ["hr_manager"],
+    );
+    setDemoActive(false);
+    setDemoOverrides(null);
+
+    if (useSalaryChangeLayout) {
+      setDemoActive(true);
+      setEmployeeCode("EMP-0001");
+      setSalaryStep("salary");
+      setLastName("Дорж");
+      setFirstName("Бат");
+      setEmail("bat@gmail.com");
+      setWorkStartDate("2024-01-15");
+      setWorkTotalDuration("2 жил 2 сар");
+      setPrevSalary("3500000");
+      setNextSalary("4200000");
+      setSalaryDelta("700000");
+      setDemoOverrides({
+        company_name: "Pinecone Academy",
+        ceo_name: "Б. Мөнхбат",
+        employer_representative: "Гүйцэтгэх захирал",
+        employee_register_no: "УХ04272036",
+        implementation_department: "Хүний нөөц",
+        control_responsible: "ХН менежер",
+        other_reason_text: "Гүйцэтгэлийн үнэлгээ",
+        reason_detail_line_1:
+          "2025 оны гүйцэтгэлийн үнэлгээний дүн өндөр байсан тул",
+        reason_detail_line_2:
+          "ажлын үр дүн нэмэгдсэнтэй уялдуулан",
+        reason_detail_line_3:
+          "үндсэн цалинг нэмэгдүүлэхээр шийдвэрлэв.",
+      });
+      return;
+    }
+
+    if (useChangePositionLayout) {
+      setEmployeeCode("EMP-0001");
+      setLastName("Дорж");
+      setFirstName("Бат");
+      setChangeEmail("bat@gmail.com");
+      setCurrentDept("Engineering");
+      setCurrentPosition("Developer");
+      setNextDept("Engineering");
+      setNextPosition("Senior Developer");
+      setChangeReason("Гүйцэтгэлийн үнэлгээ");
+      return;
+    }
+
+    if (useOffboardLayout) {
+      setEmployeeCode("EMP-0001");
+      setLastName("Дорж");
+      setFirstName("Бат");
+      setRegisterNo("УХ04272036");
+      setPhone("99999999");
+      setJobTitle("Developer");
+      setHireDate("2024-01-15");
+      setTerminationDate("2026-03-20");
+      setContractNo("2345678987");
+      setTerminationReason("Ажилтны өөрийн хүсэлтээр");
+      return;
+    }
+
     setTab("employee");
     setSalaryStep("person");
     setNewEmployeeStep(2);
@@ -246,8 +314,6 @@ export function AddEmployeeRequestDialog({
     setSalaryAmount("4200000");
     setContractStart("2026-04-01");
     setContractDuration("1 жил");
-    setRecipients(action?.recipients.length ? [...action.recipients] : ["hr_manager"]);
-    setRecipientInput("");
   };
 
   const searchKey = employeeCode.trim();
@@ -311,6 +377,8 @@ export function AddEmployeeRequestDialog({
   useEffect(() => {
     if (!open) {
       setNewEmployeeStep(1);
+      setDemoActive(false);
+      setDemoOverrides(null);
       return;
     }
     if (action?.name?.trim() === "add_employee") {
@@ -737,6 +805,9 @@ export function AddEmployeeRequestDialog({
               100,
           ),
         );
+      }
+      if (demoActive && demoOverrides) {
+        Object.assign(overrides, demoOverrides);
       }
     }
     if (useAddEmployeeLayout) {

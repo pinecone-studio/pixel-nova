@@ -78,10 +78,10 @@ export function SalaryChangeForm({
       ? `${inputClass} border-red-300 focus:border-red-400`
       : inputClass;
   const fillMock = () => {
-    setEmployeeCode("EMP0003");
-    setLastName("Дорж");
-    setFirstName("Эрдэнэ");
-    setEmail("dorj.erde@gmail.com");
+    setEmployeeCode("EMP-0002");
+    setLastName("Бямбажав ");
+    setFirstName("Золбаяр");
+    setEmail("manlaisaikhan6@gmail.com");
     setWorkStartDate("2024-02-01");
     setWorkTotalDuration("2 жил 1 сар");
     setPrevSalary("3500000");
@@ -93,6 +93,21 @@ export function SalaryChangeForm({
     <div className="flex min-w-0 flex-col gap-[16px]">
       <>
         <div className="flex min-w-0 flex-col gap-2">
+          <div className="flex min-w-0 flex-col gap-[8px]">
+            <label className={labelClass}>Ажилтны код</label>
+            <input
+              value={employeeCode}
+              onChange={(e) => setEmployeeCode(e.target.value)}
+              placeholder="EMP001"
+              name="employee_code"
+              autoComplete="off"
+              autoCorrect="off"
+              autoCapitalize="off"
+              spellCheck={false}
+              className={getInputClass("employeeCode")}
+            />
+            <FieldError message={errors.employeeCode} />
+          </div>
           <label className={labelClass}>Овог</label>
           <input
             value={lastName}
