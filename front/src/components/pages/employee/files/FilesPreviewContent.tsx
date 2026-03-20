@@ -119,7 +119,7 @@ export function FilesPreviewContent({
           background="#F8FAFC"
           color="#64748B"
         >
-          Preview бэлэн биш байна.
+          Урьдчилан харах боломжгүй байна.
         </PreviewState>
       )}
     </div>

@@ -1171,7 +1171,7 @@ export const ContractRequestsComponent = () => {
                     )
                   ) : (
                     <div className="h-full flex items-center justify-center text-slate-500">
-                      Preview бэлэн биш байна.
+                      Урьдчилан харах боломжгүй байна.
                     </div>
                   )}
                 </div>

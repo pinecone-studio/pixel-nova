@@ -1539,7 +1539,7 @@ export function EmployeeAuditComponent() {
         <div className="flex items-center gap-4">
           <h2 className="text-[22px] font-semibold text-[#101828]">
             {activeTab === "newEmployee"
-              ? "Шинэ Ажилтан"
+              ? "Шинэ ажилтан"
               : "Баримт бичиг баталгаажуулах"}
           </h2>
           <span className="rounded-full border border-[#D0D5DD] bg-[#F9FAFB] px-3 py-1 text-xs text-[#98A2B3]">

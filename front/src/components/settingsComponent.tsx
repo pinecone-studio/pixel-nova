@@ -209,16 +209,8 @@ export const SettingsComponent = () => {
 
   return (
     <div className="flex flex-col gap-5">
-      <div className="flex items-start justify-between gap-4">
-        <div>
-          <p className="text-slate-900 text-2xl font-bold tracking-tight">
-            Тохиргоо
-          </p>
-          <p className="text-slate-500 text-sm mt-1">
-            Системийн ерөнхий тохиргоо болон хувийн сонголтууд
-          </p>
-        </div>
-        <div className="text-xs text-slate-400 mt-1">
+      <div className="flex justify-end">
+        <div className="text-xs text-slate-400">
           {saveState === "saved" ? "Локал дээр хадгалагдлаа" : " "}
         </div>
       </div>

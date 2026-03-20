@@ -62,13 +62,13 @@ export default function EmployeeAuthPage() {
 
   return (
     <AuthShell
-      accentLabel="Employee access"
+      accentLabel="Ажилтны нэвтрэх"
       title="Ажилтны нэвтрэх"
       description="Ажилтны кодоо оруулаад өөрийн профайл, баримт бичиг, аудитын түүх рүү орно."
       icon={<BiUser className="h-7 w-7" />}
-      sideTitle="Employee workspace"
-      sideDescription="Ажилтан өөрийн материал руу илүү шууд, вебийн бусад хуудсуудтай ижил хэмнэлтэйгээр нэвтрэхээр шинэчилсэн."
-      sideBadges={["Documents", "Profile", "Audit history"]}
+      sideTitle="Ажилтны орчин"
+      sideDescription="Ажилтан өөрийн материал руу илүү шууд, вэбийн бусад хуудсуудтай ижил хэмнэлээр нэвтрэхээр шинэчилсэн."
+      sideBadges={["Баримтууд", "Профайл", "Аудитын түүх"]}
     >
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="space-y-2">

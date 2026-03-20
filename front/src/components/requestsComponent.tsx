@@ -123,7 +123,7 @@ const PreviewModal = ({
             onClick={onClose}
             className="text-slate-400 hover:text-slate-700 transition-colors text-xl leading-none mt-1"
           >
-            âœ•
+            ✕
           </button>
         </div>
 
@@ -133,20 +133,20 @@ const PreviewModal = ({
           <p className="text-slate-900 font-semibold text-base">{row.type}</p>
           <div className="grid grid-cols-2 gap-y-4">
             <div>
-              <p className="text-slate-500 text-xs mb-1">Ð­Ñ…Ð»ÑÑ… Ñ†Ð°Ð³</p>
+              <p className="text-slate-500 text-xs mb-1">Эхлэх цаг</p>
               <p className="text-slate-700 text-sm font-medium">
                 {row.startTime}
               </p>
             </div>
             <div>
-              <p className="text-slate-500 text-xs mb-1">Ð”ÑƒÑƒÑÐ°Ñ… Ñ†Ð°Ð³</p>
+              <p className="text-slate-500 text-xs mb-1">Дуусах цаг</p>
               <p className="text-slate-700 text-sm font-medium">
                 {row.endTime}
               </p>
             </div>
             <div>
               <p className="text-slate-500 text-xs mb-1">
-                Ð˜Ð»Ð³ÑÑÑÑÐ½ Ð¾Ð³Ð½Ð¾Ð¾
+                Илгээсэн огноо
               </p>
               <p className="text-emerald-600 text-sm font-semibold">
                 {new Date(row.createdAt).toLocaleDateString("mn-MN")}
@@ -154,7 +154,7 @@ const PreviewModal = ({
             </div>
             <div>
               <p className="text-slate-500 text-xs mb-1">
-                ÐÐ»Ð±Ð°Ð½ Ñ‚ÑƒÑˆÐ°Ð°Ð»
+                Албан тушаал
               </p>
               <p className="text-slate-700 text-sm font-medium">
                 {row.employee.jobTitle}
@@ -162,7 +162,7 @@ const PreviewModal = ({
             </div>
             {row.reason && (
               <div className="col-span-2">
-                <p className="text-slate-500 text-xs mb-1">Ð¨Ð°Ð»Ñ‚Ð³Ð°Ð°Ð½</p>
+                <p className="text-slate-500 text-xs mb-1">Шалтгаан</p>
                 <p className="text-slate-700 text-sm font-medium">
                   {row.reason}
                 </p>
@@ -173,15 +173,15 @@ const PreviewModal = ({
 
         <div className="flex flex-col gap-2">
           <p className="text-slate-900 font-semibold text-base">
-            Ð¢Ð°Ð¹Ð»Ð±Ð°Ñ€{" "}
+            Тайлбар{" "}
             <span className="text-slate-500 font-normal">
-              (Ð—Ð°Ð°Ð²Ð°Ð» Ð±Ð¸Ñˆ)
+              (Заавал биш)
             </span>
           </p>
           <textarea
             value={note}
             onChange={(e) => setNote(e.target.value)}
-            placeholder="Ð­Ð½Ð´ Ð±Ð¸Ñ‡Ð½Ñ Ò¯Ò¯..."
+            placeholder="Энд бичнэ үү..."
             rows={3}
             className="w-full bg-white border border-slate-200 rounded-2xl px-4 py-3 text-slate-700 text-sm placeholder:text-slate-400 outline-none resize-none focus:border-slate-300 transition-colors"
           />
@@ -194,20 +194,20 @@ const PreviewModal = ({
               disabled={acting}
               className="flex items-center gap-2 px-5 py-2.5 rounded-xl border border-red-200 text-red-500 text-sm font-medium hover:bg-red-50 disabled:opacity-50 transition-colors"
             >
-              <span>âœ•</span> Ð¢Ð°Ñ‚Ð³Ð°Ð»Ð·Ð°Ñ…
+              <span>✕</span> Татгалзах
             </button>
             <button
               onClick={handleApprove}
               disabled={acting}
               className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-slate-900 text-white text-sm font-medium hover:bg-slate-800 disabled:opacity-50 transition-colors"
             >
-              <span>âœ“</span>{" "}
-              {acting ? "Ð¢Ò¯Ñ€ Ñ…Ò¯Ð»ÑÑÐ½Ñ Ò¯Ò¯..." : "Ð‘Ð°Ñ‚Ð»Ð°Ñ…"}
+              <span>✓</span>{" "}
+              {acting ? "Түр хүлээнэ үү..." : "Батлах"}
             </button>
           </div>
         ) : (
           <p className="text-center text-slate-500 text-sm">
-            Ð­Ð½Ñ Ñ…Ò¯ÑÑÐ»Ñ‚ Ð°Ð»ÑŒ Ñ…ÑÐ´Ð¸Ð¹Ð½{" "}
+            Энэ хүсэлт аль хэдийн{" "}
             <StatusBadge status={row.status} />
           </p>
         )}

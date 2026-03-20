@@ -36,7 +36,7 @@ export function EmployeeRequestModal({
       <div className="w-full max-w-[612px] rounded-[28px] border border-[#1A2431] bg-[#09111C] p-7 shadow-[0_24px_80px_rgba(0,0,0,0.45)]">
         <div className="mb-8 flex items-start justify-between">
           <div>
-            <p className="text-[13px] text-[#9AA7BA]">Add Employee request</p>
+            <p className="text-[13px] text-[#9AA7BA]">Шинэ ажилтны хүсэлт</p>
             <h2 className="mt-3 text-[20px] font-semibold text-white">
               Шинэ ажилтан
             </h2>

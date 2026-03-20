@@ -1,28 +1,26 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { useMutation, useQuery } from "@apollo/client/react";
+import { useMutation } from "@apollo/client/react";
 import { createPortal } from "react-dom";
 
 import {
   ArrowUpRightIcon,
-  FilterIcon,
   Note,
   Pen,
   Sth,
   UsersIcon,
 } from "@/components/icons";
-import type { ContractRequest, LeaveRequest } from "@/lib/types";
+import type { LeaveRequest } from "@/lib/types";
 import {
   APPROVE_LEAVE_REQUEST,
   REJECT_LEAVE_REQUEST,
 } from "@/graphql/mutations";
-import { GET_CONTRACT_REQUESTS } from "@/graphql/queries/contract-requests";
 import { buildGraphQLHeaders } from "@/lib/apollo-client";
 import { useHrOverlay } from "./overlay-context";
+import { AuditDocumentsTable } from "./auditlog/AuditDocumentsTable";
 
 import type { DashboardStats } from "./dashboard-data";
-import { FiPaperclip } from "react-icons/fi";
 import { HiOutlineLightningBolt } from "react-icons/hi";
 import { Filter } from "lucide-react";
 
@@ -47,22 +45,6 @@ export function HrDashboardOverview({
     useState<LeaveRequest[]>(pendingRequests);
   const { setBlurred } = useHrOverlay();
 
-  const { data: contractData } = useQuery<{
-    contractRequests: ContractRequest[];
-  }>(GET_CONTRACT_REQUESTS, {
-    context: { headers: buildGraphQLHeaders({ actorRole: "hr" }) },
-  });
-
-  const contractCounts = useMemo(() => {
-    const rows = contractData?.contractRequests ?? [];
-    let urgent = 0;
-    let success = 0;
-    for (const row of rows) {
-      if (row.status === "pending") urgent += 1;
-      if (row.status === "approved") success += 1;
-    }
-    return { urgent, success };
-  }, [contractData]);
   const overviewCards = [
     {
       title: "PROMOTE EMPLOYEE",
@@ -144,144 +126,148 @@ export function HrDashboardOverview({
   }
 
   return (
-    <div className="grid grid-cols-1 gap-6 lg:grid-cols-[680px_1fr]">
-      <div className="flex flex-col gap-6">
-        <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-[0_10px_30px_rgba(15,23,42,0.06)]">
-          <div className="flex items-start justify-between gap-4">
-            <div>
-              <div className="mt-3 flex items-center gap-3">
-                <p className="text-[64px] font-bold text-[#3F4145CC]">
-                  {loading ? "..." : stats.totalEmployees}
+    <div className="flex flex-col gap-6">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[680px_1fr]">
+        <div className="flex flex-col gap-6">
+          <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-[0_10px_30px_rgba(15,23,42,0.06)]">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <div className="mt-3 flex items-center gap-3">
+                  <p className="text-[64px] font-bold text-[#3F4145CC]">
+                    {loading ? "..." : stats.totalEmployees}
+                  </p>
+                  <span className="flex h-7 w-24 items-center justify-center gap-1 rounded-full border border-emerald-200 bg-white text-[14px] font-semibold text-[#1ABA52]">
+                    <ArrowUpRightIcon className="h-4 w-4" />
+                    {stats.monthlyGrowth >= 0 ? "+" : ""}
+                    {stats.monthlyGrowth}%
+                  </span>
+                </div>
+                <p className="mt-2 text-[14px] font-medium text-[#3F414599]">
+                  Өмнө сар: {loading ? "..." : stats.totalEmployees - 6}
                 </p>
-                <span className="flex items-center justify-center gap-1 rounded-full border border-emerald-200 bg-white w-24 h-7 text-[14px] font-semibold text-[#1ABA52]">
-                  <ArrowUpRightIcon className="h-4 w-4" />
-                  {stats.monthlyGrowth >= 0 ? "+" : ""}
-                  {stats.monthlyGrowth}%
-                </span>
               </div>
-              <p className="mt-2 text-[14px] font-medium text-[#3F414599]">
-                Өмнө сар: {loading ? "..." : stats.totalEmployees - 6}
-              </p>
+              <div className="flex h-13.5 w-13.5 items-center justify-center rounded-2xl bg-slate-900">
+                <UsersIcon className="h-8 w-8 text-white" />
+              </div>
             </div>
-            <div className="flex h-13.5 w-13.5 items-center justify-center rounded-2xl bg-slate-900">
-              <UsersIcon className="text-white w-8 h-8" />
+            <div className="mt-6 flex h-12 items-end gap-2">
+              {barData.slice(0, 8).map((height, index) => (
+                <div
+                  key={index}
+                  className="flex-1 rounded-lg bg-slate-900/80"
+                  style={{ height: `${(height / 88) * 200}%` }}
+                />
+              ))}
             </div>
           </div>
-          <div className="mt-6 flex items-end gap-2 h-12">
-            {barData.slice(0, 8).map((height, index) => (
+
+          <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+            {overviewCards.map((card) => (
               <div
-                key={index}
-                className="flex-1 rounded-lg bg-slate-900/80"
-                style={{ height: `${(height / 88) * 200}%` }}
-              />
+                key={card.title}
+                className="flex min-h-[136px] flex-col items-start rounded-[16px] border border-black/12 bg-white p-[25px] text-left"
+              >
+                <div className="flex w-full items-start justify-between gap-3">
+                  <p className="text-[16px] font-semibold leading-5 tracking-[-0.096px] text-[#3F4145]">
+                    {card.title}
+                  </p>
+                  <span className="flex items-center gap-1 rounded-[10px] border border-[#121316] px-[9px] py-[3px] text-[12px] leading-5 text-[#121316]">
+                    <HiOutlineLightningBolt className="h-3 w-3" />
+                    {card.status}
+                  </span>
+                </div>
+
+                <div className="mt-3 flex flex-col gap-2">
+                  <p className="text-[14px] font-medium leading-5 tracking-[-0.084px] text-[#77818c]">
+                    {card.description}
+                  </p>
+                  {card.items.map((item) => (
+                    <div
+                      key={item}
+                      className="flex items-center gap-2 text-[14px] leading-4 text-[#3f414599]"
+                    >
+                      <Note />
+                      <span>{item}</span>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="mt-auto flex w-full justify-center pt-4">
+                  <button className="flex h-8 w-full items-center justify-center gap-2 rounded-[10px] bg-[#121316] px-3 text-[14px] leading-4 text-white">
+                    <Pen />
+                    Хүсэлт илгээх
+                  </button>
+                </div>
+              </div>
             ))}
           </div>
         </div>
 
-        <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-          {overviewCards.map((card) => (
-            <div
-              key={card.title}
-              className="flex min-h-[136px] flex-col items-start rounded-[16px] border border-black/12 bg-white p-[25px] text-left"
-            >
-              <div className="flex w-full items-start justify-between gap-3">
-                <p className="text-[16px] font-semibold leading-5 tracking-[-0.096px] text-[#3F4145]">
-                  {card.title}
-                </p>
-                <span className="flex items-center gap-1 rounded-[10px] border border-[#121316] px-[9px] py-[3px] text-[12px] leading-5 text-[#121316]">
-                  <HiOutlineLightningBolt className="h-3 w-3" />
-                  {card.status}
-                </span>
-              </div>
-
-              <div className="mt-3 flex flex-col gap-2">
-                <p className="text-[14px] font-medium leading-5 tracking-[-0.084px] text-[#77818c]">
-                  {card.description}
-                </p>
-                {card.items.map((item) => (
-                  <div
-                    key={item}
-                    className="flex items-center gap-2 text-[14px] leading-4 text-[#3f414599]"
-                  >
-                    <Note />
-                    <span>{item}</span>
-                  </div>
-                ))}
-              </div>
-
-              <div className="mt-auto flex w-full justify-center pt-4">
-                <button className="flex h-8 w-full items-center justify-center gap-2 rounded-[10px] bg-[#121316] px-3 text-[14px] leading-4 text-white">
-                  <Pen />
-                  Хүсэлт илгээх
-                </button>
-              </div>
+        <div className="rounded-3xl border border-slate-200 bg-white shadow-[0_10px_30px_rgba(15,23,42,0.06)]">
+          <span className="sr-only">{auditCount}</span>
+          <div className="flex items-center justify-between border-b border-slate-200 px-6 py-4">
+            <div>
+              <p className="text-[20px] font-semibold text-[#000000]">
+                Хүлээгдэж буй хүсэлтүүд
+              </p>
+              <p className="text-[14px] font-normal text-[#3F4145B2]">
+                Шинээр ирсэн хүсэлтүүдийг хянах
+              </p>
             </div>
-          ))}
-        </div>
-      </div>
-
-      <div className="rounded-3xl border border-slate-200 bg-white shadow-[0_10px_30px_rgba(15,23,42,0.06)]">
-        <span className="sr-only">{auditCount}</span>
-        <div className="flex items-center justify-between border-b border-slate-200 px-6 py-4">
-          <div>
-            <p className="text-[20px] font-semibold text-[#000000]">
-              Хүлээгдэж буй хүсэлтүүд
-            </p>
-            <p className="text-[14px] font-normal text-[#3F4145B2]">
-              Шинээр ирсэн хүсэлтүүдийг хянах
-            </p>
-          </div>
-          <div className="flex items-center gap-2">
-            <button className="rounded-xl flex items-center justify-center gap-2 border border-slate-200 w-23.5 font-medium h-10 text-xs text-slate-600 hover:bg-slate-50">
-              <Filter className="w-4 h-4 text-black" /> Шүүх
-            </button>
-            <button className="rounded-xl bg-[#1F2126] w-38.25 h-10 flex items-center gap-2 justify-center text-[14px] font-medium text-white hover:bg-slate-800">
-              Бүгдийг харах <Sth />
-            </button>
-          </div>
-        </div>
-        <div className="divide-y divide-slate-200">
-          {(localRequests.length > 0 ? localRequests.slice(0, 5) : []).map(
-            (req) => (
-              <button
-                type="button"
-                key={req.id}
-                onClick={() => {
-                  setSelected(req);
-                  setNote(req.note ?? "");
-                }}
-                className="w-full h-23 text-left flex items-center gap-3 px-6 py-4 hover:bg-slate-50 transition-colors cursor-pointer"
-              >
-                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-black text-white text-sm font-semibold">
-                  {req.employee.firstName?.[0] ?? "А"}
-                </div>
-                <div className="flex-1">
-                  <p className="text-[16px] font-semibold text-[#000000]">
-                    {req.employee.lastName} {req.employee.firstName}
-                  </p>
-                  <p className="text-[14px] text-[#3F4145B2] font-normal">
-                    {req.type ?? "Хүсэлт"}
-                  </p>
-                </div>
-                <div className="ml-6 flex items-center gap-3">
-                  <span className="rounded-full border border-red-200 bg-red-50 w-18.75 flex justify-center items-center h-5.5 text-xs font-semibold text-red-500">
-                    Яаралтай
-                  </span>
-
-                  <p className="text-[14px] font-medium text-[#3F4145B2]">
-                    {formatRelativeTime(req.createdAt)}
-                  </p>
-                </div>
+            <div className="flex items-center gap-2">
+              <button className="flex h-10 w-23.5 items-center justify-center gap-2 rounded-xl border border-slate-200 text-xs font-medium text-slate-600 hover:bg-slate-50">
+                <Filter className="h-4 w-4 text-black" /> Шүүх
               </button>
-            ),
-          )}
-          {localRequests.length === 0 ? (
-            <div className="px-6 py-6 text-[14px] font-normal text-slate-500">
-              Одоогоор хүлээгдэж буй хүсэлт алга байна.
+              <button className="flex h-10 w-38.25 items-center justify-center gap-2 rounded-xl bg-[#1F2126] text-[14px] font-medium text-white hover:bg-slate-800">
+                Бүгдийг харах <Sth />
+              </button>
             </div>
-          ) : null}
+          </div>
+          <div className="divide-y divide-slate-200">
+            {(localRequests.length > 0 ? localRequests.slice(0, 5) : []).map(
+              (req) => (
+                <button
+                  type="button"
+                  key={req.id}
+                  onClick={() => {
+                    setSelected(req);
+                    setNote(req.note ?? "");
+                  }}
+                  className="flex h-23 w-full cursor-pointer items-center gap-3 px-6 py-4 text-left transition-colors hover:bg-slate-50"
+                >
+                  <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-black text-sm font-semibold text-white">
+                    {req.employee.firstName?.[0] ?? "А"}
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-[16px] font-semibold text-[#000000]">
+                      {req.employee.lastName} {req.employee.firstName}
+                    </p>
+                    <p className="text-[14px] font-normal text-[#3F4145B2]">
+                      {req.type ?? "Хүсэлт"}
+                    </p>
+                  </div>
+                  <div className="ml-6 flex items-center gap-3">
+                    <span className="flex h-5.5 w-18.75 items-center justify-center rounded-full border border-red-200 bg-red-50 text-xs font-semibold text-red-500">
+                      Яаралтай
+                    </span>
+
+                    <p className="text-[14px] font-medium text-[#3F4145B2]">
+                      {formatRelativeTime(req.createdAt)}
+                    </p>
+                  </div>
+                </button>
+              ),
+            )}
+            {localRequests.length === 0 ? (
+              <div className="px-6 py-6 text-[14px] font-normal text-slate-500">
+                Одоогоор хүлээгдэж буй хүсэлт алга байна.
+              </div>
+            ) : null}
+          </div>
         </div>
       </div>
+
+      <AuditDocumentsTable maxHeight={420} />
 
       {selected
         ? createPortal(

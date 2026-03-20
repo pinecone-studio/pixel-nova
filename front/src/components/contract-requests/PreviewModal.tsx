@@ -21,7 +21,7 @@ export const PreviewModal = ({
       <button type="button" aria-label="Close preview" className="absolute inset-0" onClick={onClose} />
       <div className="relative w-[920px] max-w-[95vw] h-[82vh] bg-[#0f1520] rounded-2xl border border-white/10 overflow-hidden shadow-2xl">
         <div className="flex items-center justify-between px-5 py-4 border-b border-white/10">
-          <p className="text-sm text-white font-semibold">Inline Preview</p>
+          <p className="text-sm text-white font-semibold">Урьдчилан харах</p>
           <button type="button" onClick={onClose} className="text-slate-400 hover:text-white">
             ✕
           </button>
@@ -38,7 +38,7 @@ export const PreviewModal = ({
               <iframe title={content.documentName} className="w-full h-full rounded-xl bg-white" src={buildDataUrl(content)} />
             )
           ) : (
-            <div className="h-full flex items-center justify-center text-slate-500">Preview бэлэн биш байна.</div>
+            <div className="h-full flex items-center justify-center text-slate-500">Урьдчилан харах боломжгүй байна.</div>
           )}
         </div>
       </div>

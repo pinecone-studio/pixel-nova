@@ -31,7 +31,7 @@ export default function EmployeeHomePage() {
       <div className="flex min-h-screen items-center justify-center bg-[#0A0A0F]">
         <div className="flex items-center gap-3 text-sm text-white/70">
           <span className="h-5 w-5 animate-spin rounded-full border-2 border-white/20 border-t-white" />
-          Уншиж байна.....
+          Уншиж байна...
         </div>
       </div>
     );

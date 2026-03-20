@@ -55,7 +55,7 @@ export function AuditSummaryCards({
       <AuditSummaryCard
         active={selectedView === "newEmployee"}
         count={7}
-        label="Шинэ ажилтаны хүсэлт"
+        label="Шинэ ажилтны хүсэлт"
         tone="blue"
         onClick={() => onSelect("newEmployee")}
         icon={

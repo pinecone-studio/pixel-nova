@@ -85,15 +85,6 @@ export default function HrEmployeesPage() {
   const totalActive = employees.filter(
     (employee) => employee.status === "Ирсэн",
   ).length;
-  const totalNewThisMonth = employees.filter((employee) => {
-    const hireDate = new Date(employee.hireDate);
-    const now = new Date();
-    return (
-      hireDate.getFullYear() === now.getFullYear() &&
-      hireDate.getMonth() === now.getMonth()
-    );
-  }).length;
-
   async function handleSave(form: EmployeeFormState) {
     setError(null);
     try {
@@ -214,7 +205,6 @@ export default function HrEmployeesPage() {
       <WorkersStats
         totalEmployees={employees.length}
         totalActive={totalActive}
-        totalNewThisMonth={totalNewThisMonth}
         lastSyncTime={lastSyncTime}
         syncSource={syncSource}
       />
@@ -227,6 +217,8 @@ export default function HrEmployeesPage() {
         departmentFilter={departmentFilter}
         onDepartmentFilterChange={setDepartmentFilter}
       />
+
+      <div className="h-px w-full bg-slate-200/80" />
 
       {error ? (
         <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-500">
@@ -263,7 +255,7 @@ export default function HrEmployeesPage() {
           <div className="skeleton h-3 w-72 rounded-full" />
         </div>
       ) : (
-        <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
+        <div className="mx-auto grid w-fit grid-cols-1 justify-center gap-y-6 px-4 md:grid-cols-2 xl:grid-cols-4 xl:gap-x-[38px] xl:px-0">
           {filtered.map((employee) => (
             <EmployeeCard
               key={employee.id}

@@ -68,15 +68,6 @@ export function WorkersComponent() {
   );
 
   const totalActive = employees.filter((employee) => employee.status === "Ирсэн").length;
-  const totalNewThisMonth = employees.filter((employee) => {
-    const hireDate = new Date(employee.hireDate);
-    const now = new Date();
-    return (
-      hireDate.getFullYear() === now.getFullYear() &&
-      hireDate.getMonth() === now.getMonth()
-    );
-  }).length;
-
   async function handleSave(form: EmployeeFormState) {
     setError(null);
     try {
@@ -137,7 +128,6 @@ export function WorkersComponent() {
       <WorkersStats
         totalEmployees={employees.length}
         totalActive={totalActive}
-        totalNewThisMonth={totalNewThisMonth}
       />
 
       <WorkersToolbar

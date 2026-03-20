@@ -70,7 +70,7 @@ export function FilesList({
           </div>
           <div className="flex flex-col items-center gap-1">
             <h3 className="text-[13px] font-semibold text-[#6B7280]">
-              Баримт бичиг байхгүй
+              Баримт олдсонгүй
             </h3>
           </div>
         </div>

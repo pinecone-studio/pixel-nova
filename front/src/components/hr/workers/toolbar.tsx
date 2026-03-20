@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import { FilterIcon, BuildingIcon, SearchIcon } from "@/components/icons";
-import { DEPARTMENTS, STATUSES } from "./shared";
+import { DEPARTMENTS, STATUSES, statusLabel as formatStatusLabel } from "./shared";
 
 interface WorkersToolbarProps {
   search: string;
@@ -40,8 +40,12 @@ export function WorkersToolbar({
   }, []);
 
   const statusLabel = statusFilter
-    ? STATUSES.find((s) => s === statusFilter) ?? statusFilter
+    ? statusLabelText(statusFilter)
     : "Бүгд";
+
+  function statusLabelText(status: string) {
+    return formatStatusLabel(STATUSES.find((s) => s === status) ?? status);
+  }
 
   const deptLabel = departmentFilter
     ? DEPARTMENTS.find((d) => d === departmentFilter) ?? departmentFilter
@@ -99,7 +103,7 @@ export function WorkersToolbar({
                       : "text-slate-700 hover:bg-slate-50"
                   }`}
                 >
-                  {status}
+                  {statusLabelText(status)}
                 </button>
               ))}
             </div>
