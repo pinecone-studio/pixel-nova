@@ -3,6 +3,7 @@
 import * as React from "react"
 import { Select as SelectPrimitive } from "radix-ui"
 import { BiCheck, BiChevronDown, BiChevronUp } from "react-icons/bi"
+import { IoSearchOutline } from "react-icons/io5"
 
 import { cn } from "@/lib/utils"
 
@@ -64,6 +65,12 @@ function SelectContent({
   align = "center",
   ...props
 }: React.ComponentProps<typeof SelectPrimitive.Content>) {
+  const [search, setSearch] = React.useState("")
+  const filteredChildren = React.useMemo(
+    () => filterSelectChildren(children, search),
+    [children, search]
+  )
+
   return (
     <SelectPrimitive.Portal>
       <SelectPrimitive.Content
@@ -75,6 +82,19 @@ function SelectContent({
         {...props}
       >
         <SelectScrollUpButton />
+        <div className="border-b border-border px-2 py-2">
+          <div className="flex items-center gap-2 rounded-md border border-input bg-background px-2.5 py-2">
+            <IoSearchOutline className="size-4 text-muted-foreground" />
+            <input
+              autoFocus
+              value={search}
+              onChange={(event) => setSearch(event.target.value)}
+              onKeyDown={(event) => event.stopPropagation()}
+              placeholder="Хайх..."
+              className="w-full bg-transparent text-sm outline-none placeholder:text-muted-foreground"
+            />
+          </div>
+        </div>
         <SelectPrimitive.Viewport
           data-position={position}
           className={cn(
@@ -82,7 +102,13 @@ function SelectContent({
             position === "popper" && ""
           )}
         >
-          {children}
+          {filteredChildren.count > 0 ? (
+            filteredChildren.children
+          ) : (
+            <div className="px-3 py-4 text-sm text-muted-foreground">
+              Илэрц олдсонгүй.
+            </div>
+          )}
         </SelectPrimitive.Viewport>
         <SelectScrollDownButton />
       </SelectPrimitive.Content>
@@ -112,7 +138,7 @@ function SelectItem({
     <SelectPrimitive.Item
       data-slot="select-item"
       className={cn(
-        "relative flex w-full cursor-default items-center gap-1.5 rounded-md py-1 pr-8 pl-1.5 text-sm outline-hidden select-none focus:bg-accent focus:text-accent-foreground not-data-[variant=destructive]:focus:**:text-accent-foreground data-disabled:pointer-events-none data-disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 *:[span]:last:flex *:[span]:last:items-center *:[span]:last:gap-2",
+        "relative flex w-full cursor-default items-center gap-1.5 rounded-md py-2 pr-8 pl-2 text-sm outline-hidden select-none focus:bg-accent focus:text-accent-foreground data-[state=checked]:bg-accent data-[state=checked]:font-medium data-[state=checked]:text-accent-foreground not-data-[variant=destructive]:focus:**:text-accent-foreground data-disabled:pointer-events-none data-disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 *:[span]:last:flex *:[span]:last:items-center *:[span]:last:gap-2",
         className
       )}
       {...props}
@@ -125,6 +151,103 @@ function SelectItem({
       <SelectPrimitive.ItemText>{children}</SelectPrimitive.ItemText>
     </SelectPrimitive.Item>
   )
+}
+
+function filterSelectChildren(
+  children: React.ReactNode,
+  search: string
+): { children: React.ReactNode; count: number } {
+  const normalizedSearch = search.trim().toLowerCase()
+
+  if (!normalizedSearch) {
+    return {
+      children,
+      count: countSelectItems(children),
+    }
+  }
+
+  let count = 0
+
+  const filtered = React.Children.map(children, (child) => {
+    if (!React.isValidElement(child)) {
+      return child
+    }
+
+    if (child.type === SelectItem) {
+      const itemChild =
+        child as React.ReactElement<React.ComponentProps<typeof SelectPrimitive.Item>>
+      const itemText = getNodeText(
+        itemChild.props.textValue ?? itemChild.props.children
+      ).toLowerCase()
+
+      if (!itemText.includes(normalizedSearch)) {
+        return null
+      }
+
+      count += 1
+      return child
+    }
+
+    const nestedChild = child as React.ReactElement<{ children?: React.ReactNode }>
+    const nestedChildren = nestedChild.props.children
+    if (!nestedChildren) {
+      return child
+    }
+
+    const filteredNested = filterSelectChildren(nestedChildren, normalizedSearch)
+    count += filteredNested.count
+
+    if (filteredNested.count === 0 && child.type === SelectGroup) {
+      return null
+    }
+
+    return React.cloneElement(
+      child as React.ReactElement<{ children?: React.ReactNode }>,
+      undefined,
+      filteredNested.children
+    )
+  })
+
+  return { children: filtered, count }
+}
+
+function countSelectItems(children: React.ReactNode): number {
+  let count = 0
+
+  React.Children.forEach(children, (child) => {
+    if (!React.isValidElement(child)) {
+      return
+    }
+
+    if (child.type === SelectItem) {
+      count += 1
+      return
+    }
+
+    const nestedChild = child as React.ReactElement<{ children?: React.ReactNode }>
+    if (nestedChild.props.children) {
+      count += countSelectItems(nestedChild.props.children)
+    }
+  })
+
+  return count
+}
+
+function getNodeText(node: React.ReactNode): string {
+  if (typeof node === "string" || typeof node === "number") {
+    return String(node)
+  }
+
+  if (Array.isArray(node)) {
+    return node.map(getNodeText).join(" ")
+  }
+
+  if (React.isValidElement(node)) {
+    const element = node as React.ReactElement<{ children?: React.ReactNode }>
+    return getNodeText(element.props.children)
+  }
+
+  return ""
 }
 
 function SelectSeparator({

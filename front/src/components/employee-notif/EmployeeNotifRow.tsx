@@ -35,22 +35,24 @@ export function EmployeeNotifRow({
         </div>
 
         <div className="min-w-0 flex-1">
-          <div className="flex items-start justify-between gap-3">
-            <p className="text-[17px] font-semibold text-[#101828]">
+          <div className="flex flex-col gap-1 sm:flex-row sm:items-start sm:justify-between sm:gap-3">
+            <p className="break-words text-[17px] font-semibold text-[#101828]">
               {notification.title}
             </p>
-            <span className="shrink-0 text-[11px] uppercase tracking-[0.16em] text-[#98A2B3]">
+            <span className="text-[11px] uppercase tracking-[0.16em] text-[#98A2B3] sm:shrink-0">
               {formatNotificationDateWithYear(notification.createdAt)}
             </span>
           </div>
 
-          <p className="mt-2 whitespace-pre-line text-[13px] leading-6 text-[#667085]">
-            {notification.body}
-          </p>
+          {expanded ? (
+            <p className="mt-2 break-words whitespace-pre-line text-[13px] leading-6 text-[#667085]">
+              {notification.body}
+            </p>
+          ) : null}
         </div>
 
         {notification.status === "unread" ? (
-          <span className="mt-1 h-2.5 w-2.5 shrink-0 self-center rounded-full bg-[#98A2B3]" />
+          <span className="h-2.5 w-2.5 shrink-0 self-center rounded-full bg-[#12B76A]" />
         ) : null}
       </button>
     </div>

@@ -58,13 +58,23 @@ export function avatarColor(seed: string) {
 }
 
 export function statusStyle(status: string) {
-  if (status === "Ирсэн") {
-    return "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30";
+  if (status === "Ирсэн" || status.toLowerCase() === "active") {
+    return "border border-emerald-300 bg-emerald-50 text-emerald-500";
   }
-  if (status === "Тасалсан") {
-    return "bg-red-500/20 text-red-400 border border-red-500/30";
+  if (
+    status === "Тасалсан" ||
+    status.toLowerCase() === "inactive"
+  ) {
+    return "border border-rose-300 bg-rose-50 text-rose-500";
   }
-  return "bg-blue-500/20 text-blue-400 border border-blue-500/30";
+  return "border border-slate-300 bg-slate-50 text-slate-500";
+}
+
+export function statusLabel(status: string) {
+  if (status === "Ирсэн" || status.toLowerCase() === "active") return "Active";
+  if (status === "Тасалсан" || status.toLowerCase() === "inactive")
+    return "Inactive";
+  return status;
 }
 
 export function employeeToForm(employee?: Employee | null): EmployeeFormState {

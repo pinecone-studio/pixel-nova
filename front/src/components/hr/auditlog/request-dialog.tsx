@@ -1067,7 +1067,7 @@ export function AddEmployeeRequestDialog({
                     />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center text-sm text-slate-400">
-                      Preview бэлэн биш байна.
+                      Урьдчилан харах боломжгүй байна.
                     </div>
                   )}
 

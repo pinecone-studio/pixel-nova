@@ -83,15 +83,15 @@ function HrShellInner({ children }: { children: React.ReactNode }) {
                   href={item.href}
                   className={`relative flex h-14 items-center gap-3 rounded-[14px] px-2 transition-all duration-200 text-left w-full ${
                     active
-                      ? "bg-white text-slate-900 border border-[#111827]/20 shadow-[0_8px_20px_rgba(17,24,39,0.12)]"
-                      : "text-slate-500 hover:text-slate-700 hover:bg-slate-100 border border-transparent"
+                      ? "bg-white text-[#121316] border border-[#121316]/18 shadow-[0_8px_20px_rgba(18,19,22,0.12)]"
+                      : "border border-transparent text-[#121316] hover:border-[#121316]/12 hover:bg-[#fafafa]"
                   }`}
                   aria-label={item.label}>
                   {active ? (
                     <span className="absolute left-0 top-1/2 h-8 w-1 -translate-y-1/2 rounded-r bg-[rgba(63,65,69,0.9)]" />
                   ) : null}
                   <span
-                    className={`flex h-10 w-10 items-center justify-center rounded-[12px] shrink-0 transition-all ${active ? "bg-linear-to-b from-white/25 to-black/60 text-black" : ""}`}>
+                    className="flex h-10 w-10 items-center justify-center rounded-[12px] shrink-0 text-[#121316] transition-all">
                     {item.icon}
                   </span>
                   <span className="whitespace-nowrap text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-200">

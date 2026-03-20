@@ -1,14 +1,23 @@
 "use client";
 
+import type { ReactNode } from "react";
+
 import { ActiveIconn, HiredIcon } from "@/components/icons";
-import { CgPerformance } from "react-icons/cg";
 
 interface WorkersStatsProps {
   totalEmployees: number;
   totalActive: number;
-  totalNewThisMonth: number;
   lastSyncTime?: string | null;
   syncSource?: string | null;
+}
+
+interface StatCardProps {
+  title: string;
+  value: number;
+  icon: ReactNode;
+  accentClassName: string;
+  badgeText?: string | null;
+  footerText?: string | null;
 }
 
 function relativeTime(iso: string): string {
@@ -22,76 +31,67 @@ function relativeTime(iso: string): string {
   return `${days} өдрийн өмнө`;
 }
 
+function StatCard({
+  title,
+  value,
+  icon,
+  accentClassName,
+  badgeText,
+  footerText,
+}: StatCardProps) {
+  return (
+    <div className="flex min-h-[196px] rounded-[28px] border border-slate-200 bg-white px-6 py-10 shadow-[0_16px_40px_rgba(15,23,42,0.08)]">
+      <div className="flex w-full items-center justify-between gap-6">
+        <div className="min-w-0">
+          <p className="text-[18px] font-semibold leading-7 text-slate-500">
+            {title}
+          </p>
+          <p className="mt-3 text-[72px] font-semibold leading-none tracking-[-0.04em] text-slate-600">
+            {value}
+          </p>
+          {badgeText ? (
+            <span className="mt-4 inline-flex rounded-lg border border-emerald-200 bg-emerald-50 px-2 py-1 text-[11px] font-semibold text-emerald-600">
+              {badgeText}
+            </span>
+          ) : null}
+          {footerText ? (
+            <p className="mt-3 text-sm text-slate-500">{footerText}</p>
+          ) : null}
+        </div>
+        <div
+          className={`flex h-20 w-20 shrink-0 items-center justify-center rounded-[24px] border ${accentClassName}`}
+        >
+          {icon}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export function WorkersStats({
   totalEmployees,
   totalActive,
-  totalNewThisMonth,
   lastSyncTime,
   syncSource,
 }: WorkersStatsProps) {
   return (
-    <div className="grid gap-4 md:grid-cols-[1.4fr_1fr_1fr]">
-      <div className="rounded-3xl border border-slate-200 bg-white/85 p-5 shadow-[0_16px_40px_rgba(15,23,42,0.08)]">
-        <div className="flex items-start justify-between gap-3">
-          <p className="text-slate-500 text-xs font-semibold uppercase tracking-[0.2em]">
-            Нийт ажилчид
-          </p>
-          <div className="w-11 h-11 rounded-2xl border border-slate-200 bg-white flex items-center justify-center text-slate-700">
-            <HiredIcon className="h-5 w-5 text-slate-700" />
-          </div>
-        </div>
-        <div className="mt-4 flex items-end justify-between gap-3">
-          <div>
-            <div className="flex items-center gap-3">
-              <p className="text-5xl font-semibold text-slate-900">
-                {totalEmployees}
-              </p>
-              {lastSyncTime ? (
-                <span className="px-2 py-1 rounded-lg bg-emerald-50 text-emerald-600 text-[11px] font-semibold border border-emerald-200">
-                  Синк: {relativeTime(lastSyncTime)}
-                </span>
-              ) : (
-                <span className="px-2 py-1 rounded-lg bg-amber-50 text-amber-600 text-[11px] font-semibold border border-amber-200">
-                  Синк хийгдээгүй
-                </span>
-              )}
-            </div>
-            <p className="text-slate-500 text-sm mt-1">
-              {lastSyncTime && syncSource
-                ? `${syncSource} эх үүсвэр`
-                : "Гар аргаар нэмсэн"}
-            </p>
-          </div>
-        </div>
-      </div>
-
-      <div className="rounded-3xl border border-slate-200 bg-white/85 p-5 shadow-[0_16px_40px_rgba(15,23,42,0.08)]">
-        <div className="flex items-start justify-between gap-3">
-          <p className="text-slate-500 text-xs font-semibold uppercase tracking-[0.2em]">
-            Идэвхтэй
-          </p>
-          <div className="w-11 h-11 rounded-2xl border border-slate-200 bg-white flex items-center justify-center text-slate-700">
-            <ActiveIconn className="h-5 w-5 text-slate-700" />
-          </div>
-        </div>
-        <p className="mt-4 text-4xl font-semibold text-slate-900">
-          {totalActive}
-        </p>
-      </div>
-
-      <div className="rounded-3xl border border-slate-200 bg-white/85 p-5 shadow-[0_16px_40px_rgba(15,23,42,0.08)]">
-        <div className="flex items-start justify-between gap-3">
-          <p className="text-slate-500 text-xs uppercase tracking-[0.2em]">
-            Энэ сар
-          </p>
-          <div className="w-11 h-11 rounded-2xl border border-slate-200 bg-white flex items-center justify-center text-slate-700">
-            <CgPerformance className="h-7 w-7 text-slate-700" />
-          </div>
-        </div>
-        <p className="mt-4 text-3xl font-semibold text-slate-900">
-          {totalNewThisMonth}
-        </p>
-      </div>
+    <div className="grid gap-4 md:grid-cols-2 md:gap-x-12 md:gap-y-4">
+      <StatCard
+        title="Нийт ажилчид"
+        value={totalEmployees}
+        accentClassName="border-emerald-300 bg-emerald-50 text-emerald-500"
+        icon={<HiredIcon className="h-9 w-9 text-emerald-500" />}
+        badgeText={lastSyncTime ? `Синк: ${relativeTime(lastSyncTime)}` : null}
+        footerText={
+          lastSyncTime && syncSource ? `${syncSource} эх үүсвэр` : null
+        }
+      />
+      <StatCard
+        title="Идэвхтэй"
+        value={totalActive}
+        accentClassName="border-blue-300 bg-blue-50 text-blue-500"
+        icon={<ActiveIconn className="h-9 w-9 text-blue-500" />}
+      />
     </div>
   );
 }

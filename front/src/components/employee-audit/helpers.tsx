@@ -13,7 +13,7 @@ export function summaryCardTone(active: boolean, color: "blue" | "green") {
 }
 
 export function sectionLabel(type: AuditView) {
-  if (type === "newEmployee") return "Шинэ Ажилтан";
+  if (type === "newEmployee") return "Шинэ ажилтан";
   if (type === "documentReview") return "Баримт бичиг баталгаажуулалт";
   return "Статус шинэчлэлт";
 }

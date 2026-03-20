@@ -68,7 +68,7 @@ export function FilesList({
           </div>
           <div className="flex flex-col items-center gap-1">
             <h3 className="text-[13px] font-semibold text-[#6B7280]">
-              Ð‘Ð°Ñ€Ð¸Ð¼Ñ‚ Ð¾Ð»Ð´ÑÐ¾Ð½Ð³Ò¯Ð¹
+              Баримт олдсонгүй
             </h3>
           </div>
         </div>

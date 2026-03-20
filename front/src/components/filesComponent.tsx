@@ -598,6 +598,8 @@ export function FilesComponent() {
   ];
 
   const isLoading = loading || loadingRows;
+  const tableColumns =
+    "minmax(320px,3.2fr) minmax(140px,1.15fr) minmax(140px,1fr) minmax(170px,1.15fr) 56px";
 
   return (
     <div className="flex flex-col gap-6 text-slate-900 animate-fade-up xl:h-[calc(100vh-7rem)] xl:min-h-0 xl:flex-row">
@@ -690,12 +692,11 @@ export function FilesComponent() {
 
       <div className="flex min-w-0 flex-1 flex-col xl:overflow-hidden gap-2">
         <div className="flex min-w-0 flex-col overflow-hidden rounded-[24px] border border-black/12 bg-white xl:min-h-0 xl:flex-1">
-          <div className="h-[40px] xl:flex-1 xl:overflow-y-auto w-[904px]  ">
+          <div className="h-[40px] w-full xl:flex-1 xl:overflow-y-auto">
             <div
               className="sticky top-0 z-10 grid items-center border-b border-black/12 bg-white px-3 py-3 text-[14px] text-[#3f4145b3] md:px-5"
               style={{
-                gridTemplateColumns:
-                  "minmax(200px,2fr) minmax(120px,1fr) minmax(120px,1fr) minmax(130px,1fr) 60px",
+                gridTemplateColumns: tableColumns,
               }}>
               <div className="flex items-center gap-1  font-medium text-[#121316] ">
                 <span>Баримт бичиг</span>
@@ -731,8 +732,7 @@ export function FilesComponent() {
                   key={row.document.id}
                   className="grid items-center border-b border-black/12 px-3 py-3 transition-colors hover:bg-[#fafafa] md:px-5"
                   style={{
-                    gridTemplateColumns:
-                      "minmax(200px,2fr) minmax(120px,1fr) minmax(120px,1fr) minmax(130px,1fr) 60px",
+                    gridTemplateColumns: tableColumns,
                   }}>
                   <div className="flex items-center gap-2.5 px-2">
                     <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[12px] border border-black/12 bg-white text-[#121316]">

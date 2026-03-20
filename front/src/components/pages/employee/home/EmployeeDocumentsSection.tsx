@@ -22,7 +22,7 @@ export function EmployeeDocumentsSection({
     <section className="mx-auto flex w-full max-w-[1056px] flex-col gap-6">
       <div className="flex items-center gap-4">
         <h2 className="text-[24px] font-semibold tracking-[-0.02em] text-white">
-          Бичиг Баримтууд
+          Баримт бичгүүд
         </h2>
         <span className="rounded-full border border-[#233246] bg-[#162130] px-4 py-1 text-[14px] font-medium text-[#94A3B8]">
           {recentDocuments.length} баримт
