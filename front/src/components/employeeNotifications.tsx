@@ -24,6 +24,7 @@ function EmployeeNotifRow({
   expanded: boolean;
   onSelect: () => void;
 }) {
+  const hasBody = row.body.trim().length > 0;
   return (
     <div className="border-b border-slate-200 last:border-b-0">
       <button
@@ -49,7 +50,7 @@ function EmployeeNotifRow({
             </span>
           </div>
 
-          {expanded ? (
+          {hasBody ? (
             <p className="mt-2 break-words whitespace-pre-line text-[13px] leading-6 text-slate-500">
               {row.body}
             </p>
