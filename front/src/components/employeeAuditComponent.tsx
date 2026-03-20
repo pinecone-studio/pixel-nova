@@ -219,7 +219,8 @@ function AuditDetailModal({
           <button
             type="button"
             onClick={onClose}
-            className="text-[#101828] transition hover:opacity-70">
+            className="text-[#101828] transition hover:opacity-70"
+          >
             <BiX className="h-7 w-7" />
           </button>
         </div>
@@ -243,7 +244,8 @@ function AuditDetailModal({
                 {log.documentIds.map((docId) => (
                   <div
                     key={docId}
-                    className="flex items-center justify-between gap-3 rounded-2xl border border-[#EAECF0] bg-white px-3 py-3">
+                    className="flex items-center justify-between gap-3 rounded-2xl border border-[#EAECF0] bg-white px-3 py-3"
+                  >
                     <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-[#D0D5DD] bg-[#F9FAFB] text-[#667085]">
                       <FiFileText className="h-4 w-4" />
                     </div>
@@ -258,7 +260,8 @@ function AuditDetailModal({
                       }}
                       disabled={!documentsById.get(docId)}
                       className="flex h-8 w-8 items-center justify-center rounded-[10px] text-[#667085] transition-colors hover:bg-[#f5f5f5] hover:text-[#101828] disabled:cursor-not-allowed disabled:opacity-50"
-                      aria-label="Урьдчилж харах">
+                      aria-label="Урьдчилж харах"
+                    >
                       <FiEye className="h-4 w-4" />
                     </button>
                   </div>
@@ -304,7 +307,8 @@ function AuditDetailModal({
                 {log.incompleteFields.map((field) => (
                   <span
                     key={field}
-                    className="rounded-full border border-[#FDE68A] bg-[#FFFBEB] px-2.5 py-1 text-[11px] text-[#D97706]">
+                    className="rounded-full border border-[#FDE68A] bg-[#FFFBEB] px-2.5 py-1 text-[11px] text-[#D97706]"
+                  >
                     {field}
                   </span>
                 ))}
@@ -319,14 +323,16 @@ function AuditDetailModal({
               type="button"
               onClick={onSign}
               disabled={signing}
-              className="mr-3 rounded-2xl border border-[#D0D5DD] px-6 py-3 text-[15px] font-medium text-[#101828] transition hover:bg-[#F2F4F7] disabled:opacity-50">
+              className="mr-3 rounded-2xl border border-[#D0D5DD] px-6 py-3 text-[15px] font-medium text-[#101828] transition hover:bg-[#F2F4F7] disabled:opacity-50"
+            >
               {signing ? "Илгээж байна..." : "Гарын үсэг зурах"}
             </button>
           ) : null}
           <button
             type="button"
             onClick={onClose}
-            className="rounded-2xl bg-[#101828] px-6 py-3 text-[15px] font-medium text-white transition hover:bg-[#1D2939]">
+            className="rounded-2xl bg-[#101828] px-6 py-3 text-[15px] font-medium text-white transition hover:bg-[#1D2939]"
+          >
             Хаах
           </button>
         </div>
@@ -358,14 +364,16 @@ function AuditRow({
     <button
       type="button"
       onClick={() => onOpen(log)}
-      className="flex w-full items-center justify-between rounded-[20px] border border-[#EAECF0] bg-white px-5 py-5 text-left transition hover:border-[#D0D5DD] hover:bg-[#FCFCFD]">
+      className="group flex w-full items-center justify-between rounded-[20px] border border-[#EAECF0] bg-white px-5 py-5 text-left transition-colors"
+    >
       <div className="flex items-center gap-4">
         <div
           className={`flex h-12 w-12 items-center justify-center rounded-2xl border ${
             log.documentsGenerated
               ? "border-[#B7EAC7] bg-[#F0FDF4] text-[#22C55E]"
               : "border-[#FDE68A] bg-[#FFFBEB] text-[#D97706]"
-          }`}>
+          }`}
+        >
           {log.documentsGenerated ? (
             <FiCheckCircle className="h-5 w-5" />
           ) : (
@@ -410,7 +418,8 @@ function EmployeeRequestListRow({
     <button
       type="button"
       onClick={() => onOpen(log)}
-      className="group flex w-full items-center justify-between rounded-[20px] border border-[#EAECF0] bg-white px-5 py-5 text-left transition-colors">
+      className="group flex w-full items-center justify-between rounded-[20px] border border-[#EAECF0] bg-white px-5 py-5 text-left transition-colors"
+    >
       <div className="flex items-center gap-4">
         <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-[#86EFAC] bg-[#F0FDF4] text-[#22C55E]">
           <FiCheckCircle className="h-5 w-5" />
@@ -432,7 +441,8 @@ function EmployeeRequestListRow({
             log.employeeSigned
               ? "border-[#86EFAC] bg-white text-[#22C55E]"
               : "border-[#FF8A80] bg-white text-[#FF3B30]"
-          }`}>
+          }`}
+        >
           {log.employeeSigned ? "Ажилтан нэмсэн" : "Ажилтан нэмэх"}
         </span>
         <FiEye className="h-5 w-5 text-[#98A2B3]" />
@@ -464,132 +474,124 @@ function NewEmployeeAuditDetailModal({
     files.find((document) => !document.employeeSigned) ?? files[0] ?? null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/65 p-4 backdrop-blur-sm">
+    <div className="fixed inset-0 z-50 flex justify-center bg-black/65 p-4 backdrop-blur-sm">
       <button
         type="button"
         aria-label="Close detail overlay"
         className="absolute inset-0"
         onClick={onClose}
       />
-      <div className="relative z-10 w-full max-w-[500px] rounded-[24px] border border-[#EAECF0] bg-white px-6 py-6 shadow-[0_24px_80px_rgba(0,0,0,0.18)]">
-        <div className="mx-auto w-full max-w-[452px]">
-          <div className="mb-6 flex items-start justify-between">
-            <h2 className="text-[20px] font-semibold text-[#101828]">
-              Шинэ ажилтан
-            </h2>
-            <button
-              type="button"
-              onClick={onClose}
-              className="text-[#101828] transition hover:opacity-70">
-              <BiX className="h-7 w-7" />
-            </button>
-          </div>
-
-          <div className="grid grid-cols-2 gap-x-5 gap-y-4">
-            <div>
-              <p className="mb-1.5 text-[14px] leading-5 text-[#101828]">
-                Овог
-              </p>
-              <div className="rounded-[12px] border border-[#D0D5DD] px-3 py-2.5 text-[15px] leading-6 text-[#101828]">
+      <div className="relative z-10 w-full max-w-[500px] max-h-[770px] rounded-[24px] border border-[#EAECF0] bg-white px-6 py-[30px] shadow-[0_24px_80px_rgba(0,0,0,0.18)]">
+        <div className=" flex items-center w-[452px] h-[24px] justify-between">
+          <p className="text-[20px] font-semibold text-[#101828]">
+            Шинэ ажилтан
+          </p>
+          <button
+            type="button"
+            onClick={onClose}
+            className="text-[#101828] transition hover:opacity-70"
+          >
+            <BiX className="h-6 w-6" />
+          </button>
+        </div>
+        <div className="mx-auto max-h-[570] w-[452px] mt-9">
+          <div className=" w-full h-[68px] flex justify-between">
+            <div className="w-[218px] h-[68px] flex flex-col justify-between">
+              <p className="h-5 text-[16px] leading-5  text-[#101828]">Овог</p>
+              <div className="rounded-[12px] border flex items-center px-2 border-[#D0D5DD] h-10 text-[16px] leading-6 text-[#101828]">
                 {employee?.lastName ?? "Мэдээлэлгүй"}
               </div>
             </div>
-            <div>
-              <p className="mb-1.5 text-[14px] leading-5 text-[#101828]">Нэр</p>
-              <div className="rounded-[12px] border border-[#D0D5DD] px-3 py-2.5 text-[15px] leading-6 text-[#101828]">
+            <div className="w-[218px] h-[68px] flex flex-col justify-between">
+              <p className="h-5 text-[16px] leading-5 text-[#101828]">Нэр</p>
+              <div className="rounded-[12px] border flex items-center px-2 border-[#D0D5DD] h-10 text-[16px] leading-6 text-[#101828]">
                 {employee?.firstName ?? "Мэдээлэлгүй"}
               </div>
             </div>
           </div>
 
-          <div className="mt-4">
-            <p className="mb-1.5 text-[14px] leading-5 text-[#101828]">Имэйл</p>
-            <div className="rounded-[12px] border border-[#D0D5DD] px-3 py-2.5 text-[15px] leading-6 text-[#101828]">
+          <div className="mt-[14px] w-[452px] h-[68px] flex flex-col justify-between">
+            <p className="h-5 text-[16px] leading-5 text-[#101828]">Имэйл</p>
+            <div className="rounded-[12px] border flex items-center px-2 border-[#D0D5DD] h-10 text-[16px] leading-6 text-[#101828]">
               {employee?.email ?? "Мэдээлэлгүй"}
             </div>
           </div>
+          {employee?.email ?? "Мэдээлэлгүй"}
+        </div>
+      </div>
 
-          <div className="mt-4 grid grid-cols-2 gap-x-5 gap-y-4">
-            <div>
-              <p className="mb-1.5 text-[14px] leading-5 text-[#101828]">
-                Хэлтэс
-              </p>
-              <div className="rounded-[12px] border border-[#D0D5DD] px-3 py-2.5 text-[15px] leading-6 text-[#101828]">
-                {employee?.department ?? "Мэдээлэлгүй"}
-              </div>
-            </div>
-            <div>
-              <p className="mb-1.5 text-[14px] leading-5 text-[#101828]">
-                Албан тушаал
-              </p>
-              <div className="rounded-[12px] border border-[#D0D5DD] px-3 py-2.5 text-[15px] leading-6 text-[#101828]">
-                {employee?.jobTitle ?? "Мэдээлэлгүй"}
-              </div>
-            </div>
-          </div>
-
-          <div className="mt-4">
-            <p className="mb-2 text-[14px] leading-5 text-[#101828]">
-              Хавсаргасан файл
-            </p>
-            <div className="flex flex-col gap-2.5">
-              {files.map((document) => (
-                <div
-                  key={document.id}
-                  className="flex items-center justify-between rounded-[16px] border border-[#D0D5DD] bg-white px-3 py-2.5">
-                  <div className="flex min-w-0 items-center gap-4">
-                    <div className="flex h-[48px] w-[48px] shrink-0 items-center justify-center rounded-[16px] border border-[#D0D5DD] bg-white text-[#667085]">
-                      <FiFileText className="h-5 w-5" />
-                    </div>
-                    <div className="min-w-0">
-                      <p className="truncate text-[14px] font-medium leading-5 text-[#101828]">
-                        {document.documentName.replace(/\.pdf$/i, "")}
-                      </p>
-                      <p className="mt-0.5 truncate text-[12px] leading-5 text-[#98A2B3]">
-                        {document.documentName}
-                      </p>
-                    </div>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => onPreview(document)}
-                    className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-[#667085] transition hover:bg-[#F3F4F6] hover:text-[#101828]">
-                    <FiEye className="h-4.5 w-4.5" />
-                  </button>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div className="mt-3 flex items-center justify-between">
-            <div className="text-[14px] leading-5 text-[#101828]">
-              Гарын үсэг
-            </div>
-            <div className="text-[14px] leading-5 text-[#98A2B3]">
-              {log.employeeSigned ? "Зурсан" : "Зураагүй"}
-            </div>
-          </div>
-
-          <div className="mt-10 flex justify-end gap-3">
-            <button
-              type="button"
-              onClick={() => {
-                if (signableDocument) {
-                  onOpenSignature(signableDocument);
-                }
-              }}
-              disabled={!signableDocument}
-              className="rounded-[16px] border border-[#D0D5DD] px-6 py-2.5 text-[14px] font-medium text-[#101828] disabled:opacity-50">
-              Гарын үсэг зурах
-            </button>
-            <button
-              type="button"
-              onClick={onClose}
-              className="rounded-[16px] bg-[#101828] px-6 py-2.5 text-[14px] font-medium text-white">
-              Баталгаажуулах
-            </button>
+      <div className="mt-[14px] w-full h-[68px] flex justify-between">
+        <div className="w-[218px] h-full flex flex-col justify-between">
+          <p className="h-5 text-[16px] leading-5 text-[#101828]">Хэлтэс</p>
+          <div className="rounded-[12px] border flex items-center px-2 border-[#D0D5DD] h-10 text-[16px] leading-6 text-[#101828]">
+            {employee?.department ?? "Мэдээлэлгүй"}
           </div>
         </div>
+        <div className="w-[218px] h-full flex flex-col justify-between">
+          <p className="mb-1.5 text-[14px] leading-5 text-[#101828]">
+            Албан тушаал
+          </p>
+          <div className="rounded-[12px] border flex items-center px-2 border-[#D0D5DD] h-10 text-[16px] leading-6 text-[#101828]">
+            {employee?.jobTitle ?? "Мэдээлэлгүй"}
+          </div>
+        </div>
+      </div>
+
+      <p className="mt-[14px] text-[16px] leading-5 text-[#101828]">
+        Хавсаргасан файл
+      </p>
+      <div className="mt-[12px] max-h-[292px] overflow-scroll">
+        <div className="flex flex-col gap-2.5">
+          {files.map((document) => (
+            <div
+              key={document.id}
+              className="flex items-center w-[452px] h-[64px] justify-between rounded-[16px] border border-[#D0D5DD] bg-white px-3 py-2.5"
+            >
+              <div className="flex min-w-0 items-center gap-4">
+                <div className="flex h-[48px] w-[48px] shrink-0 items-center justify-center rounded-[16px] border border-[#D0D5DD] bg-white text-[#667085]">
+                  <FiFileText className="h-5 w-5" />
+                </div>
+                <div className="min-w-0">
+                  <p className="truncate text-[16px] font-medium leading-5 text-[#101828]">
+                    {document.documentName.replace(/\.pdf$/i, "")}
+                  </p>
+                  <p className="mt-0.5 truncate text-[14px] leading-5 text-[#98A2B3]">
+                    {document.documentName}
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => onPreview(document)}
+                className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-[#667085] transition hover:bg-[#F3F4F6] hover:text-[#101828]"
+              >
+                <FiEye className="h-4.5 w-4.5" />
+              </button>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className="mt-[36px] flex justify-end gap-5">
+        <button
+          type="button"
+          onClick={() => {
+            if (signableDocument) {
+              onOpenSignature(signableDocument);
+            }
+          }}
+          disabled={!signableDocument}
+          className="rounded-[16px] border border-[#D0D5DD] w-[158px] h-11 text-[16px] text-[#101828] disabled:opacity-50"
+        >
+          Гарын үсэг зурах
+        </button>
+        <button
+          type="button"
+          onClick={onClose}
+          className="rounded-[16px] bg-[#101828] w-[146px] h-11 text-[16px] text-white"
+        >
+          Баталгаажуулах
+        </button>
       </div>
     </div>
   );
@@ -619,7 +621,8 @@ function DocumentReviewRow({
           onOpen(document);
         }
       }}
-      className="group flex w-full cursor-pointer items-center justify-between rounded-[20px] border border-[#EAECF0] bg-white px-5 py-5 text-left transition-colors">
+      className="group flex w-full cursor-pointer items-center justify-between rounded-[20px] border border-[#EAECF0] bg-white px-5 py-5 text-left transition-colors"
+    >
       <div className="flex items-center gap-4">
         <div className="flex h-14 w-14 items-center justify-center rounded-[18px] border border-[#98C1FF] bg-white text-[#3B82F6]">
           <FiFileText className="h-6 w-6" />
@@ -638,7 +641,8 @@ function DocumentReviewRow({
             isNewDocument
               ? "border-[#FF8A80] bg-white text-[#FF3B30]"
               : "border-[#86EFAC] bg-white text-[#22C55E]"
-          }`}>
+          }`}
+        >
           {isNewDocument ? "Шинэ баримт" : "Шинэчлэлт"}
         </span>
         <button
@@ -648,7 +652,8 @@ function DocumentReviewRow({
             onOpen(document);
           }}
           className="flex h-8 w-8 items-center justify-center rounded-[10px] text-[#98A2B3] transition hover:bg-[#F3F4F6] hover:text-[#101828]"
-          aria-label="Урьдчилж харах">
+          aria-label="Урьдчилж харах"
+        >
           <FiEye className="h-5 w-5" />
         </button>
         <button
@@ -657,7 +662,8 @@ function DocumentReviewRow({
             event.stopPropagation();
           }}
           className="flex h-8 w-8 items-center justify-center rounded-[10px] text-[#98A2B3] transition hover:bg-[#F3F4F6] hover:text-[#101828]"
-          aria-label="Татах">
+          aria-label="Татах"
+        >
           <FiFileText className="h-5 w-5" />
         </button>
       </div>
@@ -713,7 +719,8 @@ function DocumentAuditDetailModal({
           <button
             type="button"
             onClick={onClose}
-            className="text-[#101828] transition hover:opacity-70">
+            className="text-[#101828] transition hover:opacity-70"
+          >
             <BiX className="h-7 w-7" />
           </button>
         </div>
@@ -735,7 +742,8 @@ function DocumentAuditDetailModal({
                   return (
                     <div
                       key={docId}
-                      className="flex items-center justify-between gap-3 rounded-[16px] border border-[#D0D5DD] bg-white px-3 py-2.5">
+                      className="flex items-center justify-between gap-3 rounded-[16px] border border-[#D0D5DD] bg-white px-3 py-2.5"
+                    >
                       <div className="flex items-center gap-4 min-w-0 flex-1">
                         <div className="flex h-[48px] w-[48px] items-center justify-center rounded-[16px] border border-[#D0D5DD] bg-white text-[#667085]">
                           <FiFileText className="h-5 w-5" />
@@ -755,7 +763,8 @@ function DocumentAuditDetailModal({
                       <div className="flex items-center gap-1.5">
                         {status ? (
                           <span
-                            className={`mr-2 inline-flex w-fit rounded-full border px-3 py-1 text-[11px] font-medium ${status.className}`}>
+                            className={`mr-2 inline-flex w-fit rounded-full border px-3 py-1 text-[11px] font-medium ${status.className}`}
+                          >
                             {status.label}
                           </span>
                         ) : null}
@@ -766,7 +775,8 @@ function DocumentAuditDetailModal({
                           }}
                           disabled={!document}
                           className="flex h-8 w-8 items-center justify-center rounded-[10px] text-[#667085] transition-colors hover:bg-[#f5f5f5] hover:text-[#101828] disabled:cursor-not-allowed disabled:opacity-50"
-                          aria-label="Үр дүнг харах">
+                          aria-label="Үр дүнг харах"
+                        >
                           <FiEye className="h-4 w-4" />
                         </button>
                       </div>
@@ -784,7 +794,8 @@ function DocumentAuditDetailModal({
           <button
             type="button"
             onClick={onClose}
-            className="rounded-[16px] border border-[#FF8A80] px-5 py-2.5 text-[14px] font-medium text-[#FF3B30]">
+            className="rounded-[16px] border border-[#FF8A80] px-5 py-2.5 text-[14px] font-medium text-[#FF3B30]"
+          >
             Татгалзах
           </button>
           <button
@@ -804,7 +815,8 @@ function DocumentAuditDetailModal({
                 onClose();
               }
             }}
-            className="rounded-[16px] bg-[#101828] px-5 py-2.5 text-[14px] font-medium text-white transition hover:bg-[#1D2939]">
+            className="rounded-[16px] bg-[#101828] px-5 py-2.5 text-[14px] font-medium text-white transition hover:bg-[#1D2939]"
+          >
             Баталгаажуулах
           </button>
         </div>
@@ -1223,7 +1235,8 @@ export function EmployeeAuditComponent() {
           <div
             className={`relative w-[505px] max-w-[92vw] rounded-[24px] border border-[#EAECF0] bg-white px-7 py-6 shadow-[0_24px_80px_rgba(0,0,0,0.18)] ${
               signatureMode === "redraw" ? "min-h-[553px]" : "min-h-[327px]"
-            }`}>
+            }`}
+          >
             <div className="mb-7 flex items-start justify-between">
               <div>
                 <h3 className="text-[18px] font-semibold text-[#101828]">
@@ -1236,7 +1249,8 @@ export function EmployeeAuditComponent() {
                   setSignatureOpen(false);
                   setSignatureTargetDocument(null);
                 }}
-                className="text-[#101828] transition hover:opacity-70">
+                className="text-[#101828] transition hover:opacity-70"
+              >
                 <BiX className="h-6 w-6" />
               </button>
             </div>
@@ -1255,7 +1269,8 @@ export function EmployeeAuditComponent() {
                       signatureMode === "reuse"
                         ? "border-[#2F80FF]"
                         : "border-[#98A2B3]"
-                    }`}>
+                    }`}
+                  >
                     <span
                       className={`h-3 w-3 rounded-full ${
                         signatureMode === "reuse"
@@ -1278,7 +1293,8 @@ export function EmployeeAuditComponent() {
                       signatureMode === "redraw"
                         ? "border-[#2F80FF]"
                         : "border-[#98A2B3]"
-                    }`}>
+                    }`}
+                  >
                     <span
                       className={`h-3 w-3 rounded-full ${
                         signatureMode === "redraw"
@@ -1301,7 +1317,8 @@ export function EmployeeAuditComponent() {
                   <button
                     type="button"
                     onClick={clearSignature}
-                    className="text-[12px] text-[#667085] hover:text-[#101828]">
+                    className="text-[12px] text-[#667085] hover:text-[#101828]"
+                  >
                     Арилгах
                   </button>
                 </div>
@@ -1327,7 +1344,8 @@ export function EmployeeAuditComponent() {
                       usePasscode
                         ? "border-[#98A2B3] bg-white text-[#344054]"
                         : "border-[#98A2B3] bg-white text-transparent"
-                    }`}>
+                    }`}
+                  >
                     <span className="text-[15px] leading-none">✓</span>
                   </span>
                   4 оронтой код хадгалах
@@ -1367,21 +1385,24 @@ export function EmployeeAuditComponent() {
             ) : null}
 
             <div
-              className={`${signatureMode === "redraw" ? "mt-8" : "mt-10"} flex justify-end gap-3`}>
+              className={`${signatureMode === "redraw" ? "mt-8" : "mt-10"} flex justify-end gap-3`}
+            >
               <button
                 type="button"
                 onClick={() => {
                   setSignatureOpen(false);
                   setSignatureTargetDocument(null);
                 }}
-                className="rounded-[14px] border border-[#D0D5DD] px-5 py-2.5 text-[14px] text-[#344054]">
+                className="rounded-[14px] border border-[#D0D5DD] px-5 py-2.5 text-[14px] text-[#344054]"
+              >
                 Болих
               </button>
               <button
                 type="button"
                 onClick={handleSaveSignature}
                 disabled={signing}
-                className="rounded-[14px] bg-[#101828] px-5 py-2.5 text-[14px] font-medium text-white disabled:opacity-50">
+                className="rounded-[14px] bg-[#101828] px-5 py-2.5 text-[14px] font-medium text-white disabled:opacity-50"
+              >
                 {signing ? "Илгээж байна..." : "Баталгаажуулах"}
               </button>
             </div>
@@ -1411,7 +1432,8 @@ export function EmployeeAuditComponent() {
               activeTab === "newEmployee"
                 ? "border-[#86EFAC] bg-white"
                 : "border-[#D0D5DD] bg-white hover:border-[#B7EAC7] hover:bg-[#FBFFFC]"
-            }`}>
+            }`}
+          >
             <div className="flex min-w-0 items-center gap-5">
               <div className="flex h-16 w-16 items-center justify-center rounded-[20px] border border-[#86EFAC] bg-white text-[#22C55E] shadow-[0_10px_24px_rgba(34,197,94,0.10)]">
                 <FiCheckCircle className="h-8 w-8" />
@@ -1437,7 +1459,8 @@ export function EmployeeAuditComponent() {
               activeTab === "documentReview"
                 ? "border-[#98C1FF] bg-white"
                 : "border-[#D0D5DD] bg-white hover:border-[#B8D4FF] hover:bg-[#FBFDFF]"
-            }`}>
+            }`}
+          >
             <div className="flex min-w-0 items-center gap-5">
               <div className="flex h-16 w-16 items-center justify-center rounded-[20px] border border-[#98C1FF] bg-white text-[#3B82F6] shadow-[0_10px_24px_rgba(47,123,255,0.10)]">
                 <FiFileText className="h-8 w-8" />
@@ -1469,7 +1492,8 @@ export function EmployeeAuditComponent() {
             <button
               type="button"
               onClick={() => setFilterOpen((prev) => !prev)}
-              className="flex h-[44px] w-full items-center justify-between rounded-[12px] border border-[#D0D5DD] bg-white px-4 text-[15px] text-[#667085] outline-none">
+              className="flex h-[44px] w-full items-center justify-between rounded-[12px] border border-[#D0D5DD] bg-white px-4 text-[15px] text-[#667085] outline-none"
+            >
               <span>{activeActionLabel}</span>
               <BiChevronDown
                 className={`h-4 w-4 text-[#667085] transition-transform ${
@@ -1493,7 +1517,8 @@ export function EmployeeAuditComponent() {
                         active
                           ? "bg-[#F3F4F6] text-[#111827]"
                           : "text-[#344054] hover:bg-[#F3F4F6] hover:text-[#111827]"
-                      }`}>
+                      }`}
+                    >
                       {option.label}
                     </button>
                   );
