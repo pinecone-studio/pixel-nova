@@ -255,7 +255,7 @@ function NewDocModal({
   const [selectedEmployeeId, setSelectedEmployeeId] = useState(
     () => employees[0]?.id ?? "",
   );
-  const [employeeMenuOpen, setEmployeeMenuOpen] = useState(false);
+
   const [recipients, setRecipients] = useState<string[]>([...ALL_RECIPIENTS]);
   const [file, setFile] = useState<File | null>(null);
   const [dragging, setDragging] = useState(false);

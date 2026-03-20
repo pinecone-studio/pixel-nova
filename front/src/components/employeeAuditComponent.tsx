@@ -30,18 +30,21 @@ const ACTION_LABELS: Record<string, string> = {
   add_employee: "Шинэ ажилтан авах",
   promote_employee: "Тушаал дэвшүүлэх",
   change_position: "Албан тушаал солих",
+  offboard_employee: "Ажлаас чөлөөлөх",
 };
 
 const PHASE_LABELS: Record<string, string> = {
   onboarding: "Ажилд орох",
   working: "Ажиллах",
+  offboarding: "Ажлаас гарах",
 };
 
 type FilterAction =
   | ""
   | "add_employee"
   | "promote_employee"
-  | "change_position";
+  | "change_position"
+  | "offboard_employee";
 type AuditTab = "newEmployee" | "documentReview";
 
 function getDocumentSigningSummary(
@@ -1058,15 +1061,14 @@ export function EmployeeAuditComponent() {
   );
 
   const auditLogs = useMemo(() => {
-    let logs = (data?.auditLogs ?? []).filter(
-      (log) =>
-        log.action !== "offboard_employee" && log.phase !== "offboarding",
-    );
+    let logs = data?.auditLogs ?? [];
 
     logs = logs.filter((log) =>
       activeTab === "newEmployee"
         ? log.action === "add_employee"
-        : log.action === "promote_employee" || log.action === "change_position",
+        : log.action === "promote_employee" ||
+          log.action === "change_position" ||
+          log.action === "offboard_employee",
     );
 
     if (filterAction) {
@@ -1093,7 +1095,8 @@ export function EmployeeAuditComponent() {
     let items = [...documents].filter(
       (document) =>
         document.action === "promote_employee" ||
-        document.action === "change_position",
+        document.action === "change_position" ||
+        document.action === "offboard_employee",
     );
 
     if (filterAction) {
@@ -1115,7 +1118,9 @@ export function EmployeeAuditComponent() {
     const newEmployeeLogs = all.filter((log) => log.action === "add_employee");
     const documentReviewLogs = all.filter(
       (log) =>
-        log.action === "promote_employee" || log.action === "change_position",
+        log.action === "promote_employee" ||
+        log.action === "change_position" ||
+        log.action === "offboard_employee",
     );
 
     return {
@@ -1135,6 +1140,7 @@ export function EmployeeAuditComponent() {
           { value: "", label: "Бүгд" },
           { value: "promote_employee", label: "Тушаал дэвшүүлэх" },
           { value: "change_position", label: "Албан тушаал солих" },
+          { value: "offboard_employee", label: "Ажлаас чөлөөлөх" },
         ];
   const activeActionLabel =
     actionOptions.find((option) => option.value === filterAction)?.label ??
