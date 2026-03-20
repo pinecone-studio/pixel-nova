@@ -15,6 +15,7 @@ import type { Document, DocumentContent, Employee } from "@/lib/types";
 import {
   ActiveIcon,
   CalIcon,
+  CloudIcon,
   DownloadIcon,
   PlusIcon,
   RedirectIcon,
@@ -330,7 +331,7 @@ function NewDocModal({
       onClick={onClose}
     >
       <div
-        className="relative bg-white rounded-3xl border border-slate-200 shadow-[0_28px_60px_rgba(15,23,42,0.12)] flex flex-col gap-5 overflow-hidden"
+        className="relative bg-white rounded-3xl border border-slate-200h max-w-[500px] min-h-[514px] shadow-[0_28px_60px_rgba(15,23,42,0.12)] flex flex-col gap-4 overflow-hidden"
         style={{ width: 520, padding: "28px 28px 24px" }}
         onClick={(e) => e.stopPropagation()}
       >
@@ -704,9 +705,9 @@ export function FilesComponent() {
 
       <div className="h-full w-px bg-[#0000001F]" />
 
-      <div className="flex min-w-0 flex-1 flex-col xl:overflow-hidden gap-2">
-        <div className="flex min-w-0 flex-col overflow-hidden rounded-[24px] border border-black/12 bg-white xl:min-h-0 xl:flex-1">
-          <div className="h-[40px] xl:flex-1 xl:overflow-y-auto w-[904px]  ">
+      <div className="flex min-w-0 flex-1 flex-col xl:overflow-hidden  gap-2">
+        <div className="flex min-w-0 flex-col overflow-hidden rounded-[24px]   border border-black/12 bg-white xl:min-h-0 xl:flex-1">
+          <div className=" xl:flex-1 xl:overflow-y-auto max-w-[904px] ">
             <div
               className="sticky top-0 z-10 grid items-center border-b border-black/12 bg-white px-3 py-3 text-[14px] text-[#3f4145b3] md:px-5"
               style={{
@@ -714,7 +715,7 @@ export function FilesComponent() {
                   "minmax(200px,2fr) minmax(120px,1fr) minmax(120px,1fr) minmax(130px,1fr) 60px",
               }}
             >
-              <div className="flex items-center gap-1  font-medium text-[#121316] ">
+              <div className="flex items-center gap-1 font-medium text-[#121316]">
                 <span>Баримт бичиг</span>
                 <span className="text-[#77818c]">&#8597;</span>
               </div>
@@ -739,14 +740,14 @@ export function FilesComponent() {
                 {error}
               </div>
             ) : filtered.length === 0 ? (
-              <div className="py-12 text-center text-slate-400 text-sm ">
+              <div className="py-12 text-center text-slate-400 text-sm">
                 Баримт олдсонгүй
               </div>
             ) : (
               filtered.map((row) => (
                 <div
                   key={row.document.id}
-                  className="grid items-center border-b border-black/12 px-3 py-3 transition-colors hover:bg-[#fafafa] md:px-5"
+                  className="grid items-center border-b border-black/12 min-h-[40px] px-3 py-3 transition-colors hover:bg-[#fafafa] md:px-5"
                   style={{
                     gridTemplateColumns:
                       "minmax(200px,2fr) minmax(120px,1fr) minmax(120px,1fr) minmax(130px,1fr) 60px",
@@ -760,23 +761,30 @@ export function FilesComponent() {
                       {row.document.documentName}
                     </p>
                   </div>
+
                   <div className="px-2">
                     <div className="inline-flex items-center rounded-full border border-black/12 px-3 py-1 text-[12px] text-[#3f4145]">
                       {stageLabel(row.employee)}
                     </div>
                   </div>
+
                   <div className="flex items-center gap-2 px-2">
                     <CalIcon className="h-4 w-4 shrink-0 text-[#77818c]" />
                     <span className="text-[14px] text-[#3f4145]">
-                      {formatDate(row.document.createdAt)}
+                      {new Date(row.document.createdAt)
+                        .toISOString()
+                        .slice(0, 10)
+                        .replace(/-/g, ".")}
                     </span>
                   </div>
+
                   <div className="px-2">
                     <span className="inline-flex items-center gap-1.5 rounded-full border border-[#1aba5280] px-3 py-1 text-[12px] font-medium text-[#1aba52]">
                       <span className="h-2 w-2 rounded-full bg-[#1aba52]" />
                       Баталгаажсан
                     </span>
                   </div>
+
                   <div className="flex items-center justify-center">
                     <button
                       onClick={() => setDownloadRow(row)}
@@ -792,12 +800,13 @@ export function FilesComponent() {
           </div>
 
           {/* Footer */}
-          <div className="flex shrink-0 items-center justify-between border-t border-black/12 px-5 py-3  ">
+          <div className="flex shrink-0 items-center justify-between border-t border-black/12 px-5 py-3">
             <p className="text-[13px] text-[#77818c]">
               Нийт {filtered.length} баримт
             </p>
           </div>
         </div>
+
         <div className="flex items-center justify-end">
           <button
             onClick={() => setShowModal(true)}
