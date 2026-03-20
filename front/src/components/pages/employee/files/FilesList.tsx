@@ -46,7 +46,9 @@ export function FilesList({
 
   if (visible.length === 0) {
     return (
-      <div style={{ ...emptyBoxStyle, marginBottom: 24 }}>Баримт олдсонгүй</div>
+      <div style={{ ...emptyBoxStyle, marginBottom: 24, marginTop: 10 }}>
+        Баримт олдсонгүй
+      </div>
     );
   }
 

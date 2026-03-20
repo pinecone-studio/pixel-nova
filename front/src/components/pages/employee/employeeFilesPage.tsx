@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 
 import { FilesList } from "./files/FilesList";
 import { FilesPageHeader } from "./files/FilesPageHeader";
-import { FilesSectionHeader } from "./files/FilesSectionHeader";
+
 import { FilesToolbar } from "./files/FilesToolbar";
 import { useEmployeeDocuments } from "./useEmployeeDocuments";
 import { useEmployeeSession } from "./useEmployeeSession";
@@ -12,8 +12,12 @@ import { useEmployeeSession } from "./useEmployeeSession";
 export default function EmployeeFilesPage() {
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState("all");
-  const { authToken, employee, loading: employeeLoading, errorMessage } =
-    useEmployeeSession();
+  const {
+    authToken,
+    employee,
+    loading: employeeLoading,
+    errorMessage,
+  } = useEmployeeSession();
   const {
     documents,
     loading: documentsLoading,
@@ -33,7 +37,9 @@ export default function EmployeeFilesPage() {
         document.action.toLowerCase().includes(normalizedSearch);
       const matchesFilter =
         filter === "all" ||
-        document.documentName.toLowerCase().endsWith(`.${filter.toLowerCase()}`);
+        document.documentName
+          .toLowerCase()
+          .endsWith(`.${filter.toLowerCase()}`);
 
       return matchesSearch && matchesFilter;
     });
@@ -43,24 +49,13 @@ export default function EmployeeFilesPage() {
 
   const loading = employeeLoading || documentsLoading;
   const error = errorMessage ?? documentsError ?? null;
-  const employeeName = employee ? `${employee.lastName} ${employee.firstName}` : null;
+  const employeeName = employee
+    ? `${employee.lastName} ${employee.firstName}`
+    : null;
 
   return (
-    <div
-      style={{
-        minHeight: "100vh",
-        background: "#FAFAFA",
-        padding: "33px 16px 120px",
-        fontFamily: "inherit",
-      }}
-    >
-      <div
-        style={{
-          width: "100%",
-          maxWidth: 1056,
-          margin: "0 auto",
-        }}
-      >
+    <div className="bg-[#f5f7fb]">
+      <div className="mx-auto flex w-[1056px] max-w-full flex-col mt-[32px] pb-[103px]">
         <FilesPageHeader employeeName={employeeName} />
 
         <FilesToolbar
@@ -69,9 +64,14 @@ export default function EmployeeFilesPage() {
           onSearchChange={setSearch}
           onFilterChange={setFilter}
         />
-
-        <FilesSectionHeader count={filteredDocuments.length} />
-
+        <div className="flex items-center w-[1056px] mt-8 h-6 gap-10">
+          <h2 className="text-[20px] flex items-center w-[246px] h-6 font-semibold tracking-[-0.02em] text-[#111827]">
+            Баримт бичиг шинэчлэлт
+          </h2>
+          <span className="rounded-full border h-[24px] flex items-center min-w-[79px] border-[#E5E7EB] bg-white justify-center text-[12px] font-medium text-[#6B7280]">
+            {Math.min(documents.length)} баримт
+          </span>
+        </div>
         <FilesList
           loading={loading}
           error={error}
