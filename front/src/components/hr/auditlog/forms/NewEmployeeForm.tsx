@@ -221,8 +221,7 @@ export function NewEmployeeForm({
             <SelectWrapper
               value={dept}
               onChange={(e) => setDept(e.target.value)}
-              hasError={!!errors.dept}
-            >
+              hasError={!!errors.dept}>
               {departments.map((d) => (
                 <option key={d} value={d}>
                   {d}
@@ -249,8 +248,7 @@ export function NewEmployeeForm({
               <SelectWrapper
                 value={workSchedule}
                 onChange={(e) => setWorkSchedule(e.target.value)}
-                hasError={!!errors.workSchedule}
-              >
+                hasError={!!errors.workSchedule}>
                 <option value="Бүтэн цагаар">Бүтэн цагаар</option>
                 <option value="Хагас цагаар">Хагас цагаар</option>
                 <option value="Ээлжээр">Ээлжээр</option>
@@ -262,8 +260,7 @@ export function NewEmployeeForm({
               <SelectWrapper
                 value={workdays}
                 onChange={(e) => setWorkdays(e.target.value)}
-                hasError={!!errors.workdays}
-              >
+                hasError={!!errors.workdays}>
                 <option value="Даваа-Баасан">Даваа-Баасан</option>
                 <option value="Бямба-Ням">Бямба-Ням</option>
                 <option value="Өдөр бүр">Өдөр бүр</option>
@@ -298,7 +295,7 @@ export function NewEmployeeForm({
               <input
                 value={contractEnd}
                 readOnly
-                placeholder="Ð­Ñ…Ð»ÑÑ… Ð¾Ð³Ð½Ð¾Ð¾ Ð±Ð¾Ð»Ð¾Ð½ Ñ…Ò¯Ñ‡Ð¸Ð½Ñ‚ÑÐ¹ Ñ…ÑƒÐ³Ð°Ñ†Ð°Ð°Ð³ ÑÐ¾Ð½Ð³Ð¾Ð½Ð¾ ÑƒÑƒ"
+                placeholder="Автоматаар тооцогдоно"
                 className={`${getInputClass("contractEnd")} bg-slate-50 text-slate-500`}
               />
               <FieldError message={errors.contractEnd} />
@@ -310,8 +307,7 @@ export function NewEmployeeForm({
             <SelectWrapper
               value={contractDuration}
               onChange={(e) => setContractDuration(e.target.value)}
-              hasError={!!errors.contractDuration}
-            >
+              hasError={!!errors.contractDuration}>
               <option value="">Сонгох</option>
               <option value="6 сар">6 сар</option>
               <option value="1 жил">1 жил</option>
