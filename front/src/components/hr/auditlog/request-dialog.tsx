@@ -703,7 +703,7 @@ export function AddEmployeeRequestDialog({
 
       await triggerAction({
         variables: {
-          employeeId: useAddEmployeeLayout ? "new" : matchedEmployee!.id,
+          employeeId: matchedEmployee.id,
           action: action.name,
           overrideRecipients,
           templateDataOverrides:
