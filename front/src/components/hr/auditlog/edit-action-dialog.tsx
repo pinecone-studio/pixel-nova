@@ -2,7 +2,14 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useMutation } from "@apollo/client/react";
-import { FiX, FiPlus, FiTrash2 } from "react-icons/fi";
+import {
+  FiEye,
+  FiFileText,
+  FiPlus,
+  FiRefreshCw,
+  FiTrash2,
+  FiX,
+} from "react-icons/fi";
 import { createPortal } from "react-dom";
 
 import { UPDATE_REGISTRY } from "@/graphql/mutations/actions";
@@ -10,10 +17,6 @@ import { GET_ACTIONS } from "@/graphql/queries";
 import { buildGraphQLHeaders } from "@/lib/apollo-client";
 import type { ActionConfig } from "@/lib/types";
 import { useHrOverlay } from "../overlay-context";
-
-// ---------------------------------------------------------------------------
-// Types
-// ---------------------------------------------------------------------------
 
 interface EditActionDialogProps {
   action: ActionConfig | null;
@@ -26,10 +29,6 @@ interface DocEntry {
   template: string;
   order: number;
 }
-
-// ---------------------------------------------------------------------------
-// Chip input (for triggerFields, recipients, requiredEmployeeFields)
-// ---------------------------------------------------------------------------
 
 function ChipInput({
   label,
@@ -52,68 +51,76 @@ function ChipInput({
     setInput("");
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter") {
-      e.preventDefault();
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === "Enter") {
+      event.preventDefault();
       handleAdd();
     }
   };
 
   return (
-    <div>
-      <label className="mb-1.5 block text-[12px] font-semibold uppercase tracking-wider text-[#3f4145]">
+    <div className="flex flex-col gap-4">
+      <label className="text-[18px] font-medium leading-6 text-[#121316]">
         {label}
       </label>
-      <div className="flex flex-wrap gap-1.5 mb-2">
-        {values.map((val) => (
+
+      <div className="flex min-h-10 flex-wrap gap-2">
+        {values.map((value) => (
           <span
-            key={val}
-            className="inline-flex items-center gap-1 rounded-full border border-black/12 bg-[#f5f5f5] px-2.5 py-1 text-[12px] text-[#121316]">
-            {val}
+            key={value}
+            className="inline-flex items-center gap-2 rounded-full border border-[#D5D7DA] bg-white px-4 py-1.5 text-[16px] leading-6 text-[#6B7280] shadow-[0_1px_2px_rgba(16,24,40,0.04)]"
+          >
+            {value}
             <button
               type="button"
-              onClick={() => onChange(values.filter((v) => v !== val))}
-              className="ml-0.5 text-[#77818c] hover:text-red-500">
+              onClick={() => onChange(values.filter((entry) => entry !== value))}
+              className="text-[#6B7280] transition-colors hover:text-[#121316]"
+              aria-label={`Remove ${value}`}
+            >
               <FiX className="h-3 w-3" />
             </button>
           </span>
         ))}
       </div>
-      <div className="flex gap-2">
+
+      <div className="flex gap-3">
         <input
           type="text"
           value={input}
-          onChange={(e) => setInput(e.target.value)}
+          onChange={(event) => setInput(event.target.value)}
           onKeyDown={handleKeyDown}
           placeholder={placeholder}
-          className="h-8 flex-1 rounded-[8px] border border-black/12 bg-white px-3 text-[13px] text-[#121316] placeholder:text-[#77818c] outline-none focus:border-[#121316]/30"
+          className="h-12 flex-1 rounded-[12px] border border-[#D5D7DA] bg-white px-4 text-[16px] text-[#121316] placeholder:text-[#9CA3AF] outline-none transition-colors focus:border-[#121316]/30"
         />
         <button
           type="button"
           onClick={handleAdd}
-          className="flex h-8 w-8 items-center justify-center rounded-[8px] border border-black/12 text-[#77818c] hover:bg-[#f5f5f5] hover:text-[#121316]">
-          <FiPlus className="h-3.5 w-3.5" />
+          className="flex h-12 w-12 items-center justify-center rounded-[12px] border border-[#D5D7DA] text-[#6B7280] transition-colors hover:bg-[#F9FAFB] hover:text-[#121316]"
+          aria-label={`Add ${label}`}
+        >
+          <FiPlus className="h-4 w-4" />
         </button>
       </div>
     </div>
   );
 }
 
-// ---------------------------------------------------------------------------
-// Documents editor
-// ---------------------------------------------------------------------------
-
 function DocumentsEditor({
   docs,
+  originalDocs,
   onChange,
 }: {
   docs: DocEntry[];
+  originalDocs: DocEntry[];
   onChange: (docs: DocEntry[]) => void;
 }) {
+  const [expandedIndices, setExpandedIndices] = useState<number[]>([]);
+
   const addDoc = () => {
     const nextOrder =
-      docs.length > 0 ? Math.max(...docs.map((d) => d.order)) + 1 : 1;
+      docs.length > 0 ? Math.max(...docs.map((doc) => doc.order)) + 1 : 1;
     onChange([...docs, { id: "", template: "", order: nextOrder }]);
+    setExpandedIndices((prev) => [...prev, docs.length]);
   };
 
   const updateDoc = (
@@ -127,67 +134,136 @@ function DocumentsEditor({
   };
 
   const removeDoc = (index: number) => {
-    onChange(docs.filter((_, i) => i !== index));
+    onChange(docs.filter((_, currentIndex) => currentIndex !== index));
+    setExpandedIndices((prev) =>
+      prev.filter((entry) => entry !== index).map((entry) => (entry > index ? entry - 1 : entry)),
+    );
   };
 
+  const resetDoc = (index: number) => {
+    const original = originalDocs[index];
+    if (!original) return;
+    const updated = [...docs];
+    updated[index] = { ...original };
+    onChange(updated);
+  };
+
+  const toggleExpanded = (index: number) => {
+    setExpandedIndices((prev) =>
+      prev.includes(index)
+        ? prev.filter((entry) => entry !== index)
+        : [...prev, index],
+    );
+  };
+
+  const visibleDocs = docs.map((doc, index) => ({ doc, index }));
+
   return (
-    <div>
-      <label className="mb-1.5 block text-[12px] font-semibold uppercase tracking-wider text-[#3f4145]">
-        Баримт бичгүүд
+    <div className="flex flex-col gap-4">
+      <label className="text-[18px] font-medium leading-6 text-[#121316]">
+        Хавсаргасан файл
       </label>
-      <div className="flex flex-col gap-2">
-        {docs
-          .sort((a, b) => a.order - b.order)
-          .map((doc, idx) => (
+
+      <div className="flex flex-col gap-4">
+        {visibleDocs.map(({ doc, index }) => {
+          const isExpanded = expandedIndices.includes(index);
+          const fileName = doc.id
+            ? `${doc.id.toLowerCase().replace(/\s+/g, "_")}.pdf`
+            : "document.pdf";
+
+          return (
             <div
-              key={idx}
-              className="flex items-center gap-2 rounded-[10px] border border-black/12 bg-[#fafafa] px-3 py-2">
-              <input
-                type="number"
-                value={doc.order}
-                onChange={(e) =>
-                  updateDoc(idx, "order", Number(e.target.value))
-                }
-                className="h-7 w-12 rounded-[6px] border border-black/12 bg-white px-2 text-center text-[12px] outline-none"
-                min={1}
-              />
-              <input
-                type="text"
-                value={doc.id}
-                onChange={(e) => updateDoc(idx, "id", e.target.value)}
-                placeholder="ID (жнь: employment_contract)"
-                className="h-7 flex-1 rounded-[6px] border border-black/12 bg-white px-2 text-[12px] outline-none placeholder:text-[#77818c]"
-              />
-              <input
-                type="text"
-                value={doc.template}
-                onChange={(e) => updateDoc(idx, "template", e.target.value)}
-                placeholder="Файл (жнь: employment_contract.html)"
-                className="h-7 flex-1 rounded-[6px] border border-black/12 bg-white px-2 text-[12px] outline-none placeholder:text-[#77818c]"
-              />
-              <button
-                type="button"
-                onClick={() => removeDoc(idx)}
-                className="flex h-7 w-7 items-center justify-center rounded-[6px] text-[#77818c] hover:bg-red-50 hover:text-red-500">
-                <FiTrash2 className="h-3.5 w-3.5" />
-              </button>
+              key={`${doc.id}-${doc.order}-${index}`}
+              className="rounded-[20px] border border-[#D5D7DA] bg-white px-4 py-3 shadow-[0_1px_2px_rgba(16,24,40,0.04)]"
+            >
+              <div className="flex items-center gap-4">
+                <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-[16px] border border-[#D5D7DA] bg-[#FAFAFA] text-[#3F4145]">
+                  <FiFileText className="h-6 w-6" />
+                </div>
+
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-[18px] font-medium leading-7 text-[#121316]">
+                    {doc.template || "Шинэ баримт"}
+                  </p>
+                  <p className="truncate text-[14px] leading-5 text-[#84878B]">
+                    {fileName}
+                  </p>
+                </div>
+
+                <div className="flex items-center gap-1">
+                  <button
+                    type="button"
+                    onClick={() => toggleExpanded(index)}
+                    className="flex h-10 w-10 items-center justify-center rounded-full text-[#3F4145] transition-colors hover:bg-[#F4F4F5]"
+                    aria-label="Toggle document details"
+                  >
+                    <FiEye className="h-5 w-5" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => resetDoc(index)}
+                    className="flex h-10 w-10 items-center justify-center rounded-full text-[#3F4145] transition-colors hover:bg-[#F4F4F5]"
+                    aria-label="Reset document values"
+                  >
+                    <FiRefreshCw className="h-5 w-5" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => removeDoc(index)}
+                    className="flex h-10 w-10 items-center justify-center rounded-full text-[#B42318] transition-colors hover:bg-[#FEF3F2]"
+                    aria-label="Remove document"
+                  >
+                    <FiTrash2 className="h-5 w-5" />
+                  </button>
+                </div>
+              </div>
+
+              {isExpanded ? (
+                <div className="mt-4 grid gap-3 border-t border-[#EAECF0] pt-4 md:grid-cols-[96px_1fr_1fr]">
+                  <input
+                    type="number"
+                    value={doc.order}
+                    onChange={(event) =>
+                      updateDoc(index, "order", Number(event.target.value))
+                    }
+                    className="h-11 rounded-[12px] border border-[#D5D7DA] bg-white px-4 text-[15px] text-[#121316] outline-none focus:border-[#121316]/30"
+                    min={1}
+                    placeholder="Order"
+                  />
+                  <input
+                    type="text"
+                    value={doc.id}
+                    onChange={(event) => updateDoc(index, "id", event.target.value)}
+                    placeholder="ID: employment_contract"
+                    className="h-11 rounded-[12px] border border-[#D5D7DA] bg-white px-4 text-[15px] text-[#121316] placeholder:text-[#9CA3AF] outline-none focus:border-[#121316]/30"
+                  />
+                  <input
+                    type="text"
+                    value={doc.template}
+                    onChange={(event) =>
+                      updateDoc(index, "template", event.target.value)
+                    }
+                    placeholder="Файл: employment_contract"
+                    className="h-11 rounded-[12px] border border-[#D5D7DA] bg-white px-4 text-[15px] text-[#121316] placeholder:text-[#9CA3AF] outline-none focus:border-[#121316]/30"
+                  />
+                </div>
+              ) : null}
             </div>
-          ))}
+          );
+        })}
       </div>
+
       <button
         type="button"
         onClick={addDoc}
-        className="mt-2 flex items-center gap-1.5 rounded-[8px] border border-dashed border-black/20 px-3 py-1.5 text-[12px] text-[#3f4145] hover:border-[#121316]/30 hover:text-[#121316]">
-        <FiPlus className="h-3 w-3" />
+        className="flex items-center gap-2 self-start rounded-[12px] border border-dashed border-[#D5D7DA] px-4 py-2 text-[14px] font-medium text-[#3F4145] transition-colors hover:border-[#121316]/30 hover:text-[#121316]"
+      >
+        <FiPlus className="h-4 w-4" />
         Баримт нэмэх
       </button>
     </div>
   );
 }
-
-// ---------------------------------------------------------------------------
-// Main dialog
-// ---------------------------------------------------------------------------
 
 export function EditActionDialog({
   action,
@@ -195,35 +271,41 @@ export function EditActionDialog({
   onOpenChange,
 }: EditActionDialogProps) {
   const { setBlurred } = useHrOverlay();
-  const [phase, setPhase] = useState("");
-  const [triggerCondition, setTriggerCondition] = useState("");
-  const [triggerFields, setTriggerFields] = useState<string[]>([]);
-  const [requiredEmployeeFields, setRequiredEmployeeFields] = useState<
-    string[]
-  >([]);
-  const [recipients, setRecipients] = useState<string[]>([]);
-  const [docs, setDocs] = useState<DocEntry[]>([]);
-  const [error, setError] = useState<string | null>(null);
-
-  const [prevAction, setPrevAction] = useState<ActionConfig | null>(null);
 
   useEffect(() => {
     setBlurred(open);
     return () => setBlurred(false);
   }, [open, setBlurred]);
 
-  if (action !== prevAction) {
-    setPrevAction(action);
-    if (action) {
-      setPhase(action.phase);
-      setTriggerCondition(action.triggerCondition ?? "");
-      setTriggerFields([...action.triggerFields]);
-      setRequiredEmployeeFields([...action.requiredEmployeeFields]);
-      setRecipients([...action.recipients]);
-      setDocs(action.documents.map((d) => ({ ...d })));
-      setError(null);
-    }
-  }
+  if (!open || !action) return null;
+
+  const dialog = <EditActionDialogContent key={action.name} action={action} onOpenChange={onOpenChange} />;
+
+  return typeof document !== "undefined"
+    ? createPortal(dialog, document.body)
+    : dialog;
+}
+
+function EditActionDialogContent({
+  action,
+  onOpenChange,
+}: {
+  action: ActionConfig;
+  onOpenChange: (open: boolean) => void;
+}) {
+  const [phase, setPhase] = useState(action.phase);
+  const [triggerCondition, setTriggerCondition] = useState(
+    action.triggerCondition ?? "",
+  );
+  const [triggerFields, setTriggerFields] = useState<string[]>([
+    ...action.triggerFields,
+  ]);
+  const [requiredEmployeeFields, setRequiredEmployeeFields] = useState<string[]>(
+    [...action.requiredEmployeeFields],
+  );
+  const [recipients, setRecipients] = useState<string[]>([...action.recipients]);
+  const [docs, setDocs] = useState<DocEntry[]>(action.documents.map((doc) => ({ ...doc })));
+  const [error, setError] = useState<string | null>(null);
 
   const [updateRegistry, { loading }] = useMutation(UPDATE_REGISTRY, {
     context: { headers: buildGraphQLHeaders({ actorRole: "hr" }) },
@@ -235,33 +317,38 @@ export function EditActionDialog({
     ],
   });
 
-  // ---- Validation ----
   const validationErrors = useMemo(() => {
-    const errors: string[] = [];
-    if (!phase) errors.push("Үе шат сонгоно уу");
-    if (triggerFields.length === 0)
-      errors.push("Идэвхлүүлэх талбар хоосон байна");
-    if (recipients.length === 0) errors.push("Хүлээн авагч нэмнэ үү");
-    const validDocs = docs.filter((d) => d.id && d.template);
-    if (validDocs.length === 0)
-      errors.push("Дор хаяж нэг баримт бичиг нэмнэ үү");
-    const dupDocIds = validDocs
-      .map((d) => d.id)
-      .filter((id, i, arr) => arr.indexOf(id) !== i);
-    if (dupDocIds.length > 0)
-      errors.push(`Давхардсан баримт ID: ${dupDocIds.join(", ")}`);
+    const nextErrors: string[] = [];
+    if (!phase) nextErrors.push("Үе шат сонгоно уу");
+    if (triggerFields.length === 0) nextErrors.push("Идэвхжүүлэх талбар хоосон байна");
+    if (recipients.length === 0) nextErrors.push("Хүлээн авагч нэмнэ үү");
+
+    const validDocs = docs.filter((doc) => doc.id && doc.template);
+    if (validDocs.length === 0) {
+      nextErrors.push("Дор хаяж нэг баримт нэмнэ үү");
+    }
+
+    const duplicateIds = validDocs
+      .map((doc) => doc.id)
+      .filter((id, index, all) => all.indexOf(id) !== index);
+    if (duplicateIds.length > 0) {
+      nextErrors.push(`Давхардсан баримт ID: ${duplicateIds.join(", ")}`);
+    }
+
     const incompleteDocs = docs.filter(
-      (d) => (d.id && !d.template) || (!d.id && d.template),
+      (doc) => (doc.id && !doc.template) || (!doc.id && doc.template),
     );
-    if (incompleteDocs.length > 0)
-      errors.push("Баримтын ID болон файл хоёуланг бөглөнө үү");
-    return errors;
-  }, [phase, triggerFields, recipients, docs]);
+    if (incompleteDocs.length > 0) {
+      nextErrors.push("Баримтын ID болон файлын нэрийг хоёуланг нь бөглөнө үү");
+    }
+
+    return nextErrors;
+  }, [docs, phase, recipients, triggerFields]);
 
   const handleSave = useCallback(async () => {
     if (!action) return;
-    setError(null);
 
+    setError(null);
     if (validationErrors.length > 0) {
       setError(validationErrors.join(" · "));
       return;
@@ -278,8 +365,12 @@ export function EditActionDialog({
             requiredEmployeeFields,
             recipients,
             documents: docs
-              .filter((d) => d.id && d.template)
-              .map((d) => ({ id: d.id, template: d.template, order: d.order })),
+              .filter((doc) => doc.id && doc.template)
+              .map((doc) => ({
+                id: doc.id,
+                template: doc.template,
+                order: doc.order,
+              })),
           },
         },
       });
@@ -289,140 +380,173 @@ export function EditActionDialog({
     }
   }, [
     action,
+    docs,
+    onOpenChange,
     phase,
+    recipients,
+    requiredEmployeeFields,
     triggerCondition,
     triggerFields,
-    requiredEmployeeFields,
-    recipients,
-    docs,
-    validationErrors,
     updateRegistry,
-    onOpenChange,
+    validationErrors,
   ]);
 
-  if (!open || !action) return null;
-
-  const ACTION_LABELS: Record<string, string> = {
-    add_employee: "Шинэ ажилтан",
-    promote_employee: "Ажилтан дэвшүүлэх",
+  const actionLabels: Record<string, string> = {
+    add_employee: "Шинэ ажилтан нэмэх",
+    promote_employee: "Цалин нэмэх",
     change_position: "Албан тушаал өөрчлөх",
     offboard_employee: "Ажлаас чөлөөлөх",
   };
 
+  const usePresetLayout = [
+    "add_employee",
+    "promote_employee",
+    "change_position",
+    "offboard_employee",
+  ].includes(action.name);
+
+  const originalDocs = action.documents.map((doc) => ({ ...doc }));
+
   const dialog = (
-    <div className="fixed inset-0 z-100 flex items-center justify-center bg-black/50 p-4">
+    <div className="fixed inset-0 z-100 flex items-center justify-center bg-black/55 p-4">
       <button
         type="button"
         aria-label="Close edit action overlay"
         className="absolute inset-0"
         onClick={() => onOpenChange(false)}
       />
-      <div className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-[24px] border border-black/12 bg-white shadow-2xl">
-        {/* Header */}
-        <div className="sticky top-0 z-10 flex items-center justify-between border-b border-black/12 bg-white px-6 py-4 rounded-t-[24px]">
-          <div>
-            <h3 className="text-[16px] font-semibold text-[#121316]">
-              {ACTION_LABELS[action.name] ?? action.name} — Тохиргоо засах
-            </h3>
-            <p className="text-[13px] text-[#3f4145]">{action.name}</p>
-          </div>
+
+      <div className="relative max-h-[92vh] w-full max-w-[586px] overflow-y-auto rounded-[24px] bg-white shadow-[0_24px_48px_rgba(16,24,40,0.18)]">
+        <div className="flex items-center justify-between px-7 pb-3 pt-7">
+          <h3 className="text-[24px] font-semibold leading-8 text-[#121316]">
+            {actionLabels[action.name] ?? action.name}
+          </h3>
           <button
+            type="button"
             onClick={() => onOpenChange(false)}
-            className="flex h-8 w-8 items-center justify-center rounded-[10px] text-[#77818c] transition-colors hover:bg-[#f5f5f5] hover:text-[#121316]">
-            <FiX className="h-5 w-5" />
+            className="flex h-10 w-10 items-center justify-center rounded-full text-[#121316] transition-colors hover:bg-[#F4F4F5]"
+            aria-label="Close dialog"
+          >
+            <FiX className="h-7 w-7" />
           </button>
         </div>
 
-        {/* Body */}
-        <div className="flex flex-col gap-5 px-6 py-5">
-          {/* Phase */}
-          <div>
-            <label className="mb-1.5 block text-[12px] font-semibold uppercase tracking-wider text-[#3f4145]">
-              Үе шат (Phase)
-            </label>
-            <select
-              value={phase}
-              onChange={(e) => setPhase(e.target.value)}
-              className="h-9 w-full rounded-[8px] border border-black/12 bg-white px-3 text-[13px] text-[#121316] outline-none focus:border-[#121316]/30">
-              <option value="onboarding">onboarding</option>
-              <option value="working">working</option>
-              <option value="offboarding">offboarding</option>
-            </select>
-          </div>
+        <div className="flex flex-col gap-8 px-7 pb-8 pt-3">
+          {usePresetLayout ? (
+            <>
+              <ChipInput
+                label="Шаардлагатай мэдээллүүд"
+                values={requiredEmployeeFields}
+                onChange={setRequiredEmployeeFields}
+                placeholder="Нэр оруулна уу"
+              />
 
-          {/* Trigger condition */}
-          <div>
-            <label className="mb-1.5 block text-[12px] font-semibold uppercase tracking-wider text-[#3f4145]">
-              Идэвхлүүлэх нөхцөл
-            </label>
-            <input
-              type="text"
-              value={triggerCondition}
-              onChange={(e) => setTriggerCondition(e.target.value)}
-              placeholder="жнь: status === 'Ирсэн' && hireDate"
-              className="h-9 w-full rounded-[8px] border border-black/12 bg-white px-3 text-[13px] text-[#121316] placeholder:text-[#77818c] outline-none focus:border-[#121316]/30"
-            />
-          </div>
+              <ChipInput
+                label="Хүлээн авагчид"
+                values={recipients}
+                onChange={setRecipients}
+                placeholder="Нэр оруулна уу"
+              />
 
-          {/* Trigger fields */}
-          <ChipInput
-            label="Идэвхлүүлэх талбарууд"
-            values={triggerFields}
-            onChange={setTriggerFields}
-            placeholder="жнь: status, hireDate"
-          />
+              <DocumentsEditor
+                docs={docs}
+                originalDocs={originalDocs}
+                onChange={setDocs}
+              />
+            </>
+          ) : (
+            <>
+              <div className="flex flex-col gap-2">
+                <label className="text-[14px] font-semibold uppercase tracking-[0.04em] text-[#3F4145]">
+                  Үе шат
+                </label>
+                <select
+                  value={phase}
+                  onChange={(event) => setPhase(event.target.value)}
+                  className="h-11 w-full rounded-[12px] border border-[#D5D7DA] bg-white px-4 text-[15px] text-[#121316] outline-none focus:border-[#121316]/30"
+                >
+                  <option value="onboarding">onboarding</option>
+                  <option value="working">working</option>
+                  <option value="offboarding">offboarding</option>
+                </select>
+              </div>
 
-          {/* Required employee fields */}
-          <ChipInput
-            label="Шаардлагатай ажилтны талбарууд"
-            values={requiredEmployeeFields}
-            onChange={setRequiredEmployeeFields}
-            placeholder="жнь: employee_register_no"
-          />
+              <div className="flex flex-col gap-2">
+                <label className="text-[14px] font-semibold uppercase tracking-[0.04em] text-[#3F4145]">
+                  Идэвхжүүлэх нөхцөл
+                </label>
+                <input
+                  type="text"
+                  value={triggerCondition}
+                  onChange={(event) => setTriggerCondition(event.target.value)}
+                  placeholder="status === 'Ирсэн' && hireDate"
+                  className="h-11 w-full rounded-[12px] border border-[#D5D7DA] bg-white px-4 text-[15px] text-[#121316] placeholder:text-[#9CA3AF] outline-none focus:border-[#121316]/30"
+                />
+              </div>
 
-          {/* Recipients */}
-          <ChipInput
-            label="Хүлээн авагчид"
-            values={recipients}
-            onChange={setRecipients}
-            placeholder="жнь: hr, employee, manager"
-          />
+              <ChipInput
+                label="Идэвхжүүлэх талбарууд"
+                values={triggerFields}
+                onChange={setTriggerFields}
+                placeholder="Нэр оруулна уу"
+              />
 
-          {/* Documents */}
-          <DocumentsEditor docs={docs} onChange={setDocs} />
+              <ChipInput
+                label="Шаардлагатай мэдээллүүд"
+                values={requiredEmployeeFields}
+                onChange={setRequiredEmployeeFields}
+                placeholder="Нэр оруулна уу"
+              />
 
-          {/* Error */}
-          {error && (
-            <div className="rounded-[10px] border border-red-200 bg-red-50 px-4 py-2.5 text-[13px] text-red-600">
+              <ChipInput
+                label="Хүлээн авагчид"
+                values={recipients}
+                onChange={setRecipients}
+                placeholder="Нэр оруулна уу"
+              />
+
+              <DocumentsEditor
+                docs={docs}
+                originalDocs={originalDocs}
+                onChange={setDocs}
+              />
+            </>
+          )}
+
+          {error ? (
+            <div className="rounded-[12px] border border-red-200 bg-red-50 px-4 py-3 text-[14px] text-red-600">
               {error}
             </div>
-          )}
-        </div>
+          ) : null}
 
-        {/* Footer */}
-        <div className="sticky bottom-0 flex flex-col gap-2 border-t border-black/12 bg-white px-6 py-4 rounded-b-[24px]">
-          {validationErrors.length > 0 && !error && (
-            <div className="flex flex-wrap gap-1.5">
-              {validationErrors.map((msg) => (
+          {validationErrors.length > 0 && !error ? (
+            <div className="flex flex-wrap gap-2">
+              {validationErrors.map((message) => (
                 <span
-                  key={msg}
-                  className="rounded-full border border-amber-200 bg-amber-50 px-2.5 py-0.5 text-[11px] text-amber-700">
-                  {msg}
+                  key={message}
+                  className="rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-[12px] text-amber-700"
+                >
+                  {message}
                 </span>
               ))}
             </div>
-          )}
-          <div className="flex items-center justify-end gap-3">
+          ) : null}
+
+          <div className="flex items-center justify-end gap-4 pt-2">
             <button
+              type="button"
               onClick={() => onOpenChange(false)}
-              className="rounded-[10px] border border-black/12 px-4 py-2 text-[13px] font-medium text-[#3f4145] transition-colors hover:bg-[#f5f5f5]">
+              className="min-w-[116px] rounded-[18px] border border-[#D5D7DA] px-6 py-3 text-[18px] font-medium leading-7 text-[#3F4145] transition-colors hover:bg-[#F9FAFB]"
+            >
               Болих
             </button>
             <button
+              type="button"
               onClick={handleSave}
               disabled={loading || validationErrors.length > 0}
-              className="rounded-[10px] bg-[#121316] px-5 py-2 text-[13px] font-medium text-white transition-colors hover:bg-[#1f2126] disabled:opacity-50">
-              {loading ? "Хадгалж байна..." : "Хадгалах"}
+              className="min-w-[116px] rounded-[18px] bg-[#23252B] px-6 py-3 text-[18px] font-medium leading-7 text-white transition-colors hover:bg-[#17191E] disabled:opacity-50"
+            >
+              {loading ? "Хадгалж байна..." : "Засах"}
             </button>
           </div>
         </div>
@@ -430,5 +554,5 @@ export function EditActionDialog({
     </div>
   );
 
-  return typeof document !== "undefined" ? createPortal(dialog, document.body) : dialog;
+  return dialog;
 }
