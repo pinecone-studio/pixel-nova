@@ -9,7 +9,14 @@ import type { Document, DocumentContent } from "@/lib/types";
 
 import { FilesPreviewModal } from "./FilesPreviewModal";
 import { buildDataUrl } from "./filesUtils";
-import { ReqIcon, EyeIcon, DownloadIcon, CalIcon } from "@/components/icons";
+import {
+  ReqIcon,
+  EyeIcon,
+  DownloadIcon,
+  CalIcon,
+  FilesEyeIcon,
+} from "@/components/icons";
+import { BiDownload } from "react-icons/bi";
 
 export function FilesDocumentRow({
   document,
@@ -111,14 +118,14 @@ export function FilesDocumentRow({
               className="flex h-10 w-10 items-center justify-center rounded-[10px] text-[#121316] transition-colors hover:bg-[#f5f5f5] cursor-pointer"
               aria-label="Урьдчилж харах"
             >
-              <EyeIcon />
+              <FilesEyeIcon />
             </button>
             <button
               onClick={() => void handleDownload()}
-              className="flex h-10 w-10 items-center justify-center rounded-[10px] text-[#121316] transition-colors hover:bg-[#f5f5f5] cursor-pointer"
+              className="flex h-10 w-10 items-center justify-center rounded-[10px] text-[#121316]  transition-colors hover:bg-[#f5f5f5] cursor-pointer"
               aria-label="Татах"
             >
-              <DownloadIcon className="text-[#121316]" />
+              <BiDownload />
             </button>
           </div>
           <span className="text-[14px] font-medium leading-5 text-black">
